@@ -12,6 +12,7 @@ export { Segmented, type SegmentedProps, type SegmentOption } from './Segmented'
 export { Sheet, type SheetProps } from './Sheet';
 export { Stepper, stepValue, type StepperProps } from './Stepper';
 export { Text, type TextProps } from './Text';
+export { TextField, type TextFieldProps } from './TextField';
 export {
   Toast,
   ToastHost,

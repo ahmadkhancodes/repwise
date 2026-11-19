@@ -6,6 +6,8 @@
  * Shapes mirror the Worker (server/README.md): `GET /config`, `POST /billing/verify`,
  * `GET /billing/entitlement`.
  */
+import { api, isApiError } from './api';
+import { ensureSession } from './auth';
 
 export type PlanId = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type BillingPlatform = 'ios' | 'android';
@@ -74,4 +76,44 @@ export class BillingApiError extends Error {
 /** 400/403/409/422: the Worker refused this purchase. Retrying the same request will not help. */
 export function isPermanentRejection(e: unknown): boolean {
   return e instanceof BillingApiError && [400, 403, 409, 422].includes(e.status);
+}
+
+/* ------------------------------------------------- Worker implementation (data layer) */
+
+/**
+ * `BillingApi` over `src/services/api.ts` (single-flight refresh, timeouts, offline detection).
+ * A non-2xx reply becomes `BillingApiError(status, code)`; offline/timeout/config errors are
+ * rethrown as-is, which billing treats as transient. Purchases work before sign-in on the
+ * silent anonymous account (sheet 15), created on demand.
+ */
+export function createWorkerBillingApi(): BillingApi {
+  async function call<T>(fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn();
+    } catch (e) {
+      if (isApiError(e) && e.status !== null)
+        throw new BillingApiError(e.status, e.code ?? 'http_error');
+      throw e;
+    }
+  }
+  return {
+    getConfig: () => call(() => api.get<RemoteConfig>('/config')),
+    verifyPurchase: (body) =>
+      call(async () => {
+        await ensureSession();
+        return api.post<Entitlement>('/billing/verify', body, { auth: 'required' });
+      }),
+    getEntitlement: () =>
+      call(async () => {
+        await ensureSession();
+        return api.get<Entitlement>('/billing/entitlement', { auth: 'required' });
+      }),
+    getAccountId: async () => {
+      try {
+        return (await ensureSession()).id;
+      } catch {
+        return null;
+      }
+    },
+  };
 }

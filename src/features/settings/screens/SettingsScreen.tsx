@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { ChevronLeft, CreditCard, Palette, Shield, UserRound } from 'lucide-react-native';
 
 import { usePro } from '@/features/billing/hooks/usePro';
-
+import { useAuth } from '@/services/auth';
 import { useThemeStore, type ThemePreference } from '@/theme';
 import { IconButton, ListRow, Screen, Segmented, Text } from '@/ui';
 
@@ -17,6 +17,11 @@ export function SettingsScreen() {
   const preference = useThemeStore((s) => s.preference);
   const setPreference = useThemeStore((s) => s.setPreference);
   const pro = usePro();
+  const signedIn = useAuth((s) => s.status === 'signedIn');
+  const email = useAuth((s) => s.user?.email ?? null);
+  const accountSubtitle = signedIn
+    ? (email ?? 'Signed in, backup on')
+    : 'Optional: the app works without an account';
 
   return (
     <Screen
@@ -37,9 +42,11 @@ export function SettingsScreen() {
       <Text variant="headline">Account</Text>
       <ListRow
         icon={UserRound}
-        title="Sign in for backup"
-        subtitle="Optional — the app works without an account"
+        title="Backup & account"
+        subtitle={accountSubtitle}
+        onPress={() => router.push('/settings/account')}
         divider
+        testID="open-account"
       />
       {pro.paymentsEnabled ? (
         <ListRow

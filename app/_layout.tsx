@@ -9,11 +9,12 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { billing } from '@/services/billing';
+import { DatabaseProvider } from '@/db/DatabaseProvider';
+import { startBackgroundServices } from '@/services/bootstrap';
 import { useTheme } from '@/theme';
 import { ToastHost } from '@/ui';
 
@@ -28,6 +29,12 @@ export default function RootLayout() {
     Inter_700Bold,
   });
   const ready = fontsLoaded || Boolean(fontError); // never block launch on a font error
+  const [dbSettled, setDbSettled] = useState(false);
+  const onDbSettled = useCallback((ok: boolean) => {
+    setDbSettled(true);
+    // Auth restore, then billing + sync, and the catalogue warm-up start once local data is ready.
+    if (ok) startBackgroundServices();
+  }, []);
 
   useEffect(() => {
     // Root view colour behind screens/keyboard, so dark mode never flashes white.
@@ -35,14 +42,8 @@ export default function RootLayout() {
   }, [t.colors.bg]);
 
   useEffect(() => {
-    if (ready) SplashScreen.hideAsync().catch(() => undefined);
-  }, [ready]);
-
-  useEffect(() => {
-    // Billing reads its cached flag + entitlement, then talks to the Worker in the background.
-    // The data layer calls configureBilling({ api }) to connect it (payments stay off until then).
-    void billing().init();
-  }, []);
+    if (ready && dbSettled) SplashScreen.hideAsync().catch(() => undefined);
+  }, [ready, dbSettled]);
 
   if (!ready) return null;
 
@@ -51,18 +52,20 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <BottomSheetModalProvider>
           <StatusBar style={t.scheme === 'dark' ? 'light' : 'dark'} />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: t.colors.bg },
-              animationDuration: t.motion.duration.base,
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="settings" />
-            <Stack.Screen name="dev/ui" />
-          </Stack>
+          <DatabaseProvider onSettled={onDbSettled}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: t.colors.bg },
+                animationDuration: t.motion.duration.base,
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="settings" />
+              <Stack.Screen name="dev/ui" />
+            </Stack>
+          </DatabaseProvider>
           <ToastHost />
         </BottomSheetModalProvider>
       </SafeAreaProvider>
