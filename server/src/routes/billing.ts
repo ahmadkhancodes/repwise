@@ -2,7 +2,7 @@ import { Hono, type MiddlewareHandler } from 'hono';
 import { appleToPurchase, playToPurchase, publicEntitlement, savePurchase } from '../billing/entitlement';
 import type { PlaySubscriptionV2 } from '../billing/play';
 import type { Db } from '../db/types';
-import { badRequest, notFound, readJson, str } from '../lib/http';
+import { HttpError, badRequest, notFound, readJson, str } from '../lib/http';
 import { rateLimit, requireUser } from '../lib/middleware';
 import type { AppEnv, Deps } from '../types';
 
@@ -28,6 +28,17 @@ export async function acknowledgeIfNeeded(deps: Deps, sub: PlaySubscriptionV2, t
   }
 }
 
+/**
+ * The account the app bound the purchase to (StoreKit appAccountToken / Play obfuscated account id).
+ * A replayed receipt must not move a purchase away from a signed-in account: that account restores
+ * it itself. Anonymous owners (lost on reinstall) and unbound purchases may still be restored here.
+ */
+async function assertBoundTo(db: Db, boundTo: string | null | undefined, userId: string): Promise<void> {
+  if (!boundTo || boundTo.toLowerCase() === userId.toLowerCase()) return;
+  const owner = (await db.getUser(boundTo)) ?? (await db.getUser(boundTo.toLowerCase()));
+  if (owner && !owner.anonymous && owner._id !== userId) throw new HttpError(409, 'purchase_belongs_to_another_account');
+}
+
 export const billingRoutes = new Hono<AppEnv>();
 billingRoutes.use('*', paymentsGate);
 billingRoutes.use('*', requireUser());
@@ -49,9 +60,14 @@ billingRoutes.post('/verify', async (c) => {
     // Prefer the App Store Server API's current status when keys are configured.
     const status = await deps.appleStore.getSubscriptionStatus(tx.originalTransactionId, tx.environment);
     if (status && status.transaction.bundleId === cfg.apple.bundleId) tx = status.transaction;
+    await assertBoundTo(db, tx.appAccountToken, userId);
     const existing = await db.getPurchase(`apple:${tx.originalTransactionId}`);
-    const doc = appleToPurchase(cfg, tx, status?.renewal ?? null, status?.status ?? null, now, { userId, lastEventAt: now });
-    if (!doc.plan) throw badRequest('unknown_product');
+    // Store-side time, never ours: a later-signed webhook (refund, renewal) must still apply.
+    const eventAt = tx.signedDate ?? status?.renewal?.signedDate ?? now;
+    const fresh = appleToPurchase(cfg, tx, status?.renewal ?? null, status?.status ?? null, now, { userId, lastEventAt: eventAt });
+    if (!fresh.plan) throw badRequest('unknown_product');
+    // An older JWS than what a notification already applied only transfers ownership.
+    const doc = existing && existing.lastEventAt > eventAt ? { ...existing, userId, updatedAt: now } : fresh;
     // The verifying account owns the purchase (restore on a new account transfers it).
     await savePurchase(deps, db, doc, existing?.userId ?? null);
   } else if (body.platform === 'android') {
@@ -60,6 +76,7 @@ billingRoutes.post('/verify', async (c) => {
     if (productId !== cfg.plans.android.subscriptionId) throw badRequest('unknown_product');
     const sub = await deps.play.getSubscription(token);
     if (!sub) throw badRequest('invalid_purchase');
+    await assertBoundTo(db, sub.externalAccountIdentifiers?.obfuscatedExternalAccountId, userId);
     const existing = await db.getPurchase(`play:${token}`);
     const doc = playToPurchase(cfg, token, sub, now, userId);
     if (!doc.plan) throw badRequest('unknown_product');

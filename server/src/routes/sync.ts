@@ -6,11 +6,20 @@ import { SYNC_LIMITS, TABLE_NAMES } from '../sync/tables';
 import { validateRow } from '../sync/validate';
 import type { AppEnv } from '../types';
 
-/** Overlap returned in nextSince so rows written while a pull was paging are never missed. */
-const PULL_OVERLAP_MS = 2000;
+/**
+ * Rows are stamped with a per-user monotonic `syncedAt` (hybrid: max(previous + 1, now ms), so
+ * cursors from the older wall-clock scheme stay valid). Each push holds a lease while it writes, and
+ * a pull's nextSince never passes the oldest lease's floor, so a slow write can never be skipped.
+ * Rows above the high-water mark may be sent twice; the client's last-write-wins merge is idempotent.
+ */
+/** Before a user's first stamped write, rows carry wall-clock stamps: keep the old overlap for them. */
+const LEGACY_OVERLAP_MS = 2000;
+/** A lease outlives any real write (socket timeout 15 s); a crashed Worker's lease just expires. */
+const WRITE_LEASE_MS = 120_000;
 
 interface Cursor {
   since: number;
+  /** High-water mark taken before the first page: the next pull's `since`. */
   t0: number;
   ti: number;
   s?: number | undefined;
@@ -71,7 +80,16 @@ syncRoutes.post('/push', async (c) => {
   }
   const userId = c.get('userId'); // always the token's user, never anything from the body
   const db = await deps.db();
-  const { accepted, conflicts } = await db.upsertRows(table, userId, [...valid.values()], now);
+  let result: { accepted: string[]; conflicts: string[] } = { accepted: [], conflicts: [] };
+  if (valid.size > 0) {
+    const lease = await db.beginSyncWrite(userId, now, WRITE_LEASE_MS);
+    try {
+      result = await db.upsertRows(table, userId, [...valid.values()], lease.seq);
+    } finally {
+      await db.endSyncWrite(userId, lease.leaseId);
+    }
+  }
+  const { accepted, conflicts } = result;
   // If the account was deleted while this request was in flight, remove what we just wrote.
   if (accepted.length > 0 && !(await db.getUser(userId))) {
     await db.deleteUserData(userId);
@@ -98,11 +116,13 @@ syncRoutes.get('/pull', async (c) => {
   else {
     const since = q.since === undefined || q.since === '' ? 0 : Number(q.since);
     if (!Number.isSafeInteger(since) || since < 0) throw badRequest('invalid_since');
-    cur = { since, t0: now, ti: 0 };
+    cur = { since, t0: 0, ti: 0 };
   }
 
   const db = await deps.db();
   const userId = c.get('userId');
+  // Taken before reading any rows: everything stamped at or below it is already committed.
+  if (!q.cursor) cur.t0 = await db.syncHighWater(userId, now, LEGACY_OVERLAP_MS);
   const changes: Record<string, Record<string, unknown>[]> = {};
   let remaining = limit;
   let next: Cursor | null = null;
@@ -121,7 +141,7 @@ syncRoutes.get('/pull', async (c) => {
   return c.json({
     changes,
     nextCursor: next ? encodeCursor(next) : null,
-    nextSince: Math.max(0, cur.t0 - PULL_OVERLAP_MS),
+    nextSince: cur.t0,
     serverTime: now,
   });
 });

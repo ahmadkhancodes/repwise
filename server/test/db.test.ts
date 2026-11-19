@@ -48,9 +48,26 @@ function contract(name: string, make: () => Promise<Db>) {
       expect((await db.findUserBy('email', email))?._id).toBe(id);
       await expect(db.createUser({ _id: `${id}-2`, email, anonymous: false, createdAt: 1, lastSeenAt: 1 })).rejects.toThrow();
       const now = Date.now();
-      await db.insertRefreshToken({ _id: `rt-${id}`, userId: id, tokenHash: `h-${id}`, familyId: `f-${id}`, createdAt: now, expiresAt: now + 60_000 });
+      await db.insertRefreshToken({ _id: `rt-${id}`, userId: id, tokenHash: `h-${id}`, familyId: `f-${id}`, createdAt: now, expiresAt: now + 600_000 });
       expect((await db.consumeRefreshToken(`h-${id}`, now)).status).toBe('ok');
       expect((await db.consumeRefreshToken(`h-${id}`, now)).status).toBe('reused');
+      expect((await db.consumeRefreshToken(`h-${id}`, now + 30_000, 60_000)).status).toBe('grace');
+      expect((await db.consumeRefreshToken(`h-${id}`, now + 61_000, 60_000)).status).toBe('reused');
+      expect((await db.getRefreshToken(`h-${id}`))?.familyId).toBe(`f-${id}`);
+      await expect(db.insertRefreshToken({ _id: `rt2-${id}`, userId: id, tokenHash: `h-${id}`, familyId: `f-${id}`, createdAt: now, expiresAt: now + 60_000 })).rejects.toThrow();
+      // Email codes: check-and-count is one step and stops at the cap.
+      await db.putEmailCode({ _id: `ec-${id}`, email, codeHash: 'h', attempts: 0, createdAt: now, expiresAt: now + 60_000 });
+      for (let i = 1; i <= 2; i++) expect((await db.claimEmailCodeAttempt(email, now, 2))?.attempts).toBe(i);
+      expect(await db.claimEmailCodeAttempt(email, now, 2)).toBeNull();
+      expect(await db.consumeEmailCode(`ec-${id}`)).toBe(true);
+      expect(await db.consumeEmailCode(`ec-${id}`)).toBe(false);
+      // AI spend reservations never cross the cap.
+      const month = `m-${id}`;
+      expect(await db.reserveAiSpend(month, 40, 100, now)).toBe(true);
+      expect(await db.reserveAiSpend(month, 40, 100, now)).toBe(true);
+      expect(await db.reserveAiSpend(month, 40, 100, now)).toBe(false);
+      await db.addAiSpend(month, { usdMicros: -50 }, now);
+      expect((await db.getAiSpend(month))?.usdMicros).toBe(30);
       expect(await db.hit(`k-${id}`, 60_000, now)).toBe(1);
       expect(await db.hit(`k-${id}`, 60_000, now)).toBe(2);
       await db.deleteUserData(id);
@@ -68,6 +85,14 @@ function contract(name: string, make: () => Promise<Db>) {
       const page2 = await db.pullRows('cards', uid, { since: 0, limit: 5, after: { syncedAt: page1[0]!.syncedAt, id: 'a' } });
       expect(page2.map((x) => [x.id, x.data.updated_at])).toEqual([['b', 20]]);
       expect(await db.pullRows('cards', `${uid}-other`, { since: 0, limit: 5 })).toEqual([]);
+      // Write leases cap the high-water mark until the write ends; stamps never go backwards.
+      const w1 = await db.beginSyncWrite(uid, 1_000, 60_000);
+      const w2 = await db.beginSyncWrite(uid, 500, 60_000);
+      expect(w2.seq).toBeGreaterThan(w1.seq);
+      expect(await db.syncHighWater(uid, 1_000, 2_000)).toBeLessThan(w1.seq);
+      await db.endSyncWrite(uid, w1.leaseId);
+      await db.endSyncWrite(uid, w2.leaseId);
+      expect(await db.syncHighWater(uid, 1_000, 2_000)).toBe(w2.seq);
       await db.deleteUserData(uid);
       expect(await db.pullRows('cards', uid, { since: 0, limit: 5 })).toEqual([]);
     });

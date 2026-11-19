@@ -58,19 +58,32 @@ describe('POST /auth/google', () => {
 });
 
 describe('POST /auth/apple', () => {
-  it('verifies the identity token and nonce (raw or sha256)', async () => {
+  it('verifies the identity token and requires the sha256 nonce', async () => {
     const t = await setup();
     const raw = 'nonce-123';
     const hashed = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw)))].map((b) => b.toString(16).padStart(2, '0')).join('');
     const ok1 = await call(t, 'POST', '/auth/apple', { body: { identityToken: await t.apple.sign({ sub: 'a-1', nonce: hashed, email: 'x@privaterelay.appleid.com', email_verified: 'true' }), nonce: raw } });
     expect(ok1.status).toBe(200);
     expect(ok1.body.user.email).toBe('x@privaterelay.appleid.com');
-    const ok2 = await call(t, 'POST', '/auth/apple', { body: { identityToken: await t.apple.sign({ sub: 'a-1', nonce: raw }), nonce: raw } });
-    expect(ok2.body.user.id).toBe(ok1.body.user.id);
+    const again = await call(t, 'POST', '/auth/apple', { body: { identityToken: await t.apple.sign({ sub: 'a-1', nonce: hashed }), nonce: raw } });
+    expect(again.body.user.id).toBe(ok1.body.user.id);
     const bad = await call(t, 'POST', '/auth/apple', { body: { identityToken: await t.apple.sign({ sub: 'a-1', nonce: 'other' }), nonce: raw } });
     expect(bad.status).toBe(401);
-    const wrongAud = await call(t, 'POST', '/auth/apple', { body: { identityToken: await t.apple.sign({ sub: 'a-1' }, { aud: 'com.other.app' }) } });
+    const wrongAud = await call(t, 'POST', '/auth/apple', { body: { identityToken: await t.apple.sign({ sub: 'a-1', nonce: hashed }, { aud: 'com.other.app' }), nonce: raw } });
     expect(wrongAud.status).toBe(401);
+  });
+
+  it('rejects replays: a missing nonce, or the token\'s own (hashed) nonce claim sent back as raw', async () => {
+    const t = await setup();
+    const raw = 'nonce-replay-0123456789';
+    const hashed = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw)))].map((b) => b.toString(16).padStart(2, '0')).join('');
+    const token = await t.apple.sign({ sub: 'a-9', nonce: hashed });
+    expect((await call(t, 'POST', '/auth/apple', { body: { identityToken: token } })).status).toBe(400);
+    expect((await call(t, 'POST', '/auth/apple', { body: { identityToken: token, nonce: hashed } })).status).toBe(401);
+    // A raw nonce sitting in the token (never what Apple issues for our client) does not verify either.
+    const rawInToken = await t.apple.sign({ sub: 'a-9', nonce: raw });
+    expect((await call(t, 'POST', '/auth/apple', { body: { identityToken: rawInToken, nonce: raw } })).status).toBe(401);
+    expect((await call(t, 'POST', '/auth/apple', { body: { identityToken: token, nonce: raw } })).status).toBe(200);
   });
 });
 
@@ -98,6 +111,39 @@ describe('email code sign-in', () => {
     const wrong = code === '000000' ? '111111' : '000000';
     for (let i = 0; i < 5; i++) expect((await call(t, 'POST', '/auth/email/verify', { body: { email: 'd@example.com', code: wrong } })).status).toBe(401);
     expect((await call(t, 'POST', '/auth/email/verify', { body: { email: 'd@example.com', code } })).status).toBe(429);
+  });
+
+  it('parallel guesses cannot bypass the 5-attempt lock (check-and-count is atomic)', async () => {
+    const t = await setup();
+    await call(t, 'POST', '/auth/email/start', { body: { email: 'race@example.com' } });
+    const code = /(\d{6})/.exec(t.mailer.sent[0]!.subject)![1]!;
+    const wrong = (i: number) => String((Number(code) + 1 + i) % 1_000_000).padStart(6, '0');
+    // 11 requests at once, from 11 IPs; the right code is the last one.
+    const guesses = [...Array.from({ length: 10 }, (_, i) => wrong(i)), code];
+    const res = await Promise.all(
+      guesses.map((g, i) =>
+        call(t, 'POST', '/auth/email/verify', { body: { email: 'race@example.com', code: g }, headers: { 'cf-connecting-ip': `10.0.0.${i}` } }),
+      ),
+    );
+    const statuses = res.map((r) => r.status);
+    expect(statuses.at(-1)).not.toBe(200);
+    expect(statuses.filter((s) => s === 200)).toHaveLength(0);
+    expect(statuses).toContain(429); // used up and locked
+  });
+
+  it('limits verification attempts per email across IPs', async () => {
+    const t = await setup();
+    const statuses: number[] = [];
+    for (let round = 0; round < 4; round++) {
+      await t.db.putEmailCode({ _id: `c${round}`, email: 'spread@example.com', codeHash: 'x', attempts: 0, createdAt: t.clock.now, expiresAt: t.clock.now + 600_000 });
+      for (let i = 0; i < 5; i++) {
+        const ip = `10.1.${round}.${i}`;
+        statuses.push((await call(t, 'POST', '/auth/email/verify', { body: { email: 'spread@example.com', code: '123456' }, headers: { 'cf-connecting-ip': ip } })).status);
+      }
+    }
+    // 15 counted attempts per 15 minutes per email, whatever the IP; then 429 before any compare.
+    expect(statuses.slice(0, 15).every((s) => s === 401)).toBe(true);
+    expect(statuses.slice(15).every((s) => s === 429)).toBe(true);
   });
 
   it('expires codes after 10 minutes', async () => {
@@ -134,10 +180,43 @@ describe('refresh tokens', () => {
     const t = await setup();
     const s = await signInEmail(t, 'reuse@example.com');
     const r1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    t.clock.now += 61_000; // past the lost-response grace window
     const replay = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
     expect(replay.status).toBe(401);
     expect(replay.body.error).toBe('token_reused');
     expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: r1.body.refreshToken } })).status).toBe(401);
+  });
+
+  it('a retry within the grace window (lost response) gets the same successor, not a revoked family', async () => {
+    const t = await setup();
+    const s = await signInEmail(t, 'lost@example.com');
+    const r1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    expect(r1.status).toBe(200);
+    // r1's response never reached the phone; it retries with the old token 20 s later.
+    t.clock.now += 20_000;
+    const retry = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    expect(retry.status).toBe(200);
+    expect(retry.body.refreshToken).toBe(r1.body.refreshToken);
+    // The family is intact: the successor keeps rotating.
+    const r2 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: retry.body.refreshToken } });
+    expect(r2.status).toBe(200);
+  });
+
+  it('reuse after the grace window, or after the successor was used, still revokes the family', async () => {
+    const t = await setup();
+    const a = await signInEmail(t, 'late@example.com');
+    const a1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: a.refreshToken } });
+    t.clock.now += 61_000;
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: a.refreshToken } })).body.error).toBe('token_reused');
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: a1.body.refreshToken } })).status).toBe(401);
+
+    const b = await signInEmail(t, 'stolen@example.com');
+    const b1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: b.refreshToken } });
+    const b2 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: b1.body.refreshToken } });
+    expect(b2.status).toBe(200);
+    t.clock.now += 5_000; // within the window, but the successor was already used: theft
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: b.refreshToken } })).body.error).toBe('token_reused');
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: b2.body.refreshToken } })).status).toBe(401);
   });
 
   it('rejects unknown, expired and logged-out tokens', async () => {

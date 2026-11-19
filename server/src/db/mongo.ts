@@ -1,8 +1,10 @@
+import { uuidv7 } from '../lib/crypto';
 import { TABLE_NAMES } from '../sync/tables';
 import type {
   AiCacheDoc,
   AiSpendDoc,
   AiUsageDelta,
+  ConsumeRefreshResult,
   Db,
   EmailCodeDoc,
   EntitlementDoc,
@@ -11,6 +13,7 @@ import type {
   RefreshTokenDoc,
   StoredRow,
   SyncRow,
+  SyncWriteLease,
   UserDoc,
 } from './types';
 import { DuplicateKeyError } from './types';
@@ -31,8 +34,9 @@ interface Coll {
   updateOne(filter: Doc, update: Doc, opts?: Doc): Promise<unknown>;
   updateMany(filter: Doc, update: Doc): Promise<unknown>;
   replaceOne(filter: Doc, doc: Doc, opts?: Doc): Promise<unknown>;
-  findOneAndUpdate(filter: Doc, update: Doc, opts?: Doc): Promise<Doc | null>;
-  deleteOne(filter: Doc): Promise<unknown>;
+  /** `update` may be an aggregation pipeline (array of stages). */
+  findOneAndUpdate(filter: Doc, update: Doc | Doc[], opts?: Doc): Promise<Doc | null>;
+  deleteOne(filter: Doc): Promise<{ deletedCount?: number } | unknown>;
   deleteMany(filter: Doc): Promise<unknown>;
   bulkWrite(ops: Doc[], opts?: Doc): Promise<unknown>;
   createIndex(spec: Doc, opts?: Doc): Promise<unknown>;
@@ -81,12 +85,13 @@ export function resetMongoClientCache(): void {
   cached = null;
 }
 
-const INDEX_VERSION = 1;
+const INDEX_VERSION = 2;
 let indexesReady: Promise<void> | null = null;
 
 const isDup = (e: unknown) => typeof e === 'object' && e !== null && (e as { code?: number }).code === 11000;
 const toDate = (ms: number) => new Date(ms);
 const toMs = (v: unknown): number => (v instanceof Date ? v.getTime() : Number(v));
+const normToken = (d: Doc): RefreshTokenDoc => ({ ...(d as RefreshTokenDoc), expiresAt: toMs(d.expiresAt) });
 function compact<T extends Doc>(o: T): T {
   return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
 }
@@ -125,6 +130,8 @@ export class MongoDb implements Db {
       this.c('email_codes').createIndex({ email: 1 }),
       this.c('email_codes').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
       this.c('rate_limits').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+      this.c('sync_leases').createIndex({ userId: 1, floor: 1 }),
+      this.c('sync_leases').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
       this.c('purchases').createIndex({ userId: 1 }),
       this.c('ai_cache').createIndex({ userId: 1 }),
       this.c('ai_cache').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
@@ -159,20 +166,30 @@ export class MongoDb implements Db {
 
   // refresh tokens
   async insertRefreshToken(t: RefreshTokenDoc) {
-    await this.c('refresh_tokens').insertOne({ ...t, expiresAt: toDate(t.expiresAt), rotatedAt: t.rotatedAt ?? null });
+    try {
+      await this.c('refresh_tokens').insertOne({ ...t, expiresAt: toDate(t.expiresAt), rotatedAt: t.rotatedAt ?? null });
+    } catch (e) {
+      if (isDup(e)) throw new DuplicateKeyError('duplicate token');
+      throw e;
+    }
   }
-  async consumeRefreshToken(tokenHash: string, now: number) {
+  async consumeRefreshToken(tokenHash: string, now: number, graceMs = 0): Promise<ConsumeRefreshResult> {
     const coll = this.c('refresh_tokens');
     const doc = await coll.findOneAndUpdate(
       { tokenHash, rotatedAt: null, expiresAt: { $gt: toDate(now) } },
       { $set: { rotatedAt: now } },
       { returnDocument: 'before' },
     );
-    const norm = (d: Doc): RefreshTokenDoc => ({ ...(d as RefreshTokenDoc), expiresAt: toMs(d.expiresAt) });
-    if (doc) return { status: 'ok' as const, token: norm(doc) };
+    if (doc) return { status: 'ok', token: normToken(doc) };
     const prev = await coll.findOne({ tokenHash });
-    if (prev && prev.rotatedAt && toMs(prev.expiresAt) > now) return { status: 'reused' as const, token: norm(prev) };
-    return { status: 'missing' as const };
+    if (prev && prev.rotatedAt && toMs(prev.expiresAt) > now) {
+      return { status: graceMs > 0 && now - Number(prev.rotatedAt) <= graceMs ? 'grace' : 'reused', token: normToken(prev) };
+    }
+    return { status: 'missing' };
+  }
+  async getRefreshToken(tokenHash: string) {
+    const d = await this.c('refresh_tokens').findOne({ tokenHash });
+    return d ? normToken(d) : null;
   }
   async revokeRefreshFamily(familyId: string) {
     await this.c('refresh_tokens').deleteMany({ familyId });
@@ -187,8 +204,21 @@ export class MongoDb implements Db {
     const d = await this.c('email_codes').findOne({ email, expiresAt: { $gt: toDate(now) } }, { sort: { createdAt: -1 } });
     return d ? ({ ...(d as EmailCodeDoc), expiresAt: toMs(d.expiresAt) } as EmailCodeDoc) : null;
   }
-  async incrementEmailCodeAttempts(id: string) {
-    await this.c('email_codes').updateOne({ _id: id }, { $inc: { attempts: 1 } });
+  async claimEmailCodeAttempt(email: string, now: number, maxAttempts: number) {
+    // Only the newest live code counts (putEmailCode keeps one per email). One atomic operation:
+    // the filter checks the attempt count and the update increments it.
+    const newest = await this.c('email_codes').findOne({ email, expiresAt: { $gt: toDate(now) } }, { sort: { createdAt: -1 } });
+    if (!newest) return null;
+    const d = await this.c('email_codes').findOneAndUpdate(
+      { _id: newest._id, expiresAt: { $gt: toDate(now) }, attempts: { $lt: maxAttempts } },
+      { $inc: { attempts: 1 } },
+      { returnDocument: 'after' },
+    );
+    return d ? ({ ...(d as EmailCodeDoc), expiresAt: toMs(d.expiresAt) } as EmailCodeDoc) : null;
+  }
+  async consumeEmailCode(id: string) {
+    const r = (await this.c('email_codes').deleteOne({ _id: id })) as { deletedCount?: number };
+    return (r?.deletedCount ?? 0) === 1;
   }
   async deleteEmailCodes(email: string) {
     await this.c('email_codes').deleteMany({ email });
@@ -214,12 +244,49 @@ export class MongoDb implements Db {
   }
 
   // sync
-  async upsertRows(table: string, userId: string, rows: SyncRow[], now: number) {
+  async beginSyncWrite(userId: string, now: number, leaseMs: number): Promise<SyncWriteLease> {
+    // 1. Floor = the stamp before ours. 2. Publish the lease. 3. Allocate. Steps 2 → 3 order is what
+    // lets syncHighWater() cap every pull below a stamp that is allocated but not yet committed.
+    const prev = await this.c('sync_seq').findOne({ _id: userId });
+    const floor = prev ? Number(prev.seq) : now - 1;
+    const leaseId = uuidv7(now);
+    await this.c('sync_leases').insertOne({ _id: leaseId, userId, floor, expiresAt: toDate(now + leaseMs) });
+    const run = () =>
+      this.c('sync_seq').findOneAndUpdate(
+        { _id: userId },
+        [{ $set: { seq: { $max: [{ $add: [{ $ifNull: ['$seq', 0] }, 1] }, now] } } }],
+        { upsert: true, returnDocument: 'after' },
+      );
+    let d: Doc | null;
+    try {
+      d = await run();
+    } catch (e) {
+      if (!isDup(e)) throw e;
+      d = await run(); // concurrent first upsert
+    }
+    return { seq: Number(d?.seq), leaseId };
+  }
+  async endSyncWrite(_userId: string, leaseId: string) {
+    await this.c('sync_leases').deleteOne({ _id: leaseId });
+  }
+  async syncHighWater(userId: string, now: number, legacyOverlapMs: number) {
+    // Read the counter BEFORE the leases: a write allocated after this read gets a higher stamp.
+    const seqDoc = await this.c('sync_seq').findOne({ _id: userId });
+    let hw = seqDoc ? Number(seqDoc.seq) : now - legacyOverlapMs;
+    const [oldest] = await this.c('sync_leases')
+      .find({ userId, expiresAt: { $gt: toDate(now) } })
+      .sort({ floor: 1 })
+      .limit(1)
+      .toArray();
+    if (oldest) hw = Math.min(hw, Number(oldest.floor));
+    return Math.max(0, hw);
+  }
+  async upsertRows(table: string, userId: string, rows: SyncRow[], syncedAt: number) {
     if (rows.length === 0) return { accepted: [], conflicts: [] };
     const ops = rows.map((row) => ({
       updateOne: {
         filter: { _id: `${userId}:${row.id}`, updated_at: { $lt: row.updated_at } },
-        update: { $set: { ...row, userId, syncedAt: now } },
+        update: { $set: { ...row, userId, syncedAt } },
         upsert: true,
       },
     }));
@@ -278,7 +345,24 @@ export class MongoDb implements Db {
   async putAiCache(doc: AiCacheDoc) {
     await this.c('ai_cache').replaceOne({ _id: doc._id }, { ...doc, expiresAt: toDate(doc.expiresAt) }, { upsert: true });
   }
-  async addAiSpend(month: string, delta: AiUsageDelta, now: number) {
+  async reserveAiSpend(month: string, micros: number, capMicros: number, now: number) {
+    if (micros >= capMicros) return false;
+    // Conditional $inc: the filter only matches while the reservation keeps the month under the cap.
+    const run = (upsert: boolean) =>
+      this.c('ai_spend').findOneAndUpdate(
+        { _id: month, $or: [{ usdMicros: { $lt: capMicros - micros } }, { usdMicros: { $exists: false } }] },
+        { $inc: { usdMicros: micros }, $set: { updatedAt: now } },
+        { upsert, returnDocument: 'after' },
+      );
+    try {
+      return (await run(true)) !== null;
+    } catch (e) {
+      // Duplicate _id: the month exists but is at/over the cap (or a concurrent first insert won).
+      if (!isDup(e)) throw e;
+      return (await run(false)) !== null;
+    }
+  }
+  async addAiSpend(month: string, delta: Partial<AiUsageDelta>, now: number) {
     const run = () =>
       this.c('ai_spend').findOneAndUpdate(
         { _id: month },
@@ -312,6 +396,8 @@ export class MongoDb implements Db {
       this.c('purchases').deleteMany({ userId }),
       this.c('entitlements').deleteOne({ _id: userId }),
       this.c('ai_cache').deleteMany({ userId }),
+      this.c('sync_seq').deleteOne({ _id: userId }),
+      this.c('sync_leases').deleteMany({ userId }),
       ...TABLE_NAMES.map((t) => this.c(t).deleteMany({ userId })),
     ]);
     // The user document goes last, so a retry after a partial failure still finds the email.

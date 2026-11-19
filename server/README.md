@@ -23,10 +23,10 @@ Errors are always `{ "error": "<code>" }` with no stack traces.
 | `GET /config` | none | `{ payments_enabled, ai_provider, plans, features }`. Cached 5 min. |
 | `POST /auth/anonymous` | none | Silent account (sheet 15) for AI + purchases before sign-in. Cannot sync. 10/h/IP. |
 | `POST /auth/google` | optional anon JWT | `{ idToken, deviceId? }`, verified with Google JWKS (`jose`). |
-| `POST /auth/apple` | optional anon JWT | `{ identityToken, nonce?, deviceId? }`, verified with Apple JWKS. Nonce may be raw or sha256-hex. |
+| `POST /auth/apple` | optional anon JWT | `{ identityToken, nonce, deviceId? }`, verified with Apple JWKS. `nonce` (raw) is required; the token must carry its sha256-hex. |
 | `POST /auth/email/start` | none | `{ email }` → 6-digit code by mail. 3 codes/15 min/email, 10/h/IP. Same reply for every email. |
-| `POST /auth/email/verify` | optional anon JWT | `{ email, code, deviceId? }`. 10 min expiry, 5 attempts. |
-| `POST /auth/refresh` | none | `{ refreshToken }` → new pair. Rotating; reusing an old token revokes the whole family. |
+| `POST /auth/email/verify` | optional anon JWT | `{ email, code, deviceId? }`. 10 min expiry, 5 attempts per code (counted atomically before comparing), 15 per email and 20 per IP per 15 min. |
+| `POST /auth/refresh` | none | `{ refreshToken }` → new pair. Rotating; a retry within 60 s gets the same successor back, any other reuse revokes the whole family. |
 | `POST /auth/logout` | none | `{ refreshToken }` → revokes the family. |
 | `POST /sync/push` | user (not anonymous) | `{ table, rows[] }` → `{ accepted[], conflicts[], rejected[], serverTime }`. ≤500 rows, 2 MB. |
 | `GET /sync/pull?since=&tables=&limit=&cursor=` | user (not anonymous) | `{ changes: {table: rows[]}, nextCursor, nextSince, serverTime }`. ≤500 rows/page. |
@@ -47,9 +47,9 @@ Every `/billing/*` and `/webhooks/*` route returns **404 while `PAYMENTS_ENABLED
 - **Rows are always written under the token's user.** `user_id` in a pushed row is ignored; Mongo `_id` is `userId:id`, so one user's ids can never collide with or overwrite another's.
 - **Sync rows:** plain values only (string, finite number, boolean, null), field names from the allow-list in `src/sync/tables.ts` (sheet 14 + common columns), string ≤ 200 KB, row ≤ 256 KB, `updated_at` at most 24 h in the future. Bad rows are listed in `rejected`, good rows still save. **When the app adds a column, add it to `tables.ts`.**
 - **Last-write-wins** on `updated_at`; equal or older pushes come back in `conflicts`. Deletes are soft (`deleted_at`).
-- **Pull** pages by the server's write time (`syncedAt`), not client clocks, so late pushes from a phone with a wrong clock are never missed. Loop while `nextCursor` is set, then store `nextSince` (it overlaps by 2 s; rows are idempotent).
+- **Pull** pages by a server-assigned, per-user monotonic `syncedAt` (max(previous + 1, now ms)), not client clocks. Each push holds a write lease while it writes, and `nextSince` never passes the oldest lease, so a slow write is never skipped. Loop while `nextCursor` is set, then store `nextSince` (rows near it may come again; merges are idempotent).
 - **Access JWT:** HS256, `iss`/`aud` checked, 15 min. Each request looks the user up, so a token issued before account deletion is rejected (401). Garbage tokens are 401, never 500.
-- **Refresh tokens:** opaque, 60 days, stored as sha256 only, rotated on every use. The app should run refreshes single-flight: two parallel refreshes with the same token look like theft and sign the device out.
+- **Refresh tokens:** opaque, 60 days, stored as sha256 only, rotated on every use. The successor is derived (HMAC) from the presented token, so a retry within 60 s of a lost response gets the very same successor. Reuse after that window, or after the successor was used, looks like theft and revokes the family. The app still runs refreshes single-flight.
 - **Pro comes only from the stored entitlement** (`entitlements` collection), written only by `/billing/verify` and the webhooks. A purchase belongs to the account that last verified it (restore on another account moves it).
 - **Security:** CORS `*` with no credentials (no cookies anywhere), body caps with 413, malformed JSON 400, `nosniff`, `no-store`, CSP `default-src 'none'`.
 

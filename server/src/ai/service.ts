@@ -1,6 +1,6 @@
 import type { AiKind, Config } from '../config';
 import { publicEntitlement } from '../billing/entitlement';
-import type { Db } from '../db/types';
+import type { AiUsageDelta, Db } from '../db/types';
 import { canonicalJson, sha256Hex } from '../lib/crypto';
 import { HttpError } from '../lib/http';
 import type { Deps } from '../types';
@@ -76,6 +76,18 @@ export async function usageReport(cfg: Config, db: Db, month: string) {
 }
 
 /**
+ * What the response cache is keyed on. Wall-clock fields the client sends (`params.now`) change on
+ * every call, so only their UTC day counts: same day, same inputs, same cached plan.
+ */
+export function cacheKeyInput(req: PlanRequest): PlanRequest {
+  const params = req.params;
+  if (!params || !('now' in params)) return req;
+  const { now: raw, ...rest } = params;
+  const day = typeof raw === 'number' && Number.isFinite(raw) ? Math.floor(raw / DAY) : raw;
+  return { ...req, params: { ...rest, nowDay: day ?? null } };
+}
+
+/**
  * Sheet 28 pipeline: engine prepares targets + candidate pools + a rules-only plan; the LLM (if
  * allowed by provider, budget and the user's daily limit) picks IDs and writes copy; the output is
  * checked structurally and by the engine's validator; any failure ships the rules-only plan.
@@ -84,7 +96,7 @@ export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRe
   const cfg = deps.config;
   const now = deps.now();
   const kind = req.kind;
-  const hash = await sha256Hex(canonicalJson({ v: CONTRACT_VERSION, model: cfg.ai.model, req }));
+  const hash = await sha256Hex(canonicalJson({ v: CONTRACT_VERSION, model: cfg.ai.model, req: cacheKeyInput(req) }));
   const cacheKey = `${userId}:${kind}:${hash}`;
   const hit = await db.getAiCache(cacheKey, now);
   if (hit) return { ...(hit.response as AiResponse), cached: true };
@@ -105,31 +117,41 @@ export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRe
   const isPro = publicEntitlement(await db.getEntitlement(userId), now).pro;
   const user = userMessage(kind, ctx);
   const maxTokens = MAX_TOKENS[kind];
-  // Worst case for this call, so concurrent calls cannot push the month past 100%.
-  const worstCase = costMicros(price, {
-    inputTokens: estimateTokens(SYSTEM_PROMPT + user),
-    outputTokens: maxTokens,
-    cacheReadTokens: 0,
-    cacheWriteTokens: 0,
-  });
+  // Worst case for this call: every prompt token billed at the dearer of input / cache-write rates.
+  const promptTokens = estimateTokens(SYSTEM_PROMPT + user);
+  const worstCase = Math.ceil(
+    Math.max(
+      costMicros(price, { inputTokens: promptTokens, outputTokens: maxTokens, cacheReadTokens: 0, cacheWriteTokens: 0 }),
+      costMicros(price, { inputTokens: 0, outputTokens: maxTokens, cacheReadTokens: 0, cacheWriteTokens: promptTokens }),
+    ),
+  );
   const month = monthKey(now);
-  const spent = (await db.getAiSpend(month))?.usdMicros ?? 0;
-  const level = budgetLevel(spent, cfg.ai.monthlyBudgetUsd, worstCase);
-  if (level === 'exhausted') return rules('budget_exhausted');
-  if (level === 'pro_only' && !isPro) return rules('budget_free_paused');
+  const budget = cfg.ai.monthlyBudgetUsd * 1e6;
+  // Reserve the worst case atomically BEFORE calling: concurrent calls cannot overspend the cap.
+  // Free users may only spend up to 80% of the month; Pro users up to 100%.
+  const reserved = budget > 0 && (await db.reserveAiSpend(month, worstCase, isPro ? budget : 0.8 * budget, now));
+  if (!reserved) {
+    const spent = (await db.getAiSpend(month))?.usdMicros ?? 0;
+    return rules(budgetLevel(spent, cfg.ai.monthlyBudgetUsd, worstCase) === 'exhausted' || isPro ? 'budget_exhausted' : 'budget_free_paused');
+  }
+  /** Book the real usage: `actualMicros` replaces the reservation. */
+  const settle = (actualMicros: number, extra: Partial<AiUsageDelta>) =>
+    db.addAiSpend(month, { ...extra, usdMicros: actualMicros - worstCase }, now);
 
   const limit = cfg.ai.limits[isPro ? 'pro' : 'free'][kind];
   const aiCount = await db.hit(`ai-llm:${kind}:${userId}`, DAY, now);
-  if (aiCount > limit) return rules('daily_limit');
+  if (aiCount > limit) {
+    await settle(0, {});
+    return rules('daily_limit');
+  }
 
   let result: LlmResult;
   try {
     result = await llm.generate({ kind, system: SYSTEM_PROMPT, user, schema: OUTPUT_SCHEMAS[kind], maxTokens, timeoutMs: cfg.ai.timeoutMs });
   } catch (e) {
     const reason: FallbackReason = e instanceof LlmCallError && e.reason === 'timeout' ? 'timeout' : 'provider_error';
-    // A timed-out request may still be billed: book the worst case so the cap stays hard.
-    const usd = reason === 'timeout' ? worstCase : 0;
-    await db.addAiSpend(month, { usdMicros: usd, calls: 1, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, fallbacks: 1 }, now);
+    // A timed-out request may still be billed: keep the worst case so the cap stays hard.
+    await settle(reason === 'timeout' ? worstCase : 0, { calls: 1, fallbacks: 1 });
     return rules(reason);
   }
 
@@ -145,19 +167,14 @@ export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRe
     }
   })();
 
-  await db.addAiSpend(
-    month,
-    {
-      usdMicros: costMicros(price, result.usage),
-      calls: 1,
-      inputTokens: result.usage.inputTokens,
-      outputTokens: result.usage.outputTokens,
-      cacheReadTokens: result.usage.cacheReadTokens,
-      cacheWriteTokens: result.usage.cacheWriteTokens,
-      fallbacks: outcome.ok ? 0 : 1,
-    },
-    now,
-  );
+  await settle(costMicros(price, result.usage), {
+    calls: 1,
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    cacheReadTokens: result.usage.cacheReadTokens,
+    cacheWriteTokens: result.usage.cacheWriteTokens,
+    fallbacks: outcome.ok ? 0 : 1,
+  });
   if (!outcome.ok) return rules(outcome.reason);
 
   const response: AiResponse = { ...base, source: 'ai', plan: outcome.plan, model: result.model };

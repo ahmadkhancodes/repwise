@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import { MemoryDb } from '../src/db/memory';
+import type { SyncRow } from '../src/db/types';
 import { call, row, setup, signInEmail } from './helpers';
+
+/** A store whose bulk write takes as long as the test says (an M0 write under load). */
+class SlowDb extends MemoryDb {
+  gate: Promise<void> | null = null;
+  override async upsertRows(table: string, userId: string, rows: SyncRow[], syncedAt: number) {
+    if (this.gate) await this.gate;
+    return super.upsertRows(table, userId, rows, syncedAt);
+  }
+}
 
 describe('sync push/pull', () => {
   it('round-trips rows, always under the token user', async () => {
@@ -46,6 +57,46 @@ describe('sync push/pull', () => {
     await call(t, 'POST', '/sync/push', { token: a.accessToken, body: { table: 'cards', rows: [row('c2', 2)] } });
     const next = await call(t, 'GET', `/sync/pull?since=${first.body.nextSince}`, { token: a.accessToken });
     expect(next.body.changes.cards.map((r: { id: string }) => r.id)).toEqual(['c2']);
+  });
+
+  it('a slow write that commits after a concurrent pull is never skipped by the next pull', async () => {
+    const db = new SlowDb();
+    const t = await setup({ db });
+    const a = await signInEmail(t, 'slow@example.com');
+    const push = (id: string) => call(t, 'POST', '/sync/push', { token: a.accessToken, body: { table: 'sets', rows: [row(id, t.clock.now)] } });
+    expect((await push('s0')).status).toBe(200);
+    const first = await call(t, 'GET', '/sync/pull', { token: a.accessToken });
+
+    // Device A's push is stamped now but takes 3 s to commit…
+    let release!: () => void;
+    db.gate = new Promise<void>((r) => (release = r));
+    const slow = push('s1');
+    await new Promise((r) => setTimeout(r, 5));
+    // …while device B pulls 2.5 s later and does not see it yet.
+    t.clock.now += 2_500;
+    const during = await call(t, 'GET', `/sync/pull?since=${first.body.nextSince}`, { token: a.accessToken });
+    expect(during.body.changes.sets ?? []).toEqual([]);
+    t.clock.now += 500;
+    release();
+    db.gate = null;
+    expect((await slow).body.accepted).toEqual(['s1']);
+    t.clock.now += 10_000;
+    const after = await call(t, 'GET', `/sync/pull?since=${during.body.nextSince}`, { token: a.accessToken });
+    expect((after.body.changes.sets ?? []).map((r: { id: string }) => r.id)).toContain('s1');
+  });
+
+  it('stamps are monotonic per user even when the clock steps back, and pulls are idempotent', async () => {
+    const t = await setup();
+    const a = await signInEmail(t, 'mono@example.com');
+    await call(t, 'POST', '/sync/push', { token: a.accessToken, body: { table: 'cards', rows: [row('c1', 10)] } });
+    const p1 = await call(t, 'GET', '/sync/pull', { token: a.accessToken });
+    t.clock.now -= 60_000; // another Worker isolate with a slower clock
+    await call(t, 'POST', '/sync/push', { token: a.accessToken, body: { table: 'cards', rows: [row('c2', 20)] } });
+    const p2 = await call(t, 'GET', `/sync/pull?since=${p1.body.nextSince}`, { token: a.accessToken });
+    expect(p2.body.changes.cards.map((r: { id: string }) => r.id)).toEqual(['c2']);
+    expect(p2.body.nextSince).toBeGreaterThan(p1.body.nextSince);
+    const again = await call(t, 'GET', `/sync/pull?since=${p1.body.nextSince}`, { token: a.accessToken });
+    expect(again.body.changes).toEqual(p2.body.changes);
   });
 
   it('paginates across tables with an opaque cursor', async () => {
