@@ -24,7 +24,12 @@ export function columnsOf(table: SyncTableName): ColumnInfo[] {
     cols = Object.entries(getTableColumns(syncTables[table])).map(([key, c]) => ({
       key,
       sql: c.name,
-      kind: c.columnType === 'SQLiteTextJson' ? 'json' : c.columnType === 'SQLiteBoolean' ? 'bool' : 'plain',
+      kind:
+        c.columnType === 'SQLiteTextJson'
+          ? 'json'
+          : c.columnType === 'SQLiteBoolean'
+            ? 'bool'
+            : 'plain',
     }));
     cache.set(table, cols);
   }

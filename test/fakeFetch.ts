@@ -1,6 +1,13 @@
 /** A scripted fetch for API tests: route handlers by "METHOD /path", every call recorded. */
-export type Call = { method: string; path: string; query: string; body: unknown; auth: string | null };
-export type Reply = { status: number; body?: unknown } | Promise<{ status: number; body?: unknown }>;
+export type Call = {
+  method: string;
+  path: string;
+  query: string;
+  body: unknown;
+  auth: string | null;
+};
+export type Reply =
+  { status: number; body?: unknown } | Promise<{ status: number; body?: unknown }>;
 type Handler = (call: Call) => Reply;
 
 export function createFakeFetch(base = 'https://api.test') {
@@ -23,10 +30,14 @@ export function createFakeFetch(base = 'https://api.test') {
     calls.push(call);
     const h = routes.get(`${call.method} ${call.path}`);
     const signal = init.signal;
-    const reply = h ? await Promise.race([
-      Promise.resolve(h(call)),
-      new Promise<never>((_, reject) => signal?.addEventListener('abort', () => reject(new Error('aborted')))),
-    ]) : { status: 404, body: { error: 'not_found' } };
+    const reply = h
+      ? await Promise.race([
+          Promise.resolve(h(call)),
+          new Promise<never>((_, reject) =>
+            signal?.addEventListener('abort', () => reject(new Error('aborted'))),
+          ),
+        ])
+      : { status: 404, body: { error: 'not_found' } };
     const text = reply.body === undefined ? '' : JSON.stringify(reply.body);
     return {
       ok: reply.status >= 200 && reply.status < 300,
@@ -51,12 +62,19 @@ export function createFakeFetch(base = 'https://api.test') {
   };
 }
 
-export function tokenResponse(n: number | string, opts: { anonymous?: boolean; id?: string; email?: string | null } = {}) {
+export function tokenResponse(
+  n: number | string,
+  opts: { anonymous?: boolean; id?: string; email?: string | null } = {},
+) {
   return {
     accessToken: `at-${n}`,
     refreshToken: `rt-${n}`,
     tokenType: 'Bearer',
     expiresIn: 900,
-    user: { id: opts.id ?? 'user-1', email: opts.email ?? null, anonymous: opts.anonymous ?? false },
+    user: {
+      id: opts.id ?? 'user-1',
+      email: opts.email ?? null,
+      anonymous: opts.anonymous ?? false,
+    },
   };
 }

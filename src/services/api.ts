@@ -191,7 +191,11 @@ async function expireSession(refreshToken: string): Promise<void> {
 async function doRefresh(): Promise<StoredSession> {
   const s = await loadSession();
   if (!s) throw new ApiError('unauthorized', null, 'no_session');
-  const res = await send('/auth/refresh', { method: 'POST', body: { refreshToken: s.refreshToken } }, null);
+  const res = await send(
+    '/auth/refresh',
+    { method: 'POST', body: { refreshToken: s.refreshToken } },
+    null,
+  );
   if (res.status === 401) {
     await expireSession(s.refreshToken);
     throw new ApiError('unauthorized', 401, 'session_expired');

@@ -4,7 +4,11 @@
  * email code upgrades it in place so purchases and AI history follow the user. Sign-in is only
  * for backup/restore: the app works fully without it.
  */
-import { GoogleSignin, isErrorWithCode, statusCodes } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { CryptoDigestAlgorithm, digestStringAsync } from 'expo-crypto';
 import { Platform } from 'react-native';
@@ -196,12 +200,16 @@ export async function signInWithGoogle(): Promise<SignInResult> {
   }
   let idToken: string | null;
   try {
-    if (Platform.OS === 'android') await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    if (Platform.OS === 'android')
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const r = await GoogleSignin.signIn();
     if (r.type !== 'success') return CANCELLED;
     idToken = r.data.idToken;
   } catch (e) {
-    if (isErrorWithCode(e) && (e.code === statusCodes.SIGN_IN_CANCELLED || e.code === statusCodes.IN_PROGRESS)) {
+    if (
+      isErrorWithCode(e) &&
+      (e.code === statusCodes.SIGN_IN_CANCELLED || e.code === statusCodes.IN_PROGRESS)
+    ) {
       return CANCELLED;
     }
     throw e;
@@ -261,7 +269,9 @@ export async function signOut(): Promise<void> {
   localSignOut();
   emitSessionEvent({ type: 'signedOut', reason: 'user' });
   if (s) {
-    api.post('/auth/logout', { refreshToken: s.refreshToken }, { timeoutMs: 5000 }).catch(() => undefined);
+    api
+      .post('/auth/logout', { refreshToken: s.refreshToken }, { timeoutMs: 5000 })
+      .catch(() => undefined);
   }
   if (Platform.OS !== 'web') GoogleSignin.signOut().catch(() => undefined);
 }

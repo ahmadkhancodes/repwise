@@ -124,9 +124,7 @@
       "indexes": {
         "body_metrics_date_idx": {
           "name": "body_metrics_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -220,9 +218,7 @@
       "indexes": {
         "cards_date_idx": {
           "name": "cards_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -476,9 +472,7 @@
       "indexes": {
         "food_logs_date_idx": {
           "name": "food_logs_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -565,9 +559,7 @@
       "indexes": {
         "meal_plans_date_idx": {
           "name": "meal_plans_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -677,9 +669,7 @@
       "indexes": {
         "meals_meal_plan_idx": {
           "name": "meals_meal_plan_idx",
-          "columns": [
-            "meal_plan_id"
-          ],
+          "columns": ["meal_plan_id"],
           "isUnique": false
         }
       },
@@ -766,9 +756,7 @@
       "indexes": {
         "photos_date_idx": {
           "name": "photos_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -869,10 +857,7 @@
       "indexes": {
         "plans_type_week_idx": {
           "name": "plans_type_week_idx",
-          "columns": [
-            "type",
-            "week_start"
-          ],
+          "columns": ["type", "week_start"],
           "isUnique": false
         }
       },
@@ -1456,9 +1441,7 @@
       "indexes": {
         "session_exercises_session_idx": {
           "name": "session_exercises_session_idx",
-          "columns": [
-            "session_id"
-          ],
+          "columns": ["session_id"],
           "isUnique": false
         }
       },
@@ -1580,9 +1563,7 @@
       "indexes": {
         "sessions_date_idx": {
           "name": "sessions_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -1706,9 +1687,7 @@
       "indexes": {
         "sets_session_exercise_idx": {
           "name": "sets_session_exercise_idx",
-          "columns": [
-            "session_exercise_id"
-          ],
+          "columns": ["session_exercise_id"],
           "isUnique": false
         }
       },

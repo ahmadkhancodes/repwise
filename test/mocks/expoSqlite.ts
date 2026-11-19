@@ -4,7 +4,12 @@
  * Drizzle's expo-sqlite driver uses is implemented, plus the change listener for useLiveQuery.
  */
 /* eslint-disable @typescript-eslint/no-require-imports */
-type Listener = (e: { databaseName: string; databaseFilePath: string; tableName: string; rowId: number }) => void;
+type Listener = (e: {
+  databaseName: string;
+  databaseFilePath: string;
+  tableName: string;
+  rowId: number;
+}) => void;
 
 type NodeStatement = {
   run: (...p: unknown[]) => { changes: number | bigint; lastInsertRowid: number | bigint };
@@ -12,7 +17,11 @@ type NodeStatement = {
   setReturnArrays?: (on: boolean) => void;
   columns?: () => { name: string }[];
 };
-type NodeDatabase = { prepare: (sql: string) => NodeStatement; exec: (sql: string) => void; close: () => void };
+type NodeDatabase = {
+  prepare: (sql: string) => NodeStatement;
+  exec: (sql: string) => void;
+  close: () => void;
+};
 
 const listeners = new Set<Listener>();
 

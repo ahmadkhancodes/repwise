@@ -1,4 +1,11 @@
-import { api, ApiError, configureApi, isNetworkError, refreshSession, resetApiForTests } from '@/services/api';
+import {
+  api,
+  ApiError,
+  configureApi,
+  isNetworkError,
+  refreshSession,
+  resetApiForTests,
+} from '@/services/api';
 import { useConnectivity } from '@/services/connectivity';
 import { onSessionEvent, type SessionEvent } from '@/services/sessionEvents';
 import { loadSession, peekSession, resetTokensForTests, saveSession } from '@/services/tokens';
@@ -33,7 +40,10 @@ describe('api basics', () => {
   it('builds URLs with query, sends JSON and parses the reply', async () => {
     fake.on('GET /sync/pull', () => ({ status: 200, body: { ok: 1 } }));
     await signedIn();
-    const r = await api.get('/sync/pull', { auth: 'required', query: { since: 5, cursor: undefined } });
+    const r = await api.get('/sync/pull', {
+      auth: 'required',
+      query: { since: 5, cursor: undefined },
+    });
     expect(r).toEqual({ ok: 1 });
     expect(fake.calls[0]).toMatchObject({ query: '?since=5', auth: 'Bearer at-0' });
     expect(useConnectivity.getState().online).toBe(true);
@@ -96,7 +106,9 @@ describe('single-flight refresh', () => {
       return { status: 200, body: tokenResponse(1) };
     });
     fake.on('GET /sync/pull', (c) =>
-      c.auth === 'Bearer at-1' ? { status: 200, body: { ok: true } } : { status: 401, body: { error: 'unauthorized' } },
+      c.auth === 'Bearer at-1'
+        ? { status: 200, body: { ok: true } }
+        : { status: 401, body: { error: 'unauthorized' } },
     );
     const results = await Promise.all(
       Array.from({ length: 5 }, () => api.get('/sync/pull', { auth: 'required' })),
@@ -111,7 +123,9 @@ describe('single-flight refresh', () => {
     await signedIn();
     fake.on('POST /auth/refresh', () => ({ status: 200, body: tokenResponse(1) }));
     let first = true;
-    fake.on('GET /a', (c) => (c.auth === 'Bearer at-1' ? { status: 200, body: 'a' } : { status: 401 }));
+    fake.on('GET /a', (c) =>
+      c.auth === 'Bearer at-1' ? { status: 200, body: 'a' } : { status: 401 },
+    );
     fake.on('GET /b', async (c) => {
       if (first) {
         first = false;
@@ -133,7 +147,10 @@ describe('single-flight refresh', () => {
     await signedIn(NOW + 10_000); // inside the 30 s skew
     fake.on('POST /auth/refresh', () => ({ status: 200, body: tokenResponse(2) }));
     fake.on('GET /x', (c) => ({ status: 200, body: c.auth }));
-    const r = await Promise.all([api.get('/x', { auth: 'required' }), api.get('/x', { auth: 'required' })]);
+    const r = await Promise.all([
+      api.get('/x', { auth: 'required' }),
+      api.get('/x', { auth: 'required' }),
+    ]);
     expect(r).toEqual(['Bearer at-2', 'Bearer at-2']);
     expect(fake.callsTo('POST /auth/refresh')).toHaveLength(1);
   });
@@ -165,8 +182,10 @@ describe('single-flight refresh', () => {
     await signedIn(NOW - 1);
     fake.on('POST /auth/refresh', () => ({ status: 401 }));
     fake.on('POST /auth/google', (c) => ({ status: 200, body: { auth: c.auth } }));
-    await expect(api.post('/auth/google', { idToken: 'x' }, { auth: 'optional' })).resolves.toEqual({
-      auth: null,
-    });
+    await expect(api.post('/auth/google', { idToken: 'x' }, { auth: 'optional' })).resolves.toEqual(
+      {
+        auth: null,
+      },
+    );
   });
 });

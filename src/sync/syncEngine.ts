@@ -79,7 +79,11 @@ export function resetPullCursor(userId: string): void {
 // ---------- push ----------
 
 /** Split rows into requests the Worker accepts (≤ 500 rows, ≤ 2 MB body). Pure. */
-export function chunkRows(rows: RemoteRow[], maxRows = PUSH_MAX_ROWS, maxBytes = PUSH_MAX_BYTES): RemoteRow[][] {
+export function chunkRows(
+  rows: RemoteRow[],
+  maxRows = PUSH_MAX_ROWS,
+  maxBytes = PUSH_MAX_BYTES,
+): RemoteRow[][] {
   const out: RemoteRow[][] = [];
   let cur: RemoteRow[] = [];
   let bytes = 0;
@@ -128,9 +132,15 @@ async function pushTable(name: SyncTableName): Promise<{ pushed: number; rejecte
     let settled = 0;
     for (const batch of chunkRows(rows.map((r) => toRemote(name, r)))) {
       const sent = new Map(batch.map((r) => [String(r.id), Number(r.updated_at)]));
-      const res = await api.post<PushResponse>('/sync/push', { table: name, rows: batch }, { auth: 'required' });
+      const res = await api.post<PushResponse>(
+        '/sync/push',
+        { table: name, rows: batch },
+        { auth: 'required' },
+      );
       settle(name, sent, [...res.accepted, ...res.conflicts], DIRTY.clean);
-      const bad = res.rejected.map((r) => r.id).filter((id): id is string => typeof id === 'string');
+      const bad = res.rejected
+        .map((r) => r.id)
+        .filter((id): id is string => typeof id === 'string');
       settle(name, sent, bad, DIRTY.rejected);
       pushed += res.accepted.length;
       rejected += bad.length;
@@ -144,7 +154,11 @@ async function pushTable(name: SyncTableName): Promise<{ pushed: number; rejecte
 // ---------- pull ----------
 
 /** Merge one page of remote rows (last-write-wins). Returns how many local rows changed. */
-export function mergeRemoteRows(name: SyncTableName, remoteRows: unknown[], userId: string): number {
+export function mergeRemoteRows(
+  name: SyncTableName,
+  remoteRows: unknown[],
+  userId: string,
+): number {
   const t = tableOf(name);
   const incoming = remoteRows
     .map((r) => fromRemote(name, r, userId))
@@ -271,5 +285,11 @@ export function syncNow(opts: { pull?: boolean } = {}): Promise<SyncResult> {
 export function resetSyncForTests(): void {
   running = null;
   rerun = null;
-  useSyncStatus.setState({ running: false, lastSyncAt: null, lastPullAt: null, lastError: null, offline: false });
+  useSyncStatus.setState({
+    running: false,
+    lastSyncAt: null,
+    lastPullAt: null,
+    lastError: null,
+    offline: false,
+  });
 }

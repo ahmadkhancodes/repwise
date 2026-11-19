@@ -52,7 +52,9 @@ export function buildCatalog(src: CatalogSource): Catalog {
       exercises: src.exercises.map((e) =>
         indexed(e, e.name, [...e.aliases, ...e.primaryMuscles, ...e.equipment, e.pattern]),
       ),
-      recipes: src.recipes.map((r) => indexed(r, r.title, [r.cuisine, r.mainProtein, ...r.dietTags])),
+      recipes: src.recipes.map((r) =>
+        indexed(r, r.title, [r.cuisine, r.mainProtein, ...r.dietTags]),
+      ),
       foods: src.foods.map((f) => indexed(f, f.name, [f.category])),
     },
   };
@@ -88,8 +90,9 @@ export function peekCatalog(): Catalog | null {
 
 /** Run when the JS thread is idle (RN 0.88 removed InteractionManager), else on the next tick. */
 function afterIdle(fn: () => void): void {
-  const ric = (globalThis as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void })
-    .requestIdleCallback;
+  const ric = (
+    globalThis as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void }
+  ).requestIdleCallback;
   if (typeof ric === 'function') ric(fn, { timeout: 2000 });
   else setTimeout(fn, 0);
 }
@@ -148,7 +151,11 @@ export function getFood(id: string): Food | undefined {
  * Rank: exact name 100 › name starts with query 80 › every query word starts a name word 60 ›
  * every query word starts any indexed word (aliases, muscles, tags) 40 › substring 20.
  */
-export function score(entry: { name: string; words: string[]; hay: string }, q: string, qWords: string[]): number {
+export function score(
+  entry: { name: string; words: string[]; hay: string },
+  q: string,
+  qWords: string[],
+): number {
   if (entry.name === q) return 100;
   if (entry.name.startsWith(q)) return 80;
   const nameWords = entry.name.split(' ');
@@ -158,7 +165,12 @@ export function score(entry: { name: string; words: string[]; hay: string }, q: 
   return 0;
 }
 
-function search<T>(entries: Indexed<T>[], query: string, limit: number, filter?: (t: T) => boolean): T[] {
+function search<T>(
+  entries: Indexed<T>[],
+  query: string,
+  limit: number,
+  filter?: (t: T) => boolean,
+): T[] {
   const q = normalise(query);
   const pool = filter ? entries.filter((e) => filter(e.item)) : entries;
   if (!q) return pool.slice(0, limit).map((e) => e.item);

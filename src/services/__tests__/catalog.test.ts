@@ -45,7 +45,13 @@ describe('catalog', () => {
     expect(normalise(squat[0]!.name)).toContain('squat');
     const db = searchExercises('db bench');
     expect(Array.isArray(db)).toBe(true);
-    expect(searchRecipes('chicken').every((r) => normalise(`${r.title} ${r.mainProtein} ${r.cuisine} ${r.dietTags.join(' ')}`).includes('chicken'))).toBe(true);
+    expect(
+      searchRecipes('chicken').every((r) =>
+        normalise(`${r.title} ${r.mainProtein} ${r.cuisine} ${r.dietTags.join(' ')}`).includes(
+          'chicken',
+        ),
+      ),
+    ).toBe(true);
     expect(searchFoods('oat')[0]!.name.toLowerCase()).toContain('oat');
     expect(searchExercises('zzzzqqq')).toEqual([]);
   });
@@ -58,7 +64,16 @@ describe('catalog', () => {
 
   it('searches the whole catalogue in under 50 ms', () => {
     getCatalog(); // index built once
-    const queries = ['squat', 'bench press', 'row', 'chicken rice', 'greek yogurt', 'lunge', 'curl', 'paneer'];
+    const queries = [
+      'squat',
+      'bench press',
+      'row',
+      'chicken rice',
+      'greek yogurt',
+      'lunge',
+      'curl',
+      'paneer',
+    ];
     for (const q of queries) {
       const t0 = performance.now();
       searchExercises(q);

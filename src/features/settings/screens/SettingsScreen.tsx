@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { ChevronLeft, Palette, Shield, UserRound } from 'lucide-react-native';
 
+import { useAuth } from '@/services/auth';
 import { useThemeStore, type ThemePreference } from '@/theme';
 import { IconButton, ListRow, Screen, Segmented, Text } from '@/ui';
 
@@ -14,6 +15,11 @@ const THEME_OPTIONS = [
 export function SettingsScreen() {
   const preference = useThemeStore((s) => s.preference);
   const setPreference = useThemeStore((s) => s.setPreference);
+  const signedIn = useAuth((s) => s.status === 'signedIn');
+  const email = useAuth((s) => s.user?.email ?? null);
+  const accountSubtitle = signedIn
+    ? (email ?? 'Signed in, backup on')
+    : 'Optional: the app works without an account';
 
   return (
     <Screen
@@ -34,9 +40,11 @@ export function SettingsScreen() {
       <Text variant="headline">Account</Text>
       <ListRow
         icon={UserRound}
-        title="Sign in for backup"
-        subtitle="Optional — the app works without an account"
+        title="Backup & account"
+        subtitle={accountSubtitle}
+        onPress={() => router.push('/settings/account')}
         divider
+        testID="open-account"
       />
       <ListRow icon={Shield} title="Privacy" divider />
       {__DEV__ ? (

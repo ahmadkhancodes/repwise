@@ -8,7 +8,13 @@ import { nextUpdatedAt } from '@/db/repo';
 import { sets } from '@/db/schema';
 import { getProfile, saveProfile } from '@/features/settings/repo';
 import { logSet, setsFor, setsRepo, sessionsRepo } from '@/features/workout/repo';
-import { mealsForPlan, mealPlansRepo, mealsRepo, setMealStatus, swapMeal } from '@/features/meals/repo';
+import {
+  mealsForPlan,
+  mealPlansRepo,
+  mealsRepo,
+  setMealStatus,
+  swapMeal,
+} from '@/features/meals/repo';
 import { foodLogsRepo, logsForDate, sumLogs } from '@/features/nutrition/repo';
 import { uuidv7Time } from '@/lib/ids';
 
@@ -26,8 +32,20 @@ describe('migrations', () => {
     ) as { name: string }[];
     expect(rows.map((r) => r.name).sort()).toEqual(
       [
-        'body_metrics', 'cards', 'exercises', 'food_logs', 'meal_plans', 'meals', 'photos', 'plans',
-        'profile', 'recipes', 'routines', 'session_exercises', 'sessions', 'sets',
+        'body_metrics',
+        'cards',
+        'exercises',
+        'food_logs',
+        'meal_plans',
+        'meals',
+        'photos',
+        'plans',
+        'profile',
+        'recipes',
+        'routines',
+        'session_exercises',
+        'sessions',
+        'sets',
       ].sort(),
     );
   });
@@ -64,7 +82,11 @@ describe('generic repo', () => {
     expect(sessionsRepo.remove(s.id, 2000)).toBe(true);
     expect(sessionsRepo.get(s.id)).toBeUndefined();
     expect(sessionsRepo.list()).toHaveLength(0);
-    expect(sessionsRepo.getIncludingDeleted(s.id)).toMatchObject({ deletedAt: 2000, updatedAt: 2000, dirty: 1 });
+    expect(sessionsRepo.getIncludingDeleted(s.id)).toMatchObject({
+      deletedAt: 2000,
+      updatedAt: 2000,
+      dirty: 1,
+    });
     expect(sessionsRepo.remove(s.id)).toBe(false);
   });
 
@@ -92,7 +114,11 @@ describe('domain repos', () => {
     const a = saveProfile({ goal: 'build_muscle', equipment: ['dumbbell', 'bench'] });
     const b = saveProfile({ days: 4 });
     expect(b.id).toBe(a.id);
-    expect(getProfile()).toMatchObject({ goal: 'build_muscle', days: 4, equipment: ['dumbbell', 'bench'] });
+    expect(getProfile()).toMatchObject({
+      goal: 'build_muscle',
+      days: 4,
+      equipment: ['dumbbell', 'bench'],
+    });
   });
 
   it('logSet appends sets in order', () => {
@@ -112,13 +138,36 @@ describe('domain repos', () => {
     const dinner = mealsRepo.insert({ mealPlanId: plan.id, slot: 'dinner', recipeId: 'r1' });
     mealsRepo.insert({ mealPlanId: plan.id, slot: 'breakfast', recipeId: 'r2' });
     expect(mealsForPlan(plan.id).map((m) => m.slot)).toEqual(['breakfast', 'dinner']);
-    expect(setMealStatus(dinner.id, 'eaten', 5000)).toMatchObject({ status: 'eaten', eatenAt: 5000 });
-    expect(swapMeal(dinner.id, 'r9')).toMatchObject({ recipeId: 'r9', swappedFrom: 'r1', status: 'planned' });
+    expect(setMealStatus(dinner.id, 'eaten', 5000)).toMatchObject({
+      status: 'eaten',
+      eatenAt: 5000,
+    });
+    expect(swapMeal(dinner.id, 'r9')).toMatchObject({
+      recipeId: 'r9',
+      swappedFrom: 'r1',
+      status: 'planned',
+    });
   });
 
   it('food log totals', () => {
-    foodLogsRepo.insert({ date: '2026-11-19', source: 'quick', name: 'Oats', kcal: 300, p: 10.04, c: 50, f: 5 });
-    foodLogsRepo.insert({ date: '2026-11-19', source: 'search', name: 'Eggs', kcal: 155, p: 13, c: null, f: 11 });
+    foodLogsRepo.insert({
+      date: '2026-11-19',
+      source: 'quick',
+      name: 'Oats',
+      kcal: 300,
+      p: 10.04,
+      c: 50,
+      f: 5,
+    });
+    foodLogsRepo.insert({
+      date: '2026-11-19',
+      source: 'search',
+      name: 'Eggs',
+      kcal: 155,
+      p: 13,
+      c: null,
+      f: 11,
+    });
     foodLogsRepo.insert({ date: '2026-11-20', source: 'quick', name: 'Other', kcal: 999 });
     expect(sumLogs(logsForDate('2026-11-19'))).toEqual({ kcal: 455, p: 23, c: 50, f: 16 });
   });

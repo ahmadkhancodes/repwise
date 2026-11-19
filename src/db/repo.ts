@@ -92,7 +92,8 @@ export function createRepo<T extends SyncTable>(table: T, name: SyncTableName) {
 
   /** Soft delete so the delete syncs (sheet 13). */
   function remove(id: string, now: number = Date.now()): boolean {
-    const prev = getIncludingDeleted(id) as { updatedAt: number; deletedAt: number | null } | undefined;
+    const prev = getIncludingDeleted(id) as
+      { updatedAt: number; deletedAt: number | null } | undefined;
     if (!prev || prev.deletedAt != null) return false;
     const at = nextUpdatedAt(now, prev.updatedAt);
     getDb()
