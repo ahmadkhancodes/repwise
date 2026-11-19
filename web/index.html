@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Repwise: your gym plan and your meal plan, made for you, every day</title>
+<meta name="description" content="Repwise plans your training and your food in one app. AI-personalised gym plans, daily meal plans, a one-tap gym log, macros and a grocery list. No ads, ever.">
+<link rel="canonical" href="https://repwise.app/">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Repwise">
+<meta property="og:title" content="Repwise: AI Gym &amp; Meal Planner">
+<meta property="og:description" content="Know what to lift and what to eat today. Your gym plan and your meal plan, made for you, every day. No ads, ever.">
+<meta property="og:url" content="https://repwise.app/">
+<meta property="og:image" content="https://repwise.app/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Repwise: your gym plan and your meal plan, made for you, every day.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Repwise: AI Gym &amp; Meal Planner">
+<meta name="twitter:description" content="Your gym plan and your meal plan, made for you, every day. No ads, ever.">
+<meta name="twitter:image" content="https://repwise.app/assets/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Repwise","applicationCategory":"HealthApplication","operatingSystem":"Android, iOS","description":"AI-personalised gym plans and daily meal plans in one app. Gym log, macros and grocery list. No ads.","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Repwise Pro yearly","price":"59.99","priceCurrency":"USD"}]}
+</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h14l-3-3M21 17H7l3 3"/></symbol>
+    <symbol id="i-dumbbell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M3 9v6M17.5 6.5v11M21 9v6M6.5 12h11"/></symbol>
+    <symbol id="i-bowl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a9 9 0 0 1-18 0ZM8 20h8M12 3v4M8 5v2M16 5v2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M7 15l4-5 3 3 5-7"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0ZM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></symbol>
+    <symbol id="i-wifi-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.4a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 5.2-2.7M19 12.9a10 10 0 0 0-2-1.5M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.3-3.7M12 20h.01"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.25"/><circle cx="17" cy="19.5" r="1.25"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6M9.5 11.5 12 14l2.5-2.5M10.5 18h3"/></symbol>
+    <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="var(--inverse)"/><path d="M8 20.5 13 15.5l3.6 3.6L24 11.5" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Repwise home"><svg aria-hidden="true"><use href="#i-logo"/></svg>Repwise</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="/support/">Support</a>
+    </nav>
+    <a class="btn btn-inv btn-sm" href="#get">Get the app</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow"><i></i>AI gym &amp; meal planner</p>
+      <h1 class="h-hero"><span>Know what to lift.</span> <span>Know what to eat.</span> <span>Every day.</span></h1>
+      <p class="lead">Repwise builds your gym plan and your meal plan around your goal, your equipment and the food you like, then adapts both every week to what you actually did.</p>
+      <div>
+        <div class="badges">
+          <!-- TODO(store links): replace href="#" with the live App Store and Google Play URLs, swap in the official badge artwork, and remove the "Coming soon" note. -->
+          <a class="badge" href="#" aria-label="Download Repwise on the App Store (coming soon)"><svg aria-hidden="true"><use href="#i-store"/></svg><span><small>Download on the</small>App Store</span></a>
+          <a class="badge" href="#" aria-label="Get Repwise on Google Play (coming soon)"><svg aria-hidden="true"><use href="#i-store"/></svg><span><small>Get it on</small>Google Play</span></a>
+        </div>
+        <p class="badges-note">Coming soon. Free to start, no account needed.</p>
+      </div>
+      <ul class="trust">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg>No ads, ever</li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg>Works offline</li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg>Light and dark</li>
+      </ul>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <!-- Phone B: Eat -->
+      <div class="phone phone-b"><div class="screen">
+        <div class="sbar"><span>9:41</span><i><b></b><b></b></i></div>
+        <div class="sc">
+          <div><div class="sc-title">Eat</div><div class="sc-sub">Thursday · 4 meals planned</div></div>
+          <div class="segtab"><span class="on">Day</span><span>Week</span></div>
+          <div class="card rings">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="var(--surface2)" stroke-width="9"/><circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="98" transform="rotate(-90 50 50)"/><text x="50" y="50" text-anchor="middle" font-size="19" font-weight="800" fill="var(--text)" letter-spacing="-1">1,540</text><text x="50" y="64" text-anchor="middle" font-size="8.5" font-weight="600" fill="var(--text2)">of 2,450 kcal</text></svg>
+            <div class="bars">
+              <div class="bar"><div><span>Protein</span><b>112 / 180 g</b></div><u><s style="width:62%;background:var(--protein)"></s></u></div>
+              <div class="bar"><div><span>Carbs</span><b>164 / 270 g</b></div><u><s style="width:61%;background:var(--carb)"></s></u></div>
+              <div class="bar"><div><span>Fat</span><b>48 / 72 g</b></div><u><s style="width:66%;background:var(--fat)"></s></u></div>
+            </div>
+          </div>
+          <div class="card row"><div class="thumb"><svg><use href="#i-bowl"/></svg></div><div class="grow"><div class="card-k">Lunch</div><div style="font-weight:700">Chicken rice bowl</div><div class="card-m">640 kcal · 48 g protein</div></div><div class="ico-btn"><svg><use href="#i-swap"/></svg></div></div>
+          <div class="card row"><div class="thumb"><svg><use href="#i-bowl"/></svg></div><div class="grow"><div class="card-k">Dinner</div><div style="font-weight:700">Salmon &amp; greens</div><div class="card-m">710 kcal · 44 g protein</div></div><div class="ico-btn"><svg><use href="#i-swap"/></svg></div></div>
+        </div>
+        <div class="tabs"><span><svg><use href="#i-home"/></svg>Today</span><span><svg><use href="#i-dumbbell"/></svg>Train</span><span class="on"><svg><use href="#i-bowl"/></svg>Eat</span><span><svg><use href="#i-chart"/></svg>Progress</span></div>
+      </div></div>
+
+      <!-- Phone A: Today -->
+      <div class="phone phone-a"><div class="screen">
+        <div class="sbar"><span>9:41</span><i><b></b><b></b></i></div>
+        <div class="sc">
+          <div><div class="sc-title">Today</div><div class="sc-sub">Week 6 · Day 3 of 4</div></div>
+          <div class="seg"><b class="c"></b><b class="c"></b><b></b><b></b></div>
+          <div class="card">
+            <div class="card-k">Today's workout</div>
+            <div class="card-t">Push · Chest &amp; shoulders</div>
+            <div class="card-m">6 exercises · about 52 min</div>
+            <div class="chips"><span class="chip on">Bench +2.5 kg</span><span class="chip">Barbell</span><span class="chip">Dumbbells</span></div>
+            <div class="pbtn">Start workout</div>
+          </div>
+          <div class="card row">
+            <div class="thumb"><svg><use href="#i-bowl"/></svg></div>
+            <div class="grow"><div class="card-k">Lunch · 1:00 pm</div><div style="font-weight:700;font-size:14px">Chicken rice bowl</div><div class="card-m">640 kcal · 48 g protein</div></div>
+            <div class="ico-btn"><svg><use href="#i-swap"/></svg></div>
+          </div>
+          <div class="card">
+            <div class="row" style="justify-content:space-between"><div class="card-k">Fuel today</div><div class="card-m" style="margin:0"><b style="color:var(--text)">1,540</b> / 2,450 kcal</div></div>
+            <div class="seg" style="margin-top:10px"><b class="c"></b><b class="c"></b><b class="c"></b><b></b><b></b></div>
+          </div>
+        </div>
+        <div class="tabs"><span class="on"><svg><use href="#i-home"/></svg>Today</span><span><svg><use href="#i-dumbbell"/></svg>Train</span><span><svg><use href="#i-bowl"/></svg>Eat</span><span><svg><use href="#i-chart"/></svg>Progress</span></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="stats" aria-label="Repwise at a glance">
+  <div class="wrap">
+    <ul>
+      <li><strong class="num">2</strong><span>plans in one app: what to lift and what to eat, built together.</span></li>
+      <li><strong class="num">1 tap</strong><span>to log a set, with your previous weights already filled in.</span></li>
+      <li><strong class="num">0</strong><span>ads. Not in the free tier, not anywhere, not ever.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="features" style="padding-bottom:0">
+  <div class="wrap"><div class="sec-head" style="margin-bottom:0">
+    <p class="eyebrow"><i></i>How it works</p>
+    <h2 class="h1">One short quiz. Two plans. A fresh week, every week.</h2>
+    <p class="lead">Tell Repwise your goal, your equipment, your schedule and what you like to eat. Open the app each morning and the day is already planned.</p>
+  </div></div>
+</section>
+
+<section class="feat-sec" aria-labelledby="f-player">
+  <div class="wrap feat">
+    <div class="feat-copy">
+      <p class="eyebrow"><i></i>Workout player</p>
+      <h2 class="h2" id="f-player">Walk in knowing every set.</h2>
+      <p class="lead">A weekly gym plan built around your goal, your equipment and the days you can train. Then a player that stays out of your way.</p>
+      <ul class="ticks">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Log a set in one tap.</b> Last session's weights are pre-filled.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Rest timer with a notification,</b> plus plate and 1RM calculators.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Looping demos</b> and muscle info for every exercise in the library.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Works fully offline.</b> The gym basement is not a problem.</span></li>
+      </ul>
+    </div>
+    <div class="feat-art" aria-hidden="true">
+      <div class="phone"><div class="screen">
+        <div class="sbar"><span>9:41</span><i><b></b><b></b></i></div>
+        <div class="sc">
+          <div class="seg"><b class="d"></b><b class="d"></b><b class="c"></b><b></b><b></b><b></b></div>
+          <div><div class="sc-sub">Exercise 3 of 6</div><div class="sc-title">Bench press</div></div>
+          <div class="chips" style="margin:0"><span class="chip on">Last time 60 kg × 8</span><span class="chip" style="background:var(--surface)">Chest</span></div>
+          <div class="setrow"><em>1</em><span>60<small>kg</small></span><span>8<small>reps</small></span><span class="tick ok"><svg><use href="#i-check"/></svg></span></div>
+          <div class="setrow"><em>2</em><span>62.5<small>kg</small></span><span>8<small>reps</small></span><span class="tick ok"><svg><use href="#i-check"/></svg></span></div>
+          <div class="setrow now"><em>3</em><span>62.5<small>kg</small></span><span>8<small>reps</small></span><span class="tick"><svg><use href="#i-check"/></svg></span></div>
+          <div class="setrow ghost"><em>4</em><span>62.5<small>kg</small></span><span>8<small>reps</small></span><span></span></div>
+          <div class="timer"><div><small>Rest</small><strong class="num">1:24</strong></div><div class="row" style="gap:6px"><i>−15</i><i>+15</i><i>Skip</i></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="feat-sec" aria-labelledby="f-meals">
+  <div class="wrap feat flip">
+    <div class="feat-copy">
+      <p class="eyebrow"><i></i>Meal plans</p>
+      <h2 class="h2" id="f-meals">Meals you would actually cook.</h2>
+      <p class="lead">Daily meals in the cuisines you like, matched to your calorie and protein targets, and respectful of your diet, allergies and dislikes.</p>
+      <ul class="ticks">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Swap any meal in one tap.</b> The day stays on target.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Ate out?</b> Log it and Repwise rebalances the rest of your day.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Step-by-step recipes</b> with a cook mode that keeps the screen on task.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Weekly grocery list,</b> grouped by aisle. Tick items off or share it as text.</span></li>
+      </ul>
+    </div>
+    <div class="feat-art" aria-hidden="true">
+      <div class="phone"><div class="screen">
+        <div class="sbar"><span>9:41</span><i><b></b><b></b></i></div>
+        <div class="sc">
+          <div><div class="sc-title">Eat</div><div class="sc-sub">Thursday · 4 meals planned</div></div>
+          <div class="segtab"><span class="on">Day</span><span>Week</span></div>
+          <div class="card rings">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="var(--surface2)" stroke-width="9"/><circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="98" transform="rotate(-90 50 50)"/><text x="50" y="50" text-anchor="middle" font-size="19" font-weight="800" fill="var(--text)" letter-spacing="-1">1,540</text><text x="50" y="64" text-anchor="middle" font-size="8.5" font-weight="600" fill="var(--text2)">of 2,450 kcal</text></svg>
+            <div class="bars">
+              <div class="bar"><div><span>Protein</span><b>112 / 180 g</b></div><u><s style="width:62%;background:var(--protein)"></s></u></div>
+              <div class="bar"><div><span>Carbs</span><b>164 / 270 g</b></div><u><s style="width:61%;background:var(--carb)"></s></u></div>
+              <div class="bar"><div><span>Fat</span><b>48 / 72 g</b></div><u><s style="width:66%;background:var(--fat)"></s></u></div>
+            </div>
+          </div>
+          <div class="card row"><div class="thumb"><svg><use href="#i-bowl"/></svg></div><div class="grow"><div class="card-k">Lunch</div><div style="font-weight:700">Chicken rice bowl</div><div class="card-m">640 kcal · 48 g protein</div></div><div class="ico-btn"><svg><use href="#i-swap"/></svg></div></div>
+          <div class="card row"><div class="thumb"><svg><use href="#i-bowl"/></svg></div><div class="grow"><div class="card-k">Dinner</div><div style="font-weight:700">Salmon &amp; greens</div><div class="card-m">710 kcal · 44 g protein</div></div><div class="ico-btn"><svg><use href="#i-swap"/></svg></div></div>
+          <div class="card row"><div class="thumb"><svg><use href="#i-cart"/></svg></div><div class="grow"><div style="font-weight:700">Grocery list</div><div class="card-m">23 items · 6 aisles</div></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="feat-sec" aria-labelledby="f-ai">
+  <div class="wrap feat">
+    <div class="feat-copy">
+      <p class="eyebrow"><i></i>Adapts weekly</p>
+      <h2 class="h2" id="f-ai">A plan that keeps up with you.</h2>
+      <p class="lead">Every week a short check-in looks at what you actually lifted and ate, then refreshes your sessions, targets and menus. No spreadsheet required.</p>
+      <ul class="ticks">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Fresh sessions each week</b> with smart progression, so you are never stuck repeating the same workout.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Targets that move with your progress,</b> worked out by tested rules rather than guesswork.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>A morning brief</b> with today's workout and meals, on the times you choose.</span></li>
+      </ul>
+    </div>
+    <div class="feat-art plain" aria-hidden="true">
+      <div class="checkin">
+        <div class="card">
+          <div class="card-k">Weekly check-in · Week 6</div>
+          <div class="card-t" style="font-size:22px">4 of 4 sessions done</div>
+          <div class="week">
+            <i><b class="on"><svg><use href="#i-check"/></svg></b>M</i><i><b class="on"><svg><use href="#i-check"/></svg></b>T</i><i><b></b>W</i><i><b class="on"><svg><use href="#i-check"/></svg></b>T</i><i><b></b>F</i><i><b class="on"><svg><use href="#i-check"/></svg></b>S</i><i><b></b>S</i>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-k">Next week, updated</div>
+          <div style="margin-top:6px">
+            <div class="ci-row"><span>Bench press</span><b class="num"><s>62.5</s> 65 kg</b></div>
+            <div class="ci-row"><span>Daily calories</span><b class="num"><s>2,450</s> 2,400</b></div>
+            <div class="ci-row"><span>Protein target</span><b class="num">180 g</b></div>
+            <div class="ci-row"><span>New this week</span><b>5 meals · 2 sessions</b></div>
+          </div>
+        </div>
+        <div class="pbtn inv" style="height:52px;font-size:16px;margin-top:2px">Start week 7</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feat-sec" aria-labelledby="f-progress" style="padding-bottom:96px">
+  <div class="wrap feat flip">
+    <div class="feat-copy">
+      <p class="eyebrow"><i></i>Progress &amp; records</p>
+      <h2 class="h2" id="f-progress">See the work add up.</h2>
+      <p class="lead">Every set you log feeds your records, charts and history, so progress is something you can look at rather than hope for.</p>
+      <ul class="ticks">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Personal records</b> and estimated 1RM charts for your lifts.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Muscle heatmap</b> that shows what you trained recently.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Weight trend and body measurements,</b> all in one place.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Private progress photos</b> with a side-by-side compare slider, kept on your device.</span></li>
+      </ul>
+    </div>
+    <div class="feat-art" aria-hidden="true">
+      <div class="phone"><div class="screen">
+        <div class="sbar"><span>9:41</span><i><b></b><b></b></i></div>
+        <div class="sc">
+          <div><div class="sc-title">Progress</div><div class="sc-sub">This week</div></div>
+          <div class="card">
+            <div class="card-k">Volume lifted</div>
+            <div class="row" style="justify-content:space-between;margin-top:8px;align-items:flex-end"><div class="big num">12,450<small>kg</small></div><span class="delta">↑ 6%</span></div>
+          </div>
+          <div class="card">
+            <div class="row" style="justify-content:space-between"><div class="card-k">Squat · est. 1RM</div><b class="num" style="font-size:13px">138 kg</b></div>
+            <svg viewBox="0 0 240 92" style="width:100%;margin-top:10px" preserveAspectRatio="none"><path d="M0 91.5h240M0 61.5h240M0 31.5h240" stroke="var(--border)" stroke-width="1"/><path d="M4 78 38 72 72 74 106 58 140 52 174 40 208 30 236 16V92H4Z" fill="var(--accent)" opacity=".14"/><path d="M4 78 38 72 72 74 106 58 140 52 174 40 208 30 236 16" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="236" cy="16" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2.5"/></svg>
+          </div>
+          <div class="pr"><svg><use href="#i-trophy"/></svg><div><b>New record</b><span>Squat · 120 kg × 5</span></div></div>
+          <div class="card row"><div class="grow"><div class="card-k">Body weight</div><div class="card-t num" style="margin-top:2px">78.4 kg</div></div><svg viewBox="0 0 80 30" style="width:80px;height:30px"><path d="M2 8 15 10 28 9 41 15 54 17 67 21 78 23" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="noads">
+  <div class="wrap band-grid">
+    <div>
+      <p class="eyebrow"><i></i>Our promise</p>
+      <h2 class="h-display" id="noads" style="margin-top:20px">No ads. Ever.</h2>
+      <p class="lead muted" style="margin-top:24px">You come to train, not to watch a video for a protein bar. Repwise is paid for by people who choose Pro, and by nothing else.</p>
+    </div>
+    <ul class="band-list">
+      <li><svg aria-hidden="true"><use href="#i-check"/></svg>No ads in the free tier or in Pro</li>
+      <li><svg aria-hidden="true"><use href="#i-check"/></svg>We do not sell your data</li>
+      <li><svg aria-hidden="true"><use href="#i-check"/></svg>No tracking across other apps or sites</li>
+      <li><svg aria-hidden="true"><use href="#i-check"/></svg>A paywall you can always close</li>
+    </ul>
+  </div>
+</section>
+
+<section aria-labelledby="built">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow"><i></i>Built for people who lift</p>
+      <h2 class="h1" id="built">Fast, private, and yours.</h2>
+    </div>
+    <ul class="grid">
+      <li><svg aria-hidden="true"><use href="#i-wifi-off"/></svg><h3 class="h3">Works offline</h3><p>Your plan, your log and the workout player do not need a connection.</p></li>
+      <li><svg aria-hidden="true"><use href="#i-user"/></svg><h3 class="h3">Account optional</h3><p>Use Repwise without signing in. Add an account later only if you want backup and restore.</p></li>
+      <li><svg aria-hidden="true"><use href="#i-lock"/></svg><h3 class="h3">Private by default</h3><p>Your data lives on your device first. Progress photos stay in the app, never in your gallery.</p></li>
+      <li><svg aria-hidden="true"><use href="#i-bell"/></svg><h3 class="h3">Reminders on your terms</h3><p>Workout and meal reminders at the times you pick, with quiet hours.</p></li>
+      <li><svg aria-hidden="true"><use href="#i-cart"/></svg><h3 class="h3">Grocery list included</h3><p>One weekly list from your meal plan, grouped by aisle and ready to share.</p></li>
+      <li><svg aria-hidden="true"><use href="#i-moon"/></svg><h3 class="h3">Light and dark</h3><p>Both themes, large touch targets and support for larger text sizes.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section id="pricing" aria-labelledby="pricing-h" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow"><i></i>Pricing</p>
+      <h2 class="h1" id="pricing-h">Start free. Go Pro when you are ready.</h2>
+      <p class="lead">The core logging features stay free. Pro adds the plans that adapt, the meals and everything that keeps them fresh.</p>
+    </div>
+    <div class="price-grid">
+      <div class="tier">
+        <h3>Free</h3>
+        <p>Everything you need to start training with a plan.</p>
+        <ul class="ticks">
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg><span>The quiz and your first personal plan</span></li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg><span>Workout logging</span></li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg><span>The exercise library</span></li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg><span>3 routines of your own</span></li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg><span>Basic progress</span></li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg><span>No ads</span></li>
+        </ul>
+        <a class="btn btn-ghost btn-lg" href="#get">Get started free</a>
+      </div>
+      <div class="tier pro">
+        <h3>Repwise Pro</h3>
+        <p>AI plans that adapt every week, a daily meal plan with swaps, the grocery list, the full reminder schedule, full progress history and Wrapped.</p>
+        <ul class="plans">
+          <li class="plan best"><div><b>Yearly <span class="tag">7-day free trial</span></b><small>Best value. About $1.15 a week.</small></div><div class="amt num">$59.99<small> / year</small></div></li>
+          <li class="plan"><div><b>3 months</b></div><div class="amt num">$24.99<small> / 3 months</small></div></li>
+          <li class="plan"><div><b>Monthly</b></div><div class="amt num">$12.99<small> / month</small></div></li>
+          <li class="plan"><div><b>Weekly</b></div><div class="amt num">$4.99<small> / week</small></div></li>
+        </ul>
+        <a class="btn btn-acc btn-lg" href="#get">Start your 7-day free trial</a>
+        <p class="fine">Then $59.99 a year unless you cancel before the trial ends. We remind you 2 days before. The trial is on the yearly plan, for eligible new subscribers. Prices are in US dollars; the app shows your local price before you buy. Subscriptions are billed by Apple or Google, renew automatically until cancelled, and can be cancelled any time in your store subscription settings.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="ai-h" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow"><i></i>How AI is used</p>
+      <h2 class="h2" id="ai-h">AI picks. Tested rules do the maths.</h2>
+    </div>
+    <ol class="steps">
+      <li><h3 class="h3">You answer a short quiz</h3><p>Goal, equipment, schedule, diet type, allergies and the foods you like.</p></li>
+      <li><h3 class="h3">Rules set your targets</h3><p>Sets, reps, calories and macros come from our own tested rules, not from the AI.</p></li>
+      <li><h3 class="h3">AI chooses and orders</h3><p>Through our own server, AI helps pick sessions and meals from a vetted library. We do not send it your name or email.</p></li>
+      <li><h3 class="h3">Always a fallback</h3><p>If the AI is unavailable, Repwise uses a rules-based plan, so you always have a plan for today.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section id="faq" aria-labelledby="faq-h" style="padding-top:0">
+  <div class="wrap faq-grid">
+    <div>
+      <p class="eyebrow"><i></i>FAQ</p>
+      <h2 class="h1" id="faq-h" style="margin-top:16px">Questions, answered.</h2>
+      <p class="muted" style="margin-top:16px">Something else? <a class="link" href="/support/">Visit support</a> or email us. We read everything.</p>
+    </div>
+    <div class="faq">
+      <details><summary>Is Repwise free?</summary><div><p>Yes. The quiz, your first personal plan, workout logging, the exercise library, 3 routines and basic progress are free, with no ads. Repwise Pro adds weekly adapting plans, the daily meal plan with swaps, the grocery list, the full reminder schedule, full progress history and Wrapped.</p></div></details>
+      <details><summary>How does the free trial work?</summary><div><p>The yearly plan includes a 7-day free trial for eligible new subscribers. After the trial it renews at $59.99 a year unless you cancel before it ends, and we send a reminder 2 days before. Cancel any time in your App Store or Google Play subscription settings.</p></div></details>
+      <details><summary>Do I need an account?</summary><div><p>No. You can use Repwise without signing in, and your plans, workouts, meals and progress stay on your device. An account is optional and only for backup, restore and sync across your devices, and for keeping Pro across devices.</p></div></details>
+      <details><summary>Does it work without a connection?</summary><div><p>Yes. Your plan, your log and the workout player work offline. You only need a connection for things like building a new plan or backing up.</p></div></details>
+      <details><summary>What equipment do I need?</summary><div><p>Whatever you have. The quiz asks about your equipment and the days you can train, and your plan is built around them. You can also build your own routines and custom exercises.</p></div></details>
+      <details><summary>Can it handle my diet and allergies?</summary><div><p>Your meal plan respects the diet type, allergies and disliked foods you enter, and you can swap any meal in one tap. Always check ingredients yourself if you have an allergy.</p></div></details>
+      <details><summary>Will there ever be ads?</summary><div><p>No. There are no ads in Repwise, in the free tier or in Pro, and we do not sell your data.</p></div></details>
+      <details><summary>How do I cancel or delete my account?</summary><div><p>Cancel a subscription in your App Store or Google Play subscription settings. To delete your account and backed-up data, go to Settings &gt; Account &gt; Delete account in the app, or follow the steps on our <a href="/delete-account/">delete account page</a>.</p></div></details>
+      <details><summary>Is Repwise medical advice?</summary><div><p>No. Repwise provides general fitness and nutrition guidance for healthy adults aged 18 and over. Consult a qualified professional before starting a new exercise or diet program, especially if you have a medical condition.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<section id="get" class="band cta" aria-labelledby="get-h">
+  <div class="wrap">
+    <h2 class="h-display" id="get-h">Today is already planned.</h2>
+    <p class="lead muted">Take the short quiz and get your first personal plan free. No account, no ads.</p>
+    <div>
+      <div class="badges">
+        <!-- TODO(store links): replace href="#" with the live App Store and Google Play URLs and the official badge artwork. -->
+        <a class="badge" href="#" aria-label="Download Repwise on the App Store (coming soon)"><svg aria-hidden="true"><use href="#i-store"/></svg><span><small>Download on the</small>App Store</span></a>
+        <a class="badge" href="#" aria-label="Get Repwise on Google Play (coming soon)"><svg aria-hidden="true"><use href="#i-store"/></svg><span><small>Get it on</small>Google Play</span></a>
+      </div>
+      <p class="badges-note muted">Coming soon to the App Store and Google Play.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div>
+        <a class="brand" href="/" aria-label="Repwise home"><svg aria-hidden="true"><use href="#i-logo"/></svg>Repwise</a>
+        <p class="muted" style="margin-top:8px;max-width:22em">Your gym plan and your meal plan, made for you, every day.</p>
+      </div>
+      <nav aria-label="Product"><h2>Product</h2><ul><li><a href="/#features">Features</a></li><li><a href="/#pricing">Pricing</a></li><li><a href="/#faq">FAQ</a></li></ul></nav>
+      <nav aria-label="Help"><h2>Help</h2><ul><li><a href="/support/">Support</a></li><li><a href="/delete-account/">Delete account</a></li><li><a href="mailto:buffersoltechnologies@gmail.com">Email us</a></li></ul></nav>
+      <nav aria-label="Legal"><h2>Legal</h2><ul><li><a href="/privacy/">Privacy Policy</a></li><li><a href="/terms/">Terms of Use</a></li></ul></nav>
+    </div>
+    <div class="legal">
+      <p>Repwise provides general fitness and nutrition guidance for healthy adults. It is not medical advice. Consult a qualified professional before starting a new exercise or diet program, especially if you have a medical condition.</p>
+      <p>Screens shown are illustrative. App Store is a trademark of Apple Inc. Google Play is a trademark of Google LLC.</p>
+      <p>© 2026 Buffersol Technologies. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
