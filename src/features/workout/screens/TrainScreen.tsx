@@ -1,27 +1,28 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Calculator, CalendarDays, CircleCheck, Dumbbell, History, ListPlus, Plus, TriangleAlert } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { usePro } from '@/features/billing';
 import { routinesRepo, useRoutines } from '@/features/library/repo';
-import { useCatalog } from '@/services/catalog';
+import { loadCatalog, useCatalog } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { Button, Card, EmptyState, IconButton, Screen, Segmented, Text } from '@/ui';
+import { Button, Card, EmptyState, IconButton, Screen, Segmented, showToast, Text } from '@/ui';
 
-import { startWorkoutAction } from '../actions';
+import { resumeWorkoutAction, startWorkoutAction } from '../actions';
 import { ResumeBanner } from '../components/ResumeBanner';
 import { WeekStrip } from '../components/WeekStrip';
 import { useNow } from '../hooks/useNow';
 import { useActiveSession, useHistory, useWeekSessions, type WeekSessionCard } from '../hooks/useTrain';
 import { useUnits } from '../hooks/useUnits';
 import { localDate, longWeekday, shortDate, weekOf } from '../logic/dates';
+import { parseTrainLink, resolveTrainLink } from '../logic/deepLink';
 import { estimateMinutes, formatMinutes } from '../logic/duration';
 import { canAddRoutine, parseRoutineItems, routineSetCount } from '../logic/routines';
 import { formatWeight } from '../logic/units';
 import { weekCounts, weekStates } from '../logic/week';
-import { createSession } from '../repo';
+import { activeSession, createSession, getSession } from '../repo';
 
 type Tab = 'week' | 'history' | 'routines';
 const TABS = [
@@ -75,8 +76,56 @@ function SessionCard({ card, today, index }: { card: WeekSessionCard; today: str
   );
 }
 
+/**
+ * Deep link `/train?sessionId=…&start=1` (Today, notifications, widgets): opens the player for
+ * that session and starts it (or resumes it). Works offline: the session and catalogue are local.
+ */
+function useTrainDeepLink() {
+  const params = useLocalSearchParams<{ sessionId?: string; start?: string }>();
+  const handled = useRef<string | null>(null);
+  const link = parseTrainLink(params);
+  const key = link ? `${link.sessionId}:${link.start ? 1 : 0}` : null;
+
+  useEffect(() => {
+    if (!link || !key) {
+      handled.current = null;
+      return;
+    }
+    if (handled.current === key) return;
+    handled.current = key;
+    const action = resolveTrainLink(link, getSession(link.sessionId), activeSession()?.id);
+    router.setParams({ sessionId: undefined, start: undefined });
+    if (action.kind === 'missing') {
+      showToast({ message: "That workout isn't on this phone any more" });
+      return;
+    }
+    if (action.kind === 'summary') {
+      router.push(action.route);
+      return;
+    }
+    const open = () => router.push(action.route);
+    if (action.run === 'resume') {
+      resumeWorkoutAction(action.sessionId);
+      open();
+    } else if (action.run === 'start') {
+      // The catalogue is bundled; wait for it so cardio sets are pre-created correctly.
+      loadCatalog()
+        .catch(() => null)
+        .then((c) => {
+          startWorkoutAction(action.sessionId, c);
+          open();
+        });
+    } else {
+      open();
+    }
+    // `key` captures the link; `link` is re-derived from it each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+}
+
 /** S08 Train tab: this week's plan, workout history and routines; tools in the header. */
 export function TrainScreen() {
+  useTrainDeepLink();
   const t = useTheme();
   const catalog = useCatalog();
   const { unit } = useUnits();

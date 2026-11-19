@@ -22,9 +22,10 @@ import { ToolsScreen } from '../screens/ToolsScreen';
 import { TrainScreen } from '../screens/TrainScreen';
 import { WorkoutPlayerScreen } from '../screens/WorkoutPlayerScreen';
 
+const mockParams: { current: Record<string, string> } = { current: {} };
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
-  useLocalSearchParams: () => ({}),
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true), setParams: jest.fn() },
+  useLocalSearchParams: () => mockParams.current,
 }));
 jest.mock('@/features/notifications/restTimer', () => ({ updateRestTimerSurface: jest.fn(async () => undefined) }));
 const mockRouter = (jest.requireMock('expo-router') as { router: Record<string, jest.Mock> }).router as {
@@ -32,6 +33,7 @@ const mockRouter = (jest.requireMock('expo-router') as { router: Record<string, 
   replace: jest.Mock;
   back: jest.Mock;
   canGoBack: jest.Mock;
+  setParams: jest.Mock;
 };
 const mockSurface = jest.requireMock('@/features/notifications/restTimer') as { updateRestTimerSurface: jest.Mock };
 
@@ -46,10 +48,61 @@ beforeEach(async () => {
   setAnalyticsSink((e, p) => events.push({ e, p }));
   jest.clearAllMocks();
   mockRouter.canGoBack.mockReturnValue(true);
+  mockParams.current = {};
 });
 afterEach(() => setAnalyticsSink(null));
 
 describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
+  describe('Train deep link /train?sessionId=…&start=1', () => {
+    it('opens the player for that session and starts it', async () => {
+      const s = plannedSession();
+      mockParams.current = { sessionId: s.id, start: '1' };
+      await renderThemed(<TrainScreen />, scheme);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${s.id}`);
+      expect(getSession(s.id)?.status).toBe('active');
+      expect(events.map((x) => x.e)).toContain('workout_started');
+      expect(mockRouter.setParams).toHaveBeenCalledWith({ sessionId: undefined, start: undefined });
+      // Every planned set exists as soon as the workout starts (1-tap logging).
+      expect(setsFor(exercisesForSession(s.id)[0]!.id)).toHaveLength(3);
+    });
+
+    it('without start=1 opens the session overview without starting it', async () => {
+      const s = plannedSession();
+      mockParams.current = { sessionId: s.id };
+      await renderThemed(<TrainScreen />, scheme);
+      expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${s.id}`);
+      expect(getSession(s.id)?.status).toBe('planned');
+    });
+
+    it('opens a finished session on its summary', async () => {
+      const s = finishedBench('2026-11-10', 80, 8, Date.UTC(2026, 10, 10, 9));
+      mockParams.current = { sessionId: s.id, start: '1' };
+      await renderThemed(<TrainScreen />, scheme);
+      expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${s.id}/summary`);
+    });
+
+    it('shows a calm toast for a session that is not on this phone', async () => {
+      mockParams.current = { sessionId: 'nope', start: '1' };
+      await renderThemed(<TrainScreen />, scheme);
+      expect(mockRouter.push).not.toHaveBeenCalled();
+      expect(useToastStore.getState().current?.message).toMatch(/isn't on this phone/);
+    });
+
+    it('does not start a second workout while one is in progress', async () => {
+      const running = plannedSession(TODAY(), 'Legs');
+      startWorkout(running.id);
+      const s = plannedSession();
+      mockParams.current = { sessionId: s.id, start: '1' };
+      await renderThemed(<TrainScreen />, scheme);
+      expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${s.id}`);
+      expect(getSession(s.id)?.status).toBe('planned');
+      expect(getSession(running.id)?.status).toBe('active');
+    });
+  });
+
   describe('Train tab (S08)', () => {
     it('shows an empty week and starts an empty workout', async () => {
       await renderThemed(<TrainScreen />, scheme);
