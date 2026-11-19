@@ -34,3 +34,29 @@
 - **In progress:** `feat/integrate` (engine/content adapter, real-data acceptance, server Planner wiring) and the 7 screen builders: `feat/onboarding`, `feat/today`, `feat/workout`, `feat/library`, `feat/meals`, `feat/progress`, `feat/notify`.
 - **Worktrees** share `node_modules` via a symlink to `/home/user/repwise/node_modules`.
 - **Shared brief** for the screen builders: the scratchpad `repwise_screen_brief.md`, summarised as "UI and functionality non-negotiable, tokens, motion, haptics, light/dark, a11y, tests for both platforms".
+
+## PAUSED 19 Nov 08:30 UTC (owner): resume after 3:15 PM PKT (10:15 UTC)
+`main` is green: 1,201 app tests plus engine, content and server tests. Merged so far: app-shell, engine, server, content (+ gaps), integrate, data, billing, library, meals, notify.
+
+Each paused slice has a WIP commit on its branch and a "Paused: next steps" list in its `docs/PROGRESS.md`:
+- **`feat/onboarding`** (`/home/user/repwise-onboarding`, WIP d520301):
+  1. Run check.
+  2. Replace `src/features/planner/engine.ts` with `export * from '@repwise/engine'`.
+  3. Add the Maestro F1 flows and decisions.
+- **`feat/today`** (WIP 8f281e1):
+  1. Merge `main`, taking main's `analytics.ts`.
+  2. Use the `@/features/meals` functions for ticks, water and swaps.
+  3. Run check, add decisions.
+- **`feat/workout`** (WIP 92ce404):
+  1. Re-run check.
+  2. Add the `/train?sessionId=…&start=1` deep link.
+  3. Add the Maestro flows and decisions.
+- **`feat/progress`** (WIP 19e9ac8):
+  1. Fix the screen tests: they stay on the skeleton when the whole file runs (state leak).
+  2. Run check, add the Maestro flows and decisions.
+
+**After those merge:**
+1. P-POL polish: PostHog + Sentry, review prompts, the lightness/accessibility audit, renumbering the "D?" decisions, replacing the library's `require` workaround with a normal engine import.
+2. A bug review per area.
+3. Device QA on an Android emulator + iOS simulator via GitHub Actions; the repo must be public for that run.
+4. Store packs.
