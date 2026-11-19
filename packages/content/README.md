@@ -4,9 +4,9 @@ Validated content catalogues for the Repwise planner, exercise library and meal 
 
 | File | Records | What it is |
 |---|---|---|
-| `exercises.json` | 235 | Exercise library. Original text, placeholder Cloudinary media ids. |
-| `recipes.json` | 245 | Recipes across 13 cuisines. Nutrition, allergens, diet tags and main protein are **computed**. |
-| `foods.json` | 275 | Ingredients with per-100 g nutrients from USDA FoodData Central (public domain). |
+| `exercises.json` | 283 | Exercise library. Original text, placeholder Cloudinary media ids. Cardio carries Compendium MET values. |
+| `recipes.json` | 325 | Recipes across 13 cuisines. Nutrition, allergens, diet tags and main protein are **computed**. |
+| `foods.json` | 282 | Ingredients with per-100 g nutrients from USDA FoodData Central (public domain). |
 
 The JSON files are the source of truth. `src/schemas.ts` holds the zod schemas and enums, `src/compute.ts` holds the pure derivation logic, and `src/index.ts` re-exports both plus the typed data.
 
@@ -96,6 +96,9 @@ Computed by `scripts/build.ts` (never hand-edited):
 
 ## Known limits
 
+- Coverage targets (tests): every split slot has ≥ 2 variants for the bodyweight-only and home-dumbbell kits; the engine's real-catalogue acceptance plans vegan, keto and vegetarian + gluten + egg-allergy weeks with no skipped main meal (D33–D36).
+- TVP / soya chunks use the USDA "Soy flour, defatted" record (the raw material TVP is extruded from). Seitan is made from vital wheat gluten and counts as `grains` for the main-protein rule.
+- USDA kcal for tofu, fruit and some vegetables sit about 9 % below 4P + 4C + 9F, so tofu-led recipes include a grain to stay inside the 8 % QA check.
 - Vegetarian tags assume a vegetarian (microbial-rennet) hard cheese when parmesan or pesto is used.
 - `halal_friendly` only excludes pork and alcohol (none in the catalogue); the user must still buy halal meat.
 - Nutrient values are USDA averages for generic foods, not brands. Bible QA still requires a human spot-check of 10 % of recipes, a second allergen reviewer and native-cook review of desi/Arab dishes before launch.

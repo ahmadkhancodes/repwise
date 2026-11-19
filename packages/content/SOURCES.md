@@ -7,7 +7,7 @@ This file is the licence log required by build bible sheets 24 and 29 (it serves
 - **Publisher:** U.S. Department of Agriculture, Agricultural Research Service, FoodData Central — https://fdc.nal.usda.gov/
 - **Licence:** Public domain, published under CC0 1.0. USDA asks for citation; no permission needed for commercial use. See https://fdc.nal.usda.gov/download-datasets (licence notice) and https://creativecommons.org/publicdomain/zero/1.0/.
 - **Datasets used:**
-  - SR Legacy, April 2018 release (`FoodData_Central_sr_legacy_food_csv_2018-04.zip`) — 271 foods.
+  - SR Legacy, April 2018 release (`FoodData_Central_sr_legacy_food_csv_2018-04.zip`) — 278 foods (7 added 19 Nov 2026: vital wheat gluten 168147, soy flour defatted 174275 used for TVP / soya chunks, SILK plain soy yogurt 175227, red lentils 174284, chickpea flour 174288, hemp seed 170148, macadamia nuts 170178).
   - FNDDS 2019–2020, October 2022 release (`FoodData_Central_survey_food_csv_2022-10-28.zip`) — 4 foods SR Legacy lacks: paneer, ghee, naan, hummus.
 - **Nutrients taken:** Energy (kcal, nutrient 1008/208), Protein (1003/203), Total lipid (1004/204), Carbohydrate by difference (1005/205), Fibre (1079/291), per 100 g edible portion.
 - **Per item:** every record in `foods.json` carries `source.dataset`, `source.fdcId` and the exact USDA `source.description`, so each value can be traced and re-checked.
