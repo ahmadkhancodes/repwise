@@ -1,5 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose';
-import { sha256Hex } from '../lib/crypto';
+import { safeEqual, sha256Hex } from '../lib/crypto';
 import { HttpError } from '../lib/http';
 
 export interface Identity {
@@ -41,7 +41,11 @@ export function googleVerifier(audiences: string[], jwks: JWTVerifyGetKey = crea
   };
 }
 
-/** Sign in with Apple identity token, verified against Apple's JWKS. Nonce may be raw or sha256-hex. */
+/**
+ * Sign in with Apple identity token, verified against Apple's JWKS. The nonce is required and the
+ * token must carry sha256-hex(raw nonce): the raw value never appears in the token, so a captured
+ * token cannot be replayed by copying its own nonce claim.
+ */
 export function appleVerifier(audiences: string[], jwks: JWTVerifyGetKey = createRemoteJWKSet(new URL(APPLE_JWKS_URL))): IdTokenVerifier {
   return async (token, opts) => {
     if (audiences.length === 0) throw new HttpError(503, 'not_configured');
@@ -53,10 +57,9 @@ export function appleVerifier(audiences: string[], jwks: JWTVerifyGetKey = creat
         clockTolerance: 30,
       });
       if (typeof payload.sub !== 'string' || !payload.sub) throw invalid();
-      if (opts?.nonce) {
-        const n = payload.nonce;
-        if (typeof n !== 'string' || (n !== opts.nonce && n !== (await sha256Hex(opts.nonce)))) throw invalid();
-      }
+      if (!opts?.nonce) throw invalid();
+      const n = payload.nonce;
+      if (typeof n !== 'string' || !safeEqual(n, await sha256Hex(opts.nonce))) throw invalid();
       return { sub: payload.sub, ...email(payload) };
     } catch (e) {
       if (e instanceof HttpError) throw e;

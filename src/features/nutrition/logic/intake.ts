@@ -1,7 +1,8 @@
 /**
  * Day intake (S26 rings): food_logs are the record of what was eaten. A planned meal ticked from
- * elsewhere without a matching 'plan' log (same slot) still counts, so totals never miss a meal.
- * Water rows carry no energy and are left out. Pure.
+ * elsewhere without its 'plan' log still counts, so totals never miss a meal. Plan logs are matched
+ * to meals by meal id (several snacks share the 'snack' slot); logs written before meal_id existed
+ * fall back to the slot. Water rows carry no energy and are left out. Pure.
  */
 import { sumLogs, type DayTotals } from '../repo';
 import { isWaterLog } from './water';
@@ -13,9 +14,12 @@ export type IntakeLog = {
   p: number | null;
   c: number | null;
   f: number | null;
+  mealId?: string | null;
 };
 
 export type EatenMeal = {
+  /** Without an id the meal is matched by slot only (legacy callers). */
+  id?: string;
   slot: string;
   status: string;
   kcal: number;
@@ -24,11 +28,21 @@ export type EatenMeal = {
   fat: number;
 };
 
+/** True when an eaten meal already has its 'plan' log among `logs` (by meal id, else legacy slot). */
+export function planLogMatcher(logs: readonly { source: string; slot: string | null; mealId?: string | null }[]) {
+  const plan = logs.filter((l) => l.source === 'plan');
+  const byMeal = new Set(plan.map((l) => l.mealId).filter((id): id is string => !!id));
+  const legacySlots = new Set(plan.filter((l) => !l.mealId).map((l) => l.slot));
+  const anySlot = new Set(plan.map((l) => l.slot));
+  return (m: { id?: string; slot: string }) =>
+    m.id ? byMeal.has(m.id) || legacySlots.has(m.slot) : anySlot.has(m.slot);
+}
+
 export function dayIntake(logs: readonly IntakeLog[], meals: readonly EatenMeal[] = []): DayTotals {
   const food = logs.filter((l) => !isWaterLog(l));
-  const loggedSlots = new Set(food.filter((l) => l.source === 'plan').map((l) => l.slot));
+  const logged = planLogMatcher(food);
   const extra = meals
-    .filter((m) => m.status === 'eaten' && !loggedSlots.has(m.slot))
+    .filter((m) => m.status === 'eaten' && !logged(m))
     .map((m) => ({ kcal: m.kcal, p: m.protein, c: m.carbs, f: m.fat }));
   return sumLogs([...food, ...extra]);
 }

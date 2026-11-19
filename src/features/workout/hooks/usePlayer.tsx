@@ -65,6 +65,7 @@ export function usePlayer(sessionId: string) {
 
   const onToggle = useCallback(
     (item: PlayerItem, set: WorkoutSet, patch: SetPatch) => {
+      // logSetAction / undoSetAction re-read the set, so a fast double tap is a no-op.
       if (set.doneAt != null) return undoSetAction(set);
       const pr = logSetAction({
         sessionId,
@@ -132,7 +133,11 @@ export function usePlayer(sessionId: string) {
     reorderExercises(sessionId, moveItem(items.map((i) => i.se.id), from, to));
   };
 
-  const start = () => startWorkoutAction(sessionId, catalog);
+  const start = () => {
+    const res = startWorkoutAction(sessionId, catalog);
+    // Another workout is running: take the user to it rather than orphaning it.
+    if (!res.started) router.push(`/workout/${res.activeSessionId}`);
+  };
   const pause = () => pauseWorkoutAction(sessionId);
   const resume = () => resumeWorkoutAction(sessionId);
   const finish = () => {

@@ -205,6 +205,8 @@ export const foodLogs = sqliteTable(
     p: real('p'),
     c: real('c'),
     f: real('f'),
+    /** The planned meal this 'plan' log records (several snacks share one slot, so never key by slot). */
+    mealId: text('meal_id'),
   },
   (t) => [index('food_logs_date_idx').on(t.date)],
 );

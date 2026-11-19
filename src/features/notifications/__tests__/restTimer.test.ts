@@ -63,6 +63,36 @@ describe('rest timer surfaces', () => {
     else expect(mod.cancelOngoing).toHaveBeenCalled();
   });
 
+  it('a new rest replacing a running one never races end() against update() (latest wins, in order)', async () => {
+    const calls: string[] = [];
+    let busy = 0;
+    const slow = (name: string) =>
+      jest.fn(async () => {
+        busy++;
+        if (busy > 1) calls.push('OVERLAP');
+        calls.push(`${name}:start`);
+        await new Promise((r) => setTimeout(r, 5));
+        calls.push(`${name}:done`);
+        busy--;
+        return true;
+      });
+    const mod = { ...fakeNative(), update: slow('update'), end: slow('end'), showOngoing: slow('show'), cancelOngoing: slow('cancel') };
+    resetRestTimerForTests(mod as unknown as Parameters<typeof resetRestTimerForTests>[0]);
+    await updateRestTimerSurface(state, NOW);
+    calls.length = 0;
+    // restTimer.start(): end('replaced') publishes null, then the new rest, in the same tick.
+    const a = updateRestTimerSurface(null, NOW);
+    const b = updateRestTimerSurface({ ...state, endsAt: state.endsAt + 60_000 }, NOW);
+    await Promise.all([a, b]);
+    expect(calls).not.toContain('OVERLAP');
+    const shown = Platform.OS === 'ios' ? 'update' : 'show';
+    expect(calls.at(-1)).toBe(`${shown}:done`);
+    expect(calls.some((c) => c.startsWith(Platform.OS === 'ios' ? 'end' : 'cancel'))).toBe(false);
+    // A later update still applies after the queue drained.
+    await updateRestTimerSurface(null, NOW);
+    expect(calls.at(-1)).toBe(Platform.OS === 'ios' ? 'end:done' : 'cancel:done');
+  });
+
   it('without the native module (Expo Go / tests) only the alert is used, never throws', async () => {
     resetRestTimerForTests(null);
     await expect(updateRestTimerSurface(state, NOW)).resolves.toBeUndefined();

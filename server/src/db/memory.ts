@@ -2,6 +2,7 @@ import type {
   AiCacheDoc,
   AiSpendDoc,
   AiUsageDelta,
+  ConsumeRefreshResult,
   Db,
   EmailCodeDoc,
   EntitlementDoc,
@@ -10,6 +11,7 @@ import type {
   RefreshTokenDoc,
   StoredRow,
   SyncRow,
+  SyncWriteLease,
   UserDoc,
 } from './types';
 import { DuplicateKeyError } from './types';
@@ -27,6 +29,9 @@ export class MemoryDb implements Db {
   entitlements = new Map<string, EntitlementDoc>();
   aiCache = new Map<string, AiCacheDoc>();
   aiSpend = new Map<string, AiSpendDoc>();
+  syncSeq = new Map<string, number>();
+  syncLeases = new Map<string, { userId: string; floor: number; expiresAt: number }>();
+  private leaseN = 0;
 
   async getUser(id: string) {
     const u = this.users.get(id);
@@ -57,17 +62,22 @@ export class MemoryDb implements Db {
   }
 
   async insertRefreshToken(t: RefreshTokenDoc) {
+    for (const x of this.refreshTokens.values()) if (x.tokenHash === t.tokenHash) throw new DuplicateKeyError('duplicate token');
     this.refreshTokens.set(t._id, clone(t));
   }
-  async consumeRefreshToken(tokenHash: string, now: number) {
+  async consumeRefreshToken(tokenHash: string, now: number, graceMs = 0): Promise<ConsumeRefreshResult> {
     for (const t of this.refreshTokens.values()) {
       if (t.tokenHash !== tokenHash) continue;
-      if (t.expiresAt <= now) return { status: 'missing' as const };
-      if (t.rotatedAt) return { status: 'reused' as const, token: clone(t) };
+      if (t.expiresAt <= now) return { status: 'missing' };
+      if (t.rotatedAt) return { status: graceMs > 0 && now - t.rotatedAt <= graceMs ? 'grace' : 'reused', token: clone(t) };
       t.rotatedAt = now;
-      return { status: 'ok' as const, token: clone(t) };
+      return { status: 'ok', token: clone(t) };
     }
-    return { status: 'missing' as const };
+    return { status: 'missing' };
+  }
+  async getRefreshToken(tokenHash: string) {
+    for (const t of this.refreshTokens.values()) if (t.tokenHash === tokenHash) return clone(t);
+    return null;
   }
   async revokeRefreshFamily(familyId: string) {
     for (const [k, t] of this.refreshTokens) if (t.familyId === familyId) this.refreshTokens.delete(k);
@@ -81,9 +91,18 @@ export class MemoryDb implements Db {
     for (const d of this.emailCodes.values()) if (d.email === email && d.expiresAt > now) return clone(d);
     return null;
   }
-  async incrementEmailCodeAttempts(id: string) {
-    const d = this.emailCodes.get(id);
-    if (d) d.attempts++;
+  async claimEmailCodeAttempt(email: string, now: number, maxAttempts: number) {
+    // No await between the check and the increment: atomic, like findOneAndUpdate.
+    let newest: EmailCodeDoc | null = null;
+    for (const d of this.emailCodes.values()) {
+      if (d.email === email && d.expiresAt > now && (!newest || d.createdAt > newest.createdAt)) newest = d;
+    }
+    if (!newest || newest.attempts >= maxAttempts) return null;
+    newest.attempts++;
+    return clone(newest);
+  }
+  async consumeEmailCode(id: string) {
+    return this.emailCodes.delete(id);
   }
   async deleteEmailCodes(email: string) {
     for (const [k, d] of this.emailCodes) if (d.email === email) this.emailCodes.delete(k);
@@ -101,6 +120,23 @@ export class MemoryDb implements Db {
     let t = this.tables.get(name);
     if (!t) this.tables.set(name, (t = new Map()));
     return t;
+  }
+  async beginSyncWrite(userId: string, now: number, leaseMs: number): Promise<SyncWriteLease> {
+    const prev = this.syncSeq.get(userId);
+    const leaseId = `lease-${++this.leaseN}`;
+    this.syncLeases.set(leaseId, { userId, floor: prev ?? now - 1, expiresAt: now + leaseMs });
+    const seq = Math.max((prev ?? 0) + 1, now);
+    this.syncSeq.set(userId, seq);
+    return { seq, leaseId };
+  }
+  async endSyncWrite(_userId: string, leaseId: string) {
+    this.syncLeases.delete(leaseId);
+  }
+  async syncHighWater(userId: string, now: number, legacyOverlapMs: number) {
+    const seq = this.syncSeq.get(userId);
+    let hw = seq ?? now - legacyOverlapMs;
+    for (const l of this.syncLeases.values()) if (l.userId === userId && l.expiresAt > now) hw = Math.min(hw, l.floor);
+    return Math.max(0, hw);
   }
   async upsertRows(table: string, userId: string, rows: SyncRow[], now: number) {
     const t = this.table(table);
@@ -153,7 +189,13 @@ export class MemoryDb implements Db {
   async putAiCache(doc: AiCacheDoc) {
     this.aiCache.set(doc._id, clone(doc));
   }
-  async addAiSpend(month: string, delta: AiUsageDelta, now: number) {
+  async reserveAiSpend(month: string, micros: number, capMicros: number, now: number) {
+    const spent = this.aiSpend.get(month)?.usdMicros ?? 0;
+    if (spent + micros >= capMicros) return false;
+    await this.addAiSpend(month, { usdMicros: micros }, now);
+    return true;
+  }
+  async addAiSpend(month: string, delta: Partial<AiUsageDelta>, now: number) {
     const cur: AiSpendDoc = this.aiSpend.get(month) ?? {
       _id: month,
       usdMicros: 0,
@@ -165,7 +207,7 @@ export class MemoryDb implements Db {
       fallbacks: 0,
       updatedAt: now,
     };
-    for (const k of Object.keys(delta) as (keyof AiUsageDelta)[]) cur[k] += delta[k];
+    for (const k of Object.keys(delta) as (keyof AiUsageDelta)[]) cur[k] += delta[k] ?? 0;
     cur.updatedAt = now;
     this.aiSpend.set(month, cur);
     return clone(cur);
@@ -189,5 +231,7 @@ export class MemoryDb implements Db {
     for (const [k, p] of this.purchases) if (p.userId === userId) this.purchases.delete(k);
     this.entitlements.delete(userId);
     for (const [k, d] of this.aiCache) if (d.userId === userId) this.aiCache.delete(k);
+    this.syncSeq.delete(userId);
+    for (const [k, l] of this.syncLeases) if (l.userId === userId) this.syncLeases.delete(k);
   }
 }

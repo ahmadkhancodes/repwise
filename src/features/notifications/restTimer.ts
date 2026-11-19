@@ -58,8 +58,36 @@ async function setAlert(at: number | null, title: string, body: string, sessionI
   }).catch(() => undefined);
 }
 
+/*
+ * Updates are serialised and coalesced: native calls never overlap, and only the latest state is
+ * applied. A new rest replacing a running one publishes `null` then the new state in the same
+ * tick; applying both concurrently let ActivityKit's end-all race the upsert and drop the new
+ * Live Activity. Now the end is skipped and the activity is simply updated.
+ */
+let queued: { state: RestTimerState | null; now: number } | null = null;
+let draining: Promise<void> | null = null;
+
+async function drain(): Promise<void> {
+  try {
+    while (queued) {
+      const next = queued;
+      queued = null;
+      await applySurface(next.state, next.now);
+    }
+  } finally {
+    draining = null;
+  }
+}
+
 /** Publish the current rest-timer state (null = rest finished or cancelled). Never throws. */
-export async function updateRestTimerSurface(state: RestTimerState | null, now = Date.now()): Promise<void> {
+export function updateRestTimerSurface(state: RestTimerState | null, now = Date.now()): Promise<void> {
+  queued = { state, now };
+  // Start on a microtask so updates published in the same tick collapse into the last one.
+  if (!draining) draining = Promise.resolve().then(drain);
+  return draining;
+}
+
+async function applySurface(state: RestTimerState | null, now: number): Promise<void> {
   const plan = planRestSurface(state, now);
   const mod = nativeTimer();
   try {
@@ -99,4 +127,6 @@ export function resetRestTimerForTests(mod?: NativeTimer | null): void {
   native = mod === undefined ? undefined : mod;
   lastAlertAt = null;
   showing = false;
+  queued = null;
+  draining = null;
 }

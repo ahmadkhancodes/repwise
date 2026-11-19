@@ -80,6 +80,7 @@ export function weeksInARow(doneDates: LocalDate[], today: LocalDate): number {
 }
 
 export type MealForSnapshot = {
+  id?: string;
   slot: string;
   name: string;
   kcal: number;
@@ -91,18 +92,28 @@ export type MealForSnapshot = {
   time: string;
 };
 
-export type LogForSnapshot = { slot: string | null; source: string; kcal: number; p: number; c: number; f: number };
+export type LogForSnapshot = {
+  slot: string | null;
+  source: string;
+  kcal: number;
+  p: number;
+  c: number;
+  f: number;
+  mealId?: string | null;
+};
 
 /**
- * Eaten totals: every food log, plus planned meals ticked "Ate it" that have no plan-sourced
- * log for their slot (so a meal is never counted twice, whichever way the meals screen logs it).
+ * Eaten totals: every food log, plus planned meals ticked "Ate it" that have no plan-sourced log
+ * of their own (so a meal is never counted twice, whichever way the meals screen logs it). Logs
+ * match meals by meal id (several snacks share one slot); legacy logs without one by slot.
  */
 export function eatenTotals(logs: LogForSnapshot[], meals: MealForSnapshot[]) {
-  const loggedPlanSlots = new Set(logs.filter((l) => l.source === 'plan' && l.slot).map((l) => l.slot));
-  const rows = [
-    ...logs,
-    ...meals.filter((m) => m.status === 'eaten' && !loggedPlanSlots.has(m.slot)),
-  ];
+  const plan = logs.filter((l) => l.source === 'plan' && l.slot);
+  const byMeal = new Set(plan.map((l) => l.mealId).filter((id): id is string => !!id));
+  const legacySlots = new Set(plan.filter((l) => !l.mealId).map((l) => l.slot));
+  const anySlot = new Set(plan.map((l) => l.slot));
+  const logged = (m: MealForSnapshot) => (m.id ? byMeal.has(m.id) || legacySlots.has(m.slot) : anySlot.has(m.slot));
+  const rows = [...logs, ...meals.filter((m) => m.status === 'eaten' && !logged(m))];
   const sum = (k: 'kcal' | 'p' | 'c' | 'f') => Math.round(rows.reduce((a, r) => a + (r[k] || 0), 0));
   return { kcal: sum('kcal'), p: sum('p'), c: sum('c'), f: sum('f') };
 }
@@ -134,7 +145,8 @@ export function parseSnapshot(raw: string | null | undefined): WidgetSnapshot | 
  * clear the day's data until the app writes a fresh one.
  */
 export function forDate(s: WidgetSnapshot | null, today: LocalDate, now: number): WidgetSnapshot {
-  if (!s) return emptySnapshot(today, now, true);
+  // No snapshot yet (widget added before the app ever ran): fail closed, never show Pro content.
+  if (!s) return emptySnapshot(today, now, false);
   if (s.date === today) return s;
   return { ...emptySnapshot(today, s.updatedAt, s.pro), streakWeeks: s.streakWeeks };
 }

@@ -28,7 +28,7 @@ export const SYNC_TABLES: Record<string, readonly string[]> = {
     'title', 'cuisine', 'diet_tags', 'allergens', 'ingredients', 'steps', 'prep_min', 'cost_level', 'kcal', 'protein',
     'carb', 'fat', 'image_url', 'is_custom',
   ],
-  food_logs: ['date', 'source', 'name', 'slot', 'kcal', 'p', 'c', 'f'],
+  food_logs: ['date', 'source', 'name', 'slot', 'kcal', 'p', 'c', 'f', 'meal_id'],
   body_metrics: ['date', 'weight_kg', 'waist_cm', 'hips_cm', 'chest_cm', 'arm_cm', 'thigh_cm', 'neck_cm', 'body_fat_pct', 'note'],
   photos: ['date', 'local_uri', 'cloud_key', 'pose'],
   cards: ['rule_id', 'date', 'text', 'action', 'state'],

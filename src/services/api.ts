@@ -3,8 +3,9 @@
  *
  * - Base URL from EXPO_PUBLIC_API_URL.
  * - Access JWT (15 min) + rotating refresh token. Refresh is SINGLE-FLIGHT: the Worker revokes the
- *   whole session family when a rotated refresh token is reused, so any number of concurrent 401s
- *   (or near-expiry requests) share one /auth/refresh call.
+ *   whole session family when a rotated refresh token is reused (outside a 60 s grace window for
+ *   lost replies), so any number of concurrent 401s (or near-expiry requests) share one
+ *   /auth/refresh call, and a refresh whose reply was lost is retried once straight away.
  * - Timeouts, offline detection and typed errors (ApiError.kind). Nothing here blocks the UI:
  *   callers fire and forget, and local SQLite stays the source of truth.
  */
@@ -191,11 +192,17 @@ async function expireSession(refreshToken: string): Promise<void> {
 async function doRefresh(): Promise<StoredSession> {
   const s = await loadSession();
   if (!s) throw new ApiError('unauthorized', null, 'no_session');
-  const res = await send(
-    '/auth/refresh',
-    { method: 'POST', body: { refreshToken: s.refreshToken } },
-    null,
-  );
+  const post = () =>
+    send('/auth/refresh', { method: 'POST', body: { refreshToken: s.refreshToken } }, null);
+  let res: Response;
+  try {
+    res = await post();
+  } catch (e) {
+    // The Worker may have rotated the token and only the reply was lost. Retrying at once lands
+    // inside its reuse grace window, which hands back the same successor instead of revoking.
+    if (!(isApiError(e) && (e.kind === 'timeout' || e.kind === 'offline'))) throw e;
+    res = await post();
+  }
   if (res.status === 401) {
     await expireSession(s.refreshToken);
     throw new ApiError('unauthorized', 401, 'session_expired');

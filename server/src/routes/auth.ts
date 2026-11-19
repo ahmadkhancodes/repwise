@@ -1,7 +1,7 @@
 import { Hono, type Context } from 'hono';
 import type { Identity } from '../auth/idtokens';
 import { verifyAccessToken } from '../auth/jwt';
-import { issueTokens } from '../auth/session';
+import { issueTokens, successorRefreshToken } from '../auth/session';
 import { recomputeEntitlement } from '../billing/entitlement';
 import { DuplicateKeyError, type Db, type UserDoc } from '../db/types';
 import { hmacSha256Hex, randomDigits, safeEqual, sha256Hex, uuidv7 } from '../lib/crypto';
@@ -10,6 +10,9 @@ import { bearer, rateLimit } from '../lib/middleware';
 import type { AppEnv } from '../types';
 
 const MIN = 60_000;
+/** A rotated refresh token presented again within this window gets the same successor back. */
+export const REFRESH_REUSE_GRACE_MS = 60_000;
+export const EMAIL_CODE_MAX_ATTEMPTS = 5;
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,63}$/;
 const DEVICE_RE = /^[A-Za-z0-9._:-]{1,128}$/;
 
@@ -123,8 +126,9 @@ authRoutes.post('/google', async (c) => {
 authRoutes.post('/apple', async (c) => {
   const body = await readJson(c, 16 * 1024);
   const identityToken = str(body, 'identityToken', { max: 8192 });
-  const nonce = str(body, 'nonce', { max: 256, optional: true }) || undefined;
-  const identity = await c.get('deps').verifyApple(identityToken, nonce ? { nonce } : undefined);
+  // Required: the token's nonce claim must be sha256(raw nonce), binding it to this client's flow.
+  const nonce = str(body, 'nonce', { max: 256 });
+  const identity = await c.get('deps').verifyApple(identityToken, { nonce });
   return c.json(await signIn(c, 'apple', identity, deviceId(body)));
 });
 
@@ -160,19 +164,23 @@ authRoutes.post('/email/verify', async (c) => {
   const code = str(body, 'code', { max: 12 });
   if (!/^\d{6}$/.test(code)) throw badRequest('invalid_code');
   await rateLimit(c, `auth:email-verify:ip:${clientIp(c)}`, 20, 15 * MIN);
+  // Per email as well, so guesses spread over many IPs still hit a wall (3 codes × 5 attempts).
+  await rateLimit(c, `auth:email-verify:${await sha256Hex(email)}`, 3 * EMAIL_CODE_MAX_ATTEMPTS, 15 * MIN);
   const deps = c.get('deps');
   const db = await deps.db();
-  const doc = await db.getEmailCode(email, deps.now());
-  if (!doc) throw unauthorized('invalid_code');
-  if (doc.attempts >= 5) {
-    await db.deleteEmailCodes(email);
-    throw new HttpError(429, 'too_many_attempts');
-  }
-  const hash = await hmacSha256Hex(deps.config.jwt.secret || 'unset', `${email}:${code}`);
-  if (!safeEqual(hash, doc.codeHash)) {
-    await db.incrementEmailCodeAttempts(doc._id);
+  const now = deps.now();
+  // Count the attempt BEFORE comparing, atomically: parallel guesses cannot all see attempts = 0.
+  const doc = await db.claimEmailCodeAttempt(email, now, EMAIL_CODE_MAX_ATTEMPTS);
+  if (!doc) {
+    if (await db.getEmailCode(email, now)) {
+      await db.deleteEmailCodes(email); // used up: lock it
+      throw new HttpError(429, 'too_many_attempts');
+    }
     throw unauthorized('invalid_code');
   }
+  const hash = await hmacSha256Hex(deps.config.jwt.secret || 'unset', `${email}:${code}`);
+  if (!safeEqual(hash, doc.codeHash)) throw unauthorized('invalid_code');
+  if (!(await db.consumeEmailCode(doc._id))) throw unauthorized('invalid_code'); // single use
   await db.deleteEmailCodes(email);
   return c.json(await signIn(c, 'email', { sub: email, email, emailVerified: true }, deviceId(body)));
 });
@@ -182,17 +190,26 @@ authRoutes.post('/refresh', async (c) => {
   const token = str(body, 'refreshToken', { max: 256 });
   const deps = c.get('deps');
   const db = await deps.db();
-  const res = await db.consumeRefreshToken(await sha256Hex(token), deps.now());
-  if (res.status === 'reused') {
-    // A rotated token came back: assume theft and end the whole session family.
-    await db.revokeRefreshFamily(res.token.familyId);
-    throw unauthorized('token_reused');
+  const now = deps.now();
+  const res = await db.consumeRefreshToken(await sha256Hex(token), now, REFRESH_REUSE_GRACE_MS);
+  if (res.status === 'missing') throw unauthorized('invalid_refresh_token');
+  // The successor is derived from the presented token, so a retry after a lost response gets the
+  // very same refresh token back (idempotent rotation) instead of forking the family.
+  const successor = await successorRefreshToken(deps.config.jwt.secret, token);
+  if (res.status !== 'ok') {
+    const next = await db.getRefreshToken(await sha256Hex(successor));
+    // Reuse outside the grace window, or the successor was already used: assume theft.
+    if (res.status === 'reused' || (next && next.rotatedAt)) {
+      await db.revokeRefreshFamily(res.token.familyId);
+      throw unauthorized('token_reused');
+    }
   }
-  if (res.status !== 'ok') throw unauthorized('invalid_refresh_token');
   const user = await db.getUser(res.token.userId);
   if (!user) throw unauthorized();
-  await db.updateUser(user._id, { lastSeenAt: deps.now() });
-  return c.json(await issueTokens(deps, db, user, { deviceId: res.token.deviceId, familyId: res.token.familyId }));
+  await db.updateUser(user._id, { lastSeenAt: now });
+  return c.json(
+    await issueTokens(deps, db, user, { deviceId: res.token.deviceId, familyId: res.token.familyId, refreshToken: successor }),
+  );
 });
 
 authRoutes.post('/logout', async (c) => {
@@ -200,7 +217,7 @@ authRoutes.post('/logout', async (c) => {
   const token = str(body, 'refreshToken', { max: 256 });
   const deps = c.get('deps');
   const db = await deps.db();
-  const res = await db.consumeRefreshToken(await sha256Hex(token), deps.now());
+  const res = await db.consumeRefreshToken(await sha256Hex(token), deps.now(), REFRESH_REUSE_GRACE_MS);
   if (res.status !== 'missing') await db.revokeRefreshFamily(res.token.familyId);
   return c.body(null, 204);
 });

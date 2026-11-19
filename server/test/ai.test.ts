@@ -214,6 +214,41 @@ describe('AI planner pipeline (Anthropic, mocked fetch)', () => {
     expect((await week(t, again.accessToken)).body.source).toBe('ai');
   });
 
+  it('concurrent calls at the cap cannot overspend: the worst case is reserved before calling', async () => {
+    const { t, mock, s } = await aiSetup(() => new Promise<Response>((r) => setTimeout(() => r(ok(WEEK)), 10)));
+    await makePro(t, s.user.id);
+    // Room for two worst-case calls (~1.8k micro-USD each), not five.
+    await setSpend(t, 50 - 0.004);
+    const res = await Promise.all([0, 1, 2, 3, 4].map((k) => week(t, s.accessToken, { k })));
+    const ai = res.filter((r) => r.body.source === 'ai').length;
+    expect(ai).toBeGreaterThanOrEqual(1);
+    expect(mock.requests.length).toBe(ai);
+    expect(ai).toBeLessThanOrEqual(2);
+    expect(res.filter((r) => r.body.fallbackReason === 'budget_exhausted').length).toBe(5 - ai);
+    // Reservations were reconciled to the real (small) usage, and the month never crossed $50.
+    expect((await t.db.getAiSpend('2026-11'))!.usdMicros).toBeLessThan(50e6);
+  });
+
+  it('a refused daily-limit call releases its reservation', async () => {
+    const { t, s } = await aiSetup(() => ok(WEEK));
+    for (let k = 0; k < 3; k++) await week(t, s.accessToken, { k });
+    const spend = (await t.db.getAiSpend('2026-11'))!;
+    expect(spend.calls).toBe(2);
+    expect(spend.usdMicros).toBeCloseTo(2 * costMicros(HAIKU, { inputTokens: 220, outputTokens: 180, cacheReadTokens: 700, cacheWriteTokens: 0 }), 6);
+  });
+
+  it('the client clock in params.now does not defeat the cache (same UTC day hits)', async () => {
+    const { t, mock, s } = await aiSetup(() => ok(WEEK));
+    const body = (now: number) => ({ profile: { goal: 'gain', days: 2 }, history: null, params: { weekStart: '2026-11-16', now } });
+    const a = await call(t, 'POST', '/ai/plan/week', { token: s.accessToken, body: body(T0) });
+    const b = await call(t, 'POST', '/ai/plan/week', { token: s.accessToken, body: body(T0 + 3_600_000) });
+    expect(a.body.cached).toBe(false);
+    expect(b.body.cached).toBe(true);
+    expect(mock.requests).toHaveLength(1);
+    const nextDay = await call(t, 'POST', '/ai/plan/week', { token: s.accessToken, body: body(T0 + 86_400_000) });
+    expect(nextDay.body.cached).toBe(false);
+  });
+
   it('per-user daily limits: free lower than Pro', async () => {
     const { t, mock, s } = await aiSetup(() => ok(WEEK));
     const res = [];

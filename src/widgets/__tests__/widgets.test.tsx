@@ -71,6 +71,16 @@ describe('snapshot logic', () => {
     expect(eatenTotals(logs, meals)).toEqual({ kcal: 1450, p: 70, c: 180, f: 40 });
   });
 
+  it('eatenTotals matches plan logs to meals by id when several snacks share the slot', () => {
+    const snack = (id: string, status: string) => ({ id, slot: 'snack', name: id, kcal: 200, p: 5, c: 20, f: 10, status, time: '16:00' });
+    const meals = [snack('a', 'eaten'), snack('b', 'eaten')];
+    // Only a has its plan log; b was ticked elsewhere and must still count.
+    const logs = [{ slot: 'snack', source: 'plan', kcal: 200, p: 5, c: 20, f: 10, mealId: 'a' }];
+    expect(eatenTotals(logs, meals).kcal).toBe(400);
+    // Both logged: nothing is added twice.
+    expect(eatenTotals([...logs, { ...logs[0]!, mealId: 'b' }], meals).kcal).toBe(400);
+  });
+
   it('pickNextMeal and ringProgress', () => {
     const m = (slot: string, time: string, status = 'planned') => ({ slot, name: slot, kcal: 1, p: 0, c: 0, f: 0, status, time });
     const meals = [m('dinner', '19:00'), m('breakfast', '08:00', 'eaten'), m('lunch', '13:00')];
@@ -90,6 +100,7 @@ describe('snapshot logic', () => {
     expect(s.streakWeeks).toBe(6);
     expect(forDate(snap(), '2026-11-19', 5).workout?.title).toBe('Push day');
     expect(forDate(null, '2026-11-19', 5).date).toBe('2026-11-19');
+    expect(forDate(null, '2026-11-19', 5).pro).toBe(false); // no snapshot yet: never Pro by default
     expect(parseSnapshot('{"v":99}')).toBeNull();
     expect(parseSnapshot('nope')).toBeNull();
   });

@@ -3,8 +3,10 @@
  *
  * - Push: rows with dirty = 1, ≤ 500 rows and ≤ ~1.5 MB per request. `accepted` and `conflicts`
  *   (server already has an equal or newer row) both settle the row; `rejected` rows get dirty = 2
- *   so they are not retried until edited again. A row edited while its push was in flight stays
- *   dirty (we only settle the exact updated_at we sent).
+ *   so they are not retried until edited again (or once per app launch). A row edited while its
+ *   push was in flight stays dirty (we only settle the exact updated_at we sent).
+ * - Clock skew: a row stamped by a phone clock far ahead (rejected `updated_at_in_future`) is
+ *   re-stamped with the server's time and pushed again, so it is backed up instead of stranded.
  * - Pull: GET /sync/pull pages by server write time (syncedAt); loop while nextCursor is set, then
  *   store nextSince for this account. Rows merge last-write-wins on updated_at in one transaction
  *   per page; soft deletes arrive as rows like any other.
@@ -116,6 +118,42 @@ function settle(name: SyncTableName, sent: Map<string, number>, ids: string[], t
   });
 }
 
+/**
+ * Rows the server refused as future-dated: re-stamp them with the server's clock (only if not
+ * edited meanwhile) and leave them dirty, so the next round backs them up. Returns how many.
+ */
+function restampFuture(name: SyncTableName, sent: Map<string, number>, ids: string[], serverTime: number): number {
+  if (ids.length === 0 || !Number.isSafeInteger(serverTime) || serverTime <= 0) return 0;
+  const t = tableOf(name);
+  let n = 0;
+  getDb().transaction((tx) => {
+    for (const id of ids) {
+      const updatedAt = sent.get(id);
+      if (updatedAt === undefined || updatedAt <= serverTime) continue;
+      const r = tx
+        .update(t)
+        .set({ updatedAt: serverTime })
+        .where(and(eq(t.id, id), eq(t.updatedAt, updatedAt), eq(t.dirty, DIRTY.pending)))
+        .run() as { changes?: number };
+      n += r?.changes ?? 1;
+    }
+  });
+  return n;
+}
+
+let requeued = false;
+
+/** Once per launch, give rejected rows (dirty = 2) another try: the cause may be fixed by now. */
+function requeueRejectedOnce(): void {
+  if (requeued) return;
+  requeued = true;
+  const db = getDb();
+  for (const name of SYNC_TABLE_NAMES) {
+    const t = tableOf(name);
+    db.update(t).set({ dirty: DIRTY.pending }).where(eq(t.dirty, DIRTY.rejected)).run();
+  }
+}
+
 async function pushTable(name: SyncTableName): Promise<{ pushed: number; rejected: number }> {
   const t = tableOf(name);
   let pushed = 0;
@@ -130,6 +168,7 @@ async function pushTable(name: SyncTableName): Promise<{ pushed: number; rejecte
       .all() as Record<string, unknown>[];
     if (rows.length === 0) break;
     let settled = 0;
+    let restamped = 0;
     for (const batch of chunkRows(rows.map((r) => toRemote(name, r)))) {
       const sent = new Map(batch.map((r) => [String(r.id), Number(r.updated_at)]));
       const res = await api.post<PushResponse>(
@@ -138,15 +177,19 @@ async function pushTable(name: SyncTableName): Promise<{ pushed: number; rejecte
         { auth: 'required' },
       );
       settle(name, sent, [...res.accepted, ...res.conflicts], DIRTY.clean);
-      const bad = res.rejected
-        .map((r) => r.id)
-        .filter((id): id is string => typeof id === 'string');
+      const ids = (pred: (reason: string) => boolean) =>
+        res.rejected
+          .filter((r) => pred(r.reason))
+          .map((r) => r.id)
+          .filter((id): id is string => typeof id === 'string');
+      restamped += restampFuture(name, sent, ids((r) => r === 'updated_at_in_future'), res.serverTime);
+      const bad = ids((r) => r !== 'updated_at_in_future');
       settle(name, sent, bad, DIRTY.rejected);
       pushed += res.accepted.length;
       rejected += bad.length;
       settled += res.accepted.length + res.conflicts.length + bad.length;
     }
-    if (settled === 0 || rows.length < PUSH_MAX_ROWS) break;
+    if (restamped === 0 && (settled === 0 || rows.length < PUSH_MAX_ROWS)) break;
   }
   return { pushed, rejected };
 }
@@ -231,6 +274,7 @@ async function runOnce(opts: { pull: boolean }): Promise<SyncResult> {
   if (!userId) return { status: 'skipped', reason: 'signed_out' };
   useSyncStatus.setState({ running: true });
   try {
+    requeueRejectedOnce();
     let pushed = 0;
     let rejected = 0;
     for (const name of SYNC_TABLE_NAMES) {
@@ -285,6 +329,7 @@ export function syncNow(opts: { pull?: boolean } = {}): Promise<SyncResult> {
 export function resetSyncForTests(): void {
   running = null;
   rerun = null;
+  requeued = false;
   useSyncStatus.setState({
     running: false,
     lastSyncAt: null,

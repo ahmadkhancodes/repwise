@@ -166,6 +166,65 @@ describe('POST /billing/verify + GET /billing/entitlement', () => {
     expect((await call(t, 'GET', '/billing/entitlement', { token: a.accessToken })).body.pro).toBe(false);
   });
 
+  it('a purchase bound to another signed-in account cannot be taken by replaying its receipt', async () => {
+    const t = await paid();
+    const a = await signInEmail(t, 'owner@example.com');
+    const b = await signInEmail(t, 'thief@example.com');
+    const jws = await chain.sign(yearlyTx({ appAccountToken: a.user.id }));
+    expect((await call(t, 'POST', '/billing/verify', { token: a.accessToken, body: { platform: 'ios', signedTransaction: jws } })).body.pro).toBe(true);
+    const stolen = await call(t, 'POST', '/billing/verify', { token: b.accessToken, body: { platform: 'ios', signedTransaction: jws } });
+    expect(stolen.status).toBe(409);
+    expect(stolen.body.error).toBe('purchase_belongs_to_another_account');
+    expect((await call(t, 'GET', '/billing/entitlement', { token: a.accessToken })).body.pro).toBe(true);
+    expect((await call(t, 'GET', '/billing/entitlement', { token: b.accessToken })).body.pro).toBe(false);
+
+    // Play: the obfuscated account id binds the same way.
+    t.play.subs.set('tok-bound', {
+      subscriptionState: 'SUBSCRIPTION_STATE_ACTIVE',
+      acknowledgementState: 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED',
+      externalAccountIdentifiers: { obfuscatedExternalAccountId: a.user.id },
+      lineItems: [{ productId: 'repwise_pro', expiryTime: new Date(T0 + 30 * DAY).toISOString(), offerDetails: { basePlanId: 'monthly' } }],
+    });
+    const play = await call(t, 'POST', '/billing/verify', { token: b.accessToken, body: { platform: 'android', purchaseToken: 'tok-bound', productId: 'repwise_pro' } });
+    expect(play.status).toBe(409);
+  });
+
+  it('a purchase bound to an anonymous account (lost on reinstall) can still be restored', async () => {
+    const t = await paid();
+    const anon = await call(t, 'POST', '/auth/anonymous', { body: {} });
+    const fresh = await call(t, 'POST', '/auth/anonymous', { body: {} });
+    const jws = await chain.sign(yearlyTx({ appAccountToken: anon.body.user.id }));
+    const r = await call(t, 'POST', '/billing/verify', { token: fresh.body.accessToken, body: { platform: 'ios', signedTransaction: jws } });
+    expect(r.status).toBe(200);
+    expect(r.body.pro).toBe(true);
+  });
+
+  it('restoring an old JWS stamps the store time, so a delayed refund still applies', async () => {
+    const t = await paid();
+    const s = await signInEmail(t, 'late-refund@example.com');
+    const jws = await chain.sign(yearlyTx({ signedDate: T0 - DAY }));
+    // Restore at T0 + 1 day with the JWS the phone has (no App Store API keys configured).
+    t.clock.now = T0 + DAY;
+    const token = (await signInEmail(t, 'late-refund@example.com')).accessToken;
+    expect((await call(t, 'POST', '/billing/verify', { token, body: { platform: 'ios', signedTransaction: jws } })).body.pro).toBe(true);
+    // The refund, signed by Apple at T0, is delivered late.
+    const refund = await call(t, 'POST', '/webhooks/apple', {
+      body: {
+        signedPayload: await chain.sign({
+          notificationType: 'REFUND',
+          notificationUUID: crypto.randomUUID(),
+          signedDate: T0,
+          data: { bundleId: 'com.client.repwise', environment: 'Sandbox', signedTransactionInfo: await chain.sign(yearlyTx({ signedDate: T0 })) },
+        }),
+      },
+    });
+    expect(refund.body.stale).toBeUndefined();
+    expect((await call(t, 'GET', '/billing/entitlement', { token })).body.pro).toBe(false);
+    // Re-verifying the older JWS afterwards does not roll the refund back.
+    await call(t, 'POST', '/billing/verify', { token, body: { platform: 'ios', signedTransaction: jws } });
+    expect((await call(t, 'GET', '/billing/entitlement', { token })).body.pro).toBe(false);
+  });
+
   it('Pro comes only from stored entitlement: client claims are ignored', async () => {
     const t = await paid();
     const s = await signInEmail(t, 'claim@example.com');

@@ -1,9 +1,11 @@
 import { COMMON_COLUMNS, STRIPPED_COLUMNS, SYNC_TABLES } from '../../../server/src/sync/tables';
 import { createFakeFetch, tokenResponse } from '../../../test/fakeFetch';
 
-import { resetDbForTests } from '@/db/client';
+import { eq } from 'drizzle-orm';
+
+import { getDb, resetDbForTests } from '@/db/client';
 import { migrateDb } from '@/db/migrate';
-import { SYNC_TABLE_NAMES } from '@/db/schema';
+import { SYNC_TABLE_NAMES, sessions } from '@/db/schema';
 import { getProfile, saveProfile } from '@/features/settings/repo';
 import { sessionsRepo } from '@/features/workout/repo';
 import { configureApi, resetApiForTests } from '@/services/api';
@@ -274,6 +276,38 @@ describe('syncNow against a fake Worker', () => {
     await syncNow();
     expect(fake.callsTo('POST /sync/push')).toHaveLength(2); // sessions + profile, first run only
     expect(pulls[2]).toBe('?since=7000');
+  });
+
+  it('rows stamped by a clock >24 h ahead are re-stamped with server time and backed up', async () => {
+    const SERVER_NOW = 1_800_000_000_000;
+    fake.on('POST /sync/push', (c) => {
+      const { table, rows } = c.body as { table: string; rows: Record<string, unknown>[] };
+      const t = server.get(table) ?? new Map();
+      server.set(table, t);
+      const accepted: string[] = [];
+      const rejected: { id: string; reason: string }[] = [];
+      for (const r of rows) {
+        if (Number(r.updated_at) > SERVER_NOW + 86_400_000) rejected.push({ id: String(r.id), reason: 'updated_at_in_future' });
+        else {
+          t.set(String(r.id), r);
+          accepted.push(String(r.id));
+        }
+      }
+      return { status: 200, body: { accepted, conflicts: [], rejected, serverTime: SERVER_NOW } };
+    });
+    const future = sessionsRepo.insert({ title: 'Clock cheat' }, SERVER_NOW + 7 * 86_400_000);
+    const res = await syncNow({ pull: false });
+    expect(res).toMatchObject({ status: 'ok', rejected: 0 });
+    expect(server.get('sessions')!.get(future.id)).toMatchObject({ title: 'Clock cheat', updated_at: SERVER_NOW });
+    expect(sessionsRepo.get(future.id)).toMatchObject({ updatedAt: SERVER_NOW, dirty: 0 });
+  });
+
+  it('rows rejected earlier (dirty = 2) are retried once per launch', async () => {
+    const old = sessionsRepo.insert({ title: 'Was rejected' });
+    getDb().update(sessions).set({ dirty: 2 }).where(eq(sessions.id, old.id)).run();
+    await syncNow({ pull: false });
+    expect(server.get('sessions')!.get(old.id)).toMatchObject({ title: 'Was rejected' });
+    expect(sessionsRepo.get(old.id)!.dirty).toBe(0);
   });
 
   it('a row edited while its push is in flight stays dirty', async () => {
