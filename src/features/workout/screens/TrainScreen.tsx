@@ -6,6 +6,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { usePro } from '@/features/billing';
 import { routinesRepo, useRoutines } from '@/features/library/repo';
+import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { loadCatalog, useCatalog } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import { Button, Card, EmptyState, IconButton, Screen, Segmented, showToast, Text } from '@/ui';
@@ -126,6 +127,11 @@ function useTrainDeepLink() {
 /** S08 Train tab: this week's plan, workout history and routines; tools in the header. */
 export function TrainScreen() {
   useTrainDeepLink();
+  useEffect(() => {
+    // Plan this week's workouts if a new week started (no-op when planned; never blocks a frame).
+    const id = setTimeout(() => ensurePlannedAhead(), 0);
+    return () => clearTimeout(id);
+  }, []);
   const t = useTheme();
   const catalog = useCatalog();
   const { unit } = useUnits();

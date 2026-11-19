@@ -1,19 +1,8 @@
 /**
  * History and personal records for one exercise (S19 "records"), from logged sets.
  * The 1RM estimate and kg→lb come from the engine (maths is never re-implemented in the UI).
- *
- * Loaded with a typed require of the engine's leaf modules: it keeps the engine's zod schemas out
- * of the app bundle, and keeps engine/src/schemas.ts out of the app's tsc program (it uses the
- * zod 3 `z.record(value)` overload, which fails against the root zod 4 types).
  */
-type EngineMaths = {
-  epley1RM: (weight: number, reps: number) => number;
-  kgToLb: (kg: number) => number;
-};
-/* eslint-disable @typescript-eslint/no-require-imports */
-const { epley1RM } = require('@repwise/engine/src/progression') as Pick<EngineMaths, 'epley1RM'>;
-const { kgToLb } = require('@repwise/engine/src/nutrition') as Pick<EngineMaths, 'kgToLb'>;
-/* eslint-enable @typescript-eslint/no-require-imports */
+import { epley1RM, kgToLb } from '@repwise/engine';
 
 export type LoggedSet = {
   sessionId: string;

@@ -105,11 +105,11 @@ describe.each(SCHEMES)('TodayScreen (%s)', (scheme) => {
 });
 
 describe('TodayScreen core loop', () => {
-  it('Start workout opens the workout route in one tap', async () => {
+  it('Start workout opens the Train deep link (starts the session) in one tap', async () => {
     const { session } = seedTrainingDay();
     await renderToday();
     await fireEvent.press(screen.getByTestId('start-workout'));
-    expect(router.push).toHaveBeenCalledWith(`/workout/${session.id}`);
+    expect(router.push).toHaveBeenCalledWith(`/train?sessionId=${session.id}&start=1`);
   });
 
   it('resume label while a session is in progress; done state after', async () => {

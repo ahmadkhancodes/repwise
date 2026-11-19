@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
@@ -21,6 +21,7 @@ jest.mock('expo-router', () => ({
 beforeEach(async () => {
   await freshDb();
   jest.clearAllMocks();
+  jest.mocked(useLocalSearchParams).mockReturnValue({});
 });
 
 describe.each(SCHEMES)('EatScreen (%s)', (scheme) => {
@@ -74,6 +75,22 @@ describe('EatScreen interactions', () => {
     await fireEvent.press(option);
     await waitFor(() => expect(mealsForPlan(plan.id).find((m) => m.slot === 'dinner')!.recipeId).not.toBe(before));
     expect(useToastStore.getState().current?.message).toMatch(/^Swapped to /);
+  });
+
+  it('deep link /eat?log=1 (widget quick log) opens the food log for today', async () => {
+    jest.mocked(useLocalSearchParams).mockReturnValue({ log: '1' });
+    await renderThemed(<EatScreen />);
+    expect(router.push).toHaveBeenCalledWith({ pathname: '/meal/log', params: { date: todayISO() } });
+  });
+
+  it('deep link /eat?mealId=…&swap=1 (notification Swap) opens that meal\'s swap sheet', async () => {
+    const first = await renderThemed(<EatScreen />);
+    await screen.findByTestId('meal-dinner');
+    const dinner = mealsForPlan(mealPlanForDate(todayISO())!.id).find((m) => m.slot === 'dinner')!;
+    await first.unmount(); // RNTL 14: an unawaited unmount stalls later live queries
+    jest.mocked(useLocalSearchParams).mockReturnValue({ mealId: dinner.id, swap: '1' });
+    await renderThemed(<EatScreen />);
+    expect(await screen.findByTestId('swap-option-0')).toBeTruthy();
   });
 
   it('long-press opens the swap sheet too (W4)', async () => {

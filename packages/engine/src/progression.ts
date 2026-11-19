@@ -167,12 +167,18 @@ export interface DeloadInput {
   stalledSessions: number;
   /** Weeks since the last deload (Infinity if none). */
   weeksSinceDeload?: number;
+  /** The user asked for a lighter week (check-in volume step 'deload'). */
+  requested?: boolean;
 }
 
-export type DeloadReason = 'block_end' | 'stall' | null;
+export type DeloadReason = 'block_end' | 'stall' | 'requested' | null;
 
-/** Deload every 4–6 weeks (the last week of the block) or after 2 stalled sessions. */
+/**
+ * Deload every 4–6 weeks (the last week of the block) or after 2 stalled sessions. A deload the
+ * user asked for (weekly check-in / assistant card) always wins.
+ */
 export function deloadDecision(input: DeloadInput): { deload: boolean; reason: DeloadReason } {
+  if (input.requested) return { deload: true, reason: 'requested' };
   if (input.weeksSinceDeload !== undefined && input.weeksSinceDeload < 2) return { deload: false, reason: null };
   if (input.weekInBlock >= input.blockWeeks - 1) return { deload: true, reason: 'block_end' };
   if (input.stalledSessions >= 2) return { deload: true, reason: 'stall' };

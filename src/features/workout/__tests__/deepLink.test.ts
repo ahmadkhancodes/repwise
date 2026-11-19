@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-import { parseTrainLink, resolveTrainLink } from '../logic/deepLink';
+import { parseTrainLink, resolveTrainLink, trainHref } from '../logic/deepLink';
 
 describe(`train deep link (${Platform.OS})`, () => {
   describe('parseTrainLink', () => {
@@ -47,6 +47,18 @@ describe(`train deep link (${Platform.OS})`, () => {
     });
     it('without start=1 only opens', () => {
       expect(resolveTrainLink(open, { id: 's1', status: 'planned' })).toEqual({ kind: 'open', sessionId: 's1', route: '/workout/s1', run: null });
+    });
+  });
+});
+
+describe('trainHref', () => {
+  it('builds the link parseTrainLink reads back', () => {
+    expect(trainHref('s1')).toBe('/train?sessionId=s1&start=1');
+    expect(trainHref('s1', false)).toBe('/train?sessionId=s1');
+    const q = new URLSearchParams(trainHref('a b/c').split('?')[1]);
+    expect(parseTrainLink({ sessionId: q.get('sessionId') ?? undefined, start: q.get('start') ?? undefined })).toEqual({
+      sessionId: 'a b/c',
+      start: true,
     });
   });
 });

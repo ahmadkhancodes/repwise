@@ -2,7 +2,6 @@ import { getCatalog } from '@/services/catalog';
 
 import {
   availableEquipment,
-  enginePattern,
   hasEquipment,
   registerSwapProvider,
   swapAlternatives,
@@ -25,13 +24,12 @@ const req = (over: Partial<SwapRequest> = {}): SwapRequest => ({
 afterEach(() => registerSwapProvider(null));
 
 describe('engine adapter', () => {
-  it('maps content patterns and items to the engine shape', () => {
-    expect(enginePattern('core_anti_rotation')).toBe('core');
-    expect(enginePattern('isolation_biceps')).toBe('isolation');
-    expect(enginePattern('mobility')).toBeNull();
-    expect(enginePattern('push_h')).toBe('push_h');
+  it('maps catalogue items to the engine shape via the @repwise/content adapter', () => {
     const e = toEngineExercise(byId.get('barbell-bench-press')!);
     expect(e).toMatchObject({ id: 'barbell-bench-press', pattern: 'push_h', level: 2, compound: true });
+    expect(e?.equipment).toEqual(expect.arrayContaining(['barbell', 'bench']));
+    const mobility = catalog.exercises.find((x) => x.pattern === 'mobility');
+    if (mobility) expect(toEngineExercise(mobility)).toBeNull();
   });
   it('builds a valid profile with defaults', () => {
     const p = toEngineProfile({ injuries: ['knee', 'nonsense'], days: 9, experience: 'beginner' });

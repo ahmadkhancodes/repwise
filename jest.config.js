@@ -11,6 +11,8 @@ const shared = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Workspace packages from THIS checkout (the shared node_modules symlinks point at main's).
+    '^@repwise/(engine|content)$': '<rootDir>/packages/$1/src/index.ts',
     // lucide ships ESM as .mjs for RN; use its CommonJS build under Jest.
     '^lucide-react-native$':
       '<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js',

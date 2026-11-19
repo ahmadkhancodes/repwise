@@ -10,7 +10,7 @@ import * as facade from '../engine';
 import { decideAiPlan, looksLikeWeekPlan } from '../logic/aiPlan';
 import { MAX_GOAL_WEEKS, projectGoalDate } from '../logic/goalDate';
 import { buildHistory } from '../logic/history';
-import { fillEmptyDays, planToRows, repsLabel } from '../logic/planRows';
+import { fillEmptyDays, planToRows, repsLabel, sessionMatchesPlan, type SessionRows } from '../logic/planRows';
 import { budgetTier, spreadWeekdays, toEngineProfile, type ProfileRow } from '../logic/profile';
 
 const engine = require('@repwise/engine');
@@ -317,5 +317,35 @@ describe('projectGoalDate', () => {
       projectGoalDate({ goal: 'muscle_gain', weightKg: 60, targetKg: 90, today: '2026-11-19' }),
     ).toBeNull();
     expect(MAX_GOAL_WEEKS).toBe(104);
+  });
+});
+
+describe('sessionMatchesPlan (regenerate only rewrites untouched sessions)', () => {
+  const ex = (exerciseId: string, position: number) => ({
+    exerciseId,
+    position,
+    targetSets: 3,
+    targetReps: '8-12',
+    targetLoad: null,
+    restS: 90,
+  });
+  const planned: SessionRows = {
+    date: '2026-11-19',
+    title: 'Upper',
+    dayIndex: 3,
+    exercises: [ex('a', 0), ex('b', 1)].map((e) => ({ ...e, notes: null })),
+  };
+
+  it('matches exactly what was planned, in any row order', () => {
+    expect(sessionMatchesPlan(planned, [ex('b', 1), ex('a', 0)])).toBe(true);
+  });
+
+  it('spots swaps, adds, removals, reorders, edited targets and missing plans', () => {
+    expect(sessionMatchesPlan(planned, [ex('a', 0), ex('c', 1)])).toBe(false);
+    expect(sessionMatchesPlan(planned, [ex('a', 0), ex('b', 1), ex('c', 2)])).toBe(false);
+    expect(sessionMatchesPlan(planned, [ex('a', 0)])).toBe(false);
+    expect(sessionMatchesPlan(planned, [ex('b', 0), ex('a', 1)])).toBe(false);
+    expect(sessionMatchesPlan(planned, [ex('a', 0), { ...ex('b', 1), targetSets: 4 }])).toBe(false);
+    expect(sessionMatchesPlan(undefined, [ex('a', 0)])).toBe(false);
   });
 });

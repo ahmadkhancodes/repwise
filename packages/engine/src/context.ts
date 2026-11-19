@@ -201,7 +201,7 @@ export function buildContext(profileIn: ProfileInput, historyIn: HistoryInput, c
   const stalls = Math.max(0, ...[...mainLiftIds].map((id) => stalledSessions(bestE1rmByDay(history, id, beforeMs).slice(-3))));
   const lastDeload = continuing ? prev.lastDeloadWeekStart : undefined;
   const weeksSinceDeload = lastDeload ? Math.floor(daysBetween(lastDeload, weekStart) / 7) : undefined;
-  const dd = deloadDecision({ weekInBlock, blockWeeks, stalledSessions: stalls, ...(weeksSinceDeload !== undefined ? { weeksSinceDeload } : {}) });
+  const dd = deloadDecision({ weekInBlock, blockWeeks, stalledSessions: stalls, ...(weeksSinceDeload !== undefined ? { weeksSinceDeload } : {}), ...(opts.deload ? { requested: true } : {}) });
   const alreadyDeloadedThisWeek = lastDeload === weekStart;
   const deload = dd.deload || alreadyDeloadedThisWeek;
   const block: BlockState = {

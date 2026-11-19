@@ -116,6 +116,8 @@ export interface PlanOptions {
   noRepeatDays?: number;
   /** Weekly check-in kcal delta (from weeklyAdjustment). */
   adjustmentKcal?: number;
+  /** The user asked for a deload this week (check-in / assistant card). */
+  deload?: boolean;
 }
 
 /** Optional LLM variety layer (interface only; implemented in the Worker). Output must pass validate. */

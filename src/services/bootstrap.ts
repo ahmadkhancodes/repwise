@@ -2,6 +2,7 @@
  * Background services started once the local database is ready. Everything here is
  * fire-and-forget: the UI never waits on the network.
  */
+import { registerPlannerBridge, startPlanKeeper } from '@/features/planner/bridge';
 import { startSync } from '@/sync';
 
 import { initAuth } from './auth';
@@ -15,6 +16,10 @@ let started = false;
 export function startBackgroundServices(): void {
   if (started) return;
   started = true;
+  // Check-in / assistant → planner service (local engine; no network needed).
+  registerPlannerBridge();
+  // Plan each new week as it starts (start-up, foreground, midnight); local only.
+  startPlanKeeper();
   initAuth()
     .catch(() => undefined)
     .then(() => {

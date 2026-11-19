@@ -3,12 +3,14 @@
  * Screens are re-exported by thin routes in app/workout and app/(tabs)/train.
  *
  * For other features:
- *  - Today: <ResumeBanner />, useActiveSession(); open a session with router.push(`/workout/${id}`).
+ *  - Today: <ResumeBanner />, useActiveSession(); start/open a session with
+ *    router.push(trainHref(id)) (`/train?sessionId=…&start=1`, which starts or resumes it).
  *  - Notifications / widgets (Live Activity, Android chronometer): `restTimer` (getState/subscribe)
  *    and `registerRestTimerSurface({ start, update, end })`.
  *  - Planner: `registerSwapProvider(fn)` to own exercise swaps.
  */
 export { ResumeBanner } from './components/ResumeBanner';
+export { parseTrainLink, trainHref } from './logic/deepLink';
 export { useActiveSession } from './hooks/useTrain';
 export {
   restTimer,

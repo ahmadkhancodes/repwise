@@ -198,6 +198,17 @@ describe('blocks, deloads and progression', () => {
     expect(again.targetReps).toBe(again.repRange[0]);
   });
 
+  test('a requested deload (check-in / assistant) cuts volume and stays valid', () => {
+    const normal = planWeek(gymMale, {}, catalogues, { now: NOW, weekStart: WEEK });
+    const light = planWeek(gymMale, {}, catalogues, { now: NOW, weekStart: WEEK, deload: true });
+    expect(normal.deload).toBe(false);
+    expect(light.deload).toBe(true);
+    expect(light.deloadReason).toBe('requested');
+    const sets = (p: WeekPlan) => p.sessions.reduce((a, s) => a + s.items.reduce((b, i) => b + i.sets, 0), 0);
+    expect(sets(light)).toBeLessThan(sets(normal));
+    expect(light.validation.ok).toBe(true);
+  });
+
   test('two stalled sessions on a main lift trigger a deload', () => {
     const first = planWeek(gymMale, {}, catalogues, { now: NOW, weekStart: WEEK });
     const mainId = Object.values(first.block.mainLifts)[0]!;
