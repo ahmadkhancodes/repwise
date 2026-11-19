@@ -1,0 +1,25 @@
+{
+  "name": "@repwise/content",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Repwise content catalogues: exercises, recipes and foods, with zod schemas, a build script and content QA tests.",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": ["src", "exercises.json", "recipes.json", "foods.json"],
+  "scripts": {
+    "build": "tsx scripts/build.ts --write",
+    "verify": "tsx scripts/build.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "check": "npm run typecheck && npm run verify && npm test"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
