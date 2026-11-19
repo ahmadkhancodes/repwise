@@ -126,6 +126,7 @@ const LABELS: Record<Muscle, string> = {
   forearms: 'Forearms',
   abs: 'Abs',
   obliques: 'Obliques',
+  hip_flexors: 'Hip flexors',
   lower_back: 'Lower back',
   glutes: 'Glutes',
   quads: 'Quads',

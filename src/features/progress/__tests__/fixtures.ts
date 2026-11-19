@@ -6,7 +6,7 @@ export const at = (d: number, h = 18, m = 0, month = 10, year = 2026) =>
 
 export const exercises = [
   { id: 'bench', primaryMuscles: ['chest'], secondaryMuscles: ['triceps', 'front_delts'] },
-  { id: 'squat', primaryMuscles: ['quads'], secondaryMuscles: ['glutes', 'hip_flexors'] },
+  { id: 'squat', primaryMuscles: ['quads'], secondaryMuscles: ['glutes', 'neck'] },
   { id: 'curl', primaryMuscles: ['biceps'], secondaryMuscles: [] },
 ];
 
