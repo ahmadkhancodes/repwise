@@ -1,0 +1,156 @@
+name: E2E Android
+
+# Device QA on an Android emulator: prebuild in CI → release APK (debug-signed, JS bundled, no Metro)
+# → API 34 x86_64 emulator → Maestro flows in e2e/. How to run it: docs/QA.md.
+on:
+  workflow_dispatch:
+    inputs:
+      flows:
+        description: 'Flows: "all", or comma-separated parts of paths in e2e/ (e.g. "today,meals/03")'
+        type: string
+        default: all
+      maestro_version:
+        description: Maestro CLI version (empty = latest)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: '1'
+  EXPO_NO_TELEMETRY: '1'
+  # Builds without secrets (docs/QA.md): no EXPO_PUBLIC_* values, so the app runs offline with the
+  # rules-only planner; no EAS project id (expo-updates uses the embedded bundle); no Google URL scheme.
+  EAS_PROJECT_ID: ''
+  GOOGLE_IOS_URL_SCHEME: ''
+  EXPO_PUBLIC_API_URL: ''
+  API_LEVEL: 34
+  EMULATOR_TARGET: google_apis
+  EMULATOR_ARCH: x86_64
+  EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+
+jobs:
+  android:
+    name: Build APK + Maestro (API 34)
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space (RN build + emulator image need ~25 GB)
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost \
+            /usr/local/lib/node_modules/@aws-cdk "$AGENT_TOOLSDIRECTORY/CodeQL" || true
+          df -h /
+
+      # Skia/Reanimated C++ compiles in parallel CMake builds were OOM-killed on 4 cores/15 GB in local
+      # validation; more swap plus --max-workers=2 below keeps the release build stable.
+      - name: Add 10 GB swap
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 10G /swapfile2 && sudo chmod 600 /swapfile2
+          sudo mkswap /swapfile2 && sudo swapon /swapfile2
+          free -h
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Prebuild Android (never committed)
+        run: npx expo prebuild -p android --no-install --clean
+
+      - name: Build release APK (debug key, x86_64 only)
+        working-directory: android
+        run: |
+          ./gradlew assembleRelease -PreactNativeArchitectures="$EMULATOR_ARCH" --build-cache --max-workers=2
+          ./gradlew --stop
+          mkdir -p ../build-output
+          cp app/build/outputs/apk/release/app-release.apk ../build-output/repwise-release.apk
+          ls -lh ../build-output
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: repwise-android-release-apk
+          path: build-output/repwise-release.apk
+          retention-days: 7
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.API_LEVEL }}-${{ env.EMULATOR_TARGET }}-${{ env.EMULATOR_ARCH }}-v1
+
+      - name: Create AVD snapshot for the cache
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: ${{ env.EMULATOR_TARGET }}
+          arch: ${{ env.EMULATOR_ARCH }}
+          force-avd-creation: false
+          emulator-options: ${{ env.EMULATOR_OPTIONS }}
+          disable-animations: false
+          emulator-boot-timeout: 900
+          script: echo "AVD snapshot generated."
+
+      - name: Install Maestro
+        env:
+          WANTED_VERSION: ${{ inputs.maestro_version }}
+        run: |
+          if [ -n "$WANTED_VERSION" ]; then export MAESTRO_VERSION="$WANTED_VERSION"; fi
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
+      - name: Run Maestro flows on the emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          FLOWS: ${{ inputs.flows }}
+          APP_PATH: build-output/repwise-release.apk
+          OUT_DIR: e2e-artifacts
+          MAESTRO_CLI_NO_ANALYTICS: '1'
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: ${{ env.EMULATOR_TARGET }}
+          arch: ${{ env.EMULATOR_ARCH }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save ${{ env.EMULATOR_OPTIONS }}
+          disable-animations: true
+          emulator-boot-timeout: 900
+          # One line: the action runs each script line in its own shell.
+          script: bash scripts/ci/maestro-run.sh android
+
+      - name: Upload screenshots, JUnit and logcat
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-android-results
+          path: e2e-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
