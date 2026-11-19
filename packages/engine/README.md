@@ -114,7 +114,7 @@ The Worker should use these to check LLM output before it calls the engine.
 
 ## Tests
 
-The test suite is in `test/`. The fixture catalogues are in `test/fixtures/`: about 150 exercises and about 320 recipes, generated with nutrition computed from ingredient grams.
+The test suite is in `test/`. The fixture catalogues are in `test/fixtures/`: 145 exercises and 399 recipes, generated with nutrition computed from ingredient grams.
 
 - Formula fixtures for BMR, TDEE, floors, macros, 1RM and plates.
 - Edge cases: ages 16 and 100, weights 30 and 300 kg, every goal, both sexes, metric and imperial.

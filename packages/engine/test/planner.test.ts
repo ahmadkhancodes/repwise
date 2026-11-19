@@ -146,7 +146,7 @@ describe('acceptance: 100 generated days pass macro + allergen checks (RW-31)', 
   });
 
   test('no recipe repeats inside the no-repeat window (per profile)', () => {
-    for (const [name, profile] of profiles) {
+    for (const [, profile] of profiles) {
       const { plans } = simulate(profile, 3);
       const window = Math.min(...plans.map((p) => p.noRepeatDays));
       const seen = new Map<string, string>();
