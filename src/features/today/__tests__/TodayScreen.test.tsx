@@ -6,7 +6,8 @@ import { Platform } from 'react-native';
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
 import { cardsForDate } from '@/features/assistant/repo';
-import { mealsRepo } from '@/features/meals/repo';
+import { markMealEaten } from '@/features/meals';
+import { mealPlanForDate, mealsRepo } from '@/features/meals/repo';
 import { logsForDate } from '@/features/nutrition/repo';
 import { sessionsRepo } from '@/features/workout/repo';
 import { setAnalyticsSink } from '@/services/analytics';
@@ -14,7 +15,7 @@ import { useBillingStore } from '@/services/billing';
 import { loadCatalog } from '@/services/catalog';
 import { ToastHost, useToastStore } from '@/ui';
 
-import { registerPlanner, resetPlannerForTests } from '../plannerBridge';
+import { resetPlannerForTests } from '../plannerBridge';
 import * as todayRepo from '../repo';
 import { TodayScreen } from '../screens/TodayScreen';
 import {
@@ -54,14 +55,19 @@ beforeEach(async () => {
 
 afterAll(() => setAnalyticsSink(null));
 
-function renderToday(now = MORNING, scheme: 'light' | 'dark' = 'light') {
-  return renderThemed(
+async function renderToday(now = MORNING, scheme: 'light' | 'dark' = 'light') {
+  const r = await renderThemed(
     <>
       <TodayScreen now={now} />
       <ToastHost />
     </>,
     scheme,
   );
+  // Let the background week planner (meals ensureWeekMeals, next tick) settle inside act.
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  return r;
 }
 
 function seedTrainingDay() {
@@ -127,7 +133,7 @@ describe('TodayScreen core loop', () => {
     await waitFor(() => expect(screen.getByTestId('meals-count')).toHaveTextContent('1 of 2 eaten'));
     expect(screen.getByTestId('kcal-left')).toHaveTextContent('1,656'); // 2,300 − 644
     expect(screen.getByTestId('today-meal-lunch')).toBeChecked();
-    expect(events).toContainEqual(['meal_logged', { slot: 'lunch', from_plan: true }]);
+    expect(events).toContainEqual(['meal_logged', { slot: 'lunch', from_plan: true, partial: false }]);
     const toast = await screen.findByTestId('toast');
     expect(within(toast).getByText('Lunch logged')).toBeTruthy();
     if (Platform.OS === 'ios') expect(Haptics.notificationAsync).toHaveBeenCalledWith('success');
@@ -141,7 +147,8 @@ describe('TodayScreen core loop', () => {
 
   it('tapping an eaten meal unticks it', async () => {
     const { meals } = seedTrainingDay();
-    todayRepo.tickMeal(meals[0]!, TODAY, 'Masala omelette with wholewheat paratha', { kcal: 468, p: 24, c: 49, f: 21 });
+    markMealEaten(meals[0]!.id);
+    expect(logsForDate(TODAY)).toHaveLength(1);
     await renderToday();
     expect(screen.getByTestId('today-meal-breakfast')).toBeChecked();
     await fireEvent.press(screen.getByTestId('today-meal-breakfast'));
@@ -157,20 +164,14 @@ describe('TodayScreen core loop', () => {
     expect((await screen.findByTestId('toast'))).toBeTruthy();
   });
 
-  it('swap without a planner explains; with a planner shows options and swaps', async () => {
+  it('swap opens the meals swap sheet: engine options, one tap swaps', async () => {
     const { meals } = seedTrainingDay();
     await renderToday();
     await fireEvent.press(screen.getByTestId('today-swap-lunch'));
-    expect(await screen.findByTestId('swap-unavailable')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('swap-sheet-close'));
-
-    const swapOptions = jest.fn(async () => [{ recipeId: RECIPE.breakfast, portion: 1 }]);
-    registerPlanner({ swapOptions });
-    await fireEvent.press(screen.getByTestId('today-swap-lunch'));
     const option = await screen.findByTestId('swap-option-0');
-    expect(swapOptions).toHaveBeenCalledWith(meals[1]!.id);
     await fireEvent.press(option);
-    expect(mealsRepo.get(meals[1]!.id)).toMatchObject({ recipeId: RECIPE.breakfast, swappedFrom: RECIPE.lunch });
+    await waitFor(() => expect(mealsRepo.get(meals[1]!.id)?.recipeId).not.toBe(RECIPE.lunch));
+    expect(mealsRepo.get(meals[1]!.id)?.swappedFrom).toBe(RECIPE.lunch);
     expect(events).toContainEqual(['meal_swapped', { slot: 'lunch' }]);
   });
 
@@ -178,15 +179,14 @@ describe('TodayScreen core loop', () => {
     seedTrainingDay();
     await renderToday();
     await fireEvent(screen.getByTestId('today-meal-lunch'), 'longPress');
-    expect(await screen.findByTestId('swap-unavailable')).toBeTruthy();
+    expect(await screen.findByTestId('swap-option-0')).toBeTruthy();
   });
 
-  it('swap errors keep the meal', async () => {
+  it('plans the rest of the week offline with the meals domain', async () => {
     seedTrainingDay();
-    registerPlanner({ swapOptions: async () => Promise.reject(new Error('offline')) });
     await renderToday();
-    await fireEvent.press(screen.getByTestId('today-swap-breakfast'));
-    expect(await screen.findByTestId('swap-error')).toBeTruthy();
+    await waitFor(() => expect(events.map((e) => e[0])).toContain('plan_generated'));
+    expect(mealPlanForDate('2026-11-20')).toBeDefined();
   });
 });
 
@@ -201,8 +201,8 @@ describe('TodayScreen states', () => {
     expect(within(screen.getByTestId('today-brief')).getByText('Rest day')).toBeTruthy();
   });
 
-  it('onboarded without a plan', async () => {
-    seedProfile();
+  it('onboarded without a plan (body fields missing, so meals cannot be planned yet)', async () => {
+    seedProfile(Date.UTC(2026, 10, 1), { weightKg: null, heightCm: null });
     await renderToday();
     expect(screen.getByTestId('today-no-plan')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('today-no-plan-action'));
@@ -216,7 +216,7 @@ describe('TodayScreen states', () => {
     await renderToday();
     expect(screen.getByTestId('today-error')).toBeTruthy();
     spy.mockRestore();
-    seedProfile();
+    seedProfile(Date.UTC(2026, 10, 1), { weightKg: null, heightCm: null });
     await fireEvent.press(screen.getByTestId('today-error-action'));
     await waitFor(() => expect(screen.getByTestId('today-no-plan')).toBeTruthy());
   });

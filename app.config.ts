@@ -11,6 +11,53 @@ import colors from './src/theme/colors.json';
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID;
 const BUNDLE_ID = 'com.client.repwise';
 const APP_GROUP = 'group.com.client.repwise';
+/** Android widgets (names match src/widgets/android/widgets.tsx WIDGET_NAMES). */
+const INTER = './node_modules/@expo-google-fonts/inter';
+const ANDROID_WIDGETS = {
+  fonts: [
+    `${INTER}/400Regular/Inter_400Regular.ttf`,
+    `${INTER}/600SemiBold/Inter_600SemiBold.ttf`,
+    `${INTER}/700Bold/Inter_700Bold.ttf`,
+  ],
+  widgets: [
+    {
+      name: 'RepwiseToday',
+      label: 'Today',
+      description: "Today's workout, next meal and calories, with quick log",
+      minWidth: '250dp',
+      minHeight: '110dp',
+      targetCellWidth: 4,
+      targetCellHeight: 2,
+      resizeMode: 'horizontal|vertical',
+      previewImage: './assets/images/icon.png',
+      updatePeriodMillis: 1800000,
+    },
+    {
+      name: 'RepwiseMacros',
+      label: 'Macros',
+      description: 'Calories left and protein, carbs and fat',
+      minWidth: '110dp',
+      minHeight: '110dp',
+      targetCellWidth: 2,
+      targetCellHeight: 2,
+      resizeMode: 'horizontal|vertical',
+      previewImage: './assets/images/icon.png',
+      updatePeriodMillis: 1800000,
+    },
+    {
+      name: 'RepwiseStreak',
+      label: 'Streak',
+      description: 'Weeks in a row with a workout',
+      minWidth: '57dp',
+      minHeight: '57dp',
+      targetCellWidth: 1,
+      targetCellHeight: 1,
+      resizeMode: 'none',
+      previewImage: './assets/images/icon.png',
+      updatePeriodMillis: 1800000,
+    },
+  ],
+};
 /** Reversed iOS OAuth client id (com.googleusercontent.apps.…), set in EAS env. */
 const GOOGLE_IOS_URL_SCHEME = process.env.GOOGLE_IOS_URL_SCHEME;
 
@@ -41,6 +88,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'com.apple.security.application-groups': [APP_GROUP],
       // Sign in with Apple capability (expo-apple-authentication is installed; kept explicit).
       'com.apple.developer.applesignin': ['Default'],
+      // N-5 "Rest over" breaks through Focus as a time-sensitive alert (sheet 17 timer channel).
+      'com.apple.developer.usernotifications.time-sensitive': true,
     },
     infoPlist: {
       NSCameraUsageDescription:
@@ -53,6 +102,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         'Repwise uses Face ID only if you turn on App lock, to keep your workouts and meals private.',
       // Notifications have no Info.plist string on iOS; the in-app primer (S06)
       // explains meal and workout reminders before the system prompt.
+      // W5 rest-timer Live Activity (targets/widget + modules/repwise-timer).
+      NSSupportsLiveActivities: true,
     },
     privacyManifests: {
       NSPrivacyTracking: false,
@@ -114,6 +165,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-sqlite',
     'expo-secure-store',
     'expo-apple-authentication',
+    // Local notifications (sheet 17). Small icon = monochrome adaptive icon, tinted with the accent.
+    [
+      'expo-notifications',
+      { icon: './assets/images/adaptive-icon-monochrome.png', color: colors.light.accent },
+    ],
+    // Android home-screen widgets (sheet 17 WG-1..3), rendered from the widget snapshot.
+    ['react-native-android-widget', ANDROID_WIDGETS],
+    // iOS WidgetKit extension + rest-timer Live Activity in targets/widget (App Group snapshot).
+    '@bacons/apple-targets',
     // Google Sign-In needs the reversed iOS client id as a URL scheme; the plugin throws
     // without it, so it is added only when GOOGLE_IOS_URL_SCHEME is set (EAS env).
     ...(GOOGLE_IOS_URL_SCHEME

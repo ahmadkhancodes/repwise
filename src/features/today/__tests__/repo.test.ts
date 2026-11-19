@@ -1,6 +1,3 @@
-import { eq } from 'drizzle-orm';
-
-import { foodLogs } from '@/db/schema';
 import {
   activeDates,
   cardsForDate,
@@ -23,14 +20,14 @@ import {
   weightsSince,
 } from '@/features/assistant/repo';
 import { evaluateRules } from '@/features/assistant/logic/rules';
+import { addWater, setMealOpen, undoLog } from '@/features/meals';
 import { mealsRepo } from '@/features/meals/repo';
-import { foodLogsRepo, logsForDate } from '@/features/nutrition/repo';
+import { foodLogsRepo } from '@/features/nutrition/repo';
 import { sessionsRepo } from '@/features/workout/repo';
 
-import { addWater, applySwap, loadTodaySnapshot, nutritionLogs, tickMeal, untickMeal } from '../repo';
+import { loadTodaySnapshot } from '../repo';
 import {
   EXERCISE,
-  RECIPE,
   freshDb,
   seedDoneLift,
   seedMealDay,
@@ -64,44 +61,14 @@ describe('today snapshot + core writes', () => {
     expect(snap.tomorrow.meals).toEqual([]);
   });
 
-  it('tick logs the meal for the rings; undo restores both rows', () => {
+  it('reflects meals-domain writes (water quick-add + undo, skip)', () => {
     const { meals } = seedMealDay(TODAY);
-    const lunch = meals[1]!;
-    const undo = tickMeal(lunch, TODAY, 'Chicken karahi', { kcal: 644, p: 47.9, c: 65.4, f: 20.9 });
-    expect(mealsRepo.get(lunch.id)?.status).toBe('eaten');
-    expect(logsForDate(TODAY)).toMatchObject([{ source: 'plan', slot: 'lunch', name: 'Chicken karahi', kcal: 644, p: 47.9 }]);
-    undo();
-    expect(mealsRepo.get(lunch.id)?.status).toBe('planned');
-    expect(logsForDate(TODAY)).toEqual([]);
-  });
-
-  it('untick removes the plan log it wrote, leaving other logs', () => {
-    const { meals } = seedMealDay(TODAY);
-    const lunch = meals[1]!;
-    foodLogsRepo.insert({ date: TODAY, source: 'search', name: 'Apple', slot: 'snack', kcal: 80 });
-    tickMeal(lunch, TODAY, 'Chicken karahi', { kcal: 644, p: 48, c: 65, f: 21 });
-    untickMeal(lunch, TODAY, 'Chicken karahi');
-    expect(mealsRepo.get(lunch.id)?.status).toBe('planned');
-    expect(logsForDate(TODAY).map((l) => l.name)).toEqual(['Apple']);
-  });
-
-  it('water quick-add with undo, excluded from nutrition logs', () => {
-    const undo = addWater(TODAY);
-    addWater(TODAY);
-    const rows = logsForDate(TODAY);
-    expect(rows.map((r) => [r.slot, r.name, r.kcal])).toEqual([
-      ['water', 'Water 250 ml', 0],
-      ['water', 'Water 250 ml', 0],
-    ]);
-    expect(nutritionLogs(rows)).toEqual([]);
-    undo();
-    expect(foodLogsRepo.list(eq(foodLogs.slot, 'water'))).toHaveLength(1);
-  });
-
-  it('swap keeps the slot and remembers the old recipe', () => {
-    const { meals } = seedMealDay(TODAY);
-    const m = applySwap(meals[0]!.id, 'other-recipe');
-    expect(m).toMatchObject({ slot: 'breakfast', recipeId: 'other-recipe', swappedFrom: RECIPE.breakfast });
+    const row = addWater(TODAY, 250);
+    expect(loadTodaySnapshot(TODAY, '2026-11-20').logs.map((l) => [l.slot, l.name])).toEqual([['water', 'Water 250 ml']]);
+    undoLog(row.id);
+    expect(loadTodaySnapshot(TODAY, '2026-11-20').logs).toEqual([]);
+    setMealOpen(meals[1]!.id, 'skipped');
+    expect(loadTodaySnapshot(TODAY, '2026-11-20').today.meals.map((m) => m.status)).toEqual(['planned', 'skipped']);
   });
 });
 

@@ -10,7 +10,7 @@ import { bodyMetricsRepo } from '@/features/progress/repo';
 import { cardsRepo, type Card } from '@/features/planner/repo';
 import { addDays, daysBetween, epley1RM, type ISODate } from '@/features/today/logic/engine';
 import { humanize } from '@/features/today/logic/workout';
-import { WATER_SLOT } from '@/features/today/logic/water';
+import { WATER_SLOT } from '@/features/nutrition/logic/water';
 import { sessionsRepo } from '@/features/workout/repo';
 import { peekCatalog } from '@/services/catalog';
 import { kv } from '@/services/storage';

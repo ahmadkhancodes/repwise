@@ -1,4 +1,3 @@
-import { cleanProps } from '@/services/analytics';
 
 import {
   appliesFrom,
@@ -181,15 +180,5 @@ describe('sparkline geometry', () => {
     ]);
     expect(sparkPoints([5], 10, 10)).toEqual([{ x: 5, y: 5 }]);
     expect(sparkPoints([], 10, 10)).toEqual([]);
-  });
-});
-
-describe('analytics props', () => {
-  it('keeps only short primitives', () => {
-    expect(cleanProps({ a: 'x', b: 1, c: true, d: { x: 1 }, e: 'y'.repeat(65), f: NaN, g: null })).toEqual({
-      a: 'x',
-      b: 1,
-      c: true,
-    });
   });
 });

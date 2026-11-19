@@ -50,7 +50,7 @@ describe('catalogue schemas (contract for packages/content)', () => {
     expect(RecipeSchema.safeParse({ ...goodRecipe, perServing: { kcal: 100, protein: 50, carbs: 50, fat: 20 } }).success).toBe(false);
     expect(RecipeSchema.safeParse({ ...goodRecipe, dietTags: ['vegan'], allergens: ['dairy'] }).success).toBe(false);
     expect(RecipeSchema.safeParse({ ...goodRecipe, scalable: { min: 2, max: 1 } }).success).toBe(false);
-    expect(RecipeSchema.safeParse({ ...goodRecipe, allergens: ['lupin'] }).success).toBe(false);
+    expect(RecipeSchema.safeParse({ ...goodRecipe, allergens: ['crustaceans'] }).success).toBe(false);
     expect(RecipeSchema.safeParse({ ...goodRecipe, slots: [] }).success).toBe(false);
     expect(RecipeSchema.safeParse({ ...goodRecipe, costTier: 4 }).success).toBe(false);
     const dupIng = { ...goodRecipe, ingredients: [goodRecipe.ingredients[0], goodRecipe.ingredients[0]] };

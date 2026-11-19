@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 
 import { createRepo, type Row } from '@/db/repo';
 import { foodLogs } from '@/db/schema';
@@ -28,4 +28,41 @@ export function logsForDate(date: string): FoodLog[] {
 
 export function useFoodLogs(date: string): FoodLog[] {
   return foodLogsRepo.useLive(eq(foodLogs.date, date), asc(foodLogs.createdAt), [date]).data;
+}
+
+export type NewFoodLog = {
+  date: string;
+  source: 'plan' | 'search' | 'quick';
+  name: string;
+  slot?: string | null;
+  kcal: number;
+  p?: number | null;
+  c?: number | null;
+  f?: number | null;
+};
+
+/** Add one log row (S23/S26). */
+export function logFood(v: NewFoodLog, now: number = Date.now()): FoodLog {
+  return foodLogsRepo.insert(
+    {
+      date: v.date,
+      source: v.source,
+      name: v.name,
+      slot: v.slot ?? null,
+      kcal: Math.round(v.kcal),
+      p: v.p ?? null,
+      c: v.c ?? null,
+      f: v.f ?? null,
+    },
+    now,
+  );
+}
+
+export function removeLog(id: string, now: number = Date.now()): boolean {
+  return foodLogsRepo.remove(id, now);
+}
+
+/** Latest food-search logs (recent foods on S23). */
+export function useRecentSearchLogs(limit = 60): FoodLog[] {
+  return foodLogsRepo.useLive(eq(foodLogs.source, 'search'), desc(foodLogs.createdAt), [limit]).data.slice(0, limit);
 }

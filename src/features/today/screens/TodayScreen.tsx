@@ -8,7 +8,17 @@ import { CardDetailSheet } from '@/features/assistant/components/CardDetailSheet
 import { useAssistant } from '@/features/assistant/hooks/useAssistant';
 import type { ShownCard } from '@/features/assistant/logic/cardState';
 import { usePro } from '@/features/billing';
-import { track } from '@/services/analytics';
+import {
+  addWater,
+  markMealEaten,
+  setMealOpen,
+  SwapSheet,
+  toMealView,
+  undoLog,
+  type MealView as EatMealView,
+} from '@/features/meals';
+import { getWaterGoal } from '@/features/nutrition';
+import { GLASS_ML } from '@/features/nutrition/logic/water';
 import { useCatalog } from '@/services/catalog';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
@@ -19,15 +29,11 @@ import { MealsCard } from '../components/MealsCard';
 import { MorningBrief } from '../components/MorningBrief';
 import { RingsCard } from '../components/RingsCard';
 import { TodaySkeleton } from '../components/Skeleton';
-import { SwapSheet } from '../components/SwapSheet';
 import { WaterCard } from '../components/WaterCard';
 import { RestDayCard, WorkoutCard } from '../components/WorkoutCard';
-import { recipeLookup, useToday } from '../hooks/useToday';
+import { useToday } from '../hooks/useToday';
 import { localHour } from '../logic/day';
 import type { MealView } from '../logic/meals';
-import { GLASS_ML } from '../logic/water';
-import type { SwapOption } from '../plannerBridge';
-import { addWater, applySwap, tickMeal, untickMeal } from '../repo';
 
 /** Undo window for the core action (P5 acceptance: undo toast, 5 s). */
 export const UNDO_MS = 5000;
@@ -46,7 +52,6 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
   const model = useToday(nowOverride);
   const { isPro } = usePro(nowOverride);
   const catalog = useCatalog();
-  const recipe = useMemo(() => recipeLookup(catalog), [catalog]);
   const view = model.view;
   const params = useLocalSearchParams<{ card?: string; checkin?: string }>();
 
@@ -60,7 +65,7 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
     protein: view?.targets ? { eaten: view.eaten.p, target: view.targets.p } : null,
   });
 
-  const [swapMeal, setSwapMeal] = useState<MealView | null>(null);
+  const [swapId, setSwapId] = useState<string | null>(null);
   const [openCard, setOpenCard] = useState<ShownCard | null>(null);
 
   // Deep link (notification / S12 route): /today?card=<id> opens that card's detail sheet.
@@ -75,43 +80,42 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
   const linkedCard = cardParam ? (assistant.cards.find((c) => c.id === cardParam) ?? null) : null;
   const detailCard = openCard ?? linkedCard;
 
-  const onToggle = useCallback(
-    (meal: MealView) => {
-      if (!view) return;
-      if (meal.status === 'eaten') {
-        untickMeal(meal, view.date, meal.title);
-        haptics.light();
-        return;
-      }
-      const undo = tickMeal(meal, view.date, meal.title, meal.nutrients);
-      track('meal_logged', { slot: meal.slot, from_plan: true });
-      showToast({
-        message: `${meal.slotLabel} logged`,
-        tone: 'success',
-        actionLabel: 'Undo',
-        onAction: undo,
-        durationMs: UNDO_MS,
-      });
-    },
-    [view],
-  );
-
-  const onPickSwap = useCallback((meal: MealView, option: SwapOption) => {
-    applySwap(meal.id, option.recipeId);
-    track('meal_swapped', { slot: meal.slot });
-    haptics.light();
-    setSwapMeal(null);
-    showToast({ message: `${meal.slotLabel} swapped` });
+  // Meal writes go through the meals domain, so a tick always writes the intake log (and its
+  // analytics event) exactly as on Eat. Undo restores the planned state and removes that log.
+  const onToggle = useCallback((meal: MealView) => {
+    if (meal.status === 'eaten') {
+      setMealOpen(meal.id, 'planned');
+      haptics.light();
+      return;
+    }
+    if (!markMealEaten(meal.id)) return;
+    showToast({
+      message: `${meal.slotLabel} logged`,
+      tone: 'success',
+      actionLabel: 'Undo',
+      onAction: () => {
+        setMealOpen(meal.id, 'planned');
+      },
+      durationMs: UNDO_MS,
+    });
   }, []);
+
+  // The meals swap sheet (engine swapChoices + applySwap) works on the meals domain's view.
+  const swapMeal = useMemo<EatMealView | null>(() => {
+    const row = swapId ? model.snapshot?.today.meals.find((m) => m.id === swapId) : undefined;
+    return row ? toMealView(row, catalog, []) : null;
+  }, [swapId, model.snapshot, catalog]);
 
   const onAddWater = useCallback(() => {
     if (!view) return;
-    const undo = addWater(view.date);
+    const row = addWater(view.date, GLASS_ML);
     showToast({
       message: `${GLASS_ML} ml water added`,
       tone: 'success',
       actionLabel: 'Undo',
-      onAction: undo,
+      onAction: () => {
+        undoLog(row.id);
+      },
       durationMs: UNDO_MS,
     });
   }, [view]);
@@ -202,10 +206,10 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
           meals={view.meals}
           loading={model.catalogLoading}
           onToggle={onToggle}
-          onSwap={setSwapMeal}
+          onSwap={(m) => setSwapId(m.id)}
           index={i++}
         />
-        <WaterCard totalMl={view.waterMl} onAdd={onAddWater} index={i++} />
+        <WaterCard totalMl={view.waterMl} goalMl={getWaterGoal()} onAdd={onAddWater} index={i++} />
       </>
     );
   }
@@ -218,7 +222,7 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
         </Text>
       ) : null}
       <View style={{ gap: t.spacing.md }}>{body}</View>
-      <SwapSheet meal={swapMeal} recipe={recipe} onClose={() => setSwapMeal(null)} onPick={onPickSwap} />
+      <SwapSheet meal={swapMeal} onClose={() => setSwapId(null)} />
       <CardDetailSheet
         card={detailCard}
         onClose={closeCard}

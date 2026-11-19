@@ -3,6 +3,7 @@
  * and the clock are inputs), so every state of S11 is unit-tested without rendering.
  */
 import type { MealStatus, SessionStatus } from '@/db/schema';
+import { isWaterLog, totalWaterMl } from '@/features/nutrition/logic/water';
 
 import { briefRows, eveningSummary, showEvening, tomorrowPreview, type BriefRow, type EveningItem, type TomorrowPreview } from './brief';
 import { dayPhase, greeting, longDate, type DayPhase } from './day';
@@ -19,7 +20,6 @@ import {
   type Nutrients,
   type PerServing,
 } from './meals';
-import { waterTotalMl } from './water';
 import { estimateMinutes, topMuscles } from './workout';
 
 export type RecipeInfo = { title: string; perServing: PerServing };
@@ -131,7 +131,7 @@ export function buildTodayView(
   };
   const meals = mealViews(snap.today, lookups.recipe, profile?.mealTimes ?? null);
   const workout = workoutView(snap.today, lookups.muscles);
-  const nutritionLogs = snap.logs.filter((l) => l.slot !== 'water');
+  const nutritionLogs = snap.logs.filter((l) => !isWaterLog(l));
   const eaten = sumNutrients(
     nutritionLogs.map((l) => ({ kcal: l.kcal, p: l.p ?? 0, c: l.c ?? 0, f: l.f ?? 0 })),
   );
@@ -182,7 +182,7 @@ export function buildTodayView(
     eaten,
     planned,
     targets,
-    waterMl: waterTotalMl(snap.logs),
+    waterMl: totalWaterMl(snap.logs),
     brief,
     evening,
   };

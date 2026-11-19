@@ -1,34 +1,36 @@
 /**
- * Analytics seam (sheet 23). Screens call `track(event, props)`; the PostHog SDK plugs in later
- * with `setAnalyticsSink`. Props are categories and counts only: never body measurements, meal
- * text or AI prompts (sheet 23). Values that are not short strings, numbers or booleans are dropped.
+ * Analytics facade (sheet 23). `track(event, props)` is safe to call anywhere: it never throws and
+ * never blocks. Until PostHog lands (phase 3), events go to an in-memory sink (dev log + tests).
+ * Rule: never send body measurements, meal text or AI prompts — only categories and counts.
  */
-export type AnalyticsProps = Record<string, string | number | boolean>;
+export type AnalyticsProps = Record<string, string | number | boolean | null | undefined>;
 export type AnalyticsSink = (event: string, props: AnalyticsProps) => void;
 
 let sink: AnalyticsSink | null = null;
-const MAX_STRING = 64;
+const recent: { event: string; props: AnalyticsProps }[] = [];
+const MAX_RECENT = 200;
 
+/** Plug in the real client (PostHog) at startup. */
 export function setAnalyticsSink(next: AnalyticsSink | null): void {
   sink = next;
 }
 
-/** Keep only primitive, short values. Pure; exported for tests. */
-export function cleanProps(props: Record<string, unknown> = {}): AnalyticsProps {
-  const out: AnalyticsProps = {};
-  for (const [k, v] of Object.entries(props)) {
-    if (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v))) out[k] = v;
-    else if (typeof v === 'string' && v.length <= MAX_STRING) out[k] = v;
+export function track(event: string, props: AnalyticsProps = {}): void {
+  try {
+    recent.push({ event, props });
+    if (recent.length > MAX_RECENT) recent.shift();
+    sink?.(event, props);
+  } catch {
+    // analytics must never break the app
   }
-  return out;
 }
 
-/** Fire-and-forget; analytics never breaks a screen. */
-export function track(event: string, props?: Record<string, unknown>): void {
-  if (!sink) return;
-  try {
-    sink(event, cleanProps(props));
-  } catch {
-    // ignore sink failures
-  }
+/** Events tracked in this process (tests and the dev gallery). */
+export function trackedEvents(): readonly { event: string; props: AnalyticsProps }[] {
+  return recent;
+}
+
+export function resetAnalyticsForTests(): void {
+  recent.length = 0;
+  sink = null;
 }

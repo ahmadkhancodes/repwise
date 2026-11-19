@@ -23,6 +23,8 @@ export const PATTERNS = [
   'core',
   'isolation',
   'cardio',
+  /** Stretches and drills (content catalogue); never used by the strength templates. */
+  'mobility',
 ] as const;
 export const PatternSchema = z.enum(PATTERNS);
 export type Pattern = z.infer<typeof PatternSchema>;
@@ -48,6 +50,7 @@ export const MUSCLES = [
   'adductors',
   'abductors',
   'calves',
+  'hip_flexors',
 ] as const;
 export const MuscleSchema = z.enum(MUSCLES);
 export type Muscle = z.infer<typeof MuscleSchema>;
@@ -65,7 +68,28 @@ export const EQUIPMENT = [
   'trap_bar',
   'pullup_bar',
   'bench',
+  /** Any cardio machine; implies treadmill, bike, rower, elliptical and stair_climber (see equipmentOk). */
   'cardio_machine',
+  // Aligned with packages/content (D26): the rest of the content vocabulary.
+  'squat_rack',
+  'dip_station',
+  'landmine',
+  'box',
+  'medicine_ball',
+  'suspension_trainer',
+  'ab_wheel',
+  'stability_ball',
+  'weight_plate',
+  'sled',
+  'jump_rope',
+  'foam_roller',
+  /** Comfort only: never required (see equipmentOk). */
+  'mat',
+  'treadmill',
+  'bike',
+  'rower',
+  'elliptical',
+  'stair_climber',
 ] as const;
 export const EquipmentSchema = z.enum(EQUIPMENT);
 export type Equipment = z.infer<typeof EquipmentSchema>;
@@ -89,7 +113,22 @@ export const DIET_TAGS = [
 export const DietTagSchema = z.enum(DIET_TAGS);
 export type DietTag = z.infer<typeof DietTagSchema>;
 
-export const ALLERGENS = ['dairy', 'egg', 'gluten', 'nuts', 'peanut', 'soy', 'fish', 'shellfish', 'sesame'] as const;
+/** 'shellfish' covers crustaceans and molluscs. celery, lupin, mustard and sulphites complete the EU 14 (content). */
+export const ALLERGENS = [
+  'dairy',
+  'egg',
+  'gluten',
+  'nuts',
+  'peanut',
+  'soy',
+  'fish',
+  'shellfish',
+  'sesame',
+  'celery',
+  'lupin',
+  'mustard',
+  'sulphites',
+] as const;
 export const AllergenSchema = z.enum(ALLERGENS);
 export type Allergen = z.infer<typeof AllergenSchema>;
 
@@ -111,6 +150,13 @@ export const CUISINES = [
   'korean',
   'thai',
   'other',
+  // Content catalogue groups (D26). Preferences match across fine and group values (cuisineMatches).
+  'middle_eastern',
+  'gulf',
+  'north_african',
+  'east_asian',
+  'southeast_asian',
+  'global',
 ] as const;
 export const CuisineSchema = z.enum(CUISINES);
 export type Cuisine = z.infer<typeof CuisineSchema>;
@@ -119,7 +165,7 @@ export const MEAL_SLOTS = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 export const MealSlotSchema = z.enum(MEAL_SLOTS);
 export type MealSlot = z.infer<typeof MealSlotSchema>;
 
-/** Main protein source of a recipe ('none' = no dominant source; exempt from the once-a-day rule). */
+/** Main protein source of a recipe ('none' = no dominant source; 'none' and 'grains' are exempt from the once-a-day rule). */
 export const PROTEIN_SOURCES = [
   'chicken',
   'turkey',
@@ -137,6 +183,11 @@ export const PROTEIN_SOURCES = [
   'protein_powder',
   'mixed',
   'none',
+  // Content catalogue values (D26). 'grains' is exempt from the once-a-day rule like 'none'.
+  'pork',
+  'soy',
+  'nuts_seeds',
+  'grains',
 ] as const;
 export const ProteinSourceSchema = z.enum(PROTEIN_SOURCES);
 export type ProteinSource = z.infer<typeof ProteinSourceSchema>;
@@ -374,7 +425,7 @@ export const BlockStateSchema = z.object({
   startDate: ISODateSchema,
   blockNo: z.number().int().min(1),
   /** slotKey → exercise id of the main lift held for this block. */
-  mainLifts: z.record(z.string()),
+  mainLifts: z.record(z.string(), z.string()),
   lastDeloadWeekStart: ISODateSchema.optional(),
 });
 export type BlockState = z.infer<typeof BlockStateSchema>;

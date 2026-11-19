@@ -8,10 +8,11 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+import { GLASS_ML } from '@/features/nutrition/logic/water';
 import { useTheme } from '@/theme';
 import { Card, PressableScale, Text } from '@/ui';
 
-import { GLASS_ML, waterGlasses } from '../logic/water';
+import { waterGlasses } from '../logic/water';
 
 import { enterAt } from './motion';
 
@@ -48,16 +49,19 @@ function Glass({ filled, index }: { filled: boolean; index: number }) {
 /** Water quick-add: one tap adds a 250 ml glass. */
 export function WaterCard({
   totalMl,
+  goalMl,
   onAdd,
   index = 4,
 }: {
   totalMl: number;
+  /** The user's goal from Water settings (nutrition `getWaterGoal`). */
+  goalMl?: number;
   onAdd: () => void;
   index?: number;
 }) {
   const t = useTheme();
   const reduceMotion = useReducedMotion();
-  const g = waterGlasses(totalMl);
+  const g = waterGlasses(totalMl, goalMl);
   return (
     <Animated.View entering={enterAt(index, reduceMotion)}>
       <Card testID="today-water">

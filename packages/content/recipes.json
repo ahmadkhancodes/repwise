@@ -20748,5 +20748,6483 @@
       "gluten_free"
     ],
     "mainProtein": "eggs"
+  },
+  {
+    "id": "tofu-shakshuka",
+    "title": "Tofu shakshuka",
+    "cuisine": "gulf",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 400
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 10
+      },
+      {
+        "foodId": "pita",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Soften the onion and pepper in the oil for 6 minutes, then add the garlic, cumin and paprika for 1 minute.",
+      "Pour in the tomatoes and simmer for 8 minutes until thick.",
+      "Cut the tofu into thick slices, nestle them into the sauce and cook covered for 5 minutes.",
+      "Scatter with coriander and serve from the pan with warm flatbread."
+    ],
+    "mediaId": "repwise/recipes/tofu-shakshuka",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 560,
+      "protein": 43,
+      "carbs": 52.9,
+      "fat": 24.5,
+      "fibre": 12.9
+    },
+    "allergens": [
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "silken-tofu-berry-bowl",
+    "title": "Whipped silken tofu and berry bowl",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 8,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "silken-tofu",
+        "grams": 200
+      },
+      {
+        "foodId": "soy-yogurt",
+        "grams": 150
+      },
+      {
+        "foodId": "hemp-seeds",
+        "grams": 25
+      },
+      {
+        "foodId": "mixed-berries",
+        "grams": 120
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Blend the silken tofu with the soy yoghurt and cinnamon until smooth and thick.",
+      "Spoon into a bowl and top with the berries and hemp seeds."
+    ],
+    "mediaId": "repwise/recipes/silken-tofu-berry-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 404,
+      "protein": 26.7,
+      "carbs": 30.9,
+      "fat": 22.4,
+      "fibre": 5.1
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tvp-breakfast-hash",
+    "title": "Soya mince breakfast hash",
+    "cuisine": "british",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tvp",
+        "grams": 100
+      },
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 120
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 120
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 14
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 200
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Soak the soya mince in the hot stock for 10 minutes.",
+      "Dice the potato small and fry in the oil for 10 minutes until golden.",
+      "Add the onion, pepper and mushrooms and cook for 5 minutes.",
+      "Stir in the soaked mince and paprika and fry until the edges crisp.",
+      "Finish with parsley and season."
+    ],
+    "mediaId": "repwise/recipes/tvp-breakfast-hash",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 400,
+      "protein": 32.4,
+      "carbs": 55.4,
+      "fat": 8.5,
+      "fibre": 15.3
+    },
+    "allergens": [
+      "celery",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "seitan-breakfast-patties",
+    "title": "Seitan breakfast patties with beans and tomatoes",
+    "cuisine": "british",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "vital-wheat-gluten",
+        "grams": 100
+      },
+      {
+        "foodId": "chickpea-flour",
+        "grams": 20
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 90
+      },
+      {
+        "foodId": "fennel-seed",
+        "grams": 2
+      },
+      {
+        "foodId": "thyme",
+        "grams": 2
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "baked-beans",
+        "grams": 200
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 120
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Mix the gluten, chickpea flour, fennel, thyme and pepper, then add the stock and knead for 2 minutes.",
+      "Shape into 6 thin patties and steam or simmer in a covered pan of water for 10 minutes.",
+      "Fry the patties in the oil until browned on both sides.",
+      "Grill the halved tomatoes and mushrooms and warm the beans.",
+      "Serve the patties with the beans, tomatoes and mushrooms."
+    ],
+    "mediaId": "repwise/recipes/seitan-breakfast-patties",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 403,
+      "protein": 47.8,
+      "carbs": 41.5,
+      "fat": 7.7,
+      "fibre": 8.2
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "besan-chilla-tofu",
+    "title": "Besan chilla with spiced tofu filling",
+    "cuisine": "indian",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpea-flour",
+        "grams": 140
+      },
+      {
+        "foodId": "tofu",
+        "grams": 140
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 10
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 10
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 2
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Whisk the chickpea flour, turmeric and salt with about 180 ml water to a pouring batter.",
+      "Crumble the tofu and fry with half the onion, the tomato, chilli and cumin for 4 minutes.",
+      "Pour a ladle of batter into a hot oiled pan, scatter with the rest of the onion and cook 2 minutes a side.",
+      "Fill each chilla with the tofu mix and fold.",
+      "Finish with coriander."
+    ],
+    "mediaId": "repwise/recipes/besan-chilla-tofu",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 456,
+      "protein": 29.1,
+      "carbs": 48.9,
+      "fat": 17.2,
+      "fibre": 10.8
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "soya-keema-bhurji",
+    "title": "Soya keema bhurji with roti",
+    "cuisine": "pakistani",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tvp",
+        "grams": 90
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 10
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 2
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 14
+      },
+      {
+        "foodId": "flour-wholewheat",
+        "grams": 80
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Soak the soya granules in boiling water for 10 minutes, then squeeze dry.",
+      "Fry the onion in the oil until golden, add ginger, garlic, chilli and the spices.",
+      "Add the tomato and cook to a thick masala, then stir in the soya and fry for 5 minutes.",
+      "Knead the flour with water and a pinch of salt, roll two thin rotis and cook on a dry tawa.",
+      "Serve the bhurji with coriander and the rotis."
+    ],
+    "mediaId": "repwise/recipes/soya-keema-bhurji",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 401,
+      "protein": 30.6,
+      "carbs": 56.4,
+      "fat": 9,
+      "fibre": 15.1
+    },
+    "allergens": [
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tempeh-breakfast-tacos",
+    "title": "Tempeh breakfast tacos",
+    "cuisine": "mexican",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tempeh",
+        "grams": 240
+      },
+      {
+        "foodId": "tortilla-corn",
+        "grams": 120
+      },
+      {
+        "foodId": "salsa",
+        "grams": 120
+      },
+      {
+        "foodId": "avocado",
+        "grams": 60
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Crumble the tempeh and fry in the oil with the onion, cumin and paprika for 6 minutes.",
+      "Warm the tortillas in a dry pan.",
+      "Fill with the tempeh, salsa and sliced avocado.",
+      "Finish with lime juice and coriander."
+    ],
+    "mediaId": "repwise/recipes/tempeh-breakfast-tacos",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 479,
+      "protein": 29.9,
+      "carbs": 46,
+      "fat": 23.6,
+      "fibre": 7.9
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "soy-hemp-overnight-oats",
+    "title": "Soy and hemp overnight oats",
+    "cuisine": "british",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "oats",
+        "grams": 40
+      },
+      {
+        "foodId": "soy-milk",
+        "grams": 300
+      },
+      {
+        "foodId": "hemp-seeds",
+        "grams": 30
+      },
+      {
+        "foodId": "soy-yogurt",
+        "grams": 100
+      },
+      {
+        "foodId": "raspberries",
+        "grams": 60
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Stir the oats, soy milk, hemp seeds and cinnamon together in a jar.",
+      "Chill overnight.",
+      "Top with the soy yoghurt and raspberries before eating."
+    ],
+    "mediaId": "repwise/recipes/soy-hemp-overnight-oats",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 520,
+      "protein": 28.3,
+      "carbs": 51.9,
+      "fat": 24.4,
+      "fibre": 11.8
+    },
+    "allergens": [
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "nuts_seeds"
+  },
+  {
+    "id": "banana-oat-tofu-smoothie",
+    "title": "Banana, oat and tofu protein smoothie",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "soy-milk",
+        "grams": 350
+      },
+      {
+        "foodId": "silken-tofu",
+        "grams": 200
+      },
+      {
+        "foodId": "banana",
+        "grams": 90
+      },
+      {
+        "foodId": "oats",
+        "grams": 30
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Blend everything with a few ice cubes until smooth.",
+      "Drink straight away."
+    ],
+    "mediaId": "repwise/recipes/banana-oat-tofu-smoothie",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 437,
+      "protein": 30.7,
+      "carbs": 49.6,
+      "fat": 15.4,
+      "fibre": 8.2
+    },
+    "allergens": [
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tofu-akuri-toast",
+    "title": "Tofu akuri on wholemeal toast",
+    "cuisine": "indian",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 10,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 180
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "tomato",
+        "grams": 60
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 5
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 5
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "bread-wholemeal",
+        "grams": 40
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Fry the onion in the oil until soft, add the chilli, cumin and turmeric.",
+      "Crumble in the tofu with the tomato and cook for 4 minutes, keeping it soft.",
+      "Stir through the coriander and spoon over the toast."
+    ],
+    "mediaId": "repwise/recipes/tofu-akuri-toast",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 450,
+      "protein": 37.6,
+      "carbs": 30,
+      "fat": 23.5,
+      "fibre": 8.5
+    },
+    "allergens": [
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "maple-tempeh-sandwich",
+    "title": "Smoky maple tempeh sandwich",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 8,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tempeh",
+        "grams": 120
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 70
+      },
+      {
+        "foodId": "tomato",
+        "grams": 60
+      },
+      {
+        "foodId": "romaine",
+        "grams": 20
+      },
+      {
+        "foodId": "maple-syrup",
+        "grams": 8
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 4
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Slice the tempeh thinly and brush with the maple syrup, paprika and a pinch of salt.",
+      "Fry in the oil for 2 to 3 minutes a side until crisp at the edges.",
+      "Layer on toasted sourdough with the tomato and lettuce."
+    ],
+    "mediaId": "repwise/recipes/maple-tempeh-sandwich",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 497,
+      "protein": 33,
+      "carbs": 54.9,
+      "fat": 19.1,
+      "fibre": 3.4
+    },
+    "allergens": [
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tvp-breakfast-burrito",
+    "title": "Soya and black bean breakfast burrito",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tvp",
+        "grams": 80
+      },
+      {
+        "foodId": "tortilla-flour",
+        "grams": 120
+      },
+      {
+        "foodId": "black-beans",
+        "grams": 160
+      },
+      {
+        "foodId": "salsa",
+        "grams": 80
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 80
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 160
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Soak the soya mince in the hot stock for 10 minutes.",
+      "Fry the onion and pepper in the oil, then add the mince, beans and cumin for 5 minutes.",
+      "Fill the warmed tortillas with the mix and salsa and roll tightly.",
+      "Toast seam-side down in a dry pan to seal."
+    ],
+    "mediaId": "repwise/recipes/tvp-breakfast-burrito",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 464,
+      "protein": 32,
+      "carbs": 65.5,
+      "fat": 10.1,
+      "fibre": 16.8
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "chickpea-omelette-mushroom",
+    "title": "Chickpea flour omelette with mushrooms and tofu",
+    "cuisine": "mediterranean",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 10,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpea-flour",
+        "grams": 70
+      },
+      {
+        "foodId": "tofu",
+        "grams": 70
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 80
+      },
+      {
+        "foodId": "spinach",
+        "grams": 40
+      },
+      {
+        "foodId": "garlic-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Whisk the chickpea flour, garlic powder, turmeric and salt with 120 ml water.",
+      "Fry the sliced mushrooms and crumbled tofu in the oil, then add the spinach to wilt.",
+      "Pour the batter over, cover and cook on low for 4 minutes until set.",
+      "Fold and serve."
+    ],
+    "mediaId": "repwise/recipes/chickpea-omelette-mushroom",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 458,
+      "protein": 31.7,
+      "carbs": 47.9,
+      "fat": 17.2,
+      "fibre": 11.2
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "buckwheat-hemp-porridge",
+    "title": "Buckwheat and hemp porridge",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "buckwheat",
+        "grams": 45
+      },
+      {
+        "foodId": "soy-milk",
+        "grams": 250
+      },
+      {
+        "foodId": "hemp-seeds",
+        "grams": 35
+      },
+      {
+        "foodId": "blueberries",
+        "grams": 60
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Simmer the buckwheat in the soy milk with the cinnamon for 10 minutes until creamy.",
+      "Top with the hemp seeds and blueberries."
+    ],
+    "mediaId": "repwise/recipes/buckwheat-hemp-porridge",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 468,
+      "protein": 24,
+      "carbs": 50.6,
+      "fat": 22.5,
+      "fibre": 9.3
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "nuts_seeds"
+  },
+  {
+    "id": "tvp-chili-sin-carne",
+    "title": "Soya chili sin carne",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tvp",
+        "grams": 200
+      },
+      {
+        "foodId": "kidney-beans",
+        "grams": 480
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 800
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "cumin",
+        "grams": 6
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 6
+      },
+      {
+        "foodId": "paprika",
+        "grams": 4
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 400
+      },
+      {
+        "foodId": "rice-brown",
+        "grams": 160
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Soak the soya mince in the hot stock for 10 minutes.",
+      "Fry the onion and pepper in the oil for 6 minutes, then add the garlic and spices.",
+      "Add the soya with its stock, tomatoes and drained beans and simmer for 25 minutes.",
+      "Cook the rice and serve the chili over it."
+    ],
+    "mediaId": "repwise/recipes/tvp-chili-sin-carne",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 582,
+      "protein": 41.7,
+      "carbs": 89.8,
+      "fat": 9.7,
+      "fibre": 23.1
+    },
+    "allergens": [
+      "celery",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tvp-ragu-penne",
+    "title": "Soya ragù with penne",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tvp",
+        "grams": 200
+      },
+      {
+        "foodId": "pasta",
+        "grams": 240
+      },
+      {
+        "foodId": "passata",
+        "grams": 800
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "oregano",
+        "grams": 3
+      },
+      {
+        "foodId": "basil",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 24
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 400
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Soak the soya mince in the hot stock for 10 minutes.",
+      "Gently fry the finely chopped onion and carrot in the oil for 8 minutes, then the garlic.",
+      "Add the soya, passata and oregano and simmer for 20 minutes.",
+      "Cook the penne, toss with the sauce and finish with basil."
+    ],
+    "mediaId": "repwise/recipes/tvp-ragu-penne",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 530,
+      "protein": 37.2,
+      "carbs": 81.9,
+      "fat": 8.4,
+      "fibre": 15.8
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "soya-machboos",
+    "title": "Soya chunk machboos",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tvp",
+        "grams": 240
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 240
+      },
+      {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 200
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 30
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 2
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 2
+      },
+      {
+        "foodId": "cumin",
+        "grams": 4
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 2
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 24
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 900
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Soak the soya chunks in half the hot stock for 10 minutes and squeeze dry.",
+      "Brown the onion in the oil, then add garlic, the spices and tomato paste.",
+      "Add the tomato and soya and cook for 5 minutes.",
+      "Stir in the washed rice and the rest of the stock, cover and cook gently for 20 minutes.",
+      "Finish with lime juice and coriander."
+    ],
+    "mediaId": "repwise/recipes/soya-machboos",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 535,
+      "protein": 37.8,
+      "carbs": 82.9,
+      "fat": 7.9,
+      "fibre": 14.3
+    },
+    "allergens": [
+      "celery",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "seitan-shawarma-plate",
+    "title": "Seitan shawarma plate",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 20,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "vital-wheat-gluten",
+        "grams": 120
+      },
+      {
+        "foodId": "chickpea-flour",
+        "grams": 20
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 140
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "garlic-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "tahini",
+        "grams": 30
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 120
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 80
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 14
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Mix the gluten, chickpea flour and half the spices, add the stock and knead into a dough.",
+      "Simmer the dough as a flat log in covered water for 20 minutes, then slice thinly.",
+      "Fry the slices in the oil with the remaining spices and the onion until crisp.",
+      "Cook the rice and chop the cucumber, tomato and parsley into a salad.",
+      "Whisk the tahini with lemon and water and pour over the plate."
+    ],
+    "mediaId": "repwise/recipes/seitan-shawarma-plate",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 614,
+      "protein": 55.2,
+      "carbs": 61.4,
+      "fat": 18.1,
+      "fibre": 6.3
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "sesame"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "soya-chunk-curry",
+    "title": "Soya chunk and pea curry",
+    "cuisine": "pakistani",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tvp",
+        "grams": 200
+      },
+      {
+        "foodId": "peas",
+        "grams": 300
+      },
+      {
+        "foodId": "tomato",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 200
+      },
+      {
+        "foodId": "ginger",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 10
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 3
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 4
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 4
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 30
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 200
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Boil the soya chunks for 5 minutes, drain and squeeze dry.",
+      "Fry the onion until deep golden, then add ginger, garlic, chilli and the ground spices.",
+      "Add the tomato and cook to a thick masala.",
+      "Add the soya and peas with a cup of water and simmer for 15 minutes.",
+      "Serve with boiled rice and coriander."
+    ],
+    "mediaId": "repwise/recipes/soya-chunk-curry",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 526,
+      "protein": 35.4,
+      "carbs": 79.5,
+      "fat": 9.4,
+      "fibre": 16
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tofu-tikka-skewers",
+    "title": "Tofu tikka skewers with mint chutney",
+    "cuisine": "indian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 400
+      },
+      {
+        "foodId": "soy-yogurt",
+        "grams": 100
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 3
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "mint",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cube the tofu and coat in the soy yoghurt, garlic, ginger, spices, half the lemon and salt.",
+      "Thread onto skewers with the pepper and onion.",
+      "Grill or roast at 220 °C for 15 minutes, turning once.",
+      "Blend the mint with the rest of the lemon and a spoon of water for the chutney, and serve with boiled rice."
+    ],
+    "mediaId": "repwise/recipes/tofu-tikka-skewers",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 603,
+      "protein": 41.8,
+      "carbs": 64.5,
+      "fat": 23.5,
+      "fibre": 9.3
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "red-lentil-tofu-dal",
+    "title": "Red lentil and tofu dal",
+    "cuisine": "indian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "red-lentils",
+        "grams": 120
+      },
+      {
+        "foodId": "tofu",
+        "grams": 240
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 2
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "spinach",
+        "grams": 80
+      },
+      {
+        "foodId": "rice-brown",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Simmer the lentils with turmeric in 600 ml water for 20 minutes until soft.",
+      "Fry the onion, garlic, ginger and cumin in the oil, add the tomato and cook down.",
+      "Stir the masala, cubed tofu and spinach into the lentils and simmer for 5 minutes.",
+      "Serve with brown rice."
+    ],
+    "mediaId": "repwise/recipes/red-lentil-tofu-dal",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 599,
+      "protein": 40.3,
+      "carbs": 75.6,
+      "fat": 18.5,
+      "fibre": 13.3
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "greek-tofu-souvlaki",
+    "title": "Lemon-oregano tofu souvlaki with salad",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 400
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "oregano",
+        "grams": 3
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 16
+      },
+      {
+        "foodId": "hummus",
+        "grams": 60
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "romaine",
+        "grams": 80
+      },
+      {
+        "foodId": "olives",
+        "grams": 30
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cube the tofu and toss with the lemon, oregano, garlic, half the oil and salt.",
+      "Grill or pan-fry for 12 minutes until golden on all sides.",
+      "Chop the cucumber, tomato, onion and lettuce and dress with the remaining oil.",
+      "Serve the tofu over the salad with the olives, hummus and boiled rice."
+    ],
+    "mediaId": "repwise/recipes/greek-tofu-souvlaki",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 611,
+      "protein": 41.4,
+      "carbs": 47.2,
+      "fat": 32.9,
+      "fibre": 10.1
+    },
+    "allergens": [
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "seitan-roast-dinner",
+    "title": "Seitan roast with roast potatoes and veg",
+    "cuisine": "british",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 50,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "vital-wheat-gluten",
+        "grams": 240
+      },
+      {
+        "foodId": "chickpea-flour",
+        "grams": 40
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 600
+      },
+      {
+        "foodId": "thyme",
+        "grams": 2
+      },
+      {
+        "foodId": "garlic-powder",
+        "grams": 4
+      },
+      {
+        "foodId": "potato",
+        "grams": 600
+      },
+      {
+        "foodId": "carrot",
+        "grams": 300
+      },
+      {
+        "foodId": "peas",
+        "grams": 240
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 30
+      },
+      {
+        "foodId": "cornflour",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Mix the gluten, chickpea flour, thyme and garlic powder with 280 ml stock and knead into a loaf.",
+      "Wrap tightly in foil and steam or bake in a covered tray of water at 180 °C for 45 minutes.",
+      "Roast the potatoes and carrots in the oil at 200 °C for 45 minutes.",
+      "Boil the peas and thicken the remaining stock with the cornflour for gravy.",
+      "Slice the seitan and serve with the vegetables and gravy."
+    ],
+    "mediaId": "repwise/recipes/seitan-roast-dinner",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 541,
+      "protein": 54.8,
+      "carbs": 60.3,
+      "fat": 10,
+      "fibre": 9.7
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "tempeh-buddha-bowl",
+    "title": "Tempeh, quinoa and edamame bowl",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tempeh",
+        "grams": 240
+      },
+      {
+        "foodId": "quinoa",
+        "grams": 80
+      },
+      {
+        "foodId": "edamame",
+        "grams": 100
+      },
+      {
+        "foodId": "kale",
+        "grams": 100
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "tahini",
+        "grams": 20
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cook the quinoa.",
+      "Slice the tempeh and fry in the oil until golden, then add the kale for the last minute.",
+      "Boil the edamame for 3 minutes and grate the carrot.",
+      "Whisk the tahini with lemon, water and salt and pour over the bowls."
+    ],
+    "mediaId": "repwise/recipes/tempeh-buddha-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 567,
+      "protein": 39.2,
+      "carbs": 48.4,
+      "fat": 28,
+      "fibre": 9.6
+    },
+    "allergens": [
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tofu-sofritas-bowl",
+    "title": "Chipotle-style tofu sofritas bowl",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 300
+      },
+      {
+        "foodId": "black-beans",
+        "grams": 160
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 80
+      },
+      {
+        "foodId": "salsa",
+        "grams": 120
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 4
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "romaine",
+        "grams": 60
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Crumble the tofu and fry in the oil with the onion until it starts to brown.",
+      "Add the tomato paste, chilli, cumin and a splash of water and cook for 5 minutes.",
+      "Cook the rice and warm the beans.",
+      "Build bowls with rice, beans, tofu, lettuce and salsa, then add lime."
+    ],
+    "mediaId": "repwise/recipes/tofu-sofritas-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 535,
+      "protein": 36.2,
+      "carbs": 61.4,
+      "fat": 19.5,
+      "fibre": 13.1
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "seitan-karahi",
+    "title": "Seitan karahi",
+    "cuisine": "pakistani",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 30,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "vital-wheat-gluten",
+        "grams": 100
+      },
+      {
+        "foodId": "chickpea-flour",
+        "grams": 20
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 120
+      },
+      {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
+        "foodId": "ginger",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 3
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 16
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 80
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Knead the gluten, chickpea flour and stock into a dough, simmer in covered water for 20 minutes and tear into chunks.",
+      "Fry the seitan in the oil until browned, then add the ginger, garlic and spices.",
+      "Add the chopped tomato and cook on high heat until it breaks down and coats the seitan.",
+      "Finish with green chilli and coriander and serve with rice."
+    ],
+    "mediaId": "repwise/recipes/seitan-karahi",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 496,
+      "protein": 45.2,
+      "carbs": 56.3,
+      "fat": 10.9,
+      "fibre": 5
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "red-lentil-spinach-soup",
+    "title": "Red lentil, spinach and hemp soup",
+    "cuisine": "british",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "red-lentils",
+        "grams": 160
+      },
+      {
+        "foodId": "spinach",
+        "grams": 150
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 800
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "hemp-seeds",
+        "grams": 20
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Soften the onion and carrot in the oil for 5 minutes.",
+      "Add the lentils, cumin and stock and simmer for 20 minutes.",
+      "Stir in the spinach to wilt, blend half and add the lemon.",
+      "Serve topped with the hemp seeds."
+    ],
+    "mediaId": "repwise/recipes/red-lentil-spinach-soup",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 443,
+      "protein": 26.4,
+      "carbs": 67.1,
+      "fat": 10.2,
+      "fibre": 12.9
+    },
+    "allergens": [
+      "celery"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "chilli-lime-seitan-bites",
+    "title": "Chilli-lime seitan bites",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "vital-wheat-gluten",
+        "grams": 80
+      },
+      {
+        "foodId": "chickpea-flour",
+        "grams": 20
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Mix the gluten, chickpea flour, garlic powder and paprika, add the stock and knead for 2 minutes.",
+      "Simmer as a flat log in covered water for 20 minutes, cool and cut into bite-size pieces.",
+      "Fry in the oil with the chilli powder until crisp and finish with lime juice.",
+      "Keeps in the fridge for 4 days."
+    ],
+    "mediaId": "repwise/recipes/chilli-lime-seitan-bites",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 235,
+      "protein": 32.9,
+      "carbs": 14.1,
+      "fat": 5.8,
+      "fibre": 2.1
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "tofu-chana-chaat",
+    "title": "Tofu chana chaat",
+    "cuisine": "indian",
+    "slots": [
+      "snack",
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 5,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 200
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 5
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cube the tofu and dry-fry until lightly golden.",
+      "Toss with the drained chickpeas, chopped onion, tomato, cucumber and chilli.",
+      "Season with lemon, cumin, chilli powder and salt, and finish with coriander."
+    ],
+    "mediaId": "repwise/recipes/tofu-chana-chaat",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 314,
+      "protein": 25.7,
+      "carbs": 32.7,
+      "fat": 11.7,
+      "fibre": 10.2
+    },
+    "allergens": [
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "bacon-eggs-avocado",
+    "title": "Bacon, eggs and avocado",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "bacon",
+        "grams": 40
+      },
+      {
+        "foodId": "avocado",
+        "grams": 70
+      },
+      {
+        "foodId": "butter",
+        "grams": 5
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Fry the bacon until crisp and set aside.",
+      "Fry the eggs in the butter to your liking.",
+      "Serve with the sliced avocado and season."
+    ],
+    "mediaId": "repwise/recipes/bacon-eggs-avocado",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 451,
+      "protein": 19.6,
+      "carbs": 7.3,
+      "fat": 38.7,
+      "fibre": 4.9
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "cheddar-mushroom-omelette",
+    "title": "Cheddar and mushroom omelette",
+    "cuisine": "british",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 30
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 60
+      },
+      {
+        "foodId": "butter",
+        "grams": 8
+      },
+      {
+        "foodId": "parsley",
+        "grams": 3
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Fry the sliced mushrooms in half the butter until golden and set aside.",
+      "Beat the eggs with salt, melt the rest of the butter and pour them in.",
+      "Stir gently, then let the base set and add the mushrooms and grated cheddar.",
+      "Fold and finish with parsley."
+    ],
+    "mediaId": "repwise/recipes/cheddar-mushroom-omelette",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 407,
+      "protein": 27.8,
+      "carbs": 4.2,
+      "fat": 30.9,
+      "fibre": 0.7
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "smoked-salmon-scramble",
+    "title": "Smoked salmon and cream cheese scramble",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 6,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 120
+      },
+      {
+        "foodId": "smoked-salmon",
+        "grams": 50
+      },
+      {
+        "foodId": "cream-cheese",
+        "grams": 30
+      },
+      {
+        "foodId": "butter",
+        "grams": 6
+      },
+      {
+        "foodId": "dill",
+        "grams": 2
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Beat the eggs and cook slowly in the butter, stirring, until just set.",
+      "Fold through the cream cheese in small pieces.",
+      "Top with the smoked salmon, dill and pepper."
+    ],
+    "mediaId": "repwise/recipes/smoked-salmon-scramble",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 381,
+      "protein": 26.4,
+      "carbs": 3.3,
+      "fat": 28.8,
+      "fibre": 0.3
+    },
+    "allergens": [
+      "eggs",
+      "fish",
+      "milk"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "spinach-feta-frittata",
+    "title": "Spinach and feta frittata",
+    "cuisine": "mediterranean",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 300
+      },
+      {
+        "foodId": "feta",
+        "grams": 80
+      },
+      {
+        "foodId": "spinach",
+        "grams": 120
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 16
+      },
+      {
+        "foodId": "oregano",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Wilt the spinach and spring onion in the oil in an ovenproof pan.",
+      "Pour in the beaten eggs and crumble over the feta and oregano.",
+      "Cook on low for 5 minutes, then finish under a hot grill until set and golden."
+    ],
+    "mediaId": "repwise/recipes/spinach-feta-frittata",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 411,
+      "protein": 26.6,
+      "carbs": 6.2,
+      "fat": 31.1,
+      "fibre": 1.9
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "green-shakshuka-feta",
+    "title": "Green shakshuka with feta",
+    "cuisine": "gulf",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "spinach",
+        "grams": 80
+      },
+      {
+        "foodId": "courgette",
+        "grams": 80
+      },
+      {
+        "foodId": "feta",
+        "grams": 25
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "garlic",
+        "grams": 4
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 3
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Cook the grated courgette, garlic, chilli and cumin in the oil for 4 minutes.",
+      "Add the spinach until wilted and make two wells.",
+      "Crack in the eggs, cover and cook until the whites set.",
+      "Crumble over the feta."
+    ],
+    "mediaId": "repwise/recipes/green-shakshuka-feta",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 358,
+      "protein": 19.9,
+      "carbs": 9.1,
+      "fat": 27.7,
+      "fibre": 2.8
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "masala-omelette-ghee",
+    "title": "Desi masala omelette",
+    "cuisine": "pakistani",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 6,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "egg-white",
+        "grams": 60
+      },
+      {
+        "foodId": "onion",
+        "grams": 20
+      },
+      {
+        "foodId": "tomato",
+        "grams": 30
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 4
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 4
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 0.5
+      },
+      {
+        "foodId": "ghee",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Beat the eggs and egg whites with the finely chopped onion, tomato, chilli, coriander, turmeric and salt.",
+      "Heat the ghee in a frying pan and pour in the mix.",
+      "Cook until the base is golden, flip and cook for 1 more minute."
+    ],
+    "mediaId": "repwise/recipes/masala-omelette-ghee",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 368,
+      "protein": 26.2,
+      "carbs": 5.4,
+      "fat": 26.4,
+      "fibre": 1
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "coconut-chia-pudding",
+    "title": "Coconut chia pudding with raspberries",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "chia-seeds",
+        "grams": 30
+      },
+      {
+        "foodId": "coconut-milk",
+        "grams": 150
+      },
+      {
+        "foodId": "raspberries",
+        "grams": 40
+      },
+      {
+        "foodId": "almonds",
+        "grams": 10
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Stir the chia seeds and cinnamon into the coconut milk and chill for at least 4 hours or overnight.",
+      "Top with the raspberries and chopped almonds."
+    ],
+    "mediaId": "repwise/recipes/coconut-chia-pudding",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 522,
+      "protein": 10.6,
+      "carbs": 24.6,
+      "fat": 46.4,
+      "fibre": 14.7
+    },
+    "allergens": [
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "nuts_seeds"
+  },
+  {
+    "id": "yogurt-walnut-hemp-bowl",
+    "title": "Greek yoghurt, walnut and hemp bowl",
+    "cuisine": "mediterranean",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "greek-yogurt",
+        "grams": 170
+      },
+      {
+        "foodId": "walnuts",
+        "grams": 25
+      },
+      {
+        "foodId": "hemp-seeds",
+        "grams": 15
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Spoon the yoghurt into a bowl.",
+      "Top with the chopped walnuts, hemp seeds and cinnamon."
+    ],
+    "mediaId": "repwise/recipes/yogurt-walnut-hemp-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 414,
+      "protein": 23.9,
+      "carbs": 12.3,
+      "fat": 32.1,
+      "fibre": 2.8
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "turkish-eggs-cilbir",
+    "title": "Turkish eggs with garlic yoghurt",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "greek-yogurt",
+        "grams": 100
+      },
+      {
+        "foodId": "butter",
+        "grams": 12
+      },
+      {
+        "foodId": "garlic",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 1
+      },
+      {
+        "foodId": "dill",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Stir the grated garlic and salt into the yoghurt and spread on a plate.",
+      "Poach the eggs for 3 minutes and set them on the yoghurt.",
+      "Melt the butter with the paprika until it foams and spoon it over.",
+      "Finish with dill."
+    ],
+    "mediaId": "repwise/recipes/turkish-eggs-cilbir",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 406,
+      "protein": 28.4,
+      "carbs": 6.7,
+      "fat": 29.1,
+      "fibre": 0.5
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "keto-full-english",
+    "title": "Low-carb full English",
+    "cuisine": "british",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "bacon",
+        "grams": 40
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 80
+      },
+      {
+        "foodId": "tomato",
+        "grams": 50
+      },
+      {
+        "foodId": "butter",
+        "grams": 10
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Grill or fry the bacon until crisp.",
+      "Fry the mushrooms and halved tomato in the butter.",
+      "Fry the eggs in the same pan and serve everything together."
+    ],
+    "mediaId": "repwise/recipes/keto-full-english",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 401,
+      "protein": 21.2,
+      "carbs": 5.9,
+      "fat": 32.8,
+      "fibre": 1.7
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "salmon-asparagus-lemon-butter",
+    "title": "Salmon with asparagus and lemon butter",
+    "cuisine": "british",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "salmon",
+        "grams": 150
+      },
+      {
+        "foodId": "asparagus",
+        "grams": 120
+      },
+      {
+        "foodId": "butter",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "dill",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Season the salmon and roast at 200 °C for 12 minutes with the asparagus alongside.",
+      "Melt the butter with the lemon juice and dill.",
+      "Pour over the salmon and asparagus to serve."
+    ],
+    "mediaId": "repwise/recipes/salmon-asparagus-lemon-butter",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 447,
+      "protein": 33.5,
+      "carbs": 5.5,
+      "fat": 32.4,
+      "fibre": 2.6
+    },
+    "allergens": [
+      "fish",
+      "milk"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "creamy-mushroom-chicken-thighs",
+    "title": "Creamy mushroom chicken thighs",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 360
+      },
+      {
+        "foodId": "cream",
+        "grams": 120
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 200
+      },
+      {
+        "foodId": "butter",
+        "grams": 20
+      },
+      {
+        "foodId": "spinach",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Brown the seasoned chicken thighs in the butter for 6 minutes a side and set aside.",
+      "Fry the mushrooms and garlic in the same pan until golden.",
+      "Add the cream and thyme, return the chicken and simmer for 10 minutes until cooked through.",
+      "Stir in the spinach to wilt."
+    ],
+    "mediaId": "repwise/recipes/creamy-mushroom-chicken-thighs",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 533,
+      "protein": 42,
+      "carbs": 8.1,
+      "fat": 37.7,
+      "fibre": 2.3
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "lamb-kofta-tzatziki",
+    "title": "Lamb kofta with tzatziki",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 12,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-mince",
+        "grams": 180
+      },
+      {
+        "foodId": "lamb-leg",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 30
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "greek-yogurt",
+        "grams": 120
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 120
+      },
+      {
+        "foodId": "garlic",
+        "grams": 4
+      },
+      {
+        "foodId": "mint",
+        "grams": 4
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Mince or finely chop the lamb leg and mix with the lamb mince, grated onion, parsley, cumin, cinnamon and salt and shape onto skewers.",
+      "Grill or pan-fry for 10 to 12 minutes, turning.",
+      "Grate the cucumber and stir into the yoghurt with the garlic, mint and oil.",
+      "Serve the kofta with the tzatziki."
+    ],
+    "mediaId": "repwise/recipes/lamb-kofta-tzatziki",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 482,
+      "protein": 36.6,
+      "carbs": 7.9,
+      "fat": 33.4,
+      "fibre": 1.3
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "cheeseburger-lettuce-wrap",
+    "title": "Cheeseburger lettuce wraps",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 150
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 25
+      },
+      {
+        "foodId": "romaine",
+        "grams": 60
+      },
+      {
+        "foodId": "tomato",
+        "grams": 30
+      },
+      {
+        "foodId": "mayonnaise",
+        "grams": 10
+      },
+      {
+        "foodId": "mustard",
+        "grams": 3
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Shape the beef into a patty, season and cook for 4 minutes a side.",
+      "Melt the cheddar on top for the last minute.",
+      "Wrap in the lettuce leaves with tomato, mayonnaise and mustard."
+    ],
+    "mediaId": "repwise/recipes/cheeseburger-lettuce-wrap",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 450,
+      "protein": 36.9,
+      "carbs": 4.2,
+      "fat": 31.2,
+      "fibre": 1.7
+    },
+    "allergens": [
+      "eggs",
+      "milk",
+      "mustard"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "keto-butter-chicken",
+    "title": "Butter chicken with cauliflower rice",
+    "cuisine": "indian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 360
+      },
+      {
+        "foodId": "butter",
+        "grams": 30
+      },
+      {
+        "foodId": "cream",
+        "grams": 120
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cauliflower",
+        "grams": 240
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Brown the diced chicken in half the butter and set aside.",
+      "Fry the garlic, ginger and spices in the rest of the butter, then add the tomato paste.",
+      "Stir in the cream, return the chicken and simmer for 12 minutes.",
+      "Grate the cauliflower and steam or microwave for 4 minutes.",
+      "Serve the chicken over the cauliflower rice with coriander."
+    ],
+    "mediaId": "repwise/recipes/keto-butter-chicken",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 586,
+      "protein": 40.7,
+      "carbs": 13,
+      "fat": 42.1,
+      "fibre": 3.6
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "chicken-karahi-ghee",
+    "title": "Chicken karahi in ghee",
+    "cuisine": "pakistani",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 360
+      },
+      {
+        "foodId": "ghee",
+        "grams": 50
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "ginger",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 10
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Fry the chicken pieces in the ghee on high heat until sealed.",
+      "Add the garlic and half the ginger, then the chopped tomato.",
+      "Cook uncovered until the tomato melts into a thick, glossy sauce and the chicken is cooked through.",
+      "Finish with green chilli, the rest of the ginger in thin strips, black pepper and coriander."
+    ],
+    "mediaId": "repwise/recipes/chicken-karahi-ghee",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 475,
+      "protein": 37.2,
+      "carbs": 7.9,
+      "fat": 32.8,
+      "fibre": 1.9
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "baharat-lamb-cauliflower",
+    "title": "Baharat lamb and cauliflower skillet",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-mince",
+        "grams": 200
+      },
+      {
+        "foodId": "lamb-leg",
+        "grams": 150
+      },
+      {
+        "foodId": "cauliflower",
+        "grams": 300
+      },
+      {
+        "foodId": "ghee",
+        "grams": 20
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Brown the lamb mince and diced lamb leg in the ghee, breaking up the mince.",
+      "Add the spices and tomato paste and cook for 2 minutes.",
+      "Add the cauliflower florets with a splash of water, cover and cook for 10 minutes until tender.",
+      "Finish with parsley."
+    ],
+    "mediaId": "repwise/recipes/baharat-lamb-cauliflower",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 528,
+      "protein": 35.6,
+      "carbs": 11.7,
+      "fat": 38.3,
+      "fibre": 4.6
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "mackerel-nicoise-salad",
+    "title": "Mackerel niçoise salad (no potato)",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "mackerel",
+        "grams": 120
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "green-beans",
+        "grams": 60
+      },
+      {
+        "foodId": "olives",
+        "grams": 30
+      },
+      {
+        "foodId": "romaine",
+        "grams": 50
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "vinegar-red-wine",
+        "grams": 5
+      },
+      {
+        "foodId": "mustard",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Boil the egg for 8 minutes and the green beans for 3, then cool.",
+      "Grill the mackerel for 3 minutes a side.",
+      "Whisk the oil, vinegar and mustard.",
+      "Arrange the lettuce, beans, olives, halved egg and flaked mackerel and dress."
+    ],
+    "mediaId": "repwise/recipes/mackerel-nicoise-salad",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 470,
+      "protein": 30.6,
+      "carbs": 8.1,
+      "fat": 35,
+      "fibre": 3.2
+    },
+    "allergens": [
+      "eggs",
+      "fish",
+      "mustard",
+      "sulphites"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "garlic-butter-steak-broccoli",
+    "title": "Garlic butter steak with broccoli",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-sirloin",
+        "grams": 180
+      },
+      {
+        "foodId": "butter",
+        "grams": 28
+      },
+      {
+        "foodId": "broccoli",
+        "grams": 80
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "garlic",
+        "grams": 4
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Season the steak and sear in the oil for 3 minutes a side, then rest.",
+      "Add the butter, garlic and thyme to the pan and spoon over the steak.",
+      "Steam the broccoli and toss it in the pan butter."
+    ],
+    "mediaId": "repwise/recipes/garlic-butter-steak-broccoli",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 524,
+      "protein": 42.3,
+      "carbs": 7.3,
+      "fat": 36.4,
+      "fibre": 2.5
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "garlic-prawn-courgetti",
+    "title": "Garlic butter prawns with courgetti",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 8,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 150
+      },
+      {
+        "foodId": "courgette",
+        "grams": 200
+      },
+      {
+        "foodId": "butter",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "parsley",
+        "grams": 4
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Spiralise or finely slice the courgette.",
+      "Cook the garlic in the butter and oil, add the prawns and cook for 3 minutes until pink.",
+      "Toss in the courgette for 1 minute with lemon and parsley.",
+      "Serve topped with parmesan."
+    ],
+    "mediaId": "repwise/recipes/garlic-prawn-courgetti",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 464,
+      "protein": 38.6,
+      "carbs": 9.3,
+      "fat": 31.4,
+      "fibre": 2.3
+    },
+    "allergens": [
+      "crustaceans",
+      "milk"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "chicken-caesar-no-croutons",
+    "title": "Chicken Caesar salad, no croutons",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 120
+      },
+      {
+        "foodId": "romaine",
+        "grams": 100
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 15
+      },
+      {
+        "foodId": "mayonnaise",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "garlic",
+        "grams": 2
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Season and grill the chicken for 5 minutes a side, then slice.",
+      "Mix the mayonnaise, oil, lemon, garlic and half the parmesan into a dressing.",
+      "Toss the lettuce with the dressing and top with the chicken and remaining parmesan."
+    ],
+    "mediaId": "repwise/recipes/chicken-caesar-no-croutons",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 451,
+      "protein": 34,
+      "carbs": 5.5,
+      "fat": 32.2,
+      "fibre": 2.4
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "anda-masala-curry",
+    "title": "Anda masala (egg curry)",
+    "cuisine": "pakistani",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "ghee",
+        "grams": 15
+      },
+      {
+        "foodId": "tomato",
+        "grams": 80
+      },
+      {
+        "foodId": "onion",
+        "grams": 30
+      },
+      {
+        "foodId": "cream",
+        "grams": 20
+      },
+      {
+        "foodId": "ginger",
+        "grams": 4
+      },
+      {
+        "foodId": "garlic",
+        "grams": 4
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 0.5
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 4
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Boil the eggs for 9 minutes, peel and score them.",
+      "Fry the onion in the ghee, add the ginger, garlic and spices, then the tomato.",
+      "Cook to a thick masala, stir in the cream and add the eggs for 3 minutes.",
+      "Finish with coriander."
+    ],
+    "mediaId": "repwise/recipes/anda-masala-curry",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 459,
+      "protein": 21.3,
+      "carbs": 11,
+      "fat": 37,
+      "fibre": 2.3
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "cauliflower-cheese-bake",
+    "title": "Cauliflower cheese",
+    "cuisine": "british",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "cauliflower",
+        "grams": 360
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 120
+      },
+      {
+        "foodId": "cream",
+        "grams": 80
+      },
+      {
+        "foodId": "butter",
+        "grams": 20
+      },
+      {
+        "foodId": "mustard",
+        "grams": 4
+      },
+      {
+        "foodId": "nutmeg",
+        "grams": 0.5
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Boil the cauliflower florets for 5 minutes and drain well.",
+      "Melt most of the cheddar into the cream and butter with the mustard and nutmeg.",
+      "Pour over the cauliflower, top with the rest of the cheese and bake at 200 °C for 20 minutes."
+    ],
+    "mediaId": "repwise/recipes/cauliflower-cheese-bake",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 497,
+      "protein": 18.5,
+      "carbs": 12.4,
+      "fat": 43.2,
+      "fibre": 3.7
+    },
+    "allergens": [
+      "milk",
+      "mustard"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "tuna-avocado-boats",
+    "title": "Tuna mayo avocado boats",
+    "cuisine": "global",
+    "slots": [
+      "lunch",
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tuna-canned",
+        "grams": 100
+      },
+      {
+        "foodId": "mayonnaise",
+        "grams": 20
+      },
+      {
+        "foodId": "avocado",
+        "grams": 100
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 5
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Mix the drained tuna with the mayonnaise, spring onion, lemon and pepper.",
+      "Halve and stone the avocado and pile the tuna into the halves."
+    ],
+    "mediaId": "repwise/recipes/tuna-avocado-boats",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 387,
+      "protein": 21.8,
+      "carbs": 10,
+      "fat": 30.7,
+      "fibre": 7.1
+    },
+    "allergens": [
+      "eggs",
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "devilled-eggs",
+    "title": "Devilled eggs",
+    "cuisine": "british",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 9,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "mayonnaise",
+        "grams": 15
+      },
+      {
+        "foodId": "mustard",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 0.5
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Boil the eggs for 9 minutes, cool and halve.",
+      "Mash the yolks with the mayonnaise, mustard and salt.",
+      "Pipe or spoon back into the whites and dust with paprika."
+    ],
+    "mediaId": "repwise/recipes/devilled-eggs",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 248,
+      "protein": 12.9,
+      "carbs": 1.2,
+      "fat": 20.9,
+      "fibre": 0.3
+    },
+    "allergens": [
+      "eggs",
+      "mustard"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "macadamia-cheddar-plate",
+    "title": "Macadamias with cheddar and cucumber",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "macadamias",
+        "grams": 20
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 30
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      }
+    ],
+    "steps": [
+      "Slice the cheddar and cucumber.",
+      "Serve with the macadamias."
+    ],
+    "mediaId": "repwise/recipes/macadamia-cheddar-plate",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 277,
+      "protein": 9,
+      "carbs": 6.7,
+      "fat": 25.2,
+      "fibre": 2.1
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "smoked-salmon-cucumber-bites",
+    "title": "Smoked salmon cucumber bites",
+    "cuisine": "british",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 8,
+    "cookMin": 0,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "smoked-salmon",
+        "grams": 60
+      },
+      {
+        "foodId": "cream-cheese",
+        "grams": 30
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "dill",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Cut the cucumber into thick rounds.",
+      "Top each with cream cheese, a fold of smoked salmon, dill and pepper."
+    ],
+    "mediaId": "repwise/recipes/smoked-salmon-cucumber-bites",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 189,
+      "protein": 13.5,
+      "carbs": 4.9,
+      "fat": 13,
+      "fibre": 0.5
+    },
+    "allergens": [
+      "fish",
+      "milk"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "egg-white-cheddar-omelette",
+    "title": "Egg white and cheddar omelette",
+    "cuisine": "british",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "egg-white",
+        "grams": 100
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 30
+      },
+      {
+        "foodId": "butter",
+        "grams": 8
+      },
+      {
+        "foodId": "spinach",
+        "grams": 30
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Whisk the eggs and egg whites with salt and pepper.",
+      "Melt the butter, pour in the eggs and stir gently until the base sets.",
+      "Add the spinach and grated cheddar, fold and cook for 1 more minute."
+    ],
+    "mediaId": "repwise/recipes/egg-white-cheddar-omelette",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 454,
+      "protein": 37.7,
+      "carbs": 4.5,
+      "fat": 31.1,
+      "fibre": 0.9
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "pan-seared-salmon-spinach",
+    "title": "Pan-seared salmon with garlic spinach",
+    "cuisine": "global",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "salmon",
+        "grams": 180
+      },
+      {
+        "foodId": "spinach",
+        "grams": 120
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "garlic",
+        "grams": 4
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Season the salmon and cook skin-side down in half the oil for 5 minutes, then 2 minutes on the other side.",
+      "Wilt the spinach with the garlic in the rest of the oil.",
+      "Serve with a squeeze of lemon."
+    ],
+    "mediaId": "repwise/recipes/pan-seared-salmon-spinach",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 480,
+      "protein": 40.5,
+      "carbs": 6.2,
+      "fat": 32.6,
+      "fibre": 2.7
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "gulf-spiced-grilled-mackerel",
+    "title": "Gulf-spiced grilled mackerel with salad",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "mackerel",
+        "grams": 180
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 60
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "garlic",
+        "grams": 3
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "parsley",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Rub the mackerel with the garlic, turmeric, cumin, pepper, salt and half the lemon.",
+      "Grill for 4 minutes a side until cooked through.",
+      "Chop the cucumber, tomato and parsley and dress with the oil and remaining lemon."
+    ],
+    "mediaId": "repwise/recipes/gulf-spiced-grilled-mackerel",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 466,
+      "protein": 35.5,
+      "carbs": 9.7,
+      "fat": 31.6,
+      "fibre": 2.1
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "sardine-rocket-plate",
+    "title": "Sardines with rocket and olive oil",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "sardines-canned",
+        "grams": 150
+      },
+      {
+        "foodId": "rocket",
+        "grams": 40
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 13
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 8
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Pile the rocket on a plate and lay the sardines on top.",
+      "Dress with the oil, lemon and pepper."
+    ],
+    "mediaId": "repwise/recipes/sardine-rocket-plate",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 441,
+      "protein": 38.1,
+      "carbs": 2.7,
+      "fat": 30.6,
+      "fibre": 0.9
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "chicken-thigh-avocado-salsa",
+    "title": "Chicken thighs with avocado salsa",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 200
+      },
+      {
+        "foodId": "avocado",
+        "grams": 80
+      },
+      {
+        "foodId": "tomato",
+        "grams": 40
+      },
+      {
+        "foodId": "onion",
+        "grams": 10
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 4
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 16
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Rub the chicken with the cumin, chilli, salt and half the oil.",
+      "Pan-fry for 6 minutes a side until cooked through.",
+      "Dice the avocado, tomato and onion and mix with the lime, coriander and remaining oil.",
+      "Spoon the salsa over the chicken."
+    ],
+    "mediaId": "repwise/recipes/chicken-thigh-avocado-salsa",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 533,
+      "protein": 41.9,
+      "carbs": 11.2,
+      "fat": 36.4,
+      "fibre": 6.6
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "tandoori-chicken-wings",
+    "title": "Tandoori chicken wings",
+    "cuisine": "pakistani",
+    "slots": [
+      "lunch",
+      "dinner",
+      "snack"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-wings",
+        "grams": 300
+      },
+      {
+        "foodId": "greek-yogurt",
+        "grams": 40
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 3
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "ginger",
+        "grams": 6
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "ghee",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Mix the yoghurt, spices, garlic, ginger, lemon and salt and coat the wings.",
+      "Marinate for at least 30 minutes.",
+      "Roast at 220 °C for 30 minutes, brushing with the ghee halfway, until charred and cooked through."
+    ],
+    "mediaId": "repwise/recipes/tandoori-chicken-wings",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 348,
+      "protein": 28.7,
+      "carbs": 3.9,
+      "fat": 23.8,
+      "fibre": 0.8
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "beef-seekh-kebab-raita",
+    "title": "Beef seekh kebab with raita",
+    "cuisine": "pakistani",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 15,
+    "cookMin": 12,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince",
+        "grams": 100
+      },
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 20
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 4
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 5
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "ghee",
+        "grams": 5
+      },
+      {
+        "foodId": "greek-yogurt",
+        "grams": 60
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 40
+      },
+      {
+        "foodId": "mint",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Mix both minces with the grated onion, chilli, coriander, spices and salt and squeeze onto skewers.",
+      "Grill for 10 to 12 minutes, turning and brushing with the ghee.",
+      "Stir the grated cucumber and mint into the yoghurt for raita."
+    ],
+    "mediaId": "repwise/recipes/beef-seekh-kebab-raita",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 556,
+      "protein": 43.7,
+      "carbs": 7.4,
+      "fat": 38.4,
+      "fibre": 1.3
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "turkey-swiss-roll-ups",
+    "title": "Turkey and Swiss cheese roll-ups",
+    "cuisine": "american",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-slices",
+        "grams": 60
+      },
+      {
+        "foodId": "swiss-cheese",
+        "grams": 30
+      },
+      {
+        "foodId": "mayonnaise",
+        "grams": 5
+      },
+      {
+        "foodId": "romaine",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Lay out the turkey slices and spread thinly with mayonnaise.",
+      "Add a strip of cheese and a lettuce leaf and roll up tightly."
+    ],
+    "mediaId": "repwise/recipes/turkey-swiss-roll-ups",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 218,
+      "protein": 17.2,
+      "carbs": 2.3,
+      "fat": 15.4,
+      "fibre": 0.3
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "celery-almond-butter",
+    "title": "Celery with almond butter",
+    "cuisine": "american",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "celery",
+        "grams": 80
+      },
+      {
+        "foodId": "almond-butter",
+        "grams": 30
+      }
+    ],
+    "steps": [
+      "Cut the celery into sticks.",
+      "Spread or dip with the almond butter."
+    ],
+    "mediaId": "repwise/recipes/celery-almond-butter",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 195,
+      "protein": 6.9,
+      "carbs": 8,
+      "fat": 16.8,
+      "fibre": 4.4
+    },
+    "allergens": [
+      "celery",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "nuts_seeds"
+  },
+  {
+    "id": "olives-feta-cubes",
+    "title": "Marinated olives and feta",
+    "cuisine": "mediterranean",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "olives",
+        "grams": 40
+      },
+      {
+        "foodId": "feta",
+        "grams": 40
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 3
+      },
+      {
+        "foodId": "oregano",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Cube the feta and toss with the olives, oil and oregano.",
+      "Leave for 10 minutes for the flavours to mix."
+    ],
+    "mediaId": "repwise/recipes/olives-feta-cubes",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 180,
+      "protein": 6,
+      "carbs": 4.3,
+      "fat": 16,
+      "fibre": 0.9
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "pecan-coconut-bites",
+    "title": "Pecan and coconut bites",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "pecans",
+        "grams": 30
+      },
+      {
+        "foodId": "coconut-desiccated",
+        "grams": 30
+      },
+      {
+        "foodId": "coconut-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Chop the pecans finely and mix with the coconut, cinnamon and melted coconut oil.",
+      "Press into small mounds on a lined tray and chill for 20 minutes until firm."
+    ],
+    "mediaId": "repwise/recipes/pecan-coconut-bites",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 248,
+      "protein": 2.4,
+      "carbs": 6,
+      "fat": 25.4,
+      "fibre": 4.2
+    },
+    "allergens": [
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "nuts_seeds"
+  },
+  {
+    "id": "parmesan-crisps-guacamole",
+    "title": "Parmesan crisps with guacamole",
+    "cuisine": "mexican",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 6,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "parmesan",
+        "grams": 20
+      },
+      {
+        "foodId": "avocado",
+        "grams": 60
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "onion",
+        "grams": 5
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Spoon the grated parmesan into small rounds on a lined tray and bake at 200 °C for 5 to 6 minutes until crisp.",
+      "Mash the avocado with the lime, onion, coriander and salt.",
+      "Serve the crisps with the guacamole."
+    ],
+    "mediaId": "repwise/recipes/parmesan-crisps-guacamole",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 178,
+      "protein": 8.5,
+      "carbs": 6.7,
+      "fat": 13.8,
+      "fibre": 4.2
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "keema-palak-ghee",
+    "title": "Keema palak (lamb mince with spinach)",
+    "cuisine": "pakistani",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-mince",
+        "grams": 300
+      },
+      {
+        "foodId": "spinach",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "tomato",
+        "grams": 80
+      },
+      {
+        "foodId": "ghee",
+        "grams": 15
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "green-chilli",
+        "grams": 6
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Fry the onion in the ghee until golden, then add the ginger, garlic, chilli and spices.",
+      "Add the lamb mince and cook, breaking it up, until browned.",
+      "Add the tomato and cook for 5 minutes, then the chopped spinach.",
+      "Simmer uncovered until the spinach melts into the keema."
+    ],
+    "mediaId": "repwise/recipes/keema-palak-ghee",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 557,
+      "protein": 30.6,
+      "carbs": 12.5,
+      "fat": 43.7,
+      "fibre": 5
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "lamb-aubergine-skillet",
+    "title": "Spiced lamb and aubergine skillet",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-mince",
+        "grams": 250
+      },
+      {
+        "foodId": "aubergine",
+        "grams": 300
+      },
+      {
+        "foodId": "ghee",
+        "grams": 15
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cube the aubergine and fry in the ghee until soft and browned, then set aside.",
+      "Brown the lamb with the garlic and spices.",
+      "Stir in the tomato paste and a splash of water, return the aubergine and cook for 5 minutes.",
+      "Finish with parsley."
+    ],
+    "mediaId": "repwise/recipes/lamb-aubergine-skillet",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 476,
+      "protein": 23.2,
+      "carbs": 13,
+      "fat": 37.4,
+      "fibre": 5.6
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "coconut-prawn-curry",
+    "title": "Coconut prawn curry with spinach",
+    "cuisine": "indian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 200
+      },
+      {
+        "foodId": "coconut-milk",
+        "grams": 300
+      },
+      {
+        "foodId": "spinach",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 30
+      },
+      {
+        "foodId": "ginger",
+        "grams": 6
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "coconut-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Fry the onion, ginger and garlic in the coconut oil, then add the turmeric and chilli.",
+      "Pour in the coconut milk and simmer for 5 minutes.",
+      "Add the prawns and spinach and cook for 3 to 4 minutes until the prawns turn pink.",
+      "Finish with lime and coriander."
+    ],
+    "mediaId": "repwise/recipes/coconut-prawn-curry",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 456,
+      "protein": 25.2,
+      "carbs": 10.3,
+      "fat": 37.8,
+      "fibre": 2
+    },
+    "allergens": [
+      "crustaceans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "beef-chili-sour-cream-bowl",
+    "title": "Beef chili bowl with sour cream and avocado",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince",
+        "grams": 300
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "green-pepper",
+        "grams": 60
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 3
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 40
+      },
+      {
+        "foodId": "sour-cream",
+        "grams": 60
+      },
+      {
+        "foodId": "avocado",
+        "grams": 80
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Brown the beef in the oil with the onion, pepper and garlic.",
+      "Add the spices and chopped tomato and simmer for 15 minutes.",
+      "Serve topped with grated cheddar, sour cream and sliced avocado."
+    ],
+    "mediaId": "repwise/recipes/beef-chili-sour-cream-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 647,
+      "protein": 33.6,
+      "carbs": 13.8,
+      "fat": 51.5,
+      "fibre": 5.1
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "salmon-avocado-mayo-salad",
+    "title": "Salmon and avocado salad",
+    "cuisine": "british",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "salmon",
+        "grams": 120
+      },
+      {
+        "foodId": "avocado",
+        "grams": 80
+      },
+      {
+        "foodId": "mayonnaise",
+        "grams": 15
+      },
+      {
+        "foodId": "romaine",
+        "grams": 60
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 50
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "dill",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Roast or pan-fry the salmon for 10 minutes, cool slightly and flake.",
+      "Mix the mayonnaise with lemon and dill.",
+      "Toss the lettuce, cucumber and avocado and top with the salmon and dressing."
+    ],
+    "mediaId": "repwise/recipes/salmon-avocado-mayo-salad",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 499,
+      "protein": 27.4,
+      "carbs": 11.1,
+      "fat": 39.3,
+      "fibre": 6.9
+    },
+    "allergens": [
+      "eggs",
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "low_carb",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "labneh-chickpea-bowl",
+    "title": "Labneh, chickpea and za’atar bowl",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 8,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 220
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 120
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "tomato",
+        "grams": 80
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "sesame-seeds",
+        "grams": 4
+      },
+      {
+        "foodId": "mint",
+        "grams": 3
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Season the yoghurt with salt and spread it thickly in a bowl.",
+      "Top with the drained chickpeas, diced cucumber and tomato.",
+      "Mix the thyme and sesame for a quick za’atar and scatter over with the mint.",
+      "Finish with the oil and lemon."
+    ],
+    "mediaId": "repwise/recipes/labneh-chickpea-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 403,
+      "protein": 33,
+      "carbs": 43.6,
+      "fat": 12.2,
+      "fibre": 10
+    },
+    "allergens": [
+      "milk",
+      "sesame"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "paneer-tikka-salad",
+    "title": "Paneer tikka with kachumber salad",
+    "cuisine": "indian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "paneer",
+        "grams": 220
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 220
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 3
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "ginger",
+        "grams": 6
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cube the paneer and coat with half the yoghurt, the garlic, ginger, spices, half the lemon and salt.",
+      "Thread onto skewers with the pepper and onion and grill or roast at 220 °C for 12 minutes.",
+      "Dice the cucumber, tomato and coriander with the rest of the lemon for the salad.",
+      "Serve the tikka with the salad and the remaining yoghurt as a dip."
+    ],
+    "mediaId": "repwise/recipes/paneer-tikka-salad",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 503,
+      "protein": 32,
+      "carbs": 47,
+      "fat": 21.5,
+      "fibre": 4.6
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "spinach-ricotta-lentil-bake",
+    "title": "Spinach, ricotta and lentil bake",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "ricotta",
+        "grams": 250
+      },
+      {
+        "foodId": "lentils",
+        "grams": 80
+      },
+      {
+        "foodId": "spinach",
+        "grams": 200
+      },
+      {
+        "foodId": "passata",
+        "grams": 300
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 30
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "basil",
+        "grams": 8
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Simmer the lentils for 20 minutes until tender and drain.",
+      "Wilt the spinach with the garlic in the oil and mix with the lentils and half the passata.",
+      "Spread in a dish, spoon over the ricotta and remaining passata and scatter with parmesan.",
+      "Bake at 200 °C for 20 minutes and finish with basil."
+    ],
+    "mediaId": "repwise/recipes/spinach-ricotta-lentil-bake",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 472,
+      "protein": 34.5,
+      "carbs": 44.9,
+      "fat": 19,
+      "fibre": 8.9
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "ricotta-berry-protein-bowl",
+    "title": "Ricotta, yoghurt and berry protein bowl",
+    "cuisine": "italian",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "ricotta",
+        "grams": 150
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 100
+      },
+      {
+        "foodId": "mixed-berries",
+        "grams": 100
+      },
+      {
+        "foodId": "hemp-seeds",
+        "grams": 10
+      },
+      {
+        "foodId": "honey",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Beat the ricotta and yoghurt together until smooth.",
+      "Top with the berries, hemp seeds and a drizzle of honey."
+    ],
+    "mediaId": "repwise/recipes/ricotta-berry-protein-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 381,
+      "protein": 30.9,
+      "carbs": 27.8,
+      "fat": 17.2,
+      "fibre": 2.5
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "whey-banana-smoothie",
+    "title": "Whey, banana and milk smoothie",
+    "cuisine": "american",
+    "slots": [
+      "breakfast",
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "whey-protein",
+        "grams": 30
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 300
+      },
+      {
+        "foodId": "banana",
+        "grams": 100
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Blend everything with a few ice cubes until smooth.",
+      "Drink straight away."
+    ],
+    "mediaId": "repwise/recipes/whey-banana-smoothie",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 349,
+      "protein": 28.5,
+      "carbs": 46.7,
+      "fat": 6.7,
+      "fibre": 3.1
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "labneh-cucumber-mint-pot",
+    "title": "Labneh pot with cucumber and mint",
+    "cuisine": "gulf",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 200
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "mint",
+        "grams": 3
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 0.5
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Season the yoghurt with salt and spoon into a bowl.",
+      "Top with diced cucumber, torn mint, a drizzle of oil and a pinch of paprika."
+    ],
+    "mediaId": "repwise/recipes/labneh-cucumber-mint-pot",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 159,
+      "protein": 21.1,
+      "carbs": 10.6,
+      "fat": 4,
+      "fibre": 0.8
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "cottage-cheese-lentil-salad",
+    "title": "Cottage cheese and lentil salad",
+    "cuisine": "british",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "cottage-cheese",
+        "grams": 200
+      },
+      {
+        "foodId": "lentils",
+        "grams": 60
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "rocket",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "vinegar-cider",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Simmer the lentils for 20 minutes until tender, drain and cool.",
+      "Toss with the chopped tomato, cucumber, rocket, oil and vinegar.",
+      "Top with the cottage cheese."
+    ],
+    "mediaId": "repwise/recipes/cottage-cheese-lentil-salad",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 456,
+      "protein": 38,
+      "carbs": 55.6,
+      "fat": 10.8,
+      "fibre": 8.5
+    },
+    "allergens": [
+      "milk",
+      "sulphites"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
   }
 ]

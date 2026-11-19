@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
+import { ensureWeekMeals } from '@/features/meals';
 import { customRecipesRepo } from '@/features/meals/repo';
 import { useCatalog, type Catalog } from '@/services/catalog';
 
@@ -49,6 +50,21 @@ export function useToday(nowOverride?: number): TodayModel {
   );
   const catalog = useCatalog();
   const hour = localHour(now);
+
+  // Meals are planned offline by the meals domain, the same way as on Eat: once the catalogue and
+  // an onboarded profile are there, fill any missing day of this week (writes reload the snapshot).
+  const profileStamp = data?.profile?.onboardedAt ? data.profile.updatedAt : null;
+  useEffect(() => {
+    if (!catalog || profileStamp == null) return;
+    const id = setTimeout(() => {
+      try {
+        ensureWeekMeals(date, Date.now());
+      } catch {
+        // planning is best effort; Today still shows what is stored
+      }
+    }, 0);
+    return () => clearTimeout(id);
+  }, [catalog, date, profileStamp]);
   const minutes = minutesOfDay(now);
 
   const view = useMemo(

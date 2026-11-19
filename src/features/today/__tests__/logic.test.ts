@@ -22,15 +22,7 @@ import {
   slotLabel,
   sumNutrients,
 } from '../logic/meals';
-import {
-  DEFAULT_GOAL_GLASSES,
-  GLASS_ML,
-  isWaterLog,
-  waterGlasses,
-  waterLogName,
-  waterMlOf,
-  waterTotalMl,
-} from '../logic/water';
+import { waterGlasses } from '../logic/water';
 import { estimateMinutes, humanize, pickTodaySession, topMuscles, totalSets, workoutMeta } from '../logic/workout';
 
 describe('day', () => {
@@ -165,24 +157,12 @@ describe('meals', () => {
 });
 
 describe('water', () => {
-  it('reads amounts from names and totals only water rows', () => {
-    expect(waterLogName()).toBe(`Water ${GLASS_ML} ml`);
-    expect(waterMlOf('Water 500 ml')).toBe(500);
-    expect(waterMlOf('Water')).toBe(GLASS_ML);
-    expect(isWaterLog({ slot: 'water' })).toBe(true);
-    expect(isWaterLog({ slot: 'lunch' })).toBe(false);
-    const rows = [
-      { slot: 'water', name: 'Water 250 ml' },
-      { slot: 'water', name: 'Water 500 ml' },
-      { slot: 'lunch', name: 'Chicken karahi' },
-    ];
-    expect(waterTotalMl(rows)).toBe(750);
-  });
-
-  it('glasses are capped at the goal', () => {
-    expect(waterGlasses(750)).toEqual({ filled: 3, goal: DEFAULT_GOAL_GLASSES, goalMl: 2000 });
-    expect(waterGlasses(5000).filled).toBe(DEFAULT_GOAL_GLASSES);
-    expect(waterGlasses(0, 6)).toEqual({ filled: 0, goal: 6, goalMl: 1500 });
+  it('glasses follow the user goal and are capped at it', () => {
+    expect(waterGlasses(750)).toEqual({ filled: 3, goal: 8, goalMl: 2000 });
+    expect(waterGlasses(5000).filled).toBe(8);
+    expect(waterGlasses(0, 1500)).toEqual({ filled: 0, goal: 6, goalMl: 1500 });
+    expect(waterGlasses(2600, 3000)).toEqual({ filled: 10, goal: 12, goalMl: 3000 });
+    expect(waterGlasses(-100, 1000)).toEqual({ filled: 0, goal: 4, goalMl: 1000 });
   });
 });
 
