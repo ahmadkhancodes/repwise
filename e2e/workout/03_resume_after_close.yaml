@@ -1,0 +1,76 @@
+# P0 workout crash-safety: a workout in progress survives the app being killed. The resume
+# banner brings it back with the clock still running and logged sets intact. Offline.
+# Precondition: onboarding done, no workout in progress. Works on iOS and Android.
+appId: com.client.repwise
+name: Workout - resume after the app is killed
+tags:
+  - workout
+  - p0
+---
+- launchApp
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - setAirplaneMode: enabled
+- tapOn:
+    id: "tab-train"
+- tapOn:
+    id: "train-start"
+- extendedWaitUntil:
+    visible:
+      id: "screen-workout"
+    timeout: 10000
+- runFlow:
+    when:
+      visible:
+        id: "player-empty"
+    commands:
+      - tapOn:
+          id: "player-empty-action"
+      - tapOn:
+          id: "pick-search"
+      - inputText: "squat"
+      - tapOn:
+          id: "pick-barbell-back-squat"
+- extendedWaitUntil:
+    visible:
+      id: "exercise-0-set-0-check"
+    timeout: 5000
+- tapOn:
+    id: "exercise-0-set-0-check"
+- assertVisible:
+    id: "rest-pill"
+- stopApp
+- launchApp
+- tapOn:
+    id: "tab-train"
+- assertVisible:
+    id: "resume-banner"
+- tapOn:
+    id: "resume-banner"
+- extendedWaitUntil:
+    visible:
+      id: "screen-workout"
+    timeout: 5000
+- assertVisible:
+    id: "player-clock"
+# Clean up: finish so later flows start from "no workout in progress".
+- tapOn:
+    id: "player-finish"
+- runFlow:
+    when:
+      visible:
+        id: "finish-confirm"
+    commands:
+      - tapOn:
+          id: "finish-confirm"
+- assertVisible:
+    id: "screen-summary"
+- tapOn:
+    id: "summary-done"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - setAirplaneMode: disabled

@@ -1,0 +1,34 @@
+# P0 workout deep link: /train?sessionId=…&start=1 (Today card, workout notification, widget).
+# Cold start lands on Train; an unknown session gets a calm toast and never crashes; the
+# player stays offline-capable. Starting a known session is covered by the component tests
+# (session ids are generated on device). Works on iOS and Android.
+appId: com.client.repwise
+name: Workout - train deep link
+tags:
+  - workout
+  - p0
+---
+- launchApp
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - setAirplaneMode: enabled
+- stopApp
+- openLink: repwise://train?sessionId=not-on-this-phone&start=1
+- extendedWaitUntil:
+    visible:
+      id: "screen-train"
+    timeout: 10000
+- assertVisible: "That workout isn't on this phone any more"
+- stopApp
+- openLink: repwise://train
+- assertVisible:
+    id: "screen-train"
+- assertVisible:
+    id: "train-tabs"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - setAirplaneMode: disabled
