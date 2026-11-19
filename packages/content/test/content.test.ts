@@ -204,7 +204,8 @@ describe('recipe QA', () => {
         assert.ok(s.trim().length >= 8, `${r.id}: empty step`);
         assert.ok(!BANNED.test(s), `${r.id}: banned wording "${s}"`);
       }
-      assert.equal(r.mediaId, `repwise/recipes/${r.id}`);
+      // mediaId only when a photo exists (docs/MEDIA_STATUS.md); never a dangling placeholder.
+      if (r.mediaId !== undefined) assert.equal(r.mediaId, `repwise/recipes/${r.id}`);
     }
   });
 });

@@ -1,13 +1,16 @@
 # Media pipeline (Cloudinary) — plan
 
-Implements build bible sheet 29 ("Exercise media pipeline"). **No media files live in this repo.** Every `mediaId` in `exercises.json` and `recipes.json` is a placeholder Cloudinary public id until licensed assets are uploaded.
+Implements build bible sheet 29 ("Exercise media pipeline"). **No media files live in this repo.** Current state, counts and the owner's to-do: `docs/MEDIA_STATUS.md`.
+
+- Exercises: every `mediaId` is the stable public id `repwise/exercises/<id>`. Which exercises have a licensed demo is `media/exercises-with-media.json` (`exerciseHasMedia`); sources, licence and match confidence are in `media/exercise-media-map.json`.
+- Recipes: `mediaId` is present only when a photo is live (optional field since 19 Nov 2026).
 
 ## Naming
 
 | Asset | Cloudinary public id | Resource type |
 |---|---|---|
-| Exercise demo loop | `repwise/exercises/<exercise-id>` | video (MP4 master; GIF sources are converted on upload) |
-| Exercise poster | derived from the video (no separate upload) | image transform |
+| Exercise start frame (poster, thumb) | `repwise/exercises/<exercise-id>` | image (JPEG master) |
+| Exercise end frame | `repwise/exercises/<exercise-id>-end` | image (JPEG master) |
 | Recipe photo | `repwise/recipes/<recipe-id>` | image |
 
 - The public id equals the content id, so renaming an exercise is not allowed: `id` is stable forever.
@@ -18,20 +21,20 @@ Implements build bible sheet 29 ("Exercise media pipeline"). **No media files li
 
 1. An ingest script maps each licensed source file to an exercise id. Unmatched files are rejected, never guessed.
 2. Upload with `public_id = <id>`, `overwrite = false` and `invalidate = true` only for intentional replacements.
-3. GIF sources are uploaded as video (`resource_type: video`) so Cloudinary can serve MP4/WebM, which are 5–10× smaller than GIF.
+3. Current source (free-exercise-db) is two still frames per exercise, uploaded as images by URL (`scripts/media/upload-exercises.mjs`); the app crossfades them. A future GIF/video source would be uploaded as video and needs a new `media.ts` branch.
 4. The licence for each set is recorded in SOURCES.md before anything is uploaded.
 
 ## Delivery transforms
 
 | Use | URL transform | Target |
 |---|---|---|
-| Player card loop (480 px) | `video/upload/f_auto:video,q_auto,w_480,c_limit,ac_none,du_8/repwise/exercises/<id>` | ≤ 300 KB, no audio, ≤ 8 s loop |
-| List poster (first frame) | `video/upload/so_0,f_auto,q_auto,w_160,h_160,c_fill/repwise/exercises/<id>.jpg` | ≤ 15 KB |
-| Detail poster | `video/upload/so_0,f_auto,q_auto,w_480,c_limit/repwise/exercises/<id>.jpg` | ≤ 40 KB |
+| List thumb (start frame) | `image/upload/c_fill,g_auto,h_160,w_160,q_auto,f_webp/repwise/exercises/<id>.webp` | ≤ 15 KB |
+| Detail poster (start frame) | `image/upload/c_limit,w_480,q_auto,f_webp/repwise/exercises/<id>.webp` | ≤ 40 KB |
+| Detail end frame (crossfade) | `image/upload/c_limit,w_480,q_auto,f_webp/repwise/exercises/<id>-end.webp` | ≤ 40 KB |
 | Recipe card | `image/upload/f_auto,q_auto,w_400,ar_4:3,c_fill,g_auto/repwise/recipes/<id>` | ≤ 40 KB |
 | Recipe hero | `image/upload/f_auto,q_auto,w_1080,ar_16:9,c_fill,g_auto/repwise/recipes/<id>` | ≤ 150 KB |
 
-- `f_auto` picks animated WebP/AVIF or MP4/WebM per device; `q_auto` picks quality.
+- The app uses explicit `f_webp` (native loaders do not send a reliable Accept header for `f_auto`); `q_auto` picks quality.
 - Light/dark: source loops are shot or exported on a transparent or neutral mid-grey background. If a source has a white background, add `e_make_transparent` at ingest (not at delivery) and review it in both themes.
 - Use named transformations (`t_ex_loop`, `t_ex_poster`, `t_ex_thumb`, `t_rcp_card`, `t_rcp_hero`) so URLs stay short and changes need no app update.
 

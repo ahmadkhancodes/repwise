@@ -1,4 +1,4 @@
-import type { Exercise } from '@repwise/content';
+import { EXERCISES_WITH_MEDIA, type Exercise } from '@repwise/content';
 
 import { getCatalog, resetCatalogForTests, searchExercises } from '@/services/catalog';
 
@@ -42,7 +42,7 @@ import {
   searchLibrary,
   type CustomExerciseRow,
 } from '../logic/libraryItem';
-import { exerciseMediaUrls, isSafePublicId } from '../logic/media';
+import { crossfadeOpacity, exerciseMediaUrls, isExerciseMediaLive, isSafePublicId } from '../logic/media';
 import { mergeRecent, pushViewed, VIEWED_CAP } from '../logic/recent';
 import {
   computeRecords,
@@ -232,40 +232,73 @@ describe('library items', () => {
 });
 
 describe('media urls', () => {
-  it('builds Cloudinary poster, thumb and loop urls', () => {
-    const u = exerciseMediaUrls('repwise/exercises/barbell-back-squat', 'demo')!;
+  const live = () => true;
+
+  it('builds Cloudinary image thumb, poster and 2-frame urls', () => {
+    const u = exerciseMediaUrls('repwise/exercises/barbell-back-squat', 'demo', live)!;
     expect(u.thumb).toBe(
-      'https://res.cloudinary.com/demo/video/upload/so_0,w_160,h_160,c_fill,q_auto,f_webp/repwise/exercises/barbell-back-squat.webp',
+      'https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,h_160,w_160,q_auto,f_webp/repwise/exercises/barbell-back-squat.webp',
     );
-    expect(u.poster).toContain('/video/upload/so_0,w_480,c_limit,q_auto,f_webp/');
-    expect(u.loop).toContain(
-      '/fps_15,du_8,e_loop/f_webp,fl_awebp,fl_animated/'
-        .replace('/fps', ',fps')
-        .replace('q_auto,', ''),
+    expect(u.poster).toBe(
+      'https://res.cloudinary.com/demo/image/upload/c_limit,w_480,q_auto,f_webp/repwise/exercises/barbell-back-squat.webp',
     );
-    expect(u.loop).toMatch(
-      /w_480,c_limit,q_auto,fps_15,du_8,e_loop\/f_webp,fl_awebp,fl_animated\/repwise\/exercises\/barbell-back-squat\.webp$/,
-    );
+    expect(u.frames).toEqual([
+      u.poster,
+      'https://res.cloudinary.com/demo/image/upload/c_limit,w_480,q_auto,f_webp/repwise/exercises/barbell-back-squat-end.webp',
+    ]);
+    // A renderer that only knows `loop` still shows the correct still frame.
+    expect(u.loop).toBe(u.poster);
+    expect(u.thumb).not.toMatch(/video|so_0|fl_animated/);
   });
 
-  it('returns null (offline placeholder, no request) without a cloud or a safe id', () => {
-    expect(exerciseMediaUrls('repwise/exercises/x', null)).toBeNull();
-    expect(exerciseMediaUrls(null, 'demo')).toBeNull();
-    expect(exerciseMediaUrls('../evil?x=1', 'demo')).toBeNull();
+  it('returns null (offline placeholder, no request) without a cloud, a safe id or a live asset', () => {
+    expect(exerciseMediaUrls('repwise/exercises/x', null, live)).toBeNull();
+    expect(exerciseMediaUrls(null, 'demo', live)).toBeNull();
+    expect(exerciseMediaUrls('../evil?x=1', 'demo', live)).toBeNull();
+    expect(exerciseMediaUrls('repwise/exercises/x', 'demo', () => false)).toBeNull();
     expect(isSafePublicId('repwise/exercises/a-b_c')).toBe(true);
     expect(isSafePublicId('a//b')).toBe(false);
+  });
+
+  it('only requests media recorded as live in the content package', () => {
+    expect(isExerciseMediaLive('repwise/exercises/not-an-exercise')).toBe(false);
+    expect(isExerciseMediaLive('repwise/recipes/barbell-back-squat')).toBe(false);
+    for (const id of EXERCISES_WITH_MEDIA) {
+      expect(isExerciseMediaLive(`repwise/exercises/${id}`)).toBe(true);
+    }
+    expect(exerciseMediaUrls('repwise/exercises/not-an-exercise', 'demo')).toBeNull();
   });
 
   it('reads the cloud name from EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME', () => {
     const prev = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
     process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME = 'repwise-cdn';
-    expect(exerciseMediaUrls('repwise/exercises/x')!.poster).toContain(
+    expect(exerciseMediaUrls('repwise/exercises/x', undefined, live)!.poster).toContain(
       'res.cloudinary.com/repwise-cdn/',
     );
     process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME = 'bad name/..';
-    expect(exerciseMediaUrls('repwise/exercises/x')).toBeNull();
+    expect(exerciseMediaUrls('repwise/exercises/x', undefined, live)).toBeNull();
     if (prev === undefined) delete process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
     else process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME = prev;
+  });
+
+  it('crossfades start → end → start with holds', () => {
+    const o = { holdMs: 100, fadeMs: 50 };
+    expect(crossfadeOpacity(0, o)).toBe(0);
+    expect(crossfadeOpacity(99, o)).toBe(0);
+    expect(crossfadeOpacity(125, o)).toBeCloseTo(0.5);
+    expect(crossfadeOpacity(150, o)).toBe(1);
+    expect(crossfadeOpacity(249, o)).toBe(1);
+    expect(crossfadeOpacity(275, o)).toBeCloseTo(0.5);
+    expect(crossfadeOpacity(300, o)).toBe(0); // one full cycle
+    expect(crossfadeOpacity(300 + 125, o)).toBeCloseTo(0.5);
+    expect(crossfadeOpacity(-175, o)).toBeCloseTo(0.5); // negative time wraps
+    expect(crossfadeOpacity(Number.NaN, o)).toBe(0);
+    expect(crossfadeOpacity(120, { holdMs: 100, fadeMs: 0 })).toBe(1);
+    for (let t = 0; t < 3000; t += 37) {
+      const v = crossfadeOpacity(t);
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThanOrEqual(1);
+    }
   });
 });
 

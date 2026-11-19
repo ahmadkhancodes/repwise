@@ -47,10 +47,12 @@ All recipe titles, ingredient lists and steps were written for Repwise. Nutritio
 
 Before launch (bible sheet 29 QA): a human spot-checks 10 % of recipes, a second reviewer checks allergen tags, and native cooks review the Pakistani, Indian and Gulf/Arab dishes.
 
-## Media — none yet
+## Media — exercise frames from free-exercise-db (Unlicense); recipe photos none yet
 
-No images, GIFs or videos are in this package. `mediaId` values are placeholders. When media is licensed, record each source here with its licence, proof link and attribution needs, following MEDIA.md. Prefer CC0 / MIT / CC-BY (CC-BY needs the in-app attribution screen). Commercial GIF packs such as ExerciseDB need a paid licence first.
+- **Exercise demo frames:** [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db), licence **Unlicense** (public-domain dedication; commercial use, no attribution required). Proof: [LICENSE.md at commit f00c92c](https://github.com/yuhonas/free-exercise-db/blob/f00c92c7dcf1216a928a52c3706c7ce8e2f71ed5/LICENSE.md). 179 of 283 exercises matched (`media/exercise-media-map.json`); only the images are used, never the dataset's text. **Provenance caveat and owner sign-off:** `docs/MEDIA_STATUS.md`.
+- **Recipe photos:** none yet (to be generated in the owner's Cloudinary; owned by the client).
+- Commercial GIF packs such as ExerciseDB need a paid licence first and are not used. Any CC-BY source must add its credit to Settings → About → Attributions.
 
 | Asset set | Source | Licence | Proof | Attribution needed |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| Exercise start/end frames (179 exercises) | free-exercise-db @ f00c92c | Unlicense | [LICENSE.md](https://github.com/yuhonas/free-exercise-db/blob/f00c92c7dcf1216a928a52c3706c7ce8e2f71ed5/LICENSE.md) | No (provenance caveat: docs/MEDIA_STATUS.md) |
