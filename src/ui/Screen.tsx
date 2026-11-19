@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   interpolate,
@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme';
 
 import { Text } from './Text';
+import { nextFooterId, useToastStore } from './Toast';
 
 export type ScreenProps = {
   /** Large bold title (title1) that collapses into the compact bar on scroll. */
@@ -50,6 +51,14 @@ export function Screen({
   const top = edges.includes('top') ? insets.top : 0;
   const bottom = edges.includes('bottom') ? insets.bottom : 0;
   const scrollY = useSharedValue(0);
+  const [footerId] = useState(nextFooterId);
+  const hasFooter = Boolean(footer);
+
+  // Toasts sit above this screen's pinned footer while it is mounted (audit B9).
+  useEffect(() => {
+    if (!hasFooter) return;
+    return () => useToastStore.getState().removeFooter(footerId);
+  }, [hasFooter, footerId]);
 
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -151,6 +160,10 @@ export function Screen({
 
       {footer ? (
         <View
+          testID={testID ? `${testID}-footer` : undefined}
+          onLayout={(e) =>
+            useToastStore.getState().setFooter(footerId, e.nativeEvent.layout.height)
+          }
           style={{
             paddingHorizontal: t.spacing.screen,
             paddingTop: t.spacing.sm,

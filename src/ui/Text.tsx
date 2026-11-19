@@ -37,8 +37,9 @@ export function Text({
           lineHeight: type.lineHeight,
           color: t.colors[color],
           textAlign: align,
+          letterSpacing: type.letterSpacing,
         },
-        tabular && { fontVariant: ['tabular-nums'] },
+        (tabular ?? type.tabular) && { fontVariant: ['tabular-nums'] },
         // Android adds extra top padding to custom fonts; strip it so Inter sits on the baseline.
         Platform.OS === 'android' && { includeFontPadding: false },
         style,

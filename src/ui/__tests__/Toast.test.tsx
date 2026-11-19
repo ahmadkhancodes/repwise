@@ -1,15 +1,53 @@
 import { act, fireEvent, screen } from '@testing-library/react-native';
+import * as Haptics from 'expo-haptics';
 import { AccessibilityInfo } from 'react-native';
 
 import { colors, motion } from '@/theme';
 
 import { flat, renderThemed, SCHEMES } from '../../../test/render';
-import { showToast, Toast, ToastHost, useToastStore } from '../Toast';
+import {
+  showToast,
+  showUndoToast,
+  Toast,
+  toastBottom,
+  toastBuzzes,
+  ToastHost,
+  UNDO_TOAST_MS,
+  useToastStore,
+} from '../Toast';
+
+describe('toastBuzzes', () => {
+  it('only success, only when not silent', () => {
+    expect(toastBuzzes({ tone: 'success' })).toBe(true);
+    expect(toastBuzzes({ tone: 'success', silent: true })).toBe(false);
+    expect(toastBuzzes({ tone: 'danger' })).toBe(false);
+    expect(toastBuzzes({})).toBe(false);
+  });
+});
+
+describe('toastBottom', () => {
+  it('sits above the latest pinned footer, else above the tab bar', () => {
+    expect(toastBottom([], 34, 12, 72)).toBe(106);
+    expect(toastBottom([[1, 120]], 34, 12, 72)).toBe(132);
+    expect(
+      toastBottom(
+        [
+          [1, 120],
+          [2, 90],
+        ],
+        34,
+        12,
+        72,
+      ),
+    ).toBe(102);
+  });
+});
 
 describe.each(SCHEMES)('Toast (%s)', (scheme) => {
   beforeEach(() => {
     jest.useFakeTimers();
-    useToastStore.setState({ current: null });
+    useToastStore.setState({ current: null, footers: [] });
+    jest.clearAllMocks();
   });
   afterEach(() => jest.useRealTimers());
 
@@ -35,6 +73,38 @@ describe.each(SCHEMES)('Toast (%s)', (scheme) => {
     await fireEvent.press(screen.getByRole('button', { name: 'Undo' }));
     expect(onAction).toHaveBeenCalled();
     expect(onDismiss).toHaveBeenCalled();
+  });
+
+  it('icons stay AA on the inverse pill (accent/danger OnInverse)', async () => {
+    await renderThemed(<Toast message="Saved" tone="success" testID="t" />, scheme);
+    expect(screen.getByTestId('t')).toBeTruthy();
+    expect(colors[scheme].accentOnInverse).not.toBe(colors[scheme].inverse);
+  });
+
+  it('a success toast buzzes once; silent and non-success toasts never do', async () => {
+    const buzzes = () =>
+      jest.mocked(Haptics.notificationAsync).mock.calls.length +
+      jest.mocked(Haptics.performAndroidHapticsAsync).mock.calls.length;
+    await renderThemed(<ToastHost />, scheme);
+    await act(() => showToast({ message: 'Saved', tone: 'success', silent: true }));
+    await act(() => showToast({ message: 'Removed' }));
+    expect(buzzes()).toBe(0);
+    await act(() => showToast({ message: 'Lunch logged', tone: 'success' }));
+    expect(buzzes()).toBe(1);
+  });
+
+  it('showUndoToast: 5 s window with a 48dp Undo pill', async () => {
+    const onUndo = jest.fn();
+    await renderThemed(<ToastHost />, scheme);
+    await act(() => showUndoToast('Set deleted', onUndo));
+    const undo = screen.getByRole('button', { name: 'Undo' });
+    expect(flat(undo.props.style).minHeight).toBe(48);
+    await act(() => jest.advanceTimersByTime(motion.toastMs));
+    expect(screen.getByTestId('toast')).toBeTruthy();
+    await fireEvent.press(undo);
+    expect(onUndo).toHaveBeenCalled();
+    expect(screen.queryByTestId('toast')).toBeNull();
+    expect(UNDO_TOAST_MS).toBe(5000);
   });
 
   it('ToastHost shows, announces and auto-hides', async () => {

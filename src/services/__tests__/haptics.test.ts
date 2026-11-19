@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
+import { Platform, Vibration } from 'react-native';
 
-import { haptics } from '../haptics';
+import { haptics, REST_END_GAP_MS, REST_END_PATTERN } from '../haptics';
 
 describe(`haptics on ${Platform.OS}`, () => {
   beforeEach(() => jest.clearAllMocks());
@@ -41,6 +41,23 @@ describe(`haptics on ${Platform.OS}`, () => {
         Haptics.NotificationFeedbackType.Success,
       );
     }
+  });
+
+  it('restEnd is a strong triple (vibration waveform / three heavy impacts)', () => {
+    jest.useFakeTimers();
+    const vibrate = jest.spyOn(Vibration, 'vibrate').mockImplementation(() => undefined);
+    haptics.restEnd();
+    jest.advanceTimersByTime(REST_END_GAP_MS * 3);
+    if (Platform.OS === 'android') {
+      expect(vibrate).toHaveBeenCalledWith(REST_END_PATTERN);
+      expect(REST_END_PATTERN.filter((_, i) => i % 2 === 1)).toHaveLength(3);
+    } else {
+      expect(Haptics.impactAsync).toHaveBeenCalledTimes(3);
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Heavy);
+      expect(vibrate).not.toHaveBeenCalled();
+    }
+    vibrate.mockRestore();
+    jest.useRealTimers();
   });
 
   it('never throws when the device has no haptics', async () => {

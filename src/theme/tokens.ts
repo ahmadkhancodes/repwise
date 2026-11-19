@@ -5,6 +5,9 @@
  *  - textTertiary darkened in both themes so it passes WCAG AA (4.5:1).
  *  - added on* foreground tokens, accentText, success, scrim and ripple.
  *  - screen padding 20 (sheet 10 + CLAUDE.md), motion springs from CLAUDE.md.
+ *  - DS upgrade (feat/ds): borderStrong, accent/dangerOnInverse, hero type, gym hit sizes;
+ *    light textTertiary/danger/macroCarb darkened so every pair in
+ *    __tests__/contrast.test.ts passes in both themes.
  *
  * Nothing outside src/theme may contain a hex colour (enforced by ESLint).
  */
@@ -22,6 +25,11 @@ export type ColorTokens = {
   surface2: string;
   /** Dividers */
   border: string;
+  /**
+   * Outlines of UNSELECTED interactive controls (tick, checkbox, radio, switch-off, stepper
+   * edges). ≥ 3:1 on bg, surface AND surface2 in both themes (WCAG 1.4.11). Never for dividers.
+   */
+  borderStrong: string;
   /** Titles, numbers */
   textPrimary: string;
   /** Body */
@@ -40,6 +48,10 @@ export type ColorTokens = {
   inverse: string;
   /** Text/icons placed on inverse */
   onInverse: string;
+  /** Accent glyphs on an inverse surface (toast icon, rest bar) — ≥ 4.5:1 in both themes. */
+  accentOnInverse: string;
+  /** Danger glyphs on an inverse surface (toast icon) — ≥ 4.5:1 in both themes. */
+  dangerOnInverse: string;
   success: string;
   warning: string;
   /** Destructive only */
@@ -72,7 +84,7 @@ export const fonts = {
 } as const;
 
 export type TypeVariant =
-  'display' | 'title1' | 'title2' | 'headline' | 'body' | 'callout' | 'caption';
+  'hero' | 'display' | 'title1' | 'title2' | 'headline' | 'body' | 'callout' | 'caption';
 
 export type TypeStyle = {
   fontFamily: string;
@@ -80,10 +92,33 @@ export type TypeStyle = {
   lineHeight: number;
   /** Cap for very large text so 130% scale still fits; undefined = uncapped. */
   maxFontSizeMultiplier?: number;
+  /** Tight tracking for big numerals (negative = tighter). */
+  letterSpacing?: number;
+  /** Always render with tabular figures (numbers that tick). */
+  tabular?: boolean;
 };
 
 export const typography: Record<TypeVariant, TypeStyle> = {
-  display: { fontFamily: fonts.bold, fontSize: 40, lineHeight: 44, maxFontSizeMultiplier: 1.3 },
+  /**
+   * Hero numbers: rest timer, kcal reveal, PR moment, summary total. Glanceable at 1 m.
+   * Always tabular + tight. Pair with fitFontSize (src/ui/fit.ts) inside rings so it never
+   * overflows at 130% font.
+   */
+  hero: {
+    fontFamily: fonts.bold,
+    fontSize: 72,
+    lineHeight: 76,
+    maxFontSizeMultiplier: 1.3,
+    letterSpacing: -2,
+    tabular: true,
+  },
+  display: {
+    fontFamily: fonts.bold,
+    fontSize: 40,
+    lineHeight: 44,
+    maxFontSizeMultiplier: 1.3,
+    letterSpacing: -0.5,
+  },
   title1: { fontFamily: fonts.bold, fontSize: 32, lineHeight: 38, maxFontSizeMultiplier: 1.3 },
   title2: { fontFamily: fonts.bold, fontSize: 24, lineHeight: 30, maxFontSizeMultiplier: 1.5 },
   headline: { fontFamily: fonts.semibold, fontSize: 18, lineHeight: 24 },
@@ -121,15 +156,26 @@ export const radius = {
 export const sizes = {
   /** Minimum touch target (48dp). */
   touch: 48,
+  /** Gym target (sweaty hands, one thumb): set check, stepper ±, rest controls. */
+  hitGym: 56,
+  /** Gym primary target: "Log set", hero tick hit box, bench-mode controls. */
+  hitGymLarge: 64,
   /** Primary / secondary / destructive button height (sheet 11). */
   button: 56,
   /** List row minimum height. */
   row: 56,
   icon: 24,
+  iconMedium: 20,
   iconSmall: 16,
   iconStroke: 1.75,
+  /** Check marks inside filled ticks / day dots (replaces 2.5 literals). */
+  iconStrokeBold: 2.5,
   hairline: 1,
+  /** Control outlines (tick, switch-off, selected card). */
+  borderThick: 2,
   ring: 120,
+  /** BigTimer / kcal-reveal ring. Fits a 360dp screen with screen padding. */
+  ringHero: 240,
   ringStroke: 10,
   /** Wheel picker row height at 100% font scale. */
   wheelRow: 44,

@@ -21,13 +21,18 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export type PressableScaleProps = Omit<PressableProps, 'style' | 'children'> & {
   style?: StyleProp<ViewStyle>;
   children?: ReactNode;
-  /** 'light' (default) on taps, 'selection' on pickers, 'none' to skip. */
-  feedback?: 'light' | 'selection' | 'none';
+  /**
+   * 'light' (default) on taps, 'selection' on pickers, 'success' on a core action, 'none' to
+   * skip (the handler owns its haptic). Fires on commit (press / long-press), never on press-in,
+   * so a touch that starts a scroll never buzzes.
+   */
+  feedback?: 'light' | 'selection' | 'success' | 'none';
 };
 
 /**
  * Shared press behaviour: iOS scales to 0.98 with a spring; Android shows the
- * material ripple (bounded) instead. Both fire haptics on press-in.
+ * material ripple (bounded) instead. Visual feedback starts on press-in (< 100 ms budget);
+ * the haptic fires only when the press commits (onPress / onLongPress).
  */
 export function PressableScale({
   style,
@@ -35,6 +40,8 @@ export function PressableScale({
   feedback = 'light',
   disabled,
   onPressIn,
+  onPress,
+  onLongPress,
   ...rest
 }: PressableScaleProps) {
   const t = useTheme();
@@ -48,8 +55,23 @@ export function PressableScale({
       {...rest}
       disabled={disabled}
       android_ripple={isIOS ? undefined : { color: t.colors.ripple, borderless: false }}
+      onPress={
+        onPress
+          ? (e) => {
+              if (feedback !== 'none') haptics[feedback]();
+              onPress(e);
+            }
+          : undefined
+      }
+      onLongPress={
+        onLongPress
+          ? (e) => {
+              if (feedback !== 'none') haptics[feedback]();
+              onLongPress(e);
+            }
+          : undefined
+      }
       onPressIn={(e) => {
-        if (feedback !== 'none') haptics[feedback]();
         if (isIOS && !reduceMotion) scale.set(withSpring(t.motion.pressScale, t.motion.spring));
         onPressIn?.(e);
       }}
