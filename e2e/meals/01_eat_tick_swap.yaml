@@ -1,0 +1,30 @@
+# F3 "Eat today's meals": plan renders offline, 1-tap tick, undo, swap in one tap.
+# Precondition: onboarding saved a profile (run the onboarding flow first). testIDs render on iOS and Android.
+appId: com.client.repwise
+---
+- launchApp
+- tapOn:
+    id: "tab-eat"
+- extendedWaitUntil:
+    visible:
+      id: "meal-lunch"
+    timeout: 15000
+- assertVisible:
+    id: "eat-rings"
+- tapOn:
+    id: "tick-lunch"
+- assertVisible: ".*logged"
+- tapOn: "Undo"
+- tapOn:
+    id: "swap-dinner"
+- extendedWaitUntil:
+    visible:
+      id: "swap-option-0"
+    timeout: 5000
+- tapOn:
+    id: "swap-option-0"
+- assertVisible: "Swapped to.*"
+- tapOn: "Week"
+- assertVisible:
+    id: "week-days"
+- tapOn: "Day"

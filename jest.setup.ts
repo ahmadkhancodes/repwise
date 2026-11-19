@@ -117,3 +117,13 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
   },
   isErrorWithCode: (e: unknown) => typeof e === 'object' && e !== null && 'code' in e,
 }));
+
+// Native notification + widget modules (src/services/notifications.ts, src/widgets): in-memory doubles.
+jest.mock('expo-notifications', () => require('./test/mocks/expoNotifications'));
+jest.mock('react-native-android-widget', () => require('./test/mocks/androidWidget'));
+jest.mock('@bacons/apple-targets', () => ({
+  ExtensionStorage: Object.assign(
+    jest.fn().mockImplementation(() => ({ set: jest.fn(), get: jest.fn(() => null), remove: jest.fn() })),
+    { reloadWidget: jest.fn(), reloadControls: jest.fn() },
+  ),
+}));

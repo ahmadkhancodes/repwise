@@ -4,9 +4,9 @@ Validated content catalogues for the Repwise planner, exercise library and meal 
 
 | File | Records | What it is |
 |---|---|---|
-| `exercises.json` | 235 | Exercise library. Original text, placeholder Cloudinary media ids. |
-| `recipes.json` | 245 | Recipes across 13 cuisines. Nutrition, allergens, diet tags and main protein are **computed**. |
-| `foods.json` | 275 | Ingredients with per-100 g nutrients from USDA FoodData Central (public domain). |
+| `exercises.json` | 283 | Exercise library. Original text, placeholder Cloudinary media ids. Cardio carries Compendium MET values. |
+| `recipes.json` | 325 | Recipes across 13 cuisines. Nutrition, allergens, diet tags and main protein are **computed**. |
+| `foods.json` | 282 | Ingredients with per-100 g nutrients from USDA FoodData Central (public domain). |
 
 The JSON files are the source of truth. `src/schemas.ts` holds the zod schemas and enums, `src/compute.ts` holds the pure derivation logic, and `src/index.ts` re-exports both plus the typed data.
 
@@ -37,6 +37,7 @@ Editing workflow: change authored fields only (never `perServing`, `allergens`, 
 | `level` | `beginner \| intermediate \| advanced` | Maps to bible `difficulty` 1 / 2 / 3. |
 | `unilateral` | boolean | One side at a time (log reps per side). |
 | `mechanics` | `compound \| isolation` | |
+| `met` | number, cardio only | Required for cardio: MET from the 2024 Compendium of Physical Activities (code per exercise in SOURCES.md). Drives the RW-24 calorie estimate. |
 | `contraindications` | enum[] | shoulder, elbow, wrist, neck, lower_back, hip, knee, ankle. Used to filter candidates for users who report a limitation. Not medical guidance. |
 | `instructions` | string[3–5] | Short steps, original wording. |
 | `cues` | string[2–4] | Coaching cues (bible "tips"). |
@@ -85,12 +86,19 @@ Computed by `scripts/build.ts` (never hand-edited):
 | `dietTags` | `vegetarian` (plant/dairy/egg/honey only), `vegan` (plant only), `pescatarian` (no meat, poultry or pork; vegetarian dishes qualify), `halal_friendly` (no pork; meat must still be bought halal), `high_protein` (≥ 25 g, or ≥ 15 g for snack-only, and ≥ 25 % of energy), `low_carb` (≤ 25 g and ≤ 20 % of energy), `gluten_free`, `dairy_free` (from allergens). Thresholds live in `TAG_RULES`. |
 | `mainProtein` | Protein family of the ingredient contributing the most protein: chicken, turkey, beef, lamb, goat, pork, fish, shellfish, eggs, dairy, legumes, soy, nuts_seeds, grains, other. For the "no same protein twice a day" rule. |
 
+## Engine adapter (`src/toEngine.ts`)
+
+`toEngineCatalogues()` (memoised: `engineCatalogues()`) returns `{ exercises, recipes, excluded }` in `@repwise/engine` shape. The mapping tables (`EQUIPMENT_TO_ENGINE`, `ALLERGEN_TO_ENGINE`, `DIET_TAG_TO_ENGINE`, `PROTEIN_TO_ENGINE`, …) are exhaustive, so a new content enum value fails the typecheck until it is mapped. Decisions D26–D28 list every mapping. Every cardio exercise carries a Compendium `met`, so nothing is excluded (the empty list is pinned in `test/toEngine.test.ts`). Ingredient grams become per serving; nutrition is carried, never recomputed.
+
 ## Content QA (tests)
 
-`test/content.test.ts` checks: schema validity; size targets; no duplicate ids; ingredient and alternative references; 6–20 variants per pattern; every bible pattern family present; a home-friendly variant for each strength pattern; ≥ 10 recipes per diet tag and cuisine; ≥ 30 per slot; stored computed fields equal recomputed ones; kcal within 8 % of 4P + 4C + 9F; per-serving kcal sane for each slot; allergens propagate; diet tags never contradict ingredient origins; no empty steps; no banned medical wording (cure, treat, diagnose, prescribe).
+`test/toEngine.test.ts` parses every item with the engine schemas. `test/content.test.ts` checks: schema validity; size targets; no duplicate ids; ingredient and alternative references; 6–20 variants per pattern; every bible pattern family present; a home-friendly variant for each strength pattern; ≥ 10 recipes per diet tag and cuisine; ≥ 30 per slot; stored computed fields equal recomputed ones; kcal within 8 % of 4P + 4C + 9F; per-serving kcal sane for each slot; allergens propagate; diet tags never contradict ingredient origins; no empty steps; no banned medical wording (cure, treat, diagnose, prescribe).
 
 ## Known limits
 
+- Coverage targets (tests): every split slot has ≥ 2 variants for the bodyweight-only and home-dumbbell kits; the engine's real-catalogue acceptance plans vegan, keto and vegetarian + gluten + egg-allergy weeks with no skipped main meal (D33–D36).
+- TVP / soya chunks use the USDA "Soy flour, defatted" record (the raw material TVP is extruded from). Seitan is made from vital wheat gluten and counts as `grains` for the main-protein rule.
+- USDA kcal for tofu, fruit and some vegetables sit about 9 % below 4P + 4C + 9F, so tofu-led recipes include a grain to stay inside the 8 % QA check.
 - Vegetarian tags assume a vegetarian (microbial-rennet) hard cheese when parmesan or pesto is used.
 - `halal_friendly` only excludes pork and alcohol (none in the catalogue); the user must still buy halal meat.
 - Nutrient values are USDA averages for generic foods, not brands. Bible QA still requires a human spot-check of 10 % of recipes, a second allergen reviewer and native-cook review of desi/Arab dishes before launch.

@@ -1,0 +1,16 @@
+# P0 (sheet 17): with notifications denied the screen explains and offers one primary button.
+appId: com.client.repwise
+tags:
+  - notifications
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: deny
+- tapOn:
+    id: open-settings
+- tapOn:
+    id: open-notifications
+- assertVisible: Notifications are off
+- assertVisible:
+    id: turn-on
