@@ -1,6 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 
+import { useOnboarding } from '@/features/onboarding/store';
 import { useBillingStore } from '@/services/billing';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -30,6 +31,9 @@ jest.mock('@expo-google-fonts/inter', () => ({
 }));
 
 describe('app shell routes', () => {
+  // These cover the shell after onboarding (onboarding has its own flow tests).
+  beforeEach(() => useOnboarding.getState().complete());
+
   it('opens on Today with five tabs', async () => {
     await renderRouter(routes, { initialUrl: '/' });
     expect(await screen.findByTestId('screen-today')).toBeTruthy();
