@@ -104,7 +104,8 @@ export function bmi(weightKg: number, heightCm: number): number {
 
 /** Calorie floor: never below BMR × 1.1, and never below 1,200 (women) / 1,500 (men) kcal. */
 export function calorieFloor(bmr: number, sex: Sex): number {
-  return Math.ceil(Math.max(bmr * 1.1, sex === 'female' ? 1200 : 1500) / 10) * 10;
+  const raw = Math.max(bmr * 1.1, sex === 'female' ? 1200 : 1500);
+  return Math.ceil(Math.round(raw * 1000) / 10000) * 10; // round first: 1800 × 1.1 = 1980.0000000000002
 }
 
 export const GOAL_RANGES: Record<Goal, { min: number; max: number }> = {
