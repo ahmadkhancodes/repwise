@@ -19,7 +19,10 @@ export function latestPlan(type: Plan['type']): Plan | undefined {
 }
 
 export function planForWeek(type: Plan['type'], weekStart: string): Plan | undefined {
-  return plansRepo.first(and(eq(plans.type, type), eq(plans.weekStart, weekStart)), desc(plans.version));
+  return plansRepo.first(
+    and(eq(plans.type, type), eq(plans.weekStart, weekStart)),
+    desc(plans.version),
+  );
 }
 
 export function savePlan(values: NewRow<typeof plans>): Plan {
