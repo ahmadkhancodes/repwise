@@ -15,13 +15,17 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseProvider } from '@/db/DatabaseProvider';
 import { startBackgroundServices } from '@/services/bootstrap';
+import { withCrashReporting } from '@/services/crash';
 import { startNotifications } from '@/services/notifications';
+import { startObservability } from '@/services/observability';
 import { useTheme } from '@/theme';
 import { ToastHost } from '@/ui';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
+// Sentry + PostHog + review prompt; each is a no-op without its key.
+startObservability();
 
-export default function RootLayout() {
+function RootLayout() {
   const t = useTheme();
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -77,3 +81,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default withCrashReporting(RootLayout);
