@@ -1,0 +1,47 @@
+# P1 (RW-28, S19): create a custom exercise, find it in the library, delete it.
+appId: com.client.repwise
+tags:
+  - library
+---
+- launchApp
+- tapOn:
+    id: tab-library
+- tapOn:
+    id: library-create
+- assertVisible: New exercise
+- tapOn:
+    id: custom-name
+- inputText: Maestro landmine row
+- hideKeyboard
+- tapOn:
+    id: custom-primary-lats
+- scrollUntilVisible:
+    element:
+      id: custom-equipment-landmine
+    direction: DOWN
+- tapOn:
+    id: custom-equipment-landmine
+- tapOn:
+    id: custom-save
+- assertVisible:
+    id: screen-exercise
+- assertVisible: Maestro landmine row
+- tapOn:
+    id: exercise-back
+- tapOn:
+    id: library-search
+- inputText: maestro landmine
+- assertVisible: Yours
+- tapOn: Maestro landmine row
+- tapOn:
+    id: exercise-edit
+- scrollUntilVisible:
+    element:
+      id: custom-delete
+    direction: DOWN
+- tapOn:
+    id: custom-delete
+- tapOn:
+    id: custom-delete-confirm
+- assertVisible:
+    id: screen-library
