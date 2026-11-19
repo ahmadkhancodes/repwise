@@ -60,6 +60,14 @@ const ANDROID_WIDGETS = {
 };
 /** Reversed iOS OAuth client id (com.googleusercontent.apps.…), set in EAS env. */
 const GOOGLE_IOS_URL_SCHEME = process.env.GOOGLE_IOS_URL_SCHEME;
+/**
+ * Sentry (sheet 12). The plugin only adds the native build step that uploads source maps; that
+ * upload runs only when org, project and SENTRY_AUTH_TOKEN are all set in EAS env. Without them
+ * the build still succeeds and crash reporting still works (runtime DSN: EXPO_PUBLIC_SENTRY_DSN).
+ */
+const SENTRY_ORG = process.env.SENTRY_ORG;
+const SENTRY_PROJECT = process.env.SENTRY_PROJECT;
+const SENTRY_UPLOAD = Boolean(SENTRY_ORG && SENTRY_PROJECT && process.env.SENTRY_AUTH_TOKEN);
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -108,7 +116,28 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     privacyManifests: {
       NSPrivacyTracking: false,
       NSPrivacyTrackingDomains: [],
-      NSPrivacyCollectedDataTypes: [],
+      // Anonymous crash reports (Sentry) and product analytics (PostHog): not linked to the
+      // user's identity, never used for tracking. See docs/store/PRIVACY_LABELS.md.
+      NSPrivacyCollectedDataTypes: [
+        {
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeCrashData',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+        },
+        {
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypePerformanceData',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+        },
+        {
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeProductInteraction',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAnalytics'],
+        },
+      ],
       NSPrivacyAccessedAPITypes: [
         {
           // MMKV / NSUserDefaults for app settings (theme, flags).
@@ -174,6 +203,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['react-native-android-widget', ANDROID_WIDGETS],
     // iOS WidgetKit extension + rest-timer Live Activity in targets/widget (App Group snapshot).
     '@bacons/apple-targets',
+    [
+      '@sentry/react-native/expo',
+      {
+        ...(SENTRY_ORG ? { organization: SENTRY_ORG } : {}),
+        ...(SENTRY_PROJECT ? { project: SENTRY_PROJECT } : {}),
+        disableAutoUpload: !SENTRY_UPLOAD,
+      },
+    ],
     // Google Sign-In needs the reversed iOS client id as a URL scheme; the plugin throws
     // without it, so it is added only when GOOGLE_IOS_URL_SCHEME is set (EAS env).
     ...(GOOGLE_IOS_URL_SCHEME
