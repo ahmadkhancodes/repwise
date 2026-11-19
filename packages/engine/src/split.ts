@@ -52,7 +52,7 @@ export const TEMPLATES: Record<string, DayTemplate> = {
   upper_a: {
     key: 'upper_a',
     name: 'Upper A',
-    slots: [S('push_h_main', 'push_h', 'main'), S('pull_h_main', 'pull_h', 'main'), S('push_v_2', 'push_v', 'secondary'), S('pull_v_2', 'pull_v', 'secondary'), iso('side_delts'), iso('biceps'), iso('triceps'), iso('rear_delts')],
+    slots: [S('push_h_main', 'push_h', 'main'), S('pull_h_main', 'pull_h', 'main'), S('push_v_2', 'push_v', 'secondary'), S('pull_v_2', 'pull_v', 'secondary'), iso('biceps'), iso('triceps'), iso('side_delts'), iso('rear_delts')],
   },
   lower_a: {
     key: 'lower_a',
@@ -62,7 +62,7 @@ export const TEMPLATES: Record<string, DayTemplate> = {
   upper_b: {
     key: 'upper_b',
     name: 'Upper B',
-    slots: [S('push_v_main', 'push_v', 'main'), S('pull_v_main', 'pull_v', 'main'), S('push_h_2', 'push_h', 'secondary'), S('pull_h_2', 'pull_h', 'secondary'), iso('chest'), iso('triceps'), iso('biceps'), iso('side_delts')],
+    slots: [S('push_v_main', 'push_v', 'main'), S('pull_v_main', 'pull_v', 'main'), S('push_h_2', 'push_h', 'secondary'), S('pull_h_2', 'pull_h', 'secondary'), iso('triceps'), iso('biceps'), iso('side_delts'), iso('chest')],
   },
   lower_b: {
     key: 'lower_b',
@@ -82,7 +82,7 @@ export const TEMPLATES: Record<string, DayTemplate> = {
   legs: {
     key: 'legs',
     name: 'Legs',
-    slots: [S('squat_main', 'squat', 'main'), S('hinge_2', 'hinge', 'secondary'), S('lunge_acc', 'lunge', 'accessory'), iso('quads'), iso('hamstrings'), iso('calves'), iso('glutes'), core],
+    slots: [S('squat_main', 'squat', 'main'), S('hinge_2', 'hinge', 'secondary'), S('lunge_acc', 'lunge', 'accessory'), iso('quads'), iso('hamstrings'), iso('calves'), core, iso('glutes')],
   },
 };
 
@@ -223,13 +223,13 @@ export interface VolumeTargetInput {
 
 /**
  * Weekly hard-set range per group. min = start (+1/week in block, ≤ max), capped by capacity
- * (days × sets per session × 1.2 / 8 groups); max = experience cap (≤ 20).
+ * (days × sets per session / 8 groups); max = experience cap (≤ 20).
  * Deload: min halves (the planner cuts sets by 40%).
  */
 export function volumeTargets(input: VolumeTargetInput): VolumeRange {
   const base = VOLUME_BASE[input.experience];
   const capacity = input.daysPerWeek * setsPerSession(input.sessionMin);
-  const capMin = Math.floor((capacity * 1.2) / VOLUME_GROUP_KEYS.length);
+  const capMin = Math.floor(capacity / VOLUME_GROUP_KEYS.length);
   let min = Math.min(base.start + (input.weekInBlock ?? 0), base.max, capMin);
   if (input.deload) min = Math.floor(min * 0.5);
   const out = {} as VolumeRange;
@@ -247,10 +247,13 @@ export interface AllocItem {
 }
 
 export const SET_LIMITS: Record<SlotRole, { initial: number; min: number; max: number }> = {
-  main: { initial: 3, min: 2, max: 5 },
-  secondary: { initial: 3, min: 2, max: 4 },
-  accessory: { initial: 2, min: 2, max: 4 },
+  main: { initial: 3, min: 3, max: 6 },
+  secondary: { initial: 3, min: 2, max: 5 },
+  accessory: { initial: 2, min: 2, max: 5 },
 };
+
+/** Trim order: accessories lose sets first (0), mains last (2); fill prefers mains on ties. */
+const ROLE_RANK: Record<SlotRole, number> = { accessory: 0, secondary: 1, main: 2 };
 
 /**
  * Distribute sets across the week so each group lands inside its range:
@@ -285,7 +288,12 @@ export function allocateSets<T extends { items: AllocItem[] }>(
         if (c(it.exerciseId)[g] === 0 || it.sets <= SET_LIMITS[it.role].min) continue;
         const cc = c(it.exerciseId);
         const harmless = VOLUME_GROUP_KEYS.every((h) => h === g || cc[h] === 0 || v[h] - cc[h] >= range[h].min);
-        if (!best || (harmless && !best.harmless) || (harmless === best.harmless && it.sets > best.it.sets)) best = { it, harmless };
+        const better =
+          !best ||
+          (harmless && !best.harmless) ||
+          (harmless === best.harmless &&
+            (ROLE_RANK[it.role] < ROLE_RANK[best.it.role] || (it.role === best.it.role && it.sets > best.it.sets)));
+        if (better) best = { it, harmless };
       }
       if (!best) return;
       best.it.sets -= 1;
@@ -306,7 +314,14 @@ export function allocateSets<T extends { items: AllocItem[] }>(
               const cc = c(it.exerciseId);
               if (cc[g] !== credit || it.sets >= SET_LIMITS[it.role].max) continue;
               if (VOLUME_GROUP_KEYS.some((h) => cc[h] > 0 && v[h] + cc[h] > range[h].max)) continue;
-              if (!best || it.sets < best.it.sets || (it.sets === best.it.sets && sessionSets(s) < sessionSets(best.s))) best = { it, s };
+              const head = it.sets - SET_LIMITS[it.role].initial;
+              const bestHead = best ? best.it.sets - SET_LIMITS[best.it.role].initial : 0;
+              const better =
+                !best ||
+                head < bestHead ||
+                (head === bestHead && ROLE_RANK[it.role] > ROLE_RANK[best.it.role]) ||
+                (head === bestHead && it.role === best.it.role && sessionSets(s) < sessionSets(best.s));
+              if (better) best = { it, s };
             }
           }
           if (best) {

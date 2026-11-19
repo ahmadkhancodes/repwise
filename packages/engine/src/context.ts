@@ -115,6 +115,19 @@ function bestE1rmByDay(history: History, exerciseId: string, beforeMs: number): 
   return [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([, v]) => v);
 }
 
+/** Equipment preference for main lifts (loadable, progressable kit first). */
+export const MAIN_LIFT_EQUIPMENT_RANK: Record<string, number> = {
+  barbell: 3, trap_bar: 2.5, dumbbell: 2, pullup_bar: 2, smith: 1.5, machine: 1.5, cable: 1.5, ez_bar: 1, kettlebell: 1, bodyweight: 1, band: 0.3, cardio_machine: 0,
+};
+
+/** How suitable an exercise is as a block main lift: compound, multi-muscle, bilateral, loadable. */
+export function mainLiftScore(e: Exercise): number {
+  const kit = e.equipment.filter((x) => x !== 'bench');
+  const rank = kit.length ? Math.max(...kit.map((x) => MAIN_LIFT_EQUIPMENT_RANK[x] ?? 1)) : 1;
+  const multi = e.primaryMuscles.length + e.secondaryMuscles.length >= 3 ? 1.5 : 1;
+  return rank * multi * (isCompound(e) ? 1 : 0.3) * (e.unilateral ? 0.3 : 1);
+}
+
 function chooseMainLifts(
   rotation: string[],
   pool: Exercise[],
@@ -139,7 +152,7 @@ function chooseMainLifts(
     const prev = previousBlock?.[key];
     const fresh = cands.length > 1 && prev ? cands.filter((c) => c.id !== prev) : cands;
     const rng = createRng(`${seed}/main/${key}`);
-    const pick = rng.weighted(fresh, (e) => (isCompound(e) ? 2 : 1) * (e.unilateral ? 0.3 : 1) * (moreLike.has(e.id) ? 3 : 1));
+    const pick = rng.weighted(fresh, (e) => mainLiftScore(e) ** 2 * (moreLike.has(e.id) ? 3 : 1));
     if (pick) {
       out[key] = pick.id;
       taken.add(pick.id);

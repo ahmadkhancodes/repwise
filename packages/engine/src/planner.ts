@@ -6,7 +6,7 @@
  * Optional LLM variety layer: `planWeekWithVariety` asks a hook for picks; anything that does
  * not pass `validate` falls back to the rules plan.
  */
-import { recipeCandidates, slotCandidates } from './candidates';
+import { recipeCandidates, recipeSafe, slotCandidates } from './candidates';
 import { buildContext, exercisePatternKey, dayTypeOf, type PlanningContext } from './context';
 import { startOfWeek, weekdayMon0, daysBetween, type ISODate } from './dates';
 import { meanRecovery, muscleHeatmap } from './heatmap';
@@ -309,6 +309,17 @@ export function mealFromRecipe(r: Recipe, slot: MealSlot, servings: number): Pla
   };
 }
 
+const safeCache = new WeakMap<PlanningContext, Recipe[]>();
+/** Catalogue filtered by the hard safety rules, computed once per context. */
+function safeRecipes(ctx: PlanningContext): Recipe[] {
+  let list = safeCache.get(ctx);
+  if (!list) {
+    list = ctx.catalogues.recipes.filter((r) => recipeSafe(r, ctx.recConstraints));
+    safeCache.set(ctx, list);
+  }
+  return list;
+}
+
 function pickDay(
   ctx: PlanningContext,
   slots: MealSlot[],
@@ -321,16 +332,17 @@ function pickDay(
   liked: ReturnType<typeof likedTraits>,
   relaxed: Set<string>,
   rng: Rng,
-): Recipe[] | null {
+): { recipes: Recipe[]; slots: MealSlot[] } | null {
   const blockedBase = blockedRecipes([...ctx.pastMeals, ...planned], date, window);
   const chosen: Recipe[] = [];
+  const chosenSlots: MealSlot[] = [];
   const sources = new Set<string>();
   const t = target.kcal > 0 ? (4 * target.protein) / target.kcal : 0.3;
   let lastCuisine = prevCuisine;
   for (let i = 0; i < slots.length; i++) {
     const slot = slots[i] as MealSlot;
     const blocked = new Set([...blockedBase, ...chosen.map((r) => r.id)]);
-    const { pool, relaxed: rel } = recipeCandidates(ctx.catalogues.recipes, ctx.recConstraints, slot, blocked);
+    const { pool, relaxed: rel } = recipeCandidates(safeRecipes(ctx), ctx.recConstraints, slot, blocked, 4, true);
     rel.forEach((x) => relaxed.add(x));
     const eligible = pool.filter((r) => !countsAsProteinSource(r.proteinSource) || !sources.has(r.proteinSource));
     const remaining = slots.length - i;
@@ -347,12 +359,17 @@ function pickDay(
         proteinShareTarget: want,
       }),
     );
-    if (!pick) return null;
+    if (!pick) {
+      // Snacks are optional: skip one that has no eligible recipe; main meals are not.
+      if (slot === 'snack') continue;
+      return null;
+    }
     chosen.push(pick);
+    chosenSlots.push(slot);
     if (countsAsProteinSource(pick.proteinSource)) sources.add(pick.proteinSource);
     lastCuisine = pick.cuisine;
   }
-  return chosen;
+  return chosen.length ? { recipes: chosen, slots: chosenSlots } : null;
 }
 
 function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResult {
@@ -373,12 +390,12 @@ function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResu
     outer: for (let extra = 0; extra <= 2; extra++) {
       const slots: MealSlot[] = [...ctx.mealSlots, ...Array.from({ length: extra }, () => 'snack' as const)];
       for (let attempt = 0; attempt < 30; attempt++) {
-        const picks = pickDay(ctx, slots, date, target, window, planned, ingredientUse, prevCuisine, liked, relaxed, rng.fork(`${date}/${extra}/${attempt}`));
-        if (!picks) continue;
-        const res = solvePortions(picks.map(portionItem), target);
+        const picked = pickDay(ctx, slots, date, target, window, planned, ingredientUse, prevCuisine, liked, relaxed, rng.fork(`${date}/${extra}/${attempt}`));
+        if (!picked) continue;
+        const res = solvePortions(picked.recipes.map(portionItem), target);
         const score = Math.abs(res.kcalError) / (target.kcal * 0.05) + Math.abs(res.proteinError) / 10 + extra;
         if (!best || (res.ok && !best.ok) || (res.ok === best.ok && score < best.score)) {
-          best = { recipes: picks, slots, servings: res.servings, ok: res.ok, score };
+          best = { recipes: picked.recipes, slots: picked.slots, servings: res.servings, ok: res.ok, score };
         }
         if (res.ok) break outer;
       }

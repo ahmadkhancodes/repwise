@@ -165,8 +165,10 @@ export function recipeCandidates(
   slot: MealSlot,
   exclude: ReadonlySet<string> = new Set(),
   minPool = 4,
+  /** Skip the hard safety filter because `catalogue` is already filtered with `recipeSafe`. */
+  presafe = false,
 ): RecipePool {
-  const hard = catalogue.filter((r) => r.slots.includes(slot) && !exclude.has(r.id) && recipeSafe(r, c));
+  const hard = catalogue.filter((r) => r.slots.includes(slot) && !exclude.has(r.id) && (presafe || recipeSafe(r, c)));
   const relaxed: Relaxation[] = [];
   let useCuisine = c.cuisines.length > 0;
   let useTime = true;
