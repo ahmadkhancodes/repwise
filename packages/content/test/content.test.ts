@@ -88,6 +88,28 @@ describe('exercise QA', () => {
     }
   });
 
+  it('bodyweight-only and home-dumbbell kits cover every split slot with ≥ 2 variants (D34)', () => {
+    const kits: Record<string, ReadonlySet<string>> = {
+      bodyweight: new Set(['bodyweight', 'mat']),
+      homeDumbbells: new Set(['bodyweight', 'mat', 'dumbbell', 'bench', 'band']),
+    };
+    const slots: [string, (e: (typeof exercises)[number]) => boolean][] = [
+      ...(['squat', 'hinge', 'lunge', 'push_h', 'push_v', 'pull_h', 'pull_v'] as Pattern[]).map(
+        (p) => [p, (e: (typeof exercises)[number]) => e.pattern === p] as [string, (e: (typeof exercises)[number]) => boolean],
+      ),
+      ...(['side_delts', 'rear_delts', 'biceps', 'triceps', 'chest', 'calves', 'quads', 'hamstrings', 'glutes'] as const).map(
+        (m) => [`isolation:${m}`, (e: (typeof exercises)[number]) => e.patternFamily === 'isolation' && e.primaryMuscles[0] === m] as [string, (e: (typeof exercises)[number]) => boolean],
+      ),
+    ];
+    for (const [kit, has] of Object.entries(kits)) {
+      const pool = exercises.filter((e) => e.equipment.every((q) => has.has(q)));
+      for (const [slot, fits] of slots) {
+        const n = pool.filter(fits).length;
+        assert.ok(n >= 2, `${kit} ${slot}: ${n} variant(s)`);
+      }
+    }
+  });
+
   it('has media ids, muscles, equipment and no empty or banned text', () => {
     for (const e of exercises) {
       assert.equal(e.mediaId, `repwise/exercises/${e.id}`);

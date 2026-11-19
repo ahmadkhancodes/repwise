@@ -10659,5 +10659,1992 @@
     ],
     "source": "repwise-original",
     "licence": "proprietary"
+  },
+  {
+    "id": "pause-bodyweight-squat",
+    "name": "Pause bodyweight squat",
+    "aliases": [
+      "Paused air squat"
+    ],
+    "pattern": "squat",
+    "patternFamily": "squat",
+    "primaryMuscles": [
+      "quads",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "adductors",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "knee"
+    ],
+    "instructions": [
+      "Stand with feet about shoulder-width apart, toes turned out slightly.",
+      "Sit down between your heels until your thighs are at least parallel.",
+      "Hold the bottom position still for two to three seconds.",
+      "Drive through the whole foot to stand up tall."
+    ],
+    "cues": [
+      "Stay tall through the chest during the pause.",
+      "Keep tension in your legs; do not relax at the bottom."
+    ],
+    "commonMistakes": [
+      "Bouncing out of the bottom instead of pausing.",
+      "Letting the knees cave inward."
+    ],
+    "mediaId": "repwise/exercises/pause-bodyweight-squat",
+    "alternatives": [
+      "bodyweight-squat",
+      "jump-squat",
+      "goblet-squat"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "jump-squat",
+    "name": "Jump squat",
+    "aliases": [
+      "Squat jump"
+    ],
+    "pattern": "squat",
+    "patternFamily": "squat",
+    "primaryMuscles": [
+      "quads",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "calves",
+      "hamstrings"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "knee",
+      "ankle"
+    ],
+    "instructions": [
+      "Stand with feet hip- to shoulder-width apart.",
+      "Squat down to a comfortable depth with arms swinging back.",
+      "Jump straight up, driving the arms forward.",
+      "Land softly on the balls of your feet and sink straight into the next squat."
+    ],
+    "cues": [
+      "Land quietly, like a spring.",
+      "Reset your stance if your feet drift."
+    ],
+    "commonMistakes": [
+      "Landing with straight, stiff knees.",
+      "Rushing reps so the squat gets shallow."
+    ],
+    "mediaId": "repwise/exercises/jump-squat",
+    "alternatives": [
+      "pause-bodyweight-squat",
+      "bodyweight-squat",
+      "dumbbell-front-squat"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "assisted-pistol-squat",
+    "name": "Assisted pistol squat",
+    "aliases": [
+      "Door-frame pistol squat",
+      "Single-leg squat, assisted"
+    ],
+    "pattern": "squat",
+    "patternFamily": "squat",
+    "primaryMuscles": [
+      "quads",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "abs",
+      "adductors"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [
+      "knee",
+      "ankle"
+    ],
+    "instructions": [
+      "Stand on one leg next to a door frame or sturdy table and hold it lightly.",
+      "Reach the free leg forward and sit back and down on the standing leg.",
+      "Go as deep as you can control, using your hands only as much as you need.",
+      "Push through the standing foot to rise, then switch legs after the set."
+    ],
+    "cues": [
+      "Keep the standing heel down.",
+      "Use the support less as you get stronger."
+    ],
+    "commonMistakes": [
+      "Pulling yourself up with the arms.",
+      "Letting the standing knee collapse inward."
+    ],
+    "mediaId": "repwise/exercises/assisted-pistol-squat",
+    "alternatives": [
+      "pause-bodyweight-squat",
+      "bodyweight-squat",
+      "goblet-squat"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "dumbbell-front-squat",
+    "name": "Dumbbell front squat",
+    "aliases": [
+      "Two-dumbbell front squat"
+    ],
+    "pattern": "squat",
+    "patternFamily": "squat",
+    "primaryMuscles": [
+      "quads",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "abs",
+      "upper_back"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "knee",
+      "wrist"
+    ],
+    "instructions": [
+      "Hold a dumbbell on each shoulder with one end resting on it and elbows pointing forward.",
+      "Stand with feet about shoulder-width apart.",
+      "Squat down while keeping your elbows high and chest up.",
+      "Drive up through the whole foot to stand."
+    ],
+    "cues": [
+      "Elbows up keeps the dumbbells in place.",
+      "Brace your middle before each rep."
+    ],
+    "commonMistakes": [
+      "Letting the elbows drop and the chest fold forward.",
+      "Rising onto the toes."
+    ],
+    "mediaId": "repwise/exercises/dumbbell-front-squat",
+    "alternatives": [
+      "goblet-squat",
+      "dumbbell-sumo-squat",
+      "pause-bodyweight-squat"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "dumbbell-sumo-squat",
+    "name": "Dumbbell sumo squat",
+    "aliases": [
+      "Plie squat",
+      "Wide-stance dumbbell squat"
+    ],
+    "pattern": "squat",
+    "patternFamily": "squat",
+    "primaryMuscles": [
+      "quads",
+      "adductors",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "hamstrings"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "knee",
+      "hip"
+    ],
+    "instructions": [
+      "Stand with feet wide and toes turned out, holding one dumbbell by its end between your legs.",
+      "Push your knees out in line with your toes as you squat down.",
+      "Lower until the dumbbell nearly touches the floor or your hips reach knee height.",
+      "Squeeze your glutes and stand back up."
+    ],
+    "cues": [
+      "Knees track over the toes.",
+      "Keep your torso fairly upright."
+    ],
+    "commonMistakes": [
+      "Knees falling inward on the way up.",
+      "Stance so wide that depth becomes painful."
+    ],
+    "mediaId": "repwise/exercises/dumbbell-sumo-squat",
+    "alternatives": [
+      "goblet-squat",
+      "dumbbell-front-squat",
+      "bodyweight-squat"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "bodyweight-single-leg-rdl",
+    "name": "Bodyweight single-leg Romanian deadlift",
+    "aliases": [
+      "Single-leg RDL, bodyweight",
+      "Single-leg hinge"
+    ],
+    "pattern": "hinge",
+    "patternFamily": "hinge",
+    "primaryMuscles": [
+      "hamstrings",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "lower_back",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [
+      "lower_back",
+      "ankle"
+    ],
+    "instructions": [
+      "Stand on one leg with a soft bend in the knee.",
+      "Push your hips back and tip your chest forward while the free leg reaches behind you.",
+      "Lower until you feel a stretch in the back of the standing thigh.",
+      "Squeeze the glute of the standing leg to return upright."
+    ],
+    "cues": [
+      "Keep your hips square to the floor.",
+      "Reach both arms down for balance if it helps."
+    ],
+    "commonMistakes": [
+      "Rounding the back to reach lower.",
+      "Opening the hips so the back leg turns out."
+    ],
+    "mediaId": "repwise/exercises/bodyweight-single-leg-rdl",
+    "alternatives": [
+      "single-leg-romanian-deadlift",
+      "bodyweight-good-morning",
+      "glute-bridge"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "bodyweight-good-morning",
+    "name": "Bodyweight good morning",
+    "aliases": [
+      "Hip hinge drill"
+    ],
+    "pattern": "hinge",
+    "patternFamily": "hinge",
+    "primaryMuscles": [
+      "hamstrings",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "lower_back"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "lower_back"
+    ],
+    "instructions": [
+      "Stand with feet hip-width apart and hands on your hips or behind your head.",
+      "Soften your knees and push your hips back.",
+      "Lower your chest until you feel a firm stretch in your hamstrings.",
+      "Drive your hips forward to stand tall."
+    ],
+    "cues": [
+      "Move from the hips, not the waist.",
+      "Keep a long, neutral spine."
+    ],
+    "commonMistakes": [
+      "Bending the knees so it turns into a squat.",
+      "Rounding the upper back."
+    ],
+    "mediaId": "repwise/exercises/bodyweight-good-morning",
+    "alternatives": [
+      "bodyweight-single-leg-rdl",
+      "glute-bridge",
+      "dumbbell-romanian-deadlift"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "single-leg-hip-thrust",
+    "name": "Single-leg hip thrust",
+    "aliases": [
+      "One-leg hip thrust"
+    ],
+    "pattern": "hinge",
+    "patternFamily": "hinge",
+    "primaryMuscles": [
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "hamstrings",
+      "abs"
+    ],
+    "equipment": [
+      "bench"
+    ],
+    "level": "intermediate",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [
+      "lower_back",
+      "hip"
+    ],
+    "instructions": [
+      "Sit with your upper back against the edge of a bench or sturdy sofa.",
+      "Plant one foot on the floor and lift the other knee.",
+      "Drive through the planted heel to lift your hips until your body is straight from shoulders to knee.",
+      "Lower under control and switch legs after the set."
+    ],
+    "cues": [
+      "Tuck your chin and ribs as you lift.",
+      "Pause for a second at the top."
+    ],
+    "commonMistakes": [
+      "Arching the lower back at the top.",
+      "Pushing through the toes instead of the heel."
+    ],
+    "mediaId": "repwise/exercises/single-leg-hip-thrust",
+    "alternatives": [
+      "dumbbell-hip-thrust",
+      "glute-bridge",
+      "hip-thrust"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "kickstand-dumbbell-rdl",
+    "name": "Kickstand dumbbell Romanian deadlift",
+    "aliases": [
+      "B-stance RDL",
+      "Staggered-stance RDL"
+    ],
+    "pattern": "hinge",
+    "patternFamily": "hinge",
+    "primaryMuscles": [
+      "hamstrings",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "lower_back",
+      "forearms"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [
+      "lower_back"
+    ],
+    "instructions": [
+      "Hold a dumbbell in each hand and set one foot slightly behind you, resting on the toes.",
+      "Keep most of your weight on the front leg.",
+      "Hinge at the hips and slide the dumbbells down the front thigh.",
+      "Squeeze the front glute to stand back up, then switch sides after the set."
+    ],
+    "cues": [
+      "The back foot is a kickstand for balance only.",
+      "Keep the dumbbells close to your leg."
+    ],
+    "commonMistakes": [
+      "Sharing the weight evenly between both legs.",
+      "Rounding the back at the bottom."
+    ],
+    "mediaId": "repwise/exercises/kickstand-dumbbell-rdl",
+    "alternatives": [
+      "single-leg-romanian-deadlift",
+      "dumbbell-romanian-deadlift",
+      "bodyweight-single-leg-rdl"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "door-frame-row",
+    "name": "Door frame row",
+    "aliases": [
+      "Doorway row",
+      "Single-arm doorway row"
+    ],
+    "pattern": "pull_h",
+    "patternFamily": "pull_h",
+    "primaryMuscles": [
+      "upper_back",
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "rear_delts"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [],
+    "instructions": [
+      "Stand in a doorway and grip the frame at chest height with one hand.",
+      "Walk your feet close to the frame and lean back until your arm is straight.",
+      "Row your chest toward your hand, pulling the elbow back.",
+      "Lower slowly and switch arms after the set."
+    ],
+    "cues": [
+      "Move your feet closer to the frame to make it harder.",
+      "Squeeze the shoulder blade back at the top."
+    ],
+    "commonMistakes": [
+      "Twisting the body to finish the rep.",
+      "Letting the shoulder shrug up to the ear."
+    ],
+    "mediaId": "repwise/exercises/door-frame-row",
+    "alternatives": [
+      "towel-door-row",
+      "table-row",
+      "band-row"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "table-row",
+    "name": "Table row",
+    "aliases": [
+      "Under-table inverted row"
+    ],
+    "pattern": "pull_h",
+    "patternFamily": "pull_h",
+    "primaryMuscles": [
+      "upper_back",
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "rear_delts",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "shoulder"
+    ],
+    "instructions": [
+      "Lie under a sturdy table that will not tip and grip its edge with hands shoulder-width apart.",
+      "Straighten your body with heels on the floor, or bend your knees to make it easier.",
+      "Pull your chest up to the table edge.",
+      "Lower until your arms are straight."
+    ],
+    "cues": [
+      "Check the table is solid before every set.",
+      "Keep a straight line from shoulders to heels."
+    ],
+    "commonMistakes": [
+      "Letting the hips sag on the way up.",
+      "Using a light or folding table."
+    ],
+    "mediaId": "repwise/exercises/table-row",
+    "alternatives": [
+      "inverted-row",
+      "door-frame-row",
+      "towel-door-row"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "towel-door-row",
+    "name": "Towel door row",
+    "aliases": [
+      "Door handle towel row"
+    ],
+    "pattern": "pull_h",
+    "patternFamily": "pull_h",
+    "primaryMuscles": [
+      "upper_back",
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [],
+    "instructions": [
+      "Loop a strong towel around the handle of a solid door that opens away from you, with the door shut.",
+      "Hold one end in each hand, walk your feet toward the door and lean back with straight arms.",
+      "Row your chest toward your hands.",
+      "Lower slowly to straight arms."
+    ],
+    "cues": [
+      "Test the door and handle with a gentle lean first.",
+      "Pull the elbows back, not out."
+    ],
+    "commonMistakes": [
+      "Using a door that opens toward you.",
+      "Bending at the hips instead of keeping the body straight."
+    ],
+    "mediaId": "repwise/exercises/towel-door-row",
+    "alternatives": [
+      "door-frame-row",
+      "table-row",
+      "band-row"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "bent-over-dumbbell-row",
+    "name": "Bent-over dumbbell row",
+    "aliases": [
+      "Two-dumbbell row"
+    ],
+    "pattern": "pull_h",
+    "patternFamily": "pull_h",
+    "primaryMuscles": [
+      "upper_back",
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "rear_delts",
+      "lower_back"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "lower_back"
+    ],
+    "instructions": [
+      "Hold a dumbbell in each hand and hinge forward until your torso is close to 45 degrees.",
+      "Let the dumbbells hang under your shoulders.",
+      "Row both dumbbells toward your lower ribs.",
+      "Lower them until your arms are straight."
+    ],
+    "cues": [
+      "Keep your back flat and neck long.",
+      "Lead with the elbows."
+    ],
+    "commonMistakes": [
+      "Standing up taller on each rep.",
+      "Jerking the weights with the legs."
+    ],
+    "mediaId": "repwise/exercises/bent-over-dumbbell-row",
+    "alternatives": [
+      "one-arm-dumbbell-row",
+      "tripod-dumbbell-row",
+      "barbell-row"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "tripod-dumbbell-row",
+    "name": "Tripod dumbbell row",
+    "aliases": [
+      "Hand-on-knee dumbbell row"
+    ],
+    "pattern": "pull_h",
+    "patternFamily": "pull_h",
+    "primaryMuscles": [
+      "lats",
+      "upper_back"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "rear_delts"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [],
+    "instructions": [
+      "Step one foot forward, hinge over and rest that hand on the front knee.",
+      "Hold a dumbbell in the other hand under your shoulder.",
+      "Row the dumbbell toward your hip.",
+      "Lower to a full stretch and switch sides after the set."
+    ],
+    "cues": [
+      "Pull toward the back pocket.",
+      "Keep your shoulders level."
+    ],
+    "commonMistakes": [
+      "Rotating the torso to swing the weight up.",
+      "Shrugging instead of rowing."
+    ],
+    "mediaId": "repwise/exercises/tripod-dumbbell-row",
+    "alternatives": [
+      "one-arm-dumbbell-row",
+      "bent-over-dumbbell-row",
+      "door-frame-row"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "sliding-floor-pulldown",
+    "name": "Sliding floor pulldown",
+    "aliases": [
+      "Floor slide lat pull",
+      "Towel pull-through"
+    ],
+    "pattern": "pull_v",
+    "patternFamily": "pull_v",
+    "primaryMuscles": [
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "biceps",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "shoulder",
+      "elbow"
+    ],
+    "instructions": [
+      "Lie face down on a smooth floor with your arms reaching overhead, hands on small towels or wearing socks on your hands.",
+      "Press your hands and forearms into the floor.",
+      "Pull your body forward toward your hands by drawing the elbows down to your sides.",
+      "Slide back to the start and repeat."
+    ],
+    "cues": [
+      "Think of pulling the floor toward your hips.",
+      "Keep your legs relaxed; the back does the work."
+    ],
+    "commonMistakes": [
+      "Pushing with the feet.",
+      "Lifting the hands off the floor."
+    ],
+    "mediaId": "repwise/exercises/sliding-floor-pulldown",
+    "alternatives": [
+      "towel-isometric-pulldown",
+      "band-lat-pulldown",
+      "lat-pulldown"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "towel-isometric-pulldown",
+    "name": "Towel isometric pulldown",
+    "aliases": [
+      "Towel lat pulldown hold"
+    ],
+    "pattern": "pull_v",
+    "patternFamily": "pull_v",
+    "primaryMuscles": [
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "rear_delts"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [],
+    "instructions": [
+      "Hold a towel overhead with hands wider than your shoulders.",
+      "Pull the ends apart as hard as you can so the towel is tight.",
+      "Keeping it tight, draw the towel down behind or in front of your head toward your upper back.",
+      "Hold the bottom for three to five seconds, return overhead and repeat."
+    ],
+    "cues": [
+      "The pull-apart creates the load; never let the towel go slack.",
+      "Drive the elbows down toward your back pockets."
+    ],
+    "commonMistakes": [
+      "Letting the towel sag so there is no tension.",
+      "Shrugging the shoulders up."
+    ],
+    "mediaId": "repwise/exercises/towel-isometric-pulldown",
+    "alternatives": [
+      "sliding-floor-pulldown",
+      "band-lat-pulldown",
+      "single-arm-band-pulldown"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "single-arm-band-pulldown",
+    "name": "Single-arm band pulldown",
+    "aliases": [
+      "Half-kneeling band pulldown"
+    ],
+    "pattern": "pull_v",
+    "patternFamily": "pull_v",
+    "primaryMuscles": [
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "biceps"
+    ],
+    "equipment": [
+      "band"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [],
+    "instructions": [
+      "Anchor a band high, such as over the top of a closed door with a door anchor.",
+      "Kneel on one knee facing the anchor and hold the band in the opposite hand with your arm reaching up.",
+      "Pull your elbow down to your side until your hand is near your shoulder.",
+      "Return slowly and switch arms after the set."
+    ],
+    "cues": [
+      "Keep your ribs down as you pull.",
+      "Pause with the elbow at your side."
+    ],
+    "commonMistakes": [
+      "Leaning far back to finish the rep.",
+      "Letting the band snap back."
+    ],
+    "mediaId": "repwise/exercises/single-arm-band-pulldown",
+    "alternatives": [
+      "band-lat-pulldown",
+      "single-arm-lat-pulldown",
+      "towel-isometric-pulldown"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "floor-dumbbell-pullover",
+    "name": "Floor dumbbell pullover",
+    "aliases": [
+      "Lat pullover on the floor"
+    ],
+    "pattern": "pull_v",
+    "patternFamily": "pull_v",
+    "primaryMuscles": [
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "chest",
+      "triceps",
+      "abs"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "shoulder"
+    ],
+    "instructions": [
+      "Lie on your back on the floor with knees bent, holding one dumbbell with both hands above your chest.",
+      "Keep a slight bend in the elbows and lower the dumbbell back behind your head toward the floor.",
+      "Stop just before it touches or when your shoulders reach their comfortable limit.",
+      "Pull the dumbbell back over your chest using your lats."
+    ],
+    "cues": [
+      "Keep your lower back on the floor.",
+      "Feel the stretch along your sides."
+    ],
+    "commonMistakes": [
+      "Bending the elbows so it becomes a triceps press.",
+      "Arching the back to reach further."
+    ],
+    "mediaId": "repwise/exercises/floor-dumbbell-pullover",
+    "alternatives": [
+      "single-arm-band-pulldown",
+      "band-lat-pulldown",
+      "sliding-floor-pulldown"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "knee-push-up",
+    "name": "Knee push-up",
+    "aliases": [
+      "Kneeling push-up"
+    ],
+    "pattern": "push_h",
+    "patternFamily": "push_h",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "triceps",
+      "front_delts"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "wrist"
+    ],
+    "instructions": [
+      "Kneel on the floor and place your hands a little wider than your shoulders.",
+      "Walk your hands forward until your body is straight from knees to head.",
+      "Lower your chest toward the floor with elbows angled back.",
+      "Push back up to straight arms."
+    ],
+    "cues": [
+      "Keep the hips in line, not piked up.",
+      "Use a mat or towel under your knees."
+    ],
+    "commonMistakes": [
+      "Bending at the hips instead of lowering the chest.",
+      "Going only halfway down."
+    ],
+    "mediaId": "repwise/exercises/knee-push-up",
+    "alternatives": [
+      "push-up",
+      "incline-push-up",
+      "wide-push-up"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "wide-push-up",
+    "name": "Wide push-up",
+    "aliases": [
+      "Wide-grip push-up"
+    ],
+    "pattern": "push_h",
+    "patternFamily": "push_h",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "front_delts",
+      "triceps",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "wrist",
+      "shoulder"
+    ],
+    "instructions": [
+      "Set your hands about one and a half shoulder-widths apart in a high plank.",
+      "Keep a straight line from head to heels.",
+      "Lower your chest between your hands.",
+      "Press the floor away to return to the top."
+    ],
+    "cues": [
+      "Elbows bend out at a comfortable angle, not straight to the side.",
+      "Squeeze your glutes throughout."
+    ],
+    "commonMistakes": [
+      "Hands so wide the shoulders hurt.",
+      "Sagging hips."
+    ],
+    "mediaId": "repwise/exercises/wide-push-up",
+    "alternatives": [
+      "push-up",
+      "knee-push-up",
+      "archer-push-up"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "archer-push-up",
+    "name": "Archer push-up",
+    "aliases": [
+      "Side-to-side push-up"
+    ],
+    "pattern": "push_h",
+    "patternFamily": "push_h",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "triceps",
+      "front_delts",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "advanced",
+    "unilateral": true,
+    "mechanics": "compound",
+    "contraindications": [
+      "wrist",
+      "shoulder",
+      "elbow"
+    ],
+    "instructions": [
+      "Start in a high plank with hands very wide and fingers turned out slightly.",
+      "Shift your weight toward one hand and bend that arm while the other stays nearly straight.",
+      "Lower until your chest is close to the working hand.",
+      "Press back up and alternate sides."
+    ],
+    "cues": [
+      "The straight arm assists; the bent arm does the work.",
+      "Keep the body straight and hips level."
+    ],
+    "commonMistakes": [
+      "Twisting the hips toward the floor.",
+      "Bending both arms equally."
+    ],
+    "mediaId": "repwise/exercises/archer-push-up",
+    "alternatives": [
+      "wide-push-up",
+      "push-up",
+      "decline-push-up"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "doorway-isometric-lateral-raise",
+    "name": "Doorway isometric lateral raise",
+    "aliases": [
+      "Door frame lateral press"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "side_delts"
+    ],
+    "secondaryMuscles": [
+      "traps"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder"
+    ],
+    "instructions": [
+      "Stand in a narrow doorway with arms by your sides and the backs of your wrists against the frame.",
+      "Press outward into the frame as if raising your arms to the sides.",
+      "Build to a hard push and hold for 10 to 20 seconds.",
+      "Relax, rest briefly and repeat."
+    ],
+    "cues": [
+      "Push from the shoulders, not by shrugging.",
+      "Breathe steadily during the hold."
+    ],
+    "commonMistakes": [
+      "Holding your breath.",
+      "Leaning the whole body instead of pressing with the arms."
+    ],
+    "mediaId": "repwise/exercises/doorway-isometric-lateral-raise",
+    "alternatives": [
+      "wall-lean-lateral-raise",
+      "band-lateral-raise",
+      "dumbbell-lateral-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "wall-lean-lateral-raise",
+    "name": "Wall lean lateral raise",
+    "aliases": [
+      "Side-lean wall press"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "side_delts"
+    ],
+    "secondaryMuscles": [
+      "traps",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": true,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder",
+      "elbow"
+    ],
+    "instructions": [
+      "Stand side-on to a wall, about one step away, with the near elbow bent and forearm against the wall at shoulder height.",
+      "Lean your body into the wall, supported by the forearm.",
+      "Press the forearm into the wall to push your body back to upright, using the side of the shoulder.",
+      "Lean back in slowly and switch sides after the set."
+    ],
+    "cues": [
+      "Stand further from the wall to make it harder.",
+      "Keep your body straight like a plank tilted sideways."
+    ],
+    "commonMistakes": [
+      "Pushing with the hand like a push-up.",
+      "Bending at the waist."
+    ],
+    "mediaId": "repwise/exercises/wall-lean-lateral-raise",
+    "alternatives": [
+      "doorway-isometric-lateral-raise",
+      "band-lateral-raise",
+      "dumbbell-lateral-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "prone-t-raise",
+    "name": "Prone T raise",
+    "aliases": [
+      "Lying T raise"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "rear_delts"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "traps"
+    ],
+    "equipment": [
+      "bodyweight",
+      "mat"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [],
+    "instructions": [
+      "Lie face down with your arms out to the sides in a T and thumbs pointing up.",
+      "Squeeze your shoulder blades together.",
+      "Lift your arms off the floor as high as is comfortable.",
+      "Hold for a second, then lower slowly."
+    ],
+    "cues": [
+      "Rest your forehead on a folded towel.",
+      "Keep the arms long and straight."
+    ],
+    "commonMistakes": [
+      "Lifting the chest off the floor to cheat the height.",
+      "Shrugging toward the ears."
+    ],
+    "mediaId": "repwise/exercises/prone-t-raise",
+    "alternatives": [
+      "reverse-snow-angel",
+      "door-frame-face-pull",
+      "rear-delt-fly"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "door-frame-face-pull",
+    "name": "Door frame face pull",
+    "aliases": [
+      "Doorway face pull",
+      "Bodyweight face pull"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "rear_delts"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "traps",
+      "biceps"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder"
+    ],
+    "instructions": [
+      "Stand in a doorway and grip both sides of the frame at face height.",
+      "Walk your feet forward and lean back until your arms are straight.",
+      "Pull your face toward the gap, bending the elbows high and out to the sides.",
+      "Lower slowly back to straight arms."
+    ],
+    "cues": [
+      "Elbows stay at shoulder height.",
+      "Walk your feet further in to make it harder."
+    ],
+    "commonMistakes": [
+      "Rowing with low elbows like a normal row.",
+      "Letting the hips sag."
+    ],
+    "mediaId": "repwise/exercises/door-frame-face-pull",
+    "alternatives": [
+      "band-face-pull",
+      "face-pull",
+      "prone-t-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "reverse-snow-angel",
+    "name": "Reverse snow angel",
+    "aliases": [
+      "Prone snow angel"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "rear_delts"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "traps",
+      "lower_back"
+    ],
+    "equipment": [
+      "bodyweight",
+      "mat"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [],
+    "instructions": [
+      "Lie face down with arms by your sides, palms down, and lift your hands just off the floor.",
+      "Sweep your arms out and up in a wide arc until they are overhead.",
+      "Reverse the arc back to your sides.",
+      "Keep the hands off the floor for the whole set."
+    ],
+    "cues": [
+      "Move slowly; the hold time is what makes it hard.",
+      "Keep your forehead resting down."
+    ],
+    "commonMistakes": [
+      "Letting the hands touch down to rest.",
+      "Arching the lower back."
+    ],
+    "mediaId": "repwise/exercises/reverse-snow-angel",
+    "alternatives": [
+      "prone-t-raise",
+      "band-pull-apart",
+      "door-frame-face-pull"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "seated-dumbbell-lateral-raise",
+    "name": "Seated dumbbell lateral raise",
+    "aliases": [
+      "Seated side raise"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "side_delts"
+    ],
+    "secondaryMuscles": [
+      "traps"
+    ],
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder"
+    ],
+    "instructions": [
+      "Sit on the end of a bench holding a dumbbell in each hand at your sides.",
+      "Keep a slight bend in the elbows.",
+      "Raise the dumbbells out to the sides to shoulder height.",
+      "Lower slowly."
+    ],
+    "cues": [
+      "Sitting removes the leg drive, so go lighter.",
+      "Lead with the elbows."
+    ],
+    "commonMistakes": [
+      "Swinging the torso.",
+      "Raising above shoulder height with a shrug."
+    ],
+    "mediaId": "repwise/exercises/seated-dumbbell-lateral-raise",
+    "alternatives": [
+      "dumbbell-lateral-raise",
+      "band-lateral-raise",
+      "cable-lateral-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "band-lateral-raise",
+    "name": "Band lateral raise",
+    "aliases": [
+      "Resistance band side raise"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "side_delts"
+    ],
+    "secondaryMuscles": [
+      "traps"
+    ],
+    "equipment": [
+      "band"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder"
+    ],
+    "instructions": [
+      "Stand on the middle of a band and hold one end in each hand at your sides.",
+      "Keep a slight bend in the elbows.",
+      "Raise your arms out to the sides to shoulder height.",
+      "Lower slowly against the band."
+    ],
+    "cues": [
+      "Use a wider stance on the band for more tension.",
+      "Pause at the top."
+    ],
+    "commonMistakes": [
+      "Letting the band snap the arms down.",
+      "Shrugging as you lift."
+    ],
+    "mediaId": "repwise/exercises/band-lateral-raise",
+    "alternatives": [
+      "dumbbell-lateral-raise",
+      "seated-dumbbell-lateral-raise",
+      "cable-lateral-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "chest-supported-rear-delt-fly",
+    "name": "Chest-supported rear delt fly",
+    "aliases": [
+      "Incline bench reverse fly"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "rear_delts"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "traps"
+    ],
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [],
+    "instructions": [
+      "Set a bench to a low incline and lie face down on it holding light dumbbells.",
+      "Let the arms hang with a slight bend at the elbows.",
+      "Raise the dumbbells out to the sides until your arms are level with your body.",
+      "Lower slowly."
+    ],
+    "cues": [
+      "Think of moving the hands wide, not back.",
+      "Keep your chest on the pad."
+    ],
+    "commonMistakes": [
+      "Squeezing the shoulder blades so the back does the work.",
+      "Using weights so heavy you have to swing."
+    ],
+    "mediaId": "repwise/exercises/chest-supported-rear-delt-fly",
+    "alternatives": [
+      "rear-delt-fly",
+      "reverse-pec-deck",
+      "band-face-pull"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "band-face-pull",
+    "name": "Band face pull",
+    "aliases": [
+      "Resistance band face pull"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "rear_delts"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "traps"
+    ],
+    "equipment": [
+      "band"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [],
+    "instructions": [
+      "Anchor a band at face height, for example in a closed door with a door anchor.",
+      "Hold one end in each hand and step back until the band is tight.",
+      "Pull toward your face, splitting the hands apart beside your ears.",
+      "Return slowly."
+    ],
+    "cues": [
+      "Elbows high and wide.",
+      "Finish with the hands beside the ears, not in front."
+    ],
+    "commonMistakes": [
+      "Pulling to the chest like a row.",
+      "Leaning back to move the band."
+    ],
+    "mediaId": "repwise/exercises/band-face-pull",
+    "alternatives": [
+      "face-pull",
+      "door-frame-face-pull",
+      "band-pull-apart"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "side-lying-rear-delt-raise",
+    "name": "Side-lying rear delt raise",
+    "aliases": [
+      "Lying rear lateral raise"
+    ],
+    "pattern": "isolation_shoulders",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "rear_delts"
+    ],
+    "secondaryMuscles": [
+      "side_delts"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "isolation",
+    "contraindications": [],
+    "instructions": [
+      "Lie on your side on the floor or a bench with a light dumbbell in the top hand.",
+      "Let the dumbbell hang in front of your chest with a slight bend at the elbow.",
+      "Raise it up and back until the arm points to the ceiling.",
+      "Lower slowly and switch sides after the set."
+    ],
+    "cues": [
+      "Light weight, strict form.",
+      "Keep your hips stacked."
+    ],
+    "commonMistakes": [
+      "Rolling the body back to help the lift.",
+      "Bending the elbow more as you lift."
+    ],
+    "mediaId": "repwise/exercises/side-lying-rear-delt-raise",
+    "alternatives": [
+      "rear-delt-fly",
+      "chest-supported-rear-delt-fly",
+      "prone-t-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "towel-curl",
+    "name": "Towel curl",
+    "aliases": [
+      "Self-resisted towel curl"
+    ],
+    "pattern": "isolation_biceps",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "biceps"
+    ],
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "isolation",
+    "contraindications": [
+      "elbow"
+    ],
+    "instructions": [
+      "Stand on the middle of a towel with one foot and hold both ends in one hand, or one end in each hand.",
+      "Curl the towel upward while pressing down with the foot to resist.",
+      "Set the resistance so each rep takes about three seconds up and three down.",
+      "Switch sides after the set if working one arm."
+    ],
+    "cues": [
+      "Your foot sets the load; push hard enough to make it a real set.",
+      "Keep the elbows pinned to your sides."
+    ],
+    "commonMistakes": [
+      "Easing off the foot so there is no resistance.",
+      "Swinging the body."
+    ],
+    "mediaId": "repwise/exercises/towel-curl",
+    "alternatives": [
+      "door-frame-curl",
+      "band-curl",
+      "dumbbell-curl"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "door-frame-curl",
+    "name": "Door frame curl",
+    "aliases": [
+      "Doorway biceps curl"
+    ],
+    "pattern": "isolation_biceps",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "biceps"
+    ],
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "isolation",
+    "contraindications": [
+      "elbow"
+    ],
+    "instructions": [
+      "Stand facing a door frame and grip it at waist height with one hand, palm up.",
+      "Walk your feet in and lean back until the arm is straight.",
+      "Curl your body toward the frame by bending only at the elbow.",
+      "Lower back slowly and switch arms after the set."
+    ],
+    "cues": [
+      "Keep the elbow pointing at the frame and still.",
+      "Move the feet closer for more load."
+    ],
+    "commonMistakes": [
+      "Rowing with the shoulder instead of curling.",
+      "Bending at the hips."
+    ],
+    "mediaId": "repwise/exercises/door-frame-curl",
+    "alternatives": [
+      "table-bodyweight-curl",
+      "towel-curl",
+      "band-curl"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "table-bodyweight-curl",
+    "name": "Table bodyweight curl",
+    "aliases": [
+      "Under-table curl"
+    ],
+    "pattern": "isolation_biceps",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "biceps"
+    ],
+    "secondaryMuscles": [
+      "forearms",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "elbow",
+      "shoulder"
+    ],
+    "instructions": [
+      "Lie under a sturdy table and grip its edge with palms facing you, hands shoulder-width apart.",
+      "Hold your body straight with heels on the floor, or knees bent to make it easier.",
+      "Curl your forehead toward your hands by bending only at the elbows.",
+      "Lower slowly to straight arms."
+    ],
+    "cues": [
+      "Check the table is solid before every set.",
+      "Elbows stay pointing forward."
+    ],
+    "commonMistakes": [
+      "Turning it into a row by pulling the elbows down.",
+      "Letting the hips drop."
+    ],
+    "mediaId": "repwise/exercises/table-bodyweight-curl",
+    "alternatives": [
+      "door-frame-curl",
+      "towel-curl",
+      "dumbbell-curl"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "palm-press-isometric",
+    "name": "Palm press",
+    "aliases": [
+      "Isometric chest squeeze",
+      "Prayer press"
+    ],
+    "pattern": "isolation_chest",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "front_delts",
+      "triceps"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [],
+    "instructions": [
+      "Press your palms together in front of your chest with elbows out to the sides.",
+      "Push your hands into each other as hard as you can.",
+      "Hold for 10 to 20 seconds while breathing steadily.",
+      "Relax, then repeat at different heights."
+    ],
+    "cues": [
+      "Squeeze from the chest, not the hands.",
+      "Keep the shoulders down."
+    ],
+    "commonMistakes": [
+      "Holding your breath.",
+      "Letting the elbows drop to your sides."
+    ],
+    "mediaId": "repwise/exercises/palm-press-isometric",
+    "alternatives": [
+      "sliding-floor-fly",
+      "band-chest-fly",
+      "dumbbell-fly"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "sliding-floor-fly",
+    "name": "Sliding floor fly",
+    "aliases": [
+      "Slider chest fly",
+      "Towel fly"
+    ],
+    "pattern": "isolation_chest",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "front_delts",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder",
+      "wrist"
+    ],
+    "instructions": [
+      "Kneel on a smooth floor with each hand on a small towel under your shoulders.",
+      "Slide your hands out to the sides as you lower your chest, with a slight bend in the elbows.",
+      "Go only as wide as you can control.",
+      "Squeeze your hands back together to return."
+    ],
+    "cues": [
+      "Start from the knees; progress to a full plank.",
+      "Keep the slight elbow bend fixed."
+    ],
+    "commonMistakes": [
+      "Sliding so wide you drop to the floor.",
+      "Sagging at the hips."
+    ],
+    "mediaId": "repwise/exercises/sliding-floor-fly",
+    "alternatives": [
+      "palm-press-isometric",
+      "band-chest-fly",
+      "floor-dumbbell-fly"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "floor-dumbbell-fly",
+    "name": "Floor dumbbell fly",
+    "aliases": [
+      "Dumbbell floor fly"
+    ],
+    "pattern": "isolation_chest",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "front_delts"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder"
+    ],
+    "instructions": [
+      "Lie on your back on the floor with knees bent and a dumbbell in each hand above your chest, palms facing.",
+      "With a slight bend in the elbows, open your arms out to the sides.",
+      "Lower until your upper arms touch the floor.",
+      "Bring the dumbbells back together over your chest."
+    ],
+    "cues": [
+      "The floor sets a safe range of motion.",
+      "Hug a big tree on the way up."
+    ],
+    "commonMistakes": [
+      "Bending the elbows so it becomes a press.",
+      "Dropping the arms onto the floor."
+    ],
+    "mediaId": "repwise/exercises/floor-dumbbell-fly",
+    "alternatives": [
+      "dumbbell-fly",
+      "band-chest-fly",
+      "sliding-floor-fly"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "single-leg-calf-raise",
+    "name": "Single-leg calf raise",
+    "aliases": [
+      "One-leg calf raise"
+    ],
+    "pattern": "isolation_calves",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "calves"
+    ],
+    "secondaryMuscles": [],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": true,
+    "mechanics": "isolation",
+    "contraindications": [
+      "ankle"
+    ],
+    "instructions": [
+      "Stand on one foot on a stair or on flat floor, holding a wall or rail for balance.",
+      "Lower your heel as far as is comfortable.",
+      "Rise as high onto the ball of the foot as you can.",
+      "Pause at the top, lower slowly and switch legs after the set."
+    ],
+    "cues": [
+      "Use a stair edge for a bigger stretch.",
+      "Two seconds up, two seconds down."
+    ],
+    "commonMistakes": [
+      "Bouncing at the bottom.",
+      "Bending the knee to help."
+    ],
+    "mediaId": "repwise/exercises/single-leg-calf-raise",
+    "alternatives": [
+      "bodyweight-calf-raise",
+      "standing-dumbbell-calf-raise",
+      "bent-knee-calf-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "bent-knee-calf-raise",
+    "name": "Bent-knee calf raise",
+    "aliases": [
+      "Soleus raise"
+    ],
+    "pattern": "isolation_calves",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "calves"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "ankle",
+      "knee"
+    ],
+    "instructions": [
+      "Stand with feet hip-width apart and bend your knees slightly, holding a wall for balance.",
+      "Keep the knee bend fixed.",
+      "Rise onto the balls of your feet as high as you can.",
+      "Lower slowly and repeat."
+    ],
+    "cues": [
+      "The bent knee shifts work to the lower calf.",
+      "Keep weight over the big toe."
+    ],
+    "commonMistakes": [
+      "Straightening the knees as you rise.",
+      "Rolling onto the outside of the feet."
+    ],
+    "mediaId": "repwise/exercises/bent-knee-calf-raise",
+    "alternatives": [
+      "single-leg-calf-raise",
+      "seated-dumbbell-calf-raise",
+      "bodyweight-calf-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "standing-dumbbell-calf-raise",
+    "name": "Standing dumbbell calf raise",
+    "aliases": [
+      "Dumbbell calf raise, flat floor"
+    ],
+    "pattern": "isolation_calves",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "calves"
+    ],
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "equipment": [
+      "dumbbell"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "ankle"
+    ],
+    "instructions": [
+      "Stand holding a dumbbell in each hand at your sides, feet hip-width apart.",
+      "Rise onto the balls of your feet as high as you can.",
+      "Pause for a second at the top.",
+      "Lower your heels slowly to the floor."
+    ],
+    "cues": [
+      "Hold one dumbbell and do one leg at a time for more load.",
+      "Keep your body tall."
+    ],
+    "commonMistakes": [
+      "Rushing the reps.",
+      "Leaning forward onto the toes."
+    ],
+    "mediaId": "repwise/exercises/standing-dumbbell-calf-raise",
+    "alternatives": [
+      "dumbbell-calf-raise",
+      "single-leg-calf-raise",
+      "seated-dumbbell-calf-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "seated-dumbbell-calf-raise",
+    "name": "Seated dumbbell calf raise",
+    "aliases": [
+      "Bench seated calf raise"
+    ],
+    "pattern": "isolation_calves",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "calves"
+    ],
+    "secondaryMuscles": [],
+    "equipment": [
+      "dumbbell",
+      "bench"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "ankle"
+    ],
+    "instructions": [
+      "Sit on the end of a bench with feet flat and a dumbbell resting on each knee.",
+      "Put the balls of your feet on a book or step if you have one.",
+      "Lift your heels as high as you can.",
+      "Lower slowly and repeat."
+    ],
+    "cues": [
+      "Hold the top for a second.",
+      "Keep the dumbbells steady on your knees."
+    ],
+    "commonMistakes": [
+      "Lifting the dumbbells with your hands.",
+      "Short, bouncing reps."
+    ],
+    "mediaId": "repwise/exercises/seated-dumbbell-calf-raise",
+    "alternatives": [
+      "seated-calf-raise",
+      "bent-knee-calf-raise",
+      "standing-dumbbell-calf-raise"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "bodyweight-triceps-extension",
+    "name": "Bodyweight triceps extension",
+    "aliases": [
+      "Counter skull crusher",
+      "Bodyweight skull crusher"
+    ],
+    "pattern": "isolation_triceps",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "triceps"
+    ],
+    "secondaryMuscles": [
+      "chest",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "elbow",
+      "wrist"
+    ],
+    "instructions": [
+      "Place your hands on a sturdy kitchen counter or table edge and walk your feet back into a leaning plank.",
+      "Bend only at the elbows to lower your forehead toward your hands.",
+      "Keep the elbows pointing down, not flaring.",
+      "Straighten your arms to push back to the start."
+    ],
+    "cues": [
+      "A higher surface makes it easier.",
+      "Keep the body in one straight line."
+    ],
+    "commonMistakes": [
+      "Turning it into a push-up by moving at the shoulders.",
+      "Letting the hips sag."
+    ],
+    "mediaId": "repwise/exercises/bodyweight-triceps-extension",
+    "alternatives": [
+      "diamond-push-up",
+      "bench-dip",
+      "overhead-triceps-extension"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
   }
 ]
