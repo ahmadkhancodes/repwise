@@ -35,7 +35,19 @@ jest.mock('@shopify/react-native-skia', () => {
     Path: () => null,
     Circle: () => null,
     Group: () => null,
-    Skia: { Path: { Make: () => ({}) }, PathBuilder: { Make: () => builder } },
+    // Charts / body map / share images (progress feature).
+    Rect: () => null,
+    RoundedRect: () => null,
+    Line: () => null,
+    BlurMask: () => null,
+    DashPathEffect: () => null,
+    vec: (x: number, y: number) => ({ x, y }),
+    ImageFormat: { PNG: 4, JPEG: 3 },
+    makeImageFromView: jest.fn(async () => ({ encodeToBase64: () => 'iVBORw0KGgo=' })),
+    Skia: {
+      Path: { Make: () => ({}), MakeFromSVGString: () => ({}) },
+      PathBuilder: { Make: () => builder },
+    },
   };
 });
 
@@ -123,7 +135,9 @@ jest.mock('expo-notifications', () => require('./test/mocks/expoNotifications'))
 jest.mock('react-native-android-widget', () => require('./test/mocks/androidWidget'));
 jest.mock('@bacons/apple-targets', () => ({
   ExtensionStorage: Object.assign(
-    jest.fn().mockImplementation(() => ({ set: jest.fn(), get: jest.fn(() => null), remove: jest.fn() })),
+    jest
+      .fn()
+      .mockImplementation(() => ({ set: jest.fn(), get: jest.fn(() => null), remove: jest.fn() })),
     { reloadWidget: jest.fn(), reloadControls: jest.fn() },
   ),
 }));

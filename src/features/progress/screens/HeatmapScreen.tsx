@@ -1,0 +1,179 @@
+import { router } from 'expo-router';
+import { Activity, ChevronLeft } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
+import { View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
+
+import { Card, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/ui';
+import { useTheme } from '@/theme';
+
+import { BodyMap } from '../components/BodyMap';
+import { ProgressSkeleton } from '../components/Skeleton';
+import { SectionTitle } from '../components/bits';
+import { useNow, useTraining } from '../hooks/useProgress';
+import { viewMuscles, type BodyView } from '../logic/bodyShapes';
+import type { Muscle } from '../logic/engine';
+import { muscleLabel, rankMuscles, recoveryHeatmap, recoveryLabel } from '../logic/muscles';
+
+/** S32 Muscle heatmap (W6): front/back body that glows by recent work, plus a readable list. */
+export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
+  const t = useTheme();
+  const training = useTraining();
+  const [view, setView] = useState<BodyView>('front');
+  const [selected, setSelected] = useState<Muscle | null>(null);
+  const now = useNow(nowOverride);
+  const heatmap = useMemo(
+    () => recoveryHeatmap(training.sets, training.exById, now),
+    [training.sets, training.exById, now],
+  );
+  const ranked = useMemo(() => rankMuscles(heatmap), [heatmap]);
+  const worked = ranked.filter((r) => r.sets > 0);
+  const focus = selected ?? worked[0]?.muscle ?? null;
+  const back = (
+    <IconButton
+      icon={ChevronLeft}
+      accessibilityLabel="Back"
+      onPress={() => router.back()}
+      testID="back"
+    />
+  );
+
+  const select = (m: Muscle) => {
+    setSelected(m);
+    if (!viewMuscles(view).includes(m)) setView(view === 'front' ? 'back' : 'front');
+  };
+
+  return (
+    <Screen title="Muscle recovery" headerLeft={back} testID="screen-progress-heatmap">
+      {training.loading ? (
+        <ProgressSkeleton />
+      ) : (
+        <>
+          <Segmented
+            testID="heatmap-view"
+            accessibilityLabel="Body side"
+            options={[
+              { value: 'front', label: 'Front' },
+              { value: 'back', label: 'Back' },
+            ]}
+            value={view}
+            onChange={setView}
+          />
+          <BodyMap
+            heatmap={heatmap}
+            view={view}
+            selected={focus}
+            onSelect={select}
+            testID="body-map"
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: t.spacing.md,
+            }}
+          >
+            <Legend label="Fresh" color={t.colors.surface2} />
+            <Legend label="Recovering" color={t.colors.accentSoft} />
+            <Legend label="Worked" color={t.colors.accent} />
+          </View>
+
+          {worked.length === 0 ? (
+            <EmptyState
+              icon={Activity}
+              title="All muscles fresh"
+              body="Finish a workout and the muscles you trained light up here for a few days."
+              testID="heatmap-empty"
+            />
+          ) : (
+            <>
+              {focus ? (
+                <Animated.View key={focus} entering={FadeIn.duration(t.motion.duration.base)}>
+                  <Card testID="heatmap-focus">
+                    <Text variant="headline">{muscleLabel(focus)}</Text>
+                    <Text variant="callout" color="textSecondary" tabular>
+                      {`${recoveryLabel(heatmap[focus].recovery)} · ${Math.round(heatmap[focus].recovery * 100)}% recovered · ${heatmap[focus].setsLast7d} hard sets in 7 days`}
+                    </Text>
+                  </Card>
+                </Animated.View>
+              ) : null}
+              <SectionTitle title="This week" />
+              <View style={{ gap: t.spacing.xs }}>
+                {worked.map((r) => (
+                  <PressableScale
+                    key={r.muscle}
+                    feedback="selection"
+                    onPress={() => select(r.muscle)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: r.muscle === focus }}
+                    accessibilityLabel={`${muscleLabel(r.muscle)}, ${recoveryLabel(r.recovery)}, ${r.sets} hard sets`}
+                    testID={`muscle-${r.muscle}`}
+                    style={{
+                      minHeight: t.sizes.touch,
+                      justifyContent: 'center',
+                      gap: t.spacing.xxs,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text
+                        variant="body"
+                        color={r.muscle === focus ? 'textPrimary' : 'textSecondary'}
+                      >
+                        {muscleLabel(r.muscle)}
+                      </Text>
+                      <Text variant="callout" color="textSecondary" tabular>
+                        {`${r.sets} sets · ${recoveryLabel(r.recovery)}`}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        height: 6,
+                        borderRadius: t.radius.pill,
+                        backgroundColor: t.colors.surface2,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: 6,
+                          width: `${Math.max(4, r.fatigue * 100)}%`,
+                          backgroundColor: t.colors.accent,
+                          borderRadius: t.radius.pill,
+                        }}
+                      />
+                    </View>
+                  </PressableScale>
+                ))}
+              </View>
+              <Text variant="caption" color="textTertiary">
+                Based on hard sets in the last 7 days. Bigger muscles take longer to feel fresh.
+              </Text>
+            </>
+          )}
+        </>
+      )}
+    </Screen>
+  );
+}
+
+function Legend({ label, color }: { label: string; color: string }) {
+  const t = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xxs }}>
+      <View
+        style={{
+          width: 12,
+          height: 12,
+          borderRadius: t.radius.pill,
+          backgroundColor: color,
+          borderWidth: t.sizes.hairline,
+          borderColor: t.colors.border,
+        }}
+      />
+      <Text variant="caption" color="textSecondary">
+        {label}
+      </Text>
+    </View>
+  );
+}

@@ -1,0 +1,40 @@
+# P0 (RW-50, S32): open the muscle recovery heatmap, flip front/back; focus card when trained, calm empty state when not.
+appId: com.client.repwise
+tags:
+  - progress
+  - p0
+---
+- launchApp
+- tapOn:
+    id: tab-progress
+- scrollUntilVisible:
+    element:
+      id: nav-heatmap
+    direction: DOWN
+- tapOn:
+    id: nav-heatmap
+- assertVisible:
+    id: screen-progress-heatmap
+- assertVisible:
+    id: body-map
+- tapOn:
+    id: heatmap-view-back
+- tapOn:
+    id: heatmap-view-front
+- runFlow:
+    when:
+      visible:
+        id: heatmap-empty
+    commands:
+      - assertVisible: All muscles fresh
+- runFlow:
+    when:
+      notVisible:
+        id: heatmap-empty
+    commands:
+      - assertVisible:
+          id: heatmap-focus
+- tapOn:
+    id: back
+- assertVisible:
+    id: screen-progress
