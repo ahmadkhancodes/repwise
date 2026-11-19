@@ -425,7 +425,7 @@ export const BlockStateSchema = z.object({
   startDate: ISODateSchema,
   blockNo: z.number().int().min(1),
   /** slotKey → exercise id of the main lift held for this block. */
-  mainLifts: z.record(z.string()),
+  mainLifts: z.record(z.string(), z.string()),
   lastDeloadWeekStart: ISODateSchema.optional(),
 });
 export type BlockState = z.infer<typeof BlockStateSchema>;
