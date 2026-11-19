@@ -1,0 +1,1080 @@
+{
+  "dataset": "yuhonas/free-exercise-db",
+  "reviewedBy": "Claude (media agent), 19 Nov 2026: every match checked against the dataset's name, equipment and instructions; ambiguous ones by viewing the photos",
+  "confidence": {
+    "high": "Same exercise, same equipment and set-up.",
+    "medium": "Same movement; the dataset shows a different implement, grip or a minor variant (e.g. kettlebell instead of dumbbell). Safe to show as a demonstration."
+  },
+  "decisions": {
+    "barbell-back-squat": {
+      "source": "Barbell_Squat",
+      "confidence": "high"
+    },
+    "barbell-front-squat": {
+      "source": "Front_Barbell_Squat",
+      "confidence": "high"
+    },
+    "goblet-squat": {
+      "source": "Goblet_Squat",
+      "confidence": "medium",
+      "note": "dataset holds a kettlebell"
+    },
+    "kettlebell-goblet-squat": {
+      "source": "Goblet_Squat",
+      "confidence": "high"
+    },
+    "bodyweight-squat": {
+      "source": "Bodyweight_Squat",
+      "confidence": "high"
+    },
+    "box-squat": {
+      "source": "Box_Squat",
+      "confidence": "high"
+    },
+    "leg-press": {
+      "source": "Leg_Press",
+      "confidence": "high"
+    },
+    "hack-squat": {
+      "source": "Hack_Squat",
+      "confidence": "high"
+    },
+    "smith-machine-squat": {
+      "source": "Smith_Machine_Squat",
+      "confidence": "high"
+    },
+    "zercher-squat": {
+      "source": "Zercher_Squats",
+      "confidence": "high"
+    },
+    "heels-elevated-goblet-squat": {
+      "source": null
+    },
+    "pause-squat": {
+      "source": "Barbell_Squat",
+      "confidence": "medium",
+      "note": "same lift; the pause is not visible in two frames"
+    },
+    "landmine-squat": {
+      "source": null
+    },
+    "belt-squat": {
+      "source": null
+    },
+    "cyclist-squat": {
+      "source": null
+    },
+    "conventional-deadlift": {
+      "source": "Barbell_Deadlift",
+      "confidence": "high"
+    },
+    "romanian-deadlift": {
+      "source": "Romanian_Deadlift",
+      "confidence": "high"
+    },
+    "dumbbell-romanian-deadlift": {
+      "source": null,
+      "note": "dataset only has barbell RDL / dumbbell stiff-leg deadlift"
+    },
+    "trap-bar-deadlift": {
+      "source": "Trap_Bar_Deadlift",
+      "confidence": "high"
+    },
+    "sumo-deadlift": {
+      "source": "Sumo_Deadlift",
+      "confidence": "high"
+    },
+    "kettlebell-swing": {
+      "source": "One-Arm_Kettlebell_Swings",
+      "confidence": "medium",
+      "note": "one-arm swing in the dataset"
+    },
+    "hip-thrust": {
+      "source": "Barbell_Hip_Thrust",
+      "confidence": "high"
+    },
+    "glute-bridge": {
+      "source": "Butt_Lift_Bridge",
+      "confidence": "high"
+    },
+    "good-morning": {
+      "source": "Good_Morning",
+      "confidence": "high"
+    },
+    "cable-pull-through": {
+      "source": "Pull_Through",
+      "confidence": "high"
+    },
+    "single-leg-romanian-deadlift": {
+      "source": "Kettlebell_One-Legged_Deadlift",
+      "confidence": "medium",
+      "note": "kettlebell instead of dumbbell"
+    },
+    "back-extension": {
+      "source": "Hyperextensions_Back_Extensions",
+      "confidence": "high"
+    },
+    "kettlebell-deadlift": {
+      "source": null
+    },
+    "stiff-leg-deadlift": {
+      "source": "Stiff-Legged_Barbell_Deadlift",
+      "confidence": "high"
+    },
+    "dumbbell-hip-thrust": {
+      "source": null
+    },
+    "smith-machine-hip-thrust": {
+      "source": null,
+      "note": "Smith_Machine_Hip_Raise is a reverse-crunch movement, not a hip thrust"
+    },
+    "forward-lunge": {
+      "source": "Bodyweight_Walking_Lunge",
+      "confidence": "medium",
+      "note": "walking variant; identical frames"
+    },
+    "reverse-lunge": {
+      "source": "Dumbbell_Rear_Lunge",
+      "confidence": "high"
+    },
+    "walking-lunge": {
+      "source": "Dumbbell_Lunges",
+      "confidence": "medium",
+      "note": "forward dumbbell lunge; identical frames"
+    },
+    "bulgarian-split-squat": {
+      "source": "Split_Squat_with_Dumbbells",
+      "confidence": "high",
+      "note": "rear foot elevated, dumbbells"
+    },
+    "split-squat": {
+      "source": null,
+      "note": "Split_Squats is a jumping variant"
+    },
+    "barbell-reverse-lunge": {
+      "source": null
+    },
+    "step-up": {
+      "source": "Dumbbell_Step_Ups",
+      "confidence": "high"
+    },
+    "lateral-lunge": {
+      "source": null
+    },
+    "curtsy-lunge": {
+      "source": null,
+      "note": "Crossover_Reverse_Lunge adds a torso rotation; not a curtsy lunge"
+    },
+    "goblet-reverse-lunge": {
+      "source": null
+    },
+    "smith-machine-split-squat": {
+      "source": null,
+      "note": "dataset's Smith split squat is rear-foot-elevated"
+    },
+    "deficit-reverse-lunge": {
+      "source": "Elevated_Back_Lunge",
+      "confidence": "medium",
+      "note": "barbell instead of dumbbells"
+    },
+    "jumping-lunge": {
+      "source": "Split_Jump",
+      "confidence": "high"
+    },
+    "cossack-squat": {
+      "source": null
+    },
+    "front-foot-elevated-split-squat": {
+      "source": null
+    },
+    "barbell-bench-press": {
+      "source": "Barbell_Bench_Press_-_Medium_Grip",
+      "confidence": "high"
+    },
+    "incline-barbell-bench-press": {
+      "source": "Barbell_Incline_Bench_Press_-_Medium_Grip",
+      "confidence": "high"
+    },
+    "dumbbell-bench-press": {
+      "source": "Dumbbell_Bench_Press",
+      "confidence": "high"
+    },
+    "incline-dumbbell-press": {
+      "source": "Incline_Dumbbell_Press",
+      "confidence": "high"
+    },
+    "push-up": {
+      "source": "Pushups",
+      "confidence": "high"
+    },
+    "incline-push-up": {
+      "source": "Incline_Push-Up",
+      "confidence": "high"
+    },
+    "decline-push-up": {
+      "source": "Decline_Push-Up",
+      "confidence": "high"
+    },
+    "machine-chest-press": {
+      "source": "Machine_Bench_Press",
+      "confidence": "high"
+    },
+    "cable-chest-press": {
+      "source": "Standing_Cable_Chest_Press",
+      "confidence": "high"
+    },
+    "close-grip-bench-press": {
+      "source": "Close-Grip_Barbell_Bench_Press",
+      "confidence": "high"
+    },
+    "dips": {
+      "source": "Dips_-_Chest_Version",
+      "confidence": "high"
+    },
+    "smith-machine-bench-press": {
+      "source": "Smith_Machine_Bench_Press",
+      "confidence": "high"
+    },
+    "floor-press": {
+      "source": "Dumbbell_Floor_Press",
+      "confidence": "high"
+    },
+    "landmine-press": {
+      "source": null
+    },
+    "decline-bench-press": {
+      "source": "Decline_Dumbbell_Bench_Press",
+      "confidence": "high"
+    },
+    "suspension-push-up": {
+      "source": "Suspended_Push-Up",
+      "confidence": "high"
+    },
+    "overhead-press": {
+      "source": "Standing_Military_Press",
+      "confidence": "high"
+    },
+    "seated-dumbbell-shoulder-press": {
+      "source": "Dumbbell_Shoulder_Press",
+      "confidence": "high"
+    },
+    "standing-dumbbell-press": {
+      "source": "Standing_Dumbbell_Press",
+      "confidence": "high"
+    },
+    "arnold-press": {
+      "source": "Arnold_Dumbbell_Press",
+      "confidence": "high"
+    },
+    "machine-shoulder-press": {
+      "source": "Machine_Shoulder_Military_Press",
+      "confidence": "high"
+    },
+    "push-press": {
+      "source": "Push_Press",
+      "confidence": "high"
+    },
+    "pike-push-up": {
+      "source": null
+    },
+    "landmine-shoulder-press": {
+      "source": null
+    },
+    "kettlebell-overhead-press": {
+      "source": "Two-Arm_Kettlebell_Military_Press",
+      "confidence": "medium",
+      "note": "two bells instead of one"
+    },
+    "smith-machine-shoulder-press": {
+      "source": "Smith_Machine_Overhead_Shoulder_Press",
+      "confidence": "high"
+    },
+    "z-press": {
+      "source": null
+    },
+    "band-overhead-press": {
+      "source": "Shoulder_Press_-_With_Bands",
+      "confidence": "high"
+    },
+    "handstand-push-up": {
+      "source": "Handstand_Push-Ups",
+      "confidence": "high"
+    },
+    "barbell-row": {
+      "source": "Bent_Over_Barbell_Row",
+      "confidence": "high"
+    },
+    "one-arm-dumbbell-row": {
+      "source": "One-Arm_Dumbbell_Row",
+      "confidence": "high"
+    },
+    "seated-cable-row": {
+      "source": "Seated_Cable_Rows",
+      "confidence": "high"
+    },
+    "chest-supported-dumbbell-row": {
+      "source": "Dumbbell_Incline_Row",
+      "confidence": "high"
+    },
+    "t-bar-row": {
+      "source": "T-Bar_Row_with_Handle",
+      "confidence": "high"
+    },
+    "inverted-row": {
+      "source": "Inverted_Row",
+      "confidence": "high"
+    },
+    "machine-row": {
+      "source": "Leverage_Iso_Row",
+      "confidence": "high"
+    },
+    "pendlay-row": {
+      "source": null
+    },
+    "suspension-row": {
+      "source": "Suspended_Row",
+      "confidence": "high"
+    },
+    "kroc-row": {
+      "source": "One-Arm_Dumbbell_Row",
+      "confidence": "medium",
+      "note": "same movement, heavier and looser"
+    },
+    "cable-single-arm-row": {
+      "source": "Seated_One-arm_Cable_Pulley_Rows",
+      "confidence": "medium",
+      "note": "seated instead of standing"
+    },
+    "seal-row": {
+      "source": "Lying_Cambered_Barbell_Row",
+      "confidence": "medium",
+      "note": "cambered bar"
+    },
+    "band-row": {
+      "source": null
+    },
+    "pull-up": {
+      "source": "Pullups",
+      "confidence": "high"
+    },
+    "chin-up": {
+      "source": "Chin-Up",
+      "confidence": "high"
+    },
+    "lat-pulldown": {
+      "source": "Wide-Grip_Lat_Pulldown",
+      "confidence": "high"
+    },
+    "close-grip-lat-pulldown": {
+      "source": "Close-Grip_Front_Lat_Pulldown",
+      "confidence": "high"
+    },
+    "assisted-pull-up": {
+      "source": null,
+      "note": "dataset only has band-assisted"
+    },
+    "band-assisted-pull-up": {
+      "source": "Band_Assisted_Pull-Up",
+      "confidence": "high"
+    },
+    "negative-pull-up": {
+      "source": null
+    },
+    "neutral-grip-pull-up": {
+      "source": "V-Bar_Pullup",
+      "confidence": "medium",
+      "note": "V-handle on the bar gives the neutral grip"
+    },
+    "single-arm-lat-pulldown": {
+      "source": "One_Arm_Lat_Pulldown",
+      "confidence": "high"
+    },
+    "weighted-pull-up": {
+      "source": "Weighted_Pull_Ups",
+      "confidence": "high"
+    },
+    "machine-lat-pulldown": {
+      "source": null
+    },
+    "band-lat-pulldown": {
+      "source": null
+    },
+    "farmers-carry": {
+      "source": "Farmers_Walk",
+      "confidence": "high"
+    },
+    "trap-bar-carry": {
+      "source": null
+    },
+    "suitcase-carry": {
+      "source": null
+    },
+    "kettlebell-rack-carry": {
+      "source": null
+    },
+    "overhead-carry": {
+      "source": null
+    },
+    "sled-push": {
+      "source": "Sled_Push",
+      "confidence": "high"
+    },
+    "plate-pinch-carry": {
+      "source": "Plate_Pinch",
+      "confidence": "medium",
+      "note": "static pinch hold"
+    },
+    "plank": {
+      "source": "Plank",
+      "confidence": "high"
+    },
+    "ab-wheel-rollout": {
+      "source": "Ab_Roller",
+      "confidence": "high"
+    },
+    "dead-bug": {
+      "source": "Dead_Bug",
+      "confidence": "high"
+    },
+    "body-saw": {
+      "source": null
+    },
+    "stability-ball-rollout": {
+      "source": null
+    },
+    "hollow-body-hold": {
+      "source": null
+    },
+    "plank-shoulder-tap": {
+      "source": null
+    },
+    "long-lever-plank": {
+      "source": null
+    },
+    "bear-crawl-hold": {
+      "source": null
+    },
+    "pallof-press": {
+      "source": "Pallof_Press",
+      "confidence": "high"
+    },
+    "band-pallof-press": {
+      "source": null
+    },
+    "side-plank": {
+      "source": "Side_Bridge",
+      "confidence": "high",
+      "note": "photo checked"
+    },
+    "copenhagen-plank": {
+      "source": null
+    },
+    "bird-dog": {
+      "source": null
+    },
+    "renegade-row": {
+      "source": "Alternating_Renegade_Row",
+      "confidence": "medium",
+      "note": "kettlebells instead of dumbbells"
+    },
+    "landmine-rotation": {
+      "source": "Landmine_180s",
+      "confidence": "high"
+    },
+    "cable-woodchop": {
+      "source": "Standing_Cable_Wood_Chop",
+      "confidence": "high"
+    },
+    "side-plank-hip-dip": {
+      "source": null
+    },
+    "crunch": {
+      "source": "Crunches",
+      "confidence": "high"
+    },
+    "cable-crunch": {
+      "source": "Cable_Crunch",
+      "confidence": "high"
+    },
+    "hanging-knee-raise": {
+      "source": null
+    },
+    "hanging-leg-raise": {
+      "source": "Hanging_Leg_Raise",
+      "confidence": "high"
+    },
+    "reverse-crunch": {
+      "source": "Reverse_Crunch",
+      "confidence": "high"
+    },
+    "bicycle-crunch": {
+      "source": "Air_Bike",
+      "confidence": "high",
+      "note": "the dataset's 'Air Bike' is the bicycle crunch"
+    },
+    "v-up": {
+      "source": "Jackknife_Sit-Up",
+      "confidence": "high"
+    },
+    "decline-sit-up": {
+      "source": null
+    },
+    "stability-ball-crunch": {
+      "source": "Exercise_Ball_Crunch",
+      "confidence": "high"
+    },
+    "dumbbell-fly": {
+      "source": "Dumbbell_Flyes",
+      "confidence": "high"
+    },
+    "cable-fly": {
+      "source": "Cable_Crossover",
+      "confidence": "medium",
+      "note": "high pulleys instead of shoulder height"
+    },
+    "low-to-high-cable-fly": {
+      "source": "Low_Cable_Crossover",
+      "confidence": "high"
+    },
+    "pec-deck": {
+      "source": "Butterfly",
+      "confidence": "high"
+    },
+    "incline-dumbbell-fly": {
+      "source": "Incline_Dumbbell_Flyes",
+      "confidence": "high"
+    },
+    "band-chest-fly": {
+      "source": null
+    },
+    "svend-press": {
+      "source": "Svend_Press",
+      "confidence": "high"
+    },
+    "dumbbell-lateral-raise": {
+      "source": "Side_Lateral_Raise",
+      "confidence": "high"
+    },
+    "cable-lateral-raise": {
+      "source": "Standing_Low-Pulley_Deltoid_Raise",
+      "confidence": "high"
+    },
+    "machine-lateral-raise": {
+      "source": null
+    },
+    "front-raise": {
+      "source": "Front_Dumbbell_Raise",
+      "confidence": "high"
+    },
+    "rear-delt-fly": {
+      "source": "Seated_Bent-Over_Rear_Delt_Raise",
+      "confidence": "medium",
+      "note": "seated bent-over instead of standing"
+    },
+    "face-pull": {
+      "source": "Face_Pull",
+      "confidence": "high"
+    },
+    "reverse-pec-deck": {
+      "source": "Reverse_Machine_Flyes",
+      "confidence": "high"
+    },
+    "band-pull-apart": {
+      "source": "Band_Pull_Apart",
+      "confidence": "high"
+    },
+    "lean-away-lateral-raise": {
+      "source": "One-Arm_Side_Laterals",
+      "confidence": "high"
+    },
+    "cable-y-raise": {
+      "source": null
+    },
+    "barbell-curl": {
+      "source": "Barbell_Curl",
+      "confidence": "high"
+    },
+    "dumbbell-curl": {
+      "source": "Dumbbell_Bicep_Curl",
+      "confidence": "high"
+    },
+    "hammer-curl": {
+      "source": "Hammer_Curls",
+      "confidence": "high"
+    },
+    "incline-dumbbell-curl": {
+      "source": "Incline_Dumbbell_Curl",
+      "confidence": "high"
+    },
+    "preacher-curl": {
+      "source": "Preacher_Curl",
+      "confidence": "high",
+      "note": "EZ bar per the dataset's instructions"
+    },
+    "cable-curl": {
+      "source": "Standing_Biceps_Cable_Curl",
+      "confidence": "high"
+    },
+    "concentration-curl": {
+      "source": "Concentration_Curls",
+      "confidence": "high"
+    },
+    "ez-bar-curl": {
+      "source": "EZ-Bar_Curl",
+      "confidence": "high"
+    },
+    "band-curl": {
+      "source": null
+    },
+    "spider-curl": {
+      "source": "Spider_Curl",
+      "confidence": "medium",
+      "note": "EZ bar instead of dumbbells"
+    },
+    "triceps-pushdown": {
+      "source": "Triceps_Pushdown",
+      "confidence": "high"
+    },
+    "rope-pushdown": {
+      "source": "Triceps_Pushdown_-_Rope_Attachment",
+      "confidence": "high"
+    },
+    "overhead-triceps-extension": {
+      "source": "Standing_Dumbbell_Triceps_Extension",
+      "confidence": "high"
+    },
+    "cable-overhead-extension": {
+      "source": "Cable_Rope_Overhead_Triceps_Extension",
+      "confidence": "high"
+    },
+    "skull-crusher": {
+      "source": "EZ-Bar_Skullcrusher",
+      "confidence": "high"
+    },
+    "bench-dip": {
+      "source": "Bench_Dips",
+      "confidence": "high"
+    },
+    "dumbbell-kickback": {
+      "source": "Tricep_Dumbbell_Kickback",
+      "confidence": "high"
+    },
+    "diamond-push-up": {
+      "source": "Push-Ups_-_Close_Triceps_Position",
+      "confidence": "high"
+    },
+    "machine-triceps-dip": {
+      "source": "Dip_Machine",
+      "confidence": "high"
+    },
+    "band-pushdown": {
+      "source": null
+    },
+    "straight-arm-pulldown": {
+      "source": "Straight-Arm_Pulldown",
+      "confidence": "high"
+    },
+    "dumbbell-pullover": {
+      "source": "Straight-Arm_Dumbbell_Pullover",
+      "confidence": "high"
+    },
+    "barbell-shrug": {
+      "source": "Barbell_Shrug",
+      "confidence": "high"
+    },
+    "dumbbell-shrug": {
+      "source": "Dumbbell_Shrug",
+      "confidence": "high"
+    },
+    "prone-y-raise": {
+      "source": null
+    },
+    "cable-shrug": {
+      "source": "Cable_Shrugs",
+      "confidence": "high"
+    },
+    "leg-extension": {
+      "source": "Leg_Extensions",
+      "confidence": "high"
+    },
+    "single-leg-extension": {
+      "source": "Single-Leg_Leg_Extension",
+      "confidence": "high"
+    },
+    "sissy-squat": {
+      "source": "Weighted_Sissy_Squat",
+      "confidence": "medium",
+      "note": "holds a plate"
+    },
+    "spanish-squat": {
+      "source": null
+    },
+    "wall-sit": {
+      "source": null
+    },
+    "reverse-sled-drag": {
+      "source": "Backward_Drag",
+      "confidence": "high"
+    },
+    "lying-leg-curl": {
+      "source": "Lying_Leg_Curls",
+      "confidence": "high"
+    },
+    "seated-leg-curl": {
+      "source": "Seated_Leg_Curl",
+      "confidence": "high"
+    },
+    "nordic-curl": {
+      "source": "Floor_Glute-Ham_Raise",
+      "confidence": "high",
+      "note": "kneeling, feet braced: the Nordic curl"
+    },
+    "stability-ball-leg-curl": {
+      "source": "Ball_Leg_Curl",
+      "confidence": "high"
+    },
+    "cable-leg-curl": {
+      "source": null
+    },
+    "slider-leg-curl": {
+      "source": null
+    },
+    "cable-kickback": {
+      "source": "One-Legged_Cable_Kickback",
+      "confidence": "high"
+    },
+    "hip-abduction-machine": {
+      "source": "Thigh_Abductor",
+      "confidence": "high"
+    },
+    "hip-adduction-machine": {
+      "source": "Thigh_Adductor",
+      "confidence": "high"
+    },
+    "banded-lateral-walk": {
+      "source": null,
+      "note": "Monster_Walk steps forward, not sideways"
+    },
+    "clamshell": {
+      "source": null
+    },
+    "frog-pump": {
+      "source": null
+    },
+    "single-leg-glute-bridge": {
+      "source": "Single_Leg_Glute_Bridge",
+      "confidence": "high"
+    },
+    "donkey-kick": {
+      "source": "Glute_Kickback",
+      "confidence": "high"
+    },
+    "standing-calf-raise": {
+      "source": "Standing_Calf_Raises",
+      "confidence": "high"
+    },
+    "seated-calf-raise": {
+      "source": "Seated_Calf_Raise",
+      "confidence": "high"
+    },
+    "dumbbell-calf-raise": {
+      "source": "Standing_Dumbbell_Calf_Raise",
+      "confidence": "medium",
+      "note": "both legs on a board"
+    },
+    "leg-press-calf-raise": {
+      "source": "Calf_Press_On_The_Leg_Press_Machine",
+      "confidence": "high"
+    },
+    "smith-machine-calf-raise": {
+      "source": "Smith_Machine_Calf_Raise",
+      "confidence": "high"
+    },
+    "bodyweight-calf-raise": {
+      "source": null
+    },
+    "wrist-curl": {
+      "source": "Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench",
+      "confidence": "high"
+    },
+    "reverse-wrist-curl": {
+      "source": "Palms-Down_Dumbbell_Wrist_Curl_Over_A_Bench",
+      "confidence": "high"
+    },
+    "reverse-curl": {
+      "source": "Reverse_Barbell_Curl",
+      "confidence": "medium",
+      "note": "straight bar instead of EZ bar"
+    },
+    "dead-hang": {
+      "source": null
+    },
+    "towel-hang": {
+      "source": null
+    },
+    "wrist-roller": {
+      "source": "Wrist_Roller",
+      "confidence": "high"
+    },
+    "treadmill-run": {
+      "source": "Running_Treadmill",
+      "confidence": "high"
+    },
+    "incline-walk": {
+      "source": "Walking_Treadmill",
+      "confidence": "medium",
+      "note": "incline not visible"
+    },
+    "outdoor-walk": {
+      "source": null
+    },
+    "stationary-bike": {
+      "source": "Bicycling_Stationary",
+      "confidence": "high"
+    },
+    "bike-intervals": {
+      "source": "Bicycling_Stationary",
+      "confidence": "high"
+    },
+    "rowing-machine": {
+      "source": "Rowing_Stationary",
+      "confidence": "high"
+    },
+    "elliptical": {
+      "source": "Elliptical_Trainer",
+      "confidence": "high"
+    },
+    "stair-climber": {
+      "source": "Stairmaster",
+      "confidence": "high"
+    },
+    "jump-rope": {
+      "source": "Rope_Jumping",
+      "confidence": "high"
+    },
+    "burpee": {
+      "source": null
+    },
+    "mountain-climber": {
+      "source": "Mountain_Climbers",
+      "confidence": "high"
+    },
+    "kettlebell-swing-intervals": {
+      "source": "One-Arm_Kettlebell_Swings",
+      "confidence": "medium",
+      "note": "one-arm swing in the dataset"
+    },
+    "sled-push-intervals": {
+      "source": "Sled_Push",
+      "confidence": "high"
+    },
+    "hip-flexor-stretch": {
+      "source": "Kneeling_Hip_Flexor",
+      "confidence": "high"
+    },
+    "worlds-greatest-stretch": {
+      "source": "Worlds_Greatest_Stretch",
+      "confidence": "high"
+    },
+    "cat-cow": {
+      "source": "Cat_Stretch",
+      "confidence": "medium",
+      "note": "shows the 'cat' half"
+    },
+    "thoracic-rotation": {
+      "source": null
+    },
+    "ninety-ninety-hip-switch": {
+      "source": null
+    },
+    "deep-squat-hold": {
+      "source": null
+    },
+    "hamstring-stretch": {
+      "source": null,
+      "note": "dataset's hamstring stretch is lying with a strap"
+    },
+    "pigeon-stretch": {
+      "source": null
+    },
+    "doorway-chest-stretch": {
+      "source": null
+    },
+    "foam-roll-upper-back": {
+      "source": "Rhomboids-SMR",
+      "confidence": "high"
+    },
+    "ankle-mobility-drill": {
+      "source": null
+    },
+    "shoulder-dislocate": {
+      "source": null
+    },
+    "childs-pose": {
+      "source": "Childs_Pose",
+      "confidence": "medium",
+      "note": "no side reach"
+    },
+    "pause-bodyweight-squat": {
+      "source": "Bodyweight_Squat",
+      "confidence": "medium",
+      "note": "the pause is not visible"
+    },
+    "jump-squat": {
+      "source": "Freehand_Jump_Squat",
+      "confidence": "high"
+    },
+    "assisted-pistol-squat": {
+      "source": null
+    },
+    "dumbbell-front-squat": {
+      "source": null
+    },
+    "dumbbell-sumo-squat": {
+      "source": "Plie_Dumbbell_Squat",
+      "confidence": "high"
+    },
+    "bodyweight-single-leg-rdl": {
+      "source": null
+    },
+    "bodyweight-good-morning": {
+      "source": null
+    },
+    "single-leg-hip-thrust": {
+      "source": null
+    },
+    "kickstand-dumbbell-rdl": {
+      "source": null
+    },
+    "door-frame-row": {
+      "source": null
+    },
+    "table-row": {
+      "source": null
+    },
+    "towel-door-row": {
+      "source": null
+    },
+    "bent-over-dumbbell-row": {
+      "source": "Bent_Over_Two-Dumbbell_Row",
+      "confidence": "high"
+    },
+    "tripod-dumbbell-row": {
+      "source": null
+    },
+    "sliding-floor-pulldown": {
+      "source": null
+    },
+    "towel-isometric-pulldown": {
+      "source": null
+    },
+    "single-arm-band-pulldown": {
+      "source": null
+    },
+    "floor-dumbbell-pullover": {
+      "source": null
+    },
+    "knee-push-up": {
+      "source": null
+    },
+    "wide-push-up": {
+      "source": "Push-Up_Wide",
+      "confidence": "high"
+    },
+    "archer-push-up": {
+      "source": null
+    },
+    "doorway-isometric-lateral-raise": {
+      "source": null
+    },
+    "wall-lean-lateral-raise": {
+      "source": null
+    },
+    "prone-t-raise": {
+      "source": null
+    },
+    "door-frame-face-pull": {
+      "source": null
+    },
+    "reverse-snow-angel": {
+      "source": null
+    },
+    "seated-dumbbell-lateral-raise": {
+      "source": "Seated_Side_Lateral_Raise",
+      "confidence": "high"
+    },
+    "band-lateral-raise": {
+      "source": "Lateral_Raise_-_With_Bands",
+      "confidence": "high"
+    },
+    "chest-supported-rear-delt-fly": {
+      "source": "Reverse_Flyes",
+      "confidence": "high",
+      "note": "chest on an incline bench"
+    },
+    "band-face-pull": {
+      "source": null
+    },
+    "side-lying-rear-delt-raise": {
+      "source": null
+    },
+    "towel-curl": {
+      "source": null
+    },
+    "door-frame-curl": {
+      "source": null
+    },
+    "table-bodyweight-curl": {
+      "source": null
+    },
+    "palm-press-isometric": {
+      "source": "Isometric_Chest_Squeezes",
+      "confidence": "high"
+    },
+    "sliding-floor-fly": {
+      "source": null
+    },
+    "floor-dumbbell-fly": {
+      "source": null
+    },
+    "single-leg-calf-raise": {
+      "source": null
+    },
+    "bent-knee-calf-raise": {
+      "source": null
+    },
+    "standing-dumbbell-calf-raise": {
+      "source": "Standing_Dumbbell_Calf_Raise",
+      "confidence": "medium",
+      "note": "dataset stands on a board"
+    },
+    "seated-dumbbell-calf-raise": {
+      "source": "Dumbbell_Seated_One-Leg_Calf_Raise",
+      "confidence": "medium",
+      "note": "one leg at a time"
+    },
+    "bodyweight-triceps-extension": {
+      "source": "Body_Tricep_Press",
+      "confidence": "medium",
+      "note": "leans on a racked bar instead of a counter"
+    },
+    "kneeling-pike-push-up": {
+      "source": null
+    },
+    "wall-handstand-hold": {
+      "source": null
+    },
+    "prone-lat-pulldown": {
+      "source": null
+    },
+    "floor-triceps-dip": {
+      "source": null
+    },
+    "reverse-nordic": {
+      "source": null
+    },
+    "bridge-walkout": {
+      "source": null
+    }
+  }
+}

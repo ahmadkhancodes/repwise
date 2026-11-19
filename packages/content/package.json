@@ -14,7 +14,8 @@
     "foods.json",
     "README.md",
     "SOURCES.md",
-    "MEDIA.md"
+    "MEDIA.md",
+    "media"
   ],
   "scripts": {
     "build": "tsx scripts/build.ts --write",

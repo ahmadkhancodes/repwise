@@ -183,7 +183,11 @@ export const ExerciseSchema = z
     instructions: z.array(shortLine).min(3).max(5),
     cues: z.array(shortLine).min(2).max(4),
     commonMistakes: z.array(shortLine).min(2).max(4),
-    /** Cloudinary public id (placeholder until media is licensed). */
+    /**
+     * Cloudinary public id (`repwise/exercises/<id>`, start frame; `<id>-end` is the end frame).
+     * Stable forever. Whether a licensed demo exists is in media/exercises-with-media.json
+     * (`exerciseHasMedia`), not here.
+     */
     mediaId: z.string().regex(/^repwise\/exercises\/[a-z0-9-]+$/),
     alternatives: z.array(kebabId).min(1).max(5),
     source: z.literal('repwise-original'),
@@ -360,7 +364,12 @@ export const RecipeSchema = z
     scalable: z.object({ min: z.number().min(0.25).max(1), max: z.number().min(1).max(3) }).strict(),
     ingredients: z.array(RecipeIngredient).min(2),
     steps: z.array(z.string().trim().min(8).max(240)).min(2).max(8),
-    mediaId: z.string().regex(/^repwise\/recipes\/[a-z0-9-]+$/),
+    /**
+     * Cloudinary public id of the recipe photo. Present ONLY when a photo exists
+     * (docs/MEDIA_STATUS.md); absent → the app shows the designed placeholder
+     * and makes no request. Optional since 19 Nov 2026 (older data with a placeholder id still parses).
+     */
+    mediaId: z.string().regex(/^repwise\/recipes\/[a-z0-9-]+$/).optional(),
     source: z.literal('repwise-original'),
     licence: z.literal('proprietary'),
     /* ---- Computed by scripts/build.ts — never edit by hand ---- */
@@ -371,7 +380,7 @@ export const RecipeSchema = z
   })
   .strict()
   .superRefine((r, ctx) => {
-    if (r.mediaId !== `repwise/recipes/${r.id}`) {
+    if (r.mediaId !== undefined && r.mediaId !== `repwise/recipes/${r.id}`) {
       ctx.addIssue({ code: 'custom', message: 'mediaId must equal repwise/recipes/<id>' });
     }
     const ids = r.ingredients.map((i) => i.foodId);
