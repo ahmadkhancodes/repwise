@@ -1,0 +1,22 @@
+# P0 (P-N2, WG-1..3): the links the iOS and Android widgets open work on a cold start.
+appId: com.client.repwise
+tags:
+  - widgets
+---
+- launchApp
+- stopApp
+- openLink: repwise://eat?log=1
+- assertVisible:
+    id: screen-eat
+- stopApp
+- openLink: repwise://train
+- assertVisible:
+    id: screen-train
+- stopApp
+- openLink: repwise://progress
+- assertVisible:
+    id: screen-progress
+- stopApp
+- openLink: repwise://today
+- assertVisible:
+    id: screen-today

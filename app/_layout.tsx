@@ -15,6 +15,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseProvider } from '@/db/DatabaseProvider';
 import { startBackgroundServices } from '@/services/bootstrap';
+import { startNotifications } from '@/services/notifications';
 import { useTheme } from '@/theme';
 import { ToastHost } from '@/ui';
 
@@ -33,7 +34,11 @@ export default function RootLayout() {
   const onDbSettled = useCallback((ok: boolean) => {
     setDbSettled(true);
     // Auth restore, then billing + sync, and the catalogue warm-up start once local data is ready.
-    if (ok) startBackgroundServices();
+    if (ok) {
+      startBackgroundServices();
+      // Schedule + widget snapshot from local data; handles a notification tap that launched the app.
+      startNotifications();
+    }
   }, []);
 
   useEffect(() => {
