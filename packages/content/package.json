@@ -6,7 +6,7 @@
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
-  "files": ["src", "exercises.json", "recipes.json", "foods.json"],
+  "files": ["src", "scripts", "exercises.json", "recipes.json", "foods.json", "README.md", "SOURCES.md", "MEDIA.md"],
   "scripts": {
     "build": "tsx scripts/build.ts --write",
     "verify": "tsx scripts/build.ts",
