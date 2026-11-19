@@ -12646,5 +12646,154 @@
     ],
     "source": "repwise-original",
     "licence": "proprietary"
+  },
+  {
+    "id": "kneeling-pike-push-up",
+    "name": "Kneeling pike push-up",
+    "aliases": [
+      "Pike push-up from the knees"
+    ],
+    "pattern": "push_v",
+    "patternFamily": "push_v",
+    "primaryMuscles": [
+      "front_delts"
+    ],
+    "secondaryMuscles": [
+      "triceps",
+      "side_delts",
+      "upper_back"
+    ],
+    "equipment": [
+      "bodyweight",
+      "mat"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "shoulder",
+      "wrist"
+    ],
+    "instructions": [
+      "Kneel on a mat, place your hands under your shoulders and lift your hips so your body makes an upside-down V from knees to hands.",
+      "Walk your knees in until your hips are high over your shoulders.",
+      "Bend your elbows to lower the top of your head toward the floor in front of your hands.",
+      "Press back up to straight arms."
+    ],
+    "cues": [
+      "Head travels forward of the hands, making a triangle.",
+      "Keep the hips stacked high."
+    ],
+    "commonMistakes": [
+      "Letting it turn into a flat push-up.",
+      "Flaring the elbows straight out."
+    ],
+    "mediaId": "repwise/exercises/kneeling-pike-push-up",
+    "alternatives": [
+      "pike-push-up",
+      "band-overhead-press",
+      "standing-dumbbell-press"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "wall-handstand-hold",
+    "name": "Wall handstand hold",
+    "aliases": [
+      "Chest-to-wall handstand"
+    ],
+    "pattern": "push_v",
+    "patternFamily": "push_v",
+    "primaryMuscles": [
+      "front_delts",
+      "triceps"
+    ],
+    "secondaryMuscles": [
+      "side_delts",
+      "traps",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "advanced",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [
+      "shoulder",
+      "wrist",
+      "neck"
+    ],
+    "instructions": [
+      "Place your hands a hand-width from a wall, shoulder-width apart.",
+      "Walk your feet up the wall while walking your hands closer until your chest faces the wall.",
+      "Push the floor away and hold a straight line from hands to heels.",
+      "Walk down slowly; build up to 20 to 40 second holds."
+    ],
+    "cues": [
+      "Push tall through the shoulders.",
+      "Squeeze glutes and ribs in."
+    ],
+    "commonMistakes": [
+      "Sinking into the shoulders.",
+      "Holding past the point where form breaks."
+    ],
+    "mediaId": "repwise/exercises/wall-handstand-hold",
+    "alternatives": [
+      "pike-push-up",
+      "handstand-push-up",
+      "kneeling-pike-push-up"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "prone-lat-pulldown",
+    "name": "Prone lat pulldown",
+    "aliases": [
+      "Floor pulldown",
+      "Superman pulldown"
+    ],
+    "pattern": "pull_v",
+    "patternFamily": "pull_v",
+    "primaryMuscles": [
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "upper_back",
+      "rear_delts",
+      "lower_back"
+    ],
+    "equipment": [
+      "bodyweight",
+      "mat"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "compound",
+    "contraindications": [],
+    "instructions": [
+      "Lie face down with your arms reaching straight overhead and lift your hands and chest a little off the floor.",
+      "Pull your elbows down and back toward your ribs as if doing a pulldown, squeezing your shoulder blades.",
+      "Hold for two seconds with the chest still lifted.",
+      "Reach back overhead without touching down and repeat."
+    ],
+    "cues": [
+      "Think of bending the bar you are pulling.",
+      "Keep the neck long and eyes on the floor."
+    ],
+    "commonMistakes": [
+      "Lifting the chest too high and straining the lower back.",
+      "Rushing the squeeze."
+    ],
+    "mediaId": "repwise/exercises/prone-lat-pulldown",
+    "alternatives": [
+      "sliding-floor-pulldown",
+      "towel-isometric-pulldown",
+      "band-lat-pulldown"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
   }
 ]
