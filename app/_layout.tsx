@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { billing } from '@/services/billing';
 import { useTheme } from '@/theme';
 import { ToastHost } from '@/ui';
 
@@ -36,6 +37,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => undefined);
   }, [ready]);
+
+  useEffect(() => {
+    // Billing reads its cached flag + entitlement, then talks to the Worker in the background.
+    // The data layer calls configureBilling({ api }) to connect it (payments stay off until then).
+    void billing().init();
+  }, []);
 
   if (!ready) return null;
 
