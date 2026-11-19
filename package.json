@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "format": "prettier --write .",
-    "check": "npm run lint && npm run typecheck && npm run test"
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "test:all": "npm run check && npm run check -w @repwise/engine && npm run check -w @repwise/content && npm run check -w @repwise/server"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

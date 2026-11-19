@@ -85,9 +85,13 @@ Computed by `scripts/build.ts` (never hand-edited):
 | `dietTags` | `vegetarian` (plant/dairy/egg/honey only), `vegan` (plant only), `pescatarian` (no meat, poultry or pork; vegetarian dishes qualify), `halal_friendly` (no pork; meat must still be bought halal), `high_protein` (≥ 25 g, or ≥ 15 g for snack-only, and ≥ 25 % of energy), `low_carb` (≤ 25 g and ≤ 20 % of energy), `gluten_free`, `dairy_free` (from allergens). Thresholds live in `TAG_RULES`. |
 | `mainProtein` | Protein family of the ingredient contributing the most protein: chicken, turkey, beef, lamb, goat, pork, fish, shellfish, eggs, dairy, legumes, soy, nuts_seeds, grains, other. For the "no same protein twice a day" rule. |
 
+## Engine adapter (`src/toEngine.ts`)
+
+`toEngineCatalogues()` (memoised: `engineCatalogues()`) returns `{ exercises, recipes, excluded }` in `@repwise/engine` shape. The mapping tables (`EQUIPMENT_TO_ENGINE`, `ALLERGEN_TO_ENGINE`, `DIET_TAG_TO_ENGINE`, `PROTEIN_TO_ENGINE`, …) are exhaustive, so a new content enum value fails the typecheck until it is mapped. Decisions D26–D28 list every mapping. Cardio without a `met` value is excluded (pinned in `test/toEngine.test.ts`); add `met` to bring them in. Ingredient grams become per serving; nutrition is carried, never recomputed.
+
 ## Content QA (tests)
 
-`test/content.test.ts` checks: schema validity; size targets; no duplicate ids; ingredient and alternative references; 6–20 variants per pattern; every bible pattern family present; a home-friendly variant for each strength pattern; ≥ 10 recipes per diet tag and cuisine; ≥ 30 per slot; stored computed fields equal recomputed ones; kcal within 8 % of 4P + 4C + 9F; per-serving kcal sane for each slot; allergens propagate; diet tags never contradict ingredient origins; no empty steps; no banned medical wording (cure, treat, diagnose, prescribe).
+`test/toEngine.test.ts` parses every item with the engine schemas. `test/content.test.ts` checks: schema validity; size targets; no duplicate ids; ingredient and alternative references; 6–20 variants per pattern; every bible pattern family present; a home-friendly variant for each strength pattern; ≥ 10 recipes per diet tag and cuisine; ≥ 30 per slot; stored computed fields equal recomputed ones; kcal within 8 % of 4P + 4C + 9F; per-serving kcal sane for each slot; allergens propagate; diet tags never contradict ingredient origins; no empty steps; no banned medical wording (cure, treat, diagnose, prescribe).
 
 ## Known limits
 
