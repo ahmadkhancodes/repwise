@@ -9497,6 +9497,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 8,
     "contraindications": [
       "knee",
       "ankle"
@@ -9544,6 +9545,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 5.3,
     "contraindications": [],
     "instructions": [
       "Set a moderate incline on the treadmill.",
@@ -9590,6 +9592,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 4.8,
     "contraindications": [],
     "instructions": [
       "Walk at a pace where you can talk but not sing.",
@@ -9634,6 +9637,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 6.8,
     "contraindications": [],
     "instructions": [
       "Set the seat so your knee is slightly bent at the bottom of the pedal stroke.",
@@ -9677,6 +9681,7 @@
     "level": "intermediate",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 8.8,
     "contraindications": [],
     "instructions": [
       "Warm up with five minutes of easy pedalling.",
@@ -9725,6 +9730,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 5,
     "contraindications": [
       "lower_back"
     ],
@@ -9771,6 +9777,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 5,
     "contraindications": [],
     "instructions": [
       "Step onto the pedals and hold the handles.",
@@ -9815,6 +9822,7 @@
     "level": "intermediate",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 9.3,
     "contraindications": [
       "knee"
     ],
@@ -9862,6 +9870,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 11,
     "contraindications": [
       "ankle"
     ],
@@ -9909,6 +9918,7 @@
     "level": "intermediate",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 7.5,
     "contraindications": [
       "wrist",
       "knee"
@@ -9956,6 +9966,7 @@
     "level": "beginner",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 7.5,
     "contraindications": [
       "wrist"
     ],
@@ -10002,6 +10013,7 @@
     "level": "intermediate",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 7.5,
     "contraindications": [
       "lower_back"
     ],
@@ -10047,6 +10059,7 @@
     "level": "intermediate",
     "unilateral": false,
     "mechanics": "compound",
+    "met": 7,
     "contraindications": [
       "knee"
     ],

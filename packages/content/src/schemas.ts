@@ -174,6 +174,11 @@ export const ExerciseSchema = z
     level: Level,
     unilateral: z.boolean(),
     mechanics: z.enum(['compound', 'isolation']),
+    /**
+     * Metabolic equivalent from the 2024 Adult Compendium of Physical Activities (code cited in
+     * SOURCES.md). Required for cardio (calorie estimate RW-24), absent elsewhere.
+     */
+    met: z.number().positive().max(25).optional(),
     contraindications: z.array(Contraindication),
     instructions: z.array(shortLine).min(3).max(5),
     cues: z.array(shortLine).min(2).max(4),
@@ -191,6 +196,9 @@ export const ExerciseSchema = z
     }
     if (ex.mediaId !== `repwise/exercises/${ex.id}`) {
       ctx.addIssue({ code: 'custom', message: 'mediaId must equal repwise/exercises/<id>' });
+    }
+    if (ex.pattern === 'cardio' && ex.met === undefined) {
+      ctx.addIssue({ code: 'custom', message: 'cardio exercises need a met value (Compendium of Physical Activities)' });
     }
     if (ex.alternatives.includes(ex.id)) {
       ctx.addIssue({ code: 'custom', message: 'an exercise cannot be its own alternative' });

@@ -16,6 +16,27 @@ This file is the licence log required by build bible sheets 24 and 29 (it serves
 
 Suggested citation: U.S. Department of Agriculture, Agricultural Research Service. FoodData Central, 2019. fdc.nal.usda.gov.
 
+## Cardio MET values — 2024 Adult Compendium of Physical Activities
+
+- **Source:** Herrmann SD, Willis EA, Ainsworth BE, et al. 2024 Adult Compendium of Physical Activities: a third update of the energy costs of human activities. *Journal of Sport and Health Science* 2024;13(1):6–12. Values read from https://pacompendium.com (conditioning exercise, bicycling, running and walking pages), 19 Nov 2026.
+- **Use:** facts (a number per activity code), cited per exercise below; no text copied. The engine uses MET × kg × hours for the RW-24 calorie estimate. Where several codes fit, the general or moderate code is used so estimates stay conservative.
+
+| Exercise id | Code | MET | Compendium activity |
+|---|---|---|---|
+| `treadmill-run` | 12150 | 8.0 | Running (Taylor Code 200), general |
+| `incline-walk` | 17034 | 5.3 | Climbing hills, no load, 1 to 5% grade, moderate-to-brisk pace |
+| `outdoor-walk` | 17200 | 4.8 | Walking, 3.5 to 3.9 mph, level, brisk, firm surface, walking for exercise |
+| `stationary-bike` | 01200 | 6.8 | Bicycling, stationary, general |
+| `bike-intervals` | 01305 | 8.8 | Bicycling, high intensity interval training |
+| `rowing-machine` | 02071 | 5.0 | Rowing, stationary ergometer, general, < 100 watts, moderate effort |
+| `elliptical` | 02048 | 5.0 | Elliptical trainer, moderate effort |
+| `stair-climber` | 02065 | 9.3 | Stair treadmill ergometer, general |
+| `jump-rope` | 02068 | 11.0 | Rope skipping exercise, general |
+| `burpee` | 02020 | 7.5 | Calisthenics (pushups, sit ups, pull-ups, jumping jacks, burpees, battling ropes), vigorous effort |
+| `mountain-climber` | 02020 | 7.5 | Calisthenics, vigorous effort (same class as burpees) |
+| `kettlebell-swing-intervals` | 02040 | 7.5 | Circuit training, including kettlebells, some aerobic movement with minimal rest, vigorous |
+| `sled-push-intervals` | 02210 | 7.0 | High intensity interval exercise, moderate effort (the Compendium has no sled-push code) |
+
 ## Exercise text — original (proprietary)
 
 All exercise names, instructions, cues and common mistakes were written for Repwise in our own words. No text was copied from websites, books or commercial datasets. `source: "repwise-original"`, `licence: "proprietary"`.

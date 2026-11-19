@@ -37,6 +37,7 @@ Editing workflow: change authored fields only (never `perServing`, `allergens`, 
 | `level` | `beginner \| intermediate \| advanced` | Maps to bible `difficulty` 1 / 2 / 3. |
 | `unilateral` | boolean | One side at a time (log reps per side). |
 | `mechanics` | `compound \| isolation` | |
+| `met` | number, cardio only | Required for cardio: MET from the 2024 Compendium of Physical Activities (code per exercise in SOURCES.md). Drives the RW-24 calorie estimate. |
 | `contraindications` | enum[] | shoulder, elbow, wrist, neck, lower_back, hip, knee, ankle. Used to filter candidates for users who report a limitation. Not medical guidance. |
 | `instructions` | string[3–5] | Short steps, original wording. |
 | `cues` | string[2–4] | Coaching cues (bible "tips"). |
@@ -87,7 +88,7 @@ Computed by `scripts/build.ts` (never hand-edited):
 
 ## Engine adapter (`src/toEngine.ts`)
 
-`toEngineCatalogues()` (memoised: `engineCatalogues()`) returns `{ exercises, recipes, excluded }` in `@repwise/engine` shape. The mapping tables (`EQUIPMENT_TO_ENGINE`, `ALLERGEN_TO_ENGINE`, `DIET_TAG_TO_ENGINE`, `PROTEIN_TO_ENGINE`, …) are exhaustive, so a new content enum value fails the typecheck until it is mapped. Decisions D26–D28 list every mapping. Cardio without a `met` value is excluded (pinned in `test/toEngine.test.ts`); add `met` to bring them in. Ingredient grams become per serving; nutrition is carried, never recomputed.
+`toEngineCatalogues()` (memoised: `engineCatalogues()`) returns `{ exercises, recipes, excluded }` in `@repwise/engine` shape. The mapping tables (`EQUIPMENT_TO_ENGINE`, `ALLERGEN_TO_ENGINE`, `DIET_TAG_TO_ENGINE`, `PROTEIN_TO_ENGINE`, …) are exhaustive, so a new content enum value fails the typecheck until it is mapped. Decisions D26–D28 list every mapping. Every cardio exercise carries a Compendium `met`, so nothing is excluded (the empty list is pinned in `test/toEngine.test.ts`). Ingredient grams become per serving; nutrition is carried, never recomputed.
 
 ## Content QA (tests)
 

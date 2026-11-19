@@ -17,7 +17,8 @@
  *   build (computed from USDA foods). The only derived value is the `keto` tag, computed here from
  *   the computed per-serving macros (KETO_RULE).
  * - An item that cannot satisfy the engine contract is excluded with a reason (`excluded`); the
- *   content test pins that list. Today: cardio exercises without a MET value (D28).
+ *   content test pins that list. Today it is empty: every cardio exercise carries a Compendium MET
+ *   value (D28, closed by D33); the content schema now requires one.
  *
  * Only type imports from the engine: this module has no runtime dependency on it.
  */
@@ -201,11 +202,12 @@ export interface Exclusion {
 
 /**
  * One exercise. Returns an exclusion when the engine contract cannot be met without inventing data
- * (cardio needs a MET value for RW-24 calories; the content catalogue has none yet).
+ * (cardio needs a MET value for RW-24 calories). The content schema requires `met` for cardio, so
+ * this only guards hand-built input.
  */
 export function exerciseToEngine(e: Exercise): EngineExercise | Exclusion {
   const pattern = PATTERN_TO_ENGINE[PATTERNS[e.pattern]];
-  const met = (e as Exercise & { met?: number }).met;
+  const met = e.met;
   if (pattern === 'cardio' && met === undefined) return { kind: 'exercise', id: e.id, reason: 'cardio_without_met' };
   return {
     id: e.id,
