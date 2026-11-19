@@ -108,7 +108,7 @@ export function GroceryScreen() {
                   return (
                     <Animated.View key={it.foodId} layout={layoutSpring(reduce)}>
                       <PressableScale
-                        testID={`grocery-${it.foodId}`}
+                        testID={`grocery-item-${it.foodId}`}
                         feedback="none"
                         onPress={() => toggle(it.foodId)}
                         accessibilityRole="checkbox"

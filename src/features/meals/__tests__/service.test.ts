@@ -6,6 +6,7 @@ import { totalWaterMl } from '@/features/nutrition/logic/water';
 import { logsForDate } from '@/features/nutrition/repo';
 import { saveProfile } from '@/features/settings/repo';
 import { setAnalyticsSink } from '@/services/analytics';
+import { getCatalog } from '@/services/catalog';
 import { kv } from '@/services/storage';
 
 import { addDays, startOfWeek, todayISO, weekDates } from '../logic/dates';
@@ -87,6 +88,29 @@ describe('ensureWeekMeals (offline planner)', () => {
     const next = pastMealRows(nextMon, addDays(nextMon, 7));
     expect(next.length).toBeGreaterThan(0);
     expect(next.filter((r) => thisWeek.has(r.recipeId))).toEqual([]);
+  });
+});
+
+describe('profile changes', () => {
+  it('a new allergy re-plans untouched days so no planned meal contains it', () => {
+    onboard({ allergies: [] });
+    ensureWeekMeals(TODAY, NOW);
+    const planned = pastMealRows(TODAY, addDays(TODAY, 7));
+    const cat = getCatalog();
+    const withMilk = planned.filter((r) => cat.recipeById.get(r.recipeId!)!.allergens.includes('milk'));
+    expect(withMilk.length).toBeGreaterThan(0);
+    // Eat one meal today, so today is kept and its unsafe meals are skipped instead.
+    const today = mealsForPlan(mealPlanForDate(TODAY)!.id);
+    const safeToday = today.find((m) => !cat.recipeById.get(m.recipeId!)!.allergens.includes('milk'));
+    if (safeToday) markMealEaten(safeToday.id, 1, NOW);
+    saveProfile({ allergies: ['milk'] });
+    ensureWeekMeals(TODAY, NOW + 10);
+    for (const d of weekDates(startOfWeek(TODAY)).filter((x) => x >= TODAY)) {
+      const plan = mealPlanForDate(d)!;
+      for (const m of mealsForPlan(plan.id).filter((x) => x.status === 'planned')) {
+        expect(cat.recipeById.get(m.recipeId!)!.allergens).not.toContain('milk');
+      }
+    }
   });
 });
 

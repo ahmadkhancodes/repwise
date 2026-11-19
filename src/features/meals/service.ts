@@ -117,6 +117,7 @@ export function ensureWeekMeals(date: ISODate, now: number = Date.now()): Ensure
   const today = todayISO(now);
   const wanted = weekDates(weekStart).filter((d) => d >= today);
   if (wanted.length === 0) return { status: 'ready', created: 0, warnings: [] };
+  dropUnsafeDays(wanted[0]!, addDays(weekStart, 7), inputs, now);
   const existing = plansByDate(weekStart, addDays(weekStart, 7));
   const missing = wanted.filter((d) => !existing.has(d));
   if (missing.length === 0) return { status: 'ready', created: 0, warnings: [] };
@@ -154,6 +155,26 @@ export function ensureWeekMeals(date: ISODate, now: number = Date.now()): Ensure
     track('plan_generated', { goal: p.goal, days: p.daysPerWeek, diet_type: p.dietType ?? 'omnivore', kind: 'meals' });
   }
   return { status: 'ready', created, warnings: week.warnings };
+}
+
+/**
+ * Allergies or diet changed after a plan was made: a planned meal whose recipe is no longer in the
+ * safe set must never be shown as the plan. Untouched days are dropped (and re-planned right
+ * after); on days with something already eaten or logged the unsafe meals are marked skipped.
+ */
+function dropUnsafeDays(from: ISODate, to: ISODate, inputs: PlannerInputs, now: number): void {
+  for (const plan of plansByDate(from, to).values()) {
+    const rows = mealsOfPlans([plan.id]);
+    const unsafe = rows.filter((m) => m.status === 'planned' && m.recipeId && !inputs.recipeById.has(m.recipeId));
+    if (unsafe.length === 0) continue;
+    const touched = rows.some((m) => m.status === 'eaten') || logsForDate(plan.date).some((l) => l.slot !== WATER_SLOT);
+    if (touched) {
+      for (const m of unsafe) setMealStatus(m.id, 'skipped', now);
+      continue;
+    }
+    for (const m of rows) mealsRepo.remove(m.id, now);
+    mealPlansRepo.remove(plan.id, now);
+  }
 }
 
 /**

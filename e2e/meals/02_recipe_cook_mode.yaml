@@ -1,0 +1,32 @@
+# RW-35: recipe with serving scaler, then cook mode (big steps, timers, keep awake).
+# Precondition: onboarding saved a profile (run the onboarding flow first). testIDs render on iOS and Android.
+appId: com.client.repwise
+---
+- launchApp
+- tapOn:
+    id: "tab-eat"
+- extendedWaitUntil:
+    visible:
+      id: "meal-dinner"
+    timeout: 15000
+- tapOn:
+    id: "meal-dinner"
+- assertVisible:
+    id: "recipe-ingredients"
+- tapOn:
+    id: "servings-inc"
+- tapOn:
+    id: "start-cook"
+- assertVisible: "Step 1 of .*"
+- tapOn:
+    id: "cook-next"
+- assertVisible: "Step 2 of .*"
+- tapOn:
+    id: "cook-ingredients"
+- tapOn: "Close"
+- tapOn:
+    id: "cook-close"
+- assertVisible:
+    id: "start-cook"
+- tapOn:
+    id: "back"
