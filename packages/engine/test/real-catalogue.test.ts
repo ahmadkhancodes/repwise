@@ -105,15 +105,35 @@ describe('real data: 60-session uniqueness (RW-11)', () => {
   });
 });
 
+describe('real data: bodyweight-only and home-dumbbell kits fill every template slot', () => {
+  const kits = [
+    ['bodyweight only', EQUIPMENT_PRESETS.bodyweight],
+    ['home dumbbells', EQUIPMENT_PRESETS.home_dumbbells],
+  ] as const;
+  const splits = [
+    ['3-day full body, beginner', { daysPerWeek: 3, sessionMin: 60, experience: 'beginner' }],
+    ['4-day upper/lower, intermediate', { daysPerWeek: 4, sessionMin: 60, experience: 'intermediate' }],
+    ['6-day PPL, advanced', { daysPerWeek: 6, sessionMin: 75, experience: 'advanced' }],
+  ] as const;
+  const cases = kits.flatMap(([k, eq]) => splits.map(([s, p]) => [`${k}, ${s}`, { ...p, equipment: [...eq] } as Partial<ProfileInput>] as const));
+
+  test.each(cases)('%s: no exercise slot skipped over 4 weeks', (_n, p) => {
+    const plans = simulate(person(p), 4);
+    expect(plans.flatMap((x) => x.warnings.filter((w) => w.code === 'slot_skipped' && /exercise/.test(w.message)))).toEqual([]);
+    for (const s of plans.flatMap((x) => x.sessions)) {
+      const patterns = new Set(s.items.map((it) => exById.get(it.exerciseId)!.pattern));
+      expect(patterns.has('cardio')).toBe(false);
+    }
+  });
+});
+
 /**
  * Profiles the real recipes cannot serve fully yet (see docs/PROGRESS.md "Content gaps"). Their
- * days must pass every safety rule; macros are not asserted.
- * vegan: only 4 vegan breakfasts (a 7-day no-repeat window needs ≥ 7, the default 14-day window ≥ 14),
- * so breakfast is skipped on some days, and the best vegan lunch/dinner gets 26% of energy from
- * protein while a 1.6 g/kg target needs ≈ 22–30%, so portions sit at the top of their range and
- * some days miss protein.
+ * days must pass every safety rule; macros are not asserted. Empty since content round 2 (D33–D36)
+ * added high-protein vegan, keto and gluten/egg-free vegetarian recipes; add a profile name here
+ * (with the reason) only together with a PROGRESS.md content-gap entry.
  */
-const CONTENT_GAPS = new Set(['vegan']);
+const CONTENT_GAPS = new Set<string>();
 
 describe('real data: 100+ generated days pass macro, allergen, diet and protein-source checks (RW-31)', () => {
   const profiles: Record<string, ProfileInput> = {
@@ -124,6 +144,10 @@ describe('real data: 100+ generated days pass macro, allergen, diet and protein-
     glutenFree: person({ goal: 'recomp', weightKg: 85, heightCm: 183, allergies: ['gluten'], cuisines: ['american', 'british'], budget: 2 }),
     omnivoreBudget: person({ goal: 'muscle_gain', weightKg: 100, heightCm: 190, budget: 1, cookMin: 20, mealsPerDay: 3 }),
     vegan: person({ goal: 'maintain', sex: 'female', weightKg: 65, heightCm: 168, dietType: 'vegan', cuisines: ['indian', 'mediterranean'], budget: 1, mealsPerDay: 3, allergies: ['peanut'] }),
+    veganGain: person({ goal: 'muscle_gain', weightKg: 75, heightCm: 178, dietType: 'vegan', cuisines: ['american', 'british'], budget: 2, mealsPerDay: 4 }),
+    keto: person({ goal: 'fat_loss', weightKg: 92, heightCm: 182, dietType: 'keto', cuisines: ['american', 'british'], budget: 2, mealsPerDay: 3 }),
+    ketoDesi: person({ goal: 'maintain', sex: 'female', weightKg: 68, heightCm: 165, dietType: 'keto', cuisines: ['pakistani', 'gulf'], budget: 3, mealsPerDay: 4 }),
+    vegetarianGlutenEgg: person({ goal: 'fat_loss', sex: 'female', weightKg: 78, heightCm: 168, dietType: 'vegetarian', cuisines: ['italian', 'mexican'], budget: 2, allergies: ['gluten', 'egg'] }),
   };
   const days = Object.entries(profiles).flatMap(([name, profile]) =>
     simulate(profile, 3).flatMap((plan) => plan.days.map((day) => ({ name, profile, plan, day }))),
@@ -161,11 +185,36 @@ describe('real data: 100+ generated days pass macro, allergen, diet and protein-
     expect(plan.nutrition.training.protein).toBeGreaterThanOrEqual(Math.floor(Math.min(profile.weightKg, 27 * (profile.heightCm / 100) ** 2) * 1.6));
   });
 
-  test.each([...CONTENT_GAPS])('content gap still open for %s (remove it from CONTENT_GAPS once this fails)', (name) => {
+  if (CONTENT_GAPS.size > 0) {
+    test.each([...CONTENT_GAPS])('content gap still open for %s (remove it from CONTENT_GAPS once this fails)', (name) => {
+      const own = days.filter((d) => d.name === name);
+      const macroMiss = own.some((d) => d.plan.validation.errors.some((e) => e.code === 'kcal_out_of_range' || e.code === 'protein_out_of_range'));
+      const mealSkipped = own.some((d) => d.plan.warnings.some((w) => w.code === 'slot_skipped' && w.date === d.day.date && /recipe/.test(w.message)));
+      expect(macroMiss || mealSkipped).toBe(true);
+    });
+  }
+
+  test.each(Object.keys(profiles))('%s: no breakfast, lunch or dinner is skipped and every day hits its macros', (name) => {
     const own = days.filter((d) => d.name === name);
-    const macroMiss = own.some((d) => d.plan.validation.errors.some((e) => e.code === 'kcal_out_of_range' || e.code === 'protein_out_of_range'));
-    const mealSkipped = own.some((d) => d.plan.warnings.some((w) => w.code === 'slot_skipped' && w.date === d.day.date && /recipe/.test(w.message)));
-    expect(macroMiss || mealSkipped).toBe(true);
+    expect(own.length).toBe(21);
+    for (const d of own) {
+      const slots = new Set(d.day.meals.map((m) => m.slot));
+      for (const main of ['breakfast', 'lunch', 'dinner'] as const) expect(slots.has(main)).toBe(true);
+      expect(d.plan.warnings.filter((w) => w.code === 'slot_skipped' && w.date === d.day.date)).toEqual([]);
+    }
+    expect(own.flatMap((d) => d.plan.validation.errors.filter((e) => e.code === 'kcal_out_of_range' || e.code === 'protein_out_of_range'))).toEqual([]);
+  });
+
+  test('vegan and keto days only use recipes carrying the diet tag; keto days stay low in net carbs', () => {
+    for (const d of days.filter((x) => x.profile.dietType === 'vegan' || x.profile.dietType === 'keto')) {
+      let net = 0;
+      for (const m of d.day.meals) {
+        const r = recipeById.get(m.recipeId)!;
+        expect(r.dietTags).toContain(d.profile.dietType);
+        net += (r.perServing.carbs - (r.perServing.fibre ?? 0)) * m.servings;
+      }
+      if (d.profile.dietType === 'keto') expect(net).toBeLessThanOrEqual(50);
+    }
   });
 
   test('halal profiles never get pork; halal tag = content halal_friendly', () => {
