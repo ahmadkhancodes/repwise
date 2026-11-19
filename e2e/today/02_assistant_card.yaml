@@ -1,0 +1,26 @@
+# S12: an assistant card opens its detail sheet with Later and Dismiss (only when a rule fired today).
+appId: com.client.repwise
+tags:
+  - today
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 15000
+- runFlow:
+    when:
+      visible:
+        id: "card-detail-later"
+    commands:
+      - tapOn:
+          id: "card-detail-later"
+- runFlow:
+    when:
+      visible: "Your week in 30 seconds"
+    commands:
+      - tapOn: "Your week in 30 seconds"
+      - assertVisible:
+          id: "card-detail-text"
+      - tapOn:
+          id: "card-detail-later"

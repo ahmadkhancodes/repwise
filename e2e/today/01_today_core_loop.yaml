@@ -1,0 +1,45 @@
+# P5 core loop on Today (S11): renders from local data, 1-tap meal tick with undo, water quick-add,
+# Start workout opens the player. Precondition: onboarding finished (run the onboarding flow first).
+# testIDs and texts render on iOS and Android.
+appId: com.client.repwise
+tags:
+  - today
+---
+- launchApp
+- tapOn:
+    id: "tab-today"
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 15000
+- assertVisible:
+    id: "today-date"
+- runFlow:
+    when:
+      visible:
+        id: "today-meal-lunch"
+    commands:
+      - tapOn:
+          id: "today-meal-lunch"
+      - assertVisible: "Lunch logged"
+      - tapOn: "Undo"
+- scrollUntilVisible:
+    element:
+      id: "add-water"
+    direction: DOWN
+- tapOn:
+    id: "add-water"
+- assertVisible: "250 ml water added"
+- tapOn: "Undo"
+- scrollUntilVisible:
+    element:
+      id: "today-date"
+    direction: UP
+- runFlow:
+    when:
+      visible:
+        id: "start-workout"
+    commands:
+      - tapOn:
+          id: "start-workout"
+      - back

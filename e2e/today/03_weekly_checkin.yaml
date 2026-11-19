@@ -1,0 +1,34 @@
+# F4 weekly check-in (S28): weigh-in → energy/sleep → your week → adjustments → approve.
+# Opened through the deep link Today handles (repwise://today?checkin=1). Precondition: onboarding done.
+appId: com.client.repwise
+tags:
+  - today
+---
+- launchApp
+- stopApp
+- openLink: repwise://today?checkin=1
+- extendedWaitUntil:
+    visible:
+      id: "checkin-progress"
+    timeout: 15000
+- tapOn:
+    id: "checkin-skip-weight"
+- tapOn:
+    id: "energy-ok"
+- tapOn:
+    id: "sleep-good"
+- tapOn:
+    id: "checkin-next"
+- assertVisible:
+    id: "checkin-summary"
+- tapOn:
+    id: "checkin-next"
+- assertVisible:
+    id: "checkin-volume"
+- tapOn:
+    id: "checkin-approve"
+- assertVisible: "Next week is planned around you"
+- tapOn:
+    id: "checkin-finish"
+- assertVisible:
+    id: "screen-today"

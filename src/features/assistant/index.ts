@@ -1,5 +1,6 @@
 /**
- * assistant domain (sheet 13): components/, hooks/, logic/ (pure, unit-tested), repo.ts (Drizzle).
- * Screens are re-exported by thin routes in app/.
+ * assistant domain (S12, S28, sheet 28): rule-triggered cards and the weekly check-in.
+ * Pure rules in logic/, card rows + check-in record in repo.ts.
  */
-export {};
+export { evaluateRules, type CardCandidate, type RuleContext, type RuleId } from './logic/rules';
+export { latestCheckin, type CheckinRecord } from './repo';
