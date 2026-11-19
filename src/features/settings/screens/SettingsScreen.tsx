@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { ChevronLeft, Palette, Shield, UserRound } from 'lucide-react-native';
+import { ChevronLeft, CreditCard, Palette, Shield, UserRound } from 'lucide-react-native';
 
+import { usePro } from '@/features/billing/hooks/usePro';
 import { useAuth } from '@/services/auth';
 import { useThemeStore, type ThemePreference } from '@/theme';
 import { IconButton, ListRow, Screen, Segmented, Text } from '@/ui';
@@ -15,6 +16,7 @@ const THEME_OPTIONS = [
 export function SettingsScreen() {
   const preference = useThemeStore((s) => s.preference);
   const setPreference = useThemeStore((s) => s.setPreference);
+  const pro = usePro();
   const signedIn = useAuth((s) => s.status === 'signedIn');
   const email = useAuth((s) => s.user?.email ?? null);
   const accountSubtitle = signedIn
@@ -46,6 +48,16 @@ export function SettingsScreen() {
         divider
         testID="open-account"
       />
+      {pro.paymentsEnabled ? (
+        <ListRow
+          icon={CreditCard}
+          title="Subscription"
+          value={pro.subscribed ? 'Pro' : 'Free'}
+          onPress={() => router.push('/settings/subscription')}
+          divider
+          testID="open-subscription"
+        />
+      ) : null}
       <ListRow icon={Shield} title="Privacy" divider />
       {__DEV__ ? (
         <ListRow

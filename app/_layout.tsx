@@ -32,7 +32,7 @@ export default function RootLayout() {
   const [dbSettled, setDbSettled] = useState(false);
   const onDbSettled = useCallback((ok: boolean) => {
     setDbSettled(true);
-    // Auth restore, sync and catalogue warm-up start only once local data is ready.
+    // Auth restore, then billing + sync, and the catalogue warm-up start once local data is ready.
     if (ok) startBackgroundServices();
   }, []);
 

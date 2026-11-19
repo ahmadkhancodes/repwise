@@ -1,5 +1,13 @@
 /**
- * billing domain (sheet 13): components/, hooks/, logic/ (pure, unit-tested), repo.ts (Drizzle).
- * Screens are re-exported by thin routes in app/.
+ * billing domain (sheet 05/16): Pro gate, paywall, subscription screen, pure billing logic.
+ * The store + Worker plumbing lives in src/services/billing.ts.
  */
-export {};
+export { usePro, type ProState } from './hooks/usePro';
+export { canOpenPaywall, useBilling } from './hooks/useBilling';
+export {
+  trialReminderAt,
+  trialEndFromStart,
+  DEFAULT_QUIET_HOURS,
+  type QuietHours,
+} from './logic/trialReminder';
+export { manageSubscriptionUrl } from './logic/manage';

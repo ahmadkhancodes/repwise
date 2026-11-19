@@ -11,6 +11,8 @@ import colors from './src/theme/colors.json';
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID;
 const BUNDLE_ID = 'com.client.repwise';
 const APP_GROUP = 'group.com.client.repwise';
+/** Reversed iOS OAuth client id (com.googleusercontent.apps.…), set in EAS env. */
+const GOOGLE_IOS_URL_SCHEME = process.env.GOOGLE_IOS_URL_SCHEME;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -37,8 +39,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     entitlements: {
       // Shared container for the WidgetKit widget + Live Activity timer.
       'com.apple.security.application-groups': [APP_GROUP],
-      // Sign in with Apple capability, set explicitly: `usesAppleSignIn` only adds it
-      // once expo-apple-authentication is installed (auth task, see DECISIONS).
+      // Sign in with Apple capability (expo-apple-authentication is installed; kept explicit).
       'com.apple.developer.applesignin': ['Default'],
     },
     infoPlist: {
@@ -110,6 +111,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     'expo-font',
     'expo-updates',
+    'expo-sqlite',
+    'expo-secure-store',
+    'expo-apple-authentication',
+    // Google Sign-In needs the reversed iOS client id as a URL scheme; the plugin throws
+    // without it, so it is added only when GOOGLE_IOS_URL_SCHEME is set (EAS env).
+    ...(GOOGLE_IOS_URL_SCHEME
+      ? [
+          [
+            '@react-native-google-signin/google-signin',
+            { iosUrlScheme: GOOGLE_IOS_URL_SCHEME },
+          ] as [string, Record<string, string>],
+        ]
+      : []),
     [
       'expo-splash-screen',
       {

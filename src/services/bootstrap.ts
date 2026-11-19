@@ -5,6 +5,9 @@
 import { startSync } from '@/sync';
 
 import { initAuth } from './auth';
+import { configureBilling } from './billing';
+import { createWorkerBillingApi } from './billingApi';
+import { linkBillingToSession } from './billingSession';
 import { warmCatalog } from './catalog';
 
 let started = false;
@@ -14,6 +17,12 @@ export function startBackgroundServices(): void {
   started = true;
   initAuth()
     .catch(() => undefined)
-    .then(() => startSync());
+    .then(() => {
+      // Billing reads its cached flag + entitlement, then talks to the Worker in the background.
+      // `track` is wired when the analytics service (PostHog) lands.
+      void configureBilling({ api: createWorkerBillingApi() }).init();
+      linkBillingToSession();
+      startSync();
+    });
   warmCatalog();
 }

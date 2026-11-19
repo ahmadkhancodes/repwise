@@ -50,10 +50,10 @@ export function syncAccountId(): string | null {
 const DEVICE_KEY = 'auth.deviceId';
 const PROVIDER_KEY = 'auth.provider';
 /**
- * Billing's cached entitlement (MMKV keys). Cleared on sign-out/deletion; billing should also
- * listen to onSessionEvent for its in-memory state.
+ * Billing's cached entitlement (MMKV key `K.ent` in src/services/billing.ts). Cleared on
+ * sign-out/deletion here; billingSession.ts also resets billing's in-memory store.
  */
-export const ENTITLEMENT_CACHE_KEYS = ['billing.entitlement'] as const;
+export const ENTITLEMENT_CACHE_KEYS = ['billing.entitlement.v1'] as const;
 
 export function deviceId(): string {
   let id = kv.getString(DEVICE_KEY);

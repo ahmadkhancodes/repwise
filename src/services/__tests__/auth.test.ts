@@ -44,7 +44,7 @@ beforeEach(async () => {
   resetAuthForTests();
   resetDbForTests();
   await migrateDb();
-  kv.remove('billing.entitlement');
+  kv.remove('billing.entitlement.v1');
   fake = createFakeFetch();
   configureApi({ baseUrl: fake.base, fetch: fake.fetch });
   fake.on('POST /auth/anonymous', () => ({
@@ -190,13 +190,13 @@ describe('sign out / delete / expiry', () => {
   beforeEach(async () => {
     await verifyEmailCode('me@x.co', '123456');
     sessionsRepo.insert({ title: 'mine' });
-    kv.set('billing.entitlement', '{"pro":true}');
+    kv.set('billing.entitlement.v1', '{"pro":true}');
   });
 
   function expectSignedOutLocally() {
     expect(peekSession()).toBeNull();
     expect(useAuth.getState()).toMatchObject({ status: 'signedOut', user: null });
-    expect(kv.getString('billing.entitlement')).toBeUndefined();
+    expect(kv.getString('billing.entitlement.v1')).toBeUndefined();
     const rows = sessionsRepo.list();
     expect(rows).toHaveLength(1); // data on the phone stays
     expect(rows[0]).toMatchObject({ userId: null, dirty: 1 });
