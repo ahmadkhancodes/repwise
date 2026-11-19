@@ -53,7 +53,7 @@ Every `/billing/*` and `/webhooks/*` route returns **404 while `PAYMENTS_ENABLED
 - **Pro comes only from the stored entitlement** (`entitlements` collection), written only by `/billing/verify` and the webhooks. A purchase belongs to the account that last verified it (restore on another account moves it).
 - **Security:** CORS `*` with no credentials (no cookies anywhere), body caps with 413, malformed JSON 400, `nosniff`, `no-store`, CSP `default-src 'none'`.
 
-## AI planner (sheet 28 + owner decision D9)
+## AI planner (sheet 28 + owner decision D10)
 
 Pipeline per request: **engine** (`Planner.prepare`) builds targets, candidate pools (IDs only) and the
 rules-only plan → **Claude** picks/orders candidate IDs and writes titles + one-line notes as strict JSON
@@ -64,13 +64,25 @@ or the 8 s timeout, the rules-only plan ships with `source: "rules"`.
 Response contract (`contractVersion: 1`):
 
 ```json
-{ "source": "ai" | "rules", "kind": "plan_week", "contractVersion": 1, "engine": "stub",
-  "plan": <engine output or null>, "model": "claude-haiku-5-5", "fallbackReason": "budget_exhausted",
+{ "source": "ai" | "rules", "kind": "plan_week", "contractVersion": 1, "engine": "repwise-engine",
+  "plan": <see below>, "model": "claude-haiku-5-5", "fallbackReason": "budget_exhausted",
   "cached": false, "generatedAt": 1763553600000 }
 ```
 
-`plan: null` with `engine: "stub"` means the engine is not wired in yet: the app builds the plan on-device.
-To wire `@repwise/engine`, implement `Planner` (`src/ai/planner.ts`) and set it in `src/index.ts`.
+The planner is `src/ai/enginePlanner.ts`: `@repwise/engine` over the `@repwise/content` catalogues (through the
+`toEngine` adapter; the JSON is imported statically and inlined by wrangler). `plan` per route:
+
+| Route | `plan` | Request `params` (all optional unless marked) |
+|---|---|---|
+| `/ai/plan/week` | `{ week: WeekPlan, notes: { [date]: string } }` | `weekStart`, `now`, `utcOffsetMin`, `noRepeatDays`, `adjustmentKcal` |
+| `/ai/meals/day` | `{ date, day: DayMealPlan, notes: string[] }` | `date`, plus the above |
+| `/ai/swap` | `{ item, date, index, options: (exerciseId \| PlannedMeal)[], note }` | **`item`** (`exercise` \| `meal`), **`date`**, **`index`**, `currentId` (the item the app shows, if the plan was AI-varied) |
+
+- `profile` must parse with the engine's `ProfileSchema` and `history` with `HistorySchema` (400 `invalid_profile` / `invalid_history`).
+- Without `date`/`weekStart` the server uses today at `utcOffsetMin`. Without `now` the engine uses midnight UTC of the week's Monday, so the same request gives the same plan (and cache hit). Send `now` for heatmap-aware rotation.
+- **What the LLM sees:** per training day the ordered slots, each naming a pool of ≤ 8 exercise IDs (the rules pick first; main lifts are single-ID pools); per meal a pool of ≤ 10 safe recipe IDs (rules pick first, outside the no-repeat window); for swaps the engine's ≤ 6 options. No profile fields, targets or numbers.
+- **What the engine does with the answer:** one ID per slot from that slot's pool, else `validator_rejected`. Sets, reps and rest come from the rules prescription for the slot; portions from the portion solver. The result goes through `planWeekWithVariety`, which accepts it only if it parses and passes `validate` (equipment, injuries, volume, fingerprints, consecutive variants, kcal ±5 %, protein ±10 g, allergens, diet, protein source, no-repeat window).
+- **CPU:** a week plan costs ~30–500 ms of CPU on the real catalogue (most for 5–6 meals a day when targets are tight); the AI path runs the engine twice. This needs the Workers Paid (Standard) CPU limit, not the free plan's 10 ms.
 
 Cost controls:
 
@@ -129,10 +141,10 @@ purchases that arrive before `/billing/verify` still find their owner.
 - `src/db/` `Db` interface, `MemoryDb` (tests), `MongoDb` (driver loaded with a literal `import('mongodb' as string)` so wrangler bundles it; client cached per isolate, a failed connect drops the cache; indexes created once, versioned in `_meta`).
 - `src/auth/` JWT, Google/Apple ID token verifiers, mailers. `src/sync/` allow-list + row validation.
 - `src/billing/` App Store JWS chain verification (`x509.ts`, no Node APIs), App Store Server API, Play Developer API, entitlement maths.
-- `src/ai/` `Planner` seam, Anthropic provider (fetch, no SDK), prompts, schemas/validation, cost, pipeline.
+- `src/ai/` `Planner` seam and its engine implementation (`enginePlanner.ts`), Anthropic provider (fetch, no SDK), prompts, schemas/validation, cost, pipeline.
 
 Tests run in Node with vitest (`test/`), injecting `MemoryDb`, local JWKS, a generated Apple-like cert chain and
 mocked `fetch`. `MONGODB_TEST_URI=... npm test` also runs the Db contract tests against a real database.
 
 Known gap: MongoDB on Workers depends on `nodejs_compat` sockets; confirm on a real deploy (bundle verified with
-`wrangler deploy --dry-run`, ~2 MB / 293 KB gzip).
+`wrangler deploy --dry-run`: ~3.1 MB / 456 KB gzip including the catalogues, 19 Nov 2026).

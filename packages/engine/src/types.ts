@@ -74,6 +74,7 @@ export type PlanWarningCode =
   | 'repeat_window_relaxed'
   | 'recipe_filters_relaxed'
   | 'extra_snack_added'
+  | 'protein_target_adjusted'
   | 'llm_rejected'
   | 'llm_error';
 

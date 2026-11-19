@@ -16,7 +16,8 @@
     "test": "jest",
     "format": "prettier --write .",
     "check": "npm run lint && npm run typecheck && npm run test",
-    "db:generate": "node scripts/db-generate.mjs"
+    "db:generate": "node scripts/db-generate.mjs",
+    "test:all": "npm run check && npm run check -w @repwise/engine && npm run check -w @repwise/content && npm run check -w @repwise/server"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

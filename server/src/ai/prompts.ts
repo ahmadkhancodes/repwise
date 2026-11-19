@@ -23,6 +23,9 @@ How to read a request:
 - "task" is one of plan_week (choose exercise_ids for each training day and give each session a title and note), meals_day (choose one recipe_id for each meal slot with a short note), or swap (offer up to three alternative IDs for the item being replaced, best first, with one short note).
 - "candidates" maps a pool name to the IDs you may use. Exercise pools are already grouped and ordered by the engine's preference; earlier IDs are a slightly better fit, but variety across the week is more important than always picking the first ID.
 - "constraints" holds the structure to fill. When a constraint names a pool for a day or slot, pick from that pool only.
+- plan_week: constraints.sessions lists each training day with its ordered slots, each naming a pool. Return one session per listed day, with exactly one exercise_id per slot, in the same order, taken from that slot's pool. A pool with a single ID is fixed: use it.
+- meals_day: constraints.meals lists the meals in order, each with its slot and pool. Return the meals in the same order and slots, one recipe_id from each meal's pool.
+- swap: pick up to three IDs from the "options" pool, best first.
 - "recent" lists IDs the user had in the last weeks. Treat them as unavailable unless no other candidate fits a constraint.
 
 Quality bar: a lifter reading the plan should feel it was put together by an experienced coach who knows their week, and a cook should see a menu with real variety in flavour, texture and cuisine. When in doubt, choose the simpler, more familiar option.`;
