@@ -4,16 +4,13 @@ import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { refreshPermission, requestPermission } from '@/features/notifications';
 import { track } from '@/services/analytics';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
 
 import { trackStep } from '../actions';
-import {
-  getNotificationPermission,
-  requestNotificationPermission,
-} from '../notificationPermission';
 import { useOnboarding } from '../store';
 
 type Preview = { icon: LucideIcon; title: string; body: string; when: string };
@@ -106,8 +103,8 @@ export function NotifyScreen() {
       trackStep('notify', 0);
       // Already decided (granted, or "don't ask again"): nothing to explain.
       let live = true;
-      void getNotificationPermission().then((s) => {
-        if (live && (s === 'granted' || s === 'denied')) toPlan();
+      void refreshPermission().then((s) => {
+        if (live && s === 'granted') toPlan();
       });
       return () => {
         live = false;
@@ -117,8 +114,8 @@ export function NotifyScreen() {
 
   const allow = async () => {
     setBusy(true);
-    const result = await requestNotificationPermission();
-    track('notification_permission', { granted: result === 'granted' });
+    // Shows the system prompt and fires `notification_permission` (notifications service).
+    const result = await requestPermission();
     if (result === 'granted') haptics.success();
     setBusy(false);
     toPlan();

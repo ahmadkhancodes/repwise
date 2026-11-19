@@ -1,5 +1,4 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { PermissionsAndroid, Platform } from 'react-native';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
@@ -15,7 +14,6 @@ import { NotifyScreen } from '../screens/NotifyScreen';
 import { PlanScreen } from '../screens/PlanScreen';
 import { QuizScreen } from '../screens/QuizScreen';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
-import { setNotificationsModuleForTests } from '../notificationPermission';
 import { useOnboarding } from '../store';
 
 const mockRouter = {
@@ -40,10 +38,17 @@ function fastClock() {
   return () => (now += 1000);
 }
 
-beforeEach(() => setNotificationsModuleForTests(null));
+// In-memory expo-notifications double (jest.setup.ts); the primer starts "undetermined".
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const notif = require('expo-notifications') as {
+  __state: { reset(): void; permission: object; requestResult: object };
+  requestPermissionsAsync: () => Promise<unknown>;
+};
 
 beforeEach(async () => {
   jest.clearAllMocks();
+  notif.__state.reset();
+  notif.__state.permission = { granted: false, status: 'undetermined', canAskAgain: true };
   resetDbForTests();
   await migrateDb();
   resetAnalyticsForTests();
@@ -147,17 +152,23 @@ describe('quiz steps render their controls', () => {
 });
 
 describe('notification primer', () => {
-  it(`asks only after "Turn on reminders" and records the answer (${Platform.OS})`, async () => {
-    const request = jest.spyOn(PermissionsAndroid, 'request').mockResolvedValue('granted');
+  it('asks only after "Turn on reminders" and records the answer', async () => {
+    notif.__state.requestResult = { granted: true, status: 'granted', canAskAgain: true };
+    const request = jest.spyOn(notif, 'requestPermissionsAsync');
     await renderThemed(<NotifyScreen />);
     expect(request).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByTestId('notify-allow'));
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/plan'));
+    expect(request).toHaveBeenCalledTimes(1);
     const ev = trackedEvents().find((e) => e.event === 'notification_permission');
-    // Without expo-notifications installed, iOS reports "unavailable" (not granted).
-    expect(ev?.props.granted).toBe(Platform.OS === 'android');
+    expect(ev?.props.granted).toBe(true);
     expect(useOnboarding.getState().phase).toBe('plan');
-    request.mockRestore();
+  });
+
+  it('skips the primer when reminders are already on', async () => {
+    notif.__state.permission = { granted: true, status: 'granted', canAskAgain: true };
+    await renderThemed(<NotifyScreen />);
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/plan'));
   });
 });
 

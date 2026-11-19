@@ -9,7 +9,6 @@ import { kv } from '@/services/storage';
 
 import { fullAnswers } from '../__fixtures__/answers';
 import { EMPTY_ANSWERS } from '../logic/answers';
-import { setNotificationsModuleForTests } from '../notificationPermission';
 import { ONBOARDING_STORAGE_KEY, useOnboarding } from '../store';
 
 const routes = {
@@ -35,9 +34,10 @@ jest.mock('@expo-google-fonts/inter', () => ({
 
 const events = (name: string) => trackedEvents().filter((e) => e.event === name);
 
-beforeEach(() => setNotificationsModuleForTests(null));
-
 beforeEach(() => {
+  const notif = require('expo-notifications') as { __state: { reset(): void; permission: object } };
+  notif.__state.reset();
+  notif.__state.permission = { granted: false, status: 'undetermined', canAskAgain: true };
   resetDbForTests();
   resetAnalyticsForTests();
   useOnboarding.getState().reset();
