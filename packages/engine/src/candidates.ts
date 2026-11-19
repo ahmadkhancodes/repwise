@@ -23,7 +23,24 @@ import type { SlotDef } from './split';
 
 export const FULL_GYM: Equipment[] = [
   'barbell', 'dumbbell', 'cable', 'machine', 'kettlebell', 'band', 'bodyweight', 'smith', 'ez_bar', 'trap_bar', 'pullup_bar', 'bench',
+  'cardio_machine', 'squat_rack', 'dip_station', 'landmine', 'box', 'medicine_ball', 'ab_wheel', 'stability_ball', 'weight_plate',
+  'sled', 'jump_rope', 'foam_roller', 'mat',
 ];
+
+/** Equipment presets for the onboarding "gym type" step (S04). The user can edit the list afterwards. */
+export const EQUIPMENT_PRESETS = {
+  full_gym: FULL_GYM,
+  home_dumbbells: ['bodyweight', 'dumbbell', 'bench', 'band', 'mat'],
+  bodyweight: ['bodyweight', 'mat'],
+} as const satisfies Record<string, readonly Equipment[]>;
+
+/** Items that are never required: 'bodyweight' means nothing is needed, and a mat is comfort only (a towel or the floor works). */
+export const NEVER_REQUIRED: ReadonlySet<Equipment> = new Set<Equipment>(['bodyweight', 'mat']);
+
+/** Owning the first item means owning the listed ones too (profile vocabulary is coarser than the catalogue's). */
+export const EQUIPMENT_IMPLIES: Partial<Record<Equipment, readonly Equipment[]>> = {
+  cardio_machine: ['treadmill', 'bike', 'rower', 'elliptical', 'stair_climber'],
+};
 
 export const MAX_LEVEL: Record<Experience, 1 | 2 | 3> = { beginner: 2, intermediate: 3, advanced: 3 };
 
@@ -43,9 +60,11 @@ export function exerciseConstraints(profile: Pick<Profile, 'equipment' | 'injuri
   };
 }
 
-/** Every required item available ('bodyweight' needs nothing). */
+/** Every required item available ('bodyweight' and 'mat' need nothing; 'cardio_machine' covers each machine). */
 export function equipmentOk(ex: Pick<Exercise, 'equipment'>, available: readonly Equipment[]): boolean {
-  return ex.equipment.every((e) => e === 'bodyweight' || available.includes(e));
+  return ex.equipment.every(
+    (e) => NEVER_REQUIRED.has(e) || available.includes(e) || available.some((a) => EQUIPMENT_IMPLIES[a]?.includes(e) ?? false),
+  );
 }
 
 export function injuryOk(ex: Pick<Exercise, 'contraindications'>, injuries: readonly Injury[]): boolean {
@@ -78,6 +97,31 @@ export function slotCandidates(pool: readonly Exercise[], slot: Pick<SlotDef, 'p
 // Recipes
 // ---------------------------------------------------------------------------
 
+/**
+ * Fine cuisines (profile vocabulary) → the catalogue groups that contain them (D26).
+ * A preference matches a recipe when the values are equal or one is a group of the other.
+ */
+export const CUISINE_GROUPS: Partial<Record<Cuisine, readonly Cuisine[]>> = {
+  arab: ['middle_eastern', 'gulf', 'north_african'],
+  turkish: ['middle_eastern'],
+  persian: ['middle_eastern'],
+  greek: ['mediterranean'],
+  chinese: ['east_asian'],
+  japanese: ['east_asian'],
+  korean: ['east_asian'],
+  thai: ['southeast_asian'],
+  western: ['american', 'british'],
+  other: ['global'],
+};
+
+export function cuisineMatches(preferred: Cuisine, recipe: Cuisine): boolean {
+  return preferred === recipe || (CUISINE_GROUPS[preferred]?.includes(recipe) ?? false) || (CUISINE_GROUPS[recipe]?.includes(preferred) ?? false);
+}
+
+export function cuisinePreferred(preferred: readonly Cuisine[], recipe: Cuisine): boolean {
+  return preferred.some((p) => cuisineMatches(p, recipe));
+}
+
 export function dietOk(recipe: Pick<Recipe, 'dietTags'>, diet: DietType): boolean {
   const t = recipe.dietTags;
   switch (diet) {
@@ -100,15 +144,19 @@ export function allergenOk(recipe: Pick<Recipe, 'allergens'>, allergies: readonl
   return !recipe.allergens.some((a) => allergies.includes(a));
 }
 
-/** Case-insensitive: dislike matches an ingredient id exactly or appears in its id/name. */
+/**
+ * Case-insensitive: dislike matches an ingredient id exactly or appears in its id/name.
+ * Ids may use '_' or '-' (the content catalogue uses kebab-case), so separators are normalised.
+ */
 export function dislikedIngredients(recipe: Pick<Recipe, 'ingredients'>, dislikes: readonly string[]): string[] {
+  const norm = (x: string) => x.trim().toLowerCase().replace(/[\s-]+/g, '_');
   const ds = dislikes.map((d) => d.trim().toLowerCase()).filter((d) => d.length > 0);
   if (ds.length === 0) return [];
   return recipe.ingredients
     .filter((ing) => {
-      const id = ing.id.toLowerCase();
+      const id = norm(ing.id);
       const name = ing.name.toLowerCase();
-      return ds.some((d) => id === d || id.includes(d.replace(/\s+/g, '_')) || name.includes(d));
+      return ds.some((d) => id === norm(d) || id.includes(norm(d)) || name.includes(d));
     })
     .map((ing) => ing.id);
 }
@@ -176,7 +224,7 @@ export function recipeCandidates(
   const apply = () =>
     hard.filter(
       (r) =>
-        (!useCuisine || c.cuisines.includes(r.cuisine)) &&
+        (!useCuisine || cuisinePreferred(c.cuisines, r.cuisine)) &&
         (!useTime || r.prepMin <= c.cookMin) &&
         (!useBudget || r.costTier <= c.budget),
     );

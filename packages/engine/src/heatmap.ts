@@ -28,6 +28,7 @@ export const MUSCLE_HALF_LIFE_H: Record<Muscle, number> = {
   adductors: 30,
   abductors: 24,
   calves: 18,
+  hip_flexors: 24,
 };
 
 /** Fatigue units that map to a fully "red" muscle (≈ 8 fresh hard sets). */

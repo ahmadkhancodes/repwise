@@ -10,6 +10,7 @@
  */
 import { daysBetween, type ISODate } from './dates';
 import { hashHex } from './random';
+import { cuisinePreferred } from './candidates';
 import type { Cuisine, Exercise, ProteinSource, Recipe } from './schemas';
 
 export { createRng, cyrb53, hashHex, type Rng } from './random';
@@ -111,11 +112,12 @@ export function blockedRecipes(meals: readonly { date: ISODate; recipeId: string
 }
 
 /** Protein sources that count for the once-a-day rule ('none' is exempt). */
+/** 'none' (no dominant source) and 'grains' (a cereal base, not a protein food) are exempt from the once-a-day rule. */
 export function countsAsProteinSource(source: ProteinSource): boolean {
-  return source !== 'none';
+  return source !== 'none' && source !== 'grains';
 }
 
-const STAPLE_RE = /(^|_)(salt|pepper|water|oil|spice|spices|herbs|stock)(_|$)/;
+const STAPLE_RE = /(^|[_-])(salt|pepper|water|oil|spice|spices|herbs|stock)([_-]|$)/;
 export function isStaple(ingredientId: string): boolean {
   return STAPLE_RE.test(ingredientId);
 }
@@ -143,7 +145,7 @@ export function recipeWeight(r: Recipe, ctx: RecipeWeightContext): number {
   if (ctx.moreLike.has(r.id)) w *= 3;
   if (ctx.likedCuisines?.has(r.cuisine)) w *= 1.3;
   if (ctx.likedSources?.has(r.proteinSource)) w *= 1.2;
-  if (ctx.preferredCuisines && ctx.preferredCuisines.length > 0 && ctx.preferredCuisines.includes(r.cuisine)) w *= 1.5;
+  if (ctx.preferredCuisines && ctx.preferredCuisines.length > 0 && cuisinePreferred(ctx.preferredCuisines, r.cuisine)) w *= 1.5;
   if (ctx.previousCuisine && ctx.previousCuisine === r.cuisine) w *= 0.35;
   if (ctx.ingredientUse) {
     let shared = 0;

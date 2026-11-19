@@ -86,6 +86,19 @@ export const TEMPLATES: Record<string, DayTemplate> = {
   },
 };
 
+/**
+ * Filler slots (D27): when the user's equipment leaves a session with fewer than
+ * min(exercisesPerSession, MIN_SESSION_ITEMS) items, core work is added so short kit lists
+ * (bodyweight only) still get a full, varied session.
+ */
+export const MIN_SESSION_ITEMS = 4;
+export const FILLER_SLOTS: SlotDef[] = [S('core_fill_1', 'core', 'accessory'), S('core_fill_2', 'core', 'accessory'), S('core_fill_3', 'core', 'accessory')];
+
+/** A template slot, or a filler slot, by key. */
+export function slotDef(templateKey: string, slotKey: string): SlotDef | undefined {
+  return TEMPLATES[templateKey]?.slots.find((x) => x.key === slotKey) ?? FILLER_SLOTS.find((x) => x.key === slotKey);
+}
+
 export const SPLIT_ROTATIONS: Record<SplitType, string[]> = {
   full_body: ['full_a', 'full_b', 'full_c'],
   upper_lower: ['upper_a', 'lower_a', 'upper_b', 'lower_b'],
