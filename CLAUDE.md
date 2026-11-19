@@ -12,7 +12,7 @@ Core loop: Morning brief (push) → open Today → do the planned workout (log s
 - No account needed to use the app. Sign-in (Google one-tap or email code) is only for backup/restore.
 - Core action in ≤ 2 taps from home, widget or notification.
 - Offline-first: SQLite is the source of truth; the Cloudflare Worker + MongoDB Atlas are backup/sync/entitlement only.
-- No AI/LLM calls, no paid per-use APIs, no ads SDKs, no dark patterns.
+- No paid per-use APIs except the Anthropic API behind our Worker (budget-capped, see Owner overrides); no ads SDKs, no dark patterns.
 - Paywall: visible close button, price after trial stated, restore purchases, terms/privacy links.
 - Plans: weekly $4.99 / monthly $12.99 / 3-month $24.99 / yearly $59.99 (pre-selected, 7-day trial). NO ads. Pro unlocked ONLY by the Worker entitlement.
 - Minimal, light design. One primary action per screen. Use tokens from src/theme/tokens.ts only — no hard-coded colours, sizes or fonts.
@@ -47,7 +47,7 @@ Font Inter; body 16px; tabular numbers. Radius: card 20, sheet 28, button 14, in
 - Unit tests for any logic (dates, schedules, maths). Lightness test passed. No TypeScript errors.
 
 ## Never
-- Never block the UI on the network. Never lose user data. Never show an ad. Never call an LLM. Never add a library not in the stack list without asking.
+- Never block the UI on the network. Never lose user data. Never show an ad. Never call an LLM from the app (only the Worker /ai routes may). Never add a library not in the stack list without asking.
 - Never use the words 'cure', 'treat', 'diagnose' or give dosing/medical advice in UI copy.
 
 ## App-specific rules
@@ -62,9 +62,12 @@ Font Inter; body 16px; tabular numbers. Radius: card 20, sheet 28, button 14, in
   - **Config:** iOS bundle id `com.client.repwise`; Info.plist usage strings for every permission; Sign in with Apple (required, because Google sign-in is offered); a privacy manifest via `ios.privacyManifests`; App Group for widgets; an EAS `ios-simulator` profile.
   - **Payments:** StoreKit 2 through `react-native-iap` (Apple requires IAP for digital subscriptions). Never Stripe for in-app subscriptions on either store.
   - **Tests:** every test runs for both `Platform.OS` values where behaviour differs; Maestro flows work on both platforms.
-- **AI planner: rules-first, with no LLM cost by default.** The bible says both "NO AI/LLM calls" and "LLM behind our Worker". Decision:
-  - v1 ships the deterministic rules engine (sheet 28: targets, candidate pools, uniqueness rules, validator, portion solver) as the planner. It produces the full variety itself.
-  - The Worker `/ai/*` routes exist with an LLM provider adapter behind `AI_PROVIDER` (default `none`, which returns rules-only output). The LLM is only ever an optional variety/copy layer, its output is validated, and it falls back to the rules.
-  - The app never calls an LLM directly.
+- **AI in v1 (owner, 19 Nov 2026): Anthropic API, hard budget of $50/month.**
+  - The Worker `/ai/*` routes call the Anthropic Messages API (cheapest capable model, configurable). The key is the Worker secret `ANTHROPIC_API_KEY`.
+  - The deterministic engine (`@repwise/engine`) computes targets, candidate pools and validation. The LLM only picks and orders candidate IDs and writes titles and coaching copy. The LLM never does maths.
+  - Any invalid output or timeout falls back to the rules-only plan.
+  - **Budget guard:** real cost is tracked per month. At 80% of the budget, free users get rules-only plans; at 100%, everyone does. There are also per-user daily limits, a cache, and prompt caching.
+  - The app never calls an LLM directly. It only calls our Worker.
+  - This replaces the bible's "No AI/LLM calls" line for the planner, and only for these Worker routes.
 - **Package and branding:** `com.client.repwise`, scheme `repwise`. Light AND dark themes, per sheet 11.
 - **How we build:** in Claude Code (this session) with parallel agents on branches/worktrees. Each agent works only in its own directories, and the orchestrator merges. Memory lives in `docs/PROGRESS.md` and `docs/DECISIONS.md`.
