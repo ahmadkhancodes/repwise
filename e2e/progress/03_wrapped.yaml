@@ -1,0 +1,42 @@
+# P1 (RW-51, S34; reached from the RW-50 hub): open Wrapped for this month, step back a month and return.
+# Works with or without data: either the story cards or the calm empty state shows.
+appId: com.client.repwise
+tags:
+  - progress
+---
+- launchApp
+- tapOn:
+    id: tab-progress
+- scrollUntilVisible:
+    element:
+      id: nav-wrapped
+    direction: DOWN
+- tapOn:
+    id: nav-wrapped
+- assertVisible:
+    id: screen-progress-wrapped
+- assertVisible:
+    id: wrapped-month
+- runFlow:
+    when:
+      visible:
+        id: wrapped-cards
+    commands:
+      - assertVisible:
+          id: wrapped-share
+- runFlow:
+    when:
+      visible:
+        id: wrapped-empty
+    commands:
+      - assertVisible: Nothing to wrap yet
+- tapOn:
+    id: wrapped-prev
+- assertVisible:
+    id: wrapped-month
+- tapOn:
+    id: wrapped-next
+- tapOn:
+    id: back
+- assertVisible:
+    id: screen-progress
