@@ -102,11 +102,19 @@ export function toggle<T>(list: readonly T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
+const GROUP_OF = new Map<Equipment, EquipmentGroup>(
+  (Object.keys(EQUIPMENT_GROUPS) as EquipmentGroup[]).flatMap((g) =>
+    EQUIPMENT_GROUPS[g].items.map((i) => [i, g] as const),
+  ),
+);
+
 /** Groups an exercise uses; accessory-only kit (a bench) counts as bodyweight. */
 export function equipmentGroupsOf(equipment: readonly Equipment[]): EquipmentGroup[] {
-  const groups = (Object.keys(EQUIPMENT_GROUPS) as EquipmentGroup[]).filter((g) =>
-    EQUIPMENT_GROUPS[g].items.some((i) => equipment.includes(i)),
-  );
+  const groups: EquipmentGroup[] = [];
+  for (const e of equipment) {
+    const g = GROUP_OF.get(e);
+    if (g && !groups.includes(g)) groups.push(g);
+  }
   return groups.length ? groups : ['bodyweight'];
 }
 

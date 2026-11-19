@@ -216,12 +216,17 @@ describe('library items', () => {
     );
     searchLibrary(searchExercises, customs, 'warm', EMPTY_FILTERS); // warm the index
     for (const q of ['b', 'bench', 'row', 'dumbbell curl', 'glute', 'my mo', 'xyz']) {
-      const start = performance.now();
-      searchLibrary(searchExercises, customs, q, {
-        ...EMPTY_FILTERS,
-        equipment: ['dumbbell', 'barbell'],
-      });
-      expect(performance.now() - start).toBeLessThan(50);
+      // best of 5: measures the search, not CI scheduler noise
+      let best = Infinity;
+      for (let i = 0; i < 5; i++) {
+        const start = performance.now();
+        searchLibrary(searchExercises, customs, q, {
+          ...EMPTY_FILTERS,
+          equipment: ['dumbbell', 'barbell'],
+        });
+        best = Math.min(best, performance.now() - start);
+      }
+      expect(best).toBeLessThan(50);
     }
   });
 });
