@@ -3,3 +3,5 @@ ENVIRONMENT=development
 JWT_SECRET=change-me-to-a-long-random-string-of-at-least-32-chars
 MONGODB_URI=mongodb+srv://user:pass@cluster.example.mongodb.net/?retryWrites=true&w=majority
 GOOGLE_WEB_CLIENT_ID=
+ANTHROPIC_API_KEY=
+AI_ADMIN_TOKEN=

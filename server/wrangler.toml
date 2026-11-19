@@ -14,7 +14,10 @@ MONGODB_DB = "repwise"
 APPLE_BUNDLE_ID = "com.client.repwise"
 PLAY_PACKAGE_NAME = "com.client.repwise"
 PAYMENTS_ENABLED = "false"
-AI_PROVIDER = "none"
+AI_PROVIDER = "anthropic"
+AI_MODEL = "claude-haiku-5-5"
+AI_MONTHLY_BUDGET_USD = "50"
+AI_TIMEOUT_MS = "8000"
 MAIL_PROVIDER = "console"
 
 [observability]
