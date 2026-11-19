@@ -1,5 +1,5 @@
 import { AnthropicProvider } from './ai/anthropic';
-import { stubPlanner } from './ai/planner';
+import { createEnginePlanner } from './ai/enginePlanner';
 import { createApp } from './app';
 import { appleVerifier, googleVerifier } from './auth/idtokens';
 import { ConsoleMailer, ResendMailer } from './auth/mailer';
@@ -33,8 +33,8 @@ export function buildDeps(env: Env): Deps {
     appleStore: createAppleStore(config, f, now),
     play: createPlayApi(config, f, now),
     verifyPubsub: pubsubVerifier(config),
-    // Swap in the @repwise/engine adapter here once packages/engine lands.
-    planner: stubPlanner,
+    // @repwise/engine over the bundled @repwise/content catalogues (rules-only without an LLM).
+    planner: createEnginePlanner({ clock: now }),
     llm: config.ai.provider === 'anthropic' && config.ai.apiKey ? new AnthropicProvider(config.ai.apiKey, config.ai.model, f) : null,
   };
   cache.set(env, deps);
