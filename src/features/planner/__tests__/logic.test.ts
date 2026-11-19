@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import type { Exercise as ContentExercise, Food, Recipe as ContentRecipe } from '@repwise/content';
+import {
+  toEngineCatalogues,
+  type Exercise as ContentExercise,
+  type Food,
+  type Recipe as ContentRecipe,
+} from '@repwise/content';
 
 import * as facade from '../engine';
 import { decideAiPlan, looksLikeWeekPlan } from '../logic/aiPlan';
@@ -15,7 +20,7 @@ const content = {
   foods: require('@repwise/content/foods.json') as Food[],
 };
 
-describe('engine facade', () => {
+describe('engine re-export', () => {
   it('mirrors the engine vocabularies', () => {
     for (const k of [
       'GOALS',
@@ -36,7 +41,7 @@ describe('engine facade', () => {
 });
 
 describe('content → engine catalogues', () => {
-  const cat = facade.contentAdapter().toEngineCatalogues(content);
+  const cat = toEngineCatalogues(content);
 
   it('every item the adapter keeps satisfies the engine contract', () => {
     expect(() => engine.ExerciseCatalogueSchema.parse(cat.exercises)).not.toThrow();
@@ -217,7 +222,7 @@ describe('planRows', () => {
 });
 
 describe('planToRows with a real engine plan', () => {
-  const cat = facade.contentAdapter().toEngineCatalogues(content);
+  const cat = toEngineCatalogues(content);
   const profile = toEngineProfile(row({ dietType: 'omnivore', allergies: [], cuisines: [] }), {
     trainingWeekdays: [3, 5, 6],
   })!;

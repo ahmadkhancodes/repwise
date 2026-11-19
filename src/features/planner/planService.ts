@@ -13,7 +13,6 @@
 import {
   addDays,
   buildContext,
-  contentAdapter,
   localDateFromEpoch,
   mealFromRecipe,
   planWeek,
@@ -30,6 +29,7 @@ import {
   type ProfileInput,
   type WeekPlan,
 } from './engine';
+import { toEngineCatalogues } from '@repwise/content';
 import { and, asc, desc, eq, gte, inArray, lt } from 'drizzle-orm';
 
 import { getRawDb } from '@/db/client';
@@ -85,7 +85,7 @@ let engineCatalogues: { src: unknown; cat: Catalogues } | null = null;
 export function getEngineCatalogues(): Catalogues {
   const c = getCatalog();
   if (engineCatalogues?.src !== c) {
-    const { exercises, recipes } = contentAdapter().toEngineCatalogues(c);
+    const { exercises, recipes } = toEngineCatalogues(c);
     engineCatalogues = { src: c, cat: { exercises, recipes } };
   }
   return engineCatalogues.cat;
