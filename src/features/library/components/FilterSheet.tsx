@@ -70,7 +70,7 @@ export function FilterSheet({ open, value, onClose, onApply, countFor }: Props) 
     setWasOpen(open);
     if (open) setDraft(value);
   }
-  const count = countFor(draft);
+  const count = open ? countFor(draft) : 0; // no search work while closed
   const { height } = useWindowDimensions();
 
   return (
