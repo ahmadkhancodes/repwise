@@ -1,0 +1,21 @@
+# Repwise API (Cloudflare Worker). No secrets in this file: use `wrangler secret put <NAME>`.
+# See server/README.md for the full list of variables and secrets.
+name = "repwise-api"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+ENVIRONMENT = "production"
+JWT_ISSUER = "repwise-api"
+JWT_AUDIENCE = "repwise-app"
+MONGODB_DB = "repwise"
+APPLE_BUNDLE_ID = "com.client.repwise"
+PLAY_PACKAGE_NAME = "com.client.repwise"
+PAYMENTS_ENABLED = "false"
+AI_PROVIDER = "none"
+MAIL_PROVIDER = "console"
+
+[observability]
+enabled = true

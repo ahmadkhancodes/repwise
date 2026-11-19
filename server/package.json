@@ -1,0 +1,24 @@
+{
+  "name": "@repwise/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Repwise API: Cloudflare Worker (Hono) + MongoDB Atlas",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "tsc --noEmit && vitest run",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "hono": "^4.13.19",
+    "jose": "^6.2.18",
+    "mongodb": "^7.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1",
+    "wrangler": "^4.165.0"
+  }
+}

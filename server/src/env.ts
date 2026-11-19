@@ -1,0 +1,44 @@
+/** Worker bindings. Vars live in wrangler.toml [vars]; secrets via `wrangler secret put`. */
+export interface Env {
+  ENVIRONMENT?: string;
+  // Database
+  MONGODB_URI?: string;
+  MONGODB_DB?: string;
+  // Tokens
+  JWT_SECRET?: string;
+  JWT_ISSUER?: string;
+  JWT_AUDIENCE?: string;
+  // Sign-in
+  GOOGLE_WEB_CLIENT_ID?: string;
+  GOOGLE_IOS_CLIENT_ID?: string;
+  GOOGLE_ANDROID_CLIENT_ID?: string;
+  APPLE_BUNDLE_ID?: string;
+  APPLE_SERVICES_ID?: string;
+  MAIL_PROVIDER?: string;
+  MAIL_FROM?: string;
+  RESEND_API_KEY?: string;
+  // Billing
+  PAYMENTS_ENABLED?: string;
+  PLANS_JSON?: string;
+  APPLE_ROOT_CA_G3_B64?: string;
+  APPLE_ISSUER_ID?: string;
+  APPLE_KEY_ID?: string;
+  APPLE_PRIVATE_KEY?: string;
+  PLAY_PACKAGE_NAME?: string;
+  PLAY_SERVICE_ACCOUNT_JSON?: string;
+  PLAY_RTDN_SECRET?: string;
+  PLAY_PUBSUB_AUDIENCE?: string;
+  PLAY_PUBSUB_SERVICE_ACCOUNT?: string;
+  // AI
+  AI_PROVIDER?: string;
+  AI_MODEL?: string;
+  ANTHROPIC_API_KEY?: string;
+  AI_MONTHLY_BUDGET_USD?: string;
+  AI_PRICES_JSON?: string;
+  AI_LIMITS_JSON?: string;
+  AI_TIMEOUT_MS?: string;
+  AI_ADMIN_TOKEN?: string;
+  // Misc
+  FEATURE_FLAGS_JSON?: string;
+  CORS_ORIGINS?: string;
+}
