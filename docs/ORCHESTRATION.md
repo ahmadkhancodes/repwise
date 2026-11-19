@@ -60,3 +60,26 @@ Each paused slice has a WIP commit on its branch and a "Paused: next steps" list
 2. A bug review per area.
 3. Device QA on an Android emulator + iOS simulator via GitHub Actions; the repo must be public for that run.
 4. Store packs.
+
+## Status 19 Nov 2026, 18:50 UTC (auto-resume reads this)
+- **On main (8ae43a3), all green:** app 2469, engine 690, content 43, server 100. Merged so far:
+  - onboarding, today, workout, progress;
+  - glue: deep links, route audit, planner bridge, week rollover, edits survive regenerate;
+  - obs: PostHog, Sentry, review prompt, privacy manifest;
+  - ci: GitHub Actions for checks and E2E on Android and iOS;
+  - store packs;
+  - design-system v2: shared components, gym Stepper/BigTimer, contrast test;
+  - media groundwork: Cloudinary DISABLED, and the open-dataset images are on hold for the owner's licence check;
+  - srvfix: auth brute force, refresh grace, sync cursor, AI budget reservation, snack meal_id.
+- **Fix wave in progress.** Worktrees `/home/user/repwise-w-*`, branches `feat/w-*`:
+  - w-onb (onboarding, settings, billing, notifications);
+  - w-today (today, meals, nutrition);
+  - w-train (workout player: gym UX + perf);
+  - w-libprog (library + progress + muscle-map exercise hero);
+  - w-perf (catalogue lazy-load, fonts, DB indexes 0002, startup).
+  - Brief: scratchpad `wave_brief.md`.
+- **Next after the wave:**
+  1. Merge the wave branches and renumber the D? entries.
+  2. Re-audit: UI + perf/gym + bugs, read-only, then fix.
+  3. Device QA through the workflows; the repo must be public temporarily, which is the owner's call.
+  4. Final tested-app report to Ahmad.
