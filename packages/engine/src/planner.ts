@@ -387,7 +387,8 @@ function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResu
     const dayType = dayTypeOf(ctx, date);
     const target = dayType === 'training' ? ctx.nutrition.training : ctx.nutrition.rest;
     let best: { recipes: Recipe[]; slots: MealSlot[]; servings: number[]; ok: boolean; score: number } | undefined;
-    outer: for (let extra = 0; extra <= 2; extra++) {
+    const maxExtra = Math.max(2, 8 - ctx.mealSlots.length); // up to 8 eating occasions for very high targets
+    outer: for (let extra = 0; extra <= maxExtra; extra++) {
       const slots: MealSlot[] = [...ctx.mealSlots, ...Array.from({ length: extra }, () => 'snack' as const)];
       for (let attempt = 0; attempt < 30; attempt++) {
         const picked = pickDay(ctx, slots, date, target, window, planned, ingredientUse, prevCuisine, liked, relaxed, rng.fork(`${date}/${extra}/${attempt}`));
