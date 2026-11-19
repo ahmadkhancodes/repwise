@@ -780,6 +780,7 @@
     },
     "allergens": [
       "gluten",
+      "eggs",
       "milk"
     ],
     "dietTags": [
@@ -975,6 +976,7 @@
     },
     "allergens": [
       "gluten",
+      "eggs",
       "milk"
     ],
     "dietTags": [
@@ -1924,7 +1926,7 @@
     ],
     "servings": 2,
     "prepMin": 10,
-    "cookMin": 0,
+    "cookMin": 15,
     "costTier": 1,
     "scalable": {
       "min": 0.5,
@@ -3362,6 +3364,7 @@
     },
     "allergens": [
       "gluten",
+      "eggs",
       "milk"
     ],
     "dietTags": [
@@ -3645,7 +3648,7 @@
     ],
     "servings": 1,
     "prepMin": 10,
-    "cookMin": 0,
+    "cookMin": 12,
     "costTier": 1,
     "scalable": {
       "min": 0.5,
@@ -5334,7 +5337,7 @@
     ],
     "servings": 1,
     "prepMin": 10,
-    "cookMin": 0,
+    "cookMin": 10,
     "costTier": 1,
     "scalable": {
       "min": 0.75,
@@ -6684,7 +6687,7 @@
     "servings": 2,
     "prepMin": 15,
     "cookMin": 12,
-    "costTier": 3,
+    "costTier": 2,
     "scalable": {
       "min": 0.75,
       "max": 1.75
@@ -7997,6 +8000,7 @@
       "fibre": 5.5
     },
     "allergens": [
+      "celery",
       "milk",
       "mustard"
     ],
@@ -8329,6 +8333,7 @@
       "fibre": 8.4
     },
     "allergens": [
+      "celery",
       "milk",
       "sulphites"
     ],
@@ -8348,7 +8353,7 @@
     ],
     "servings": 1,
     "prepMin": 10,
-    "cookMin": 0,
+    "cookMin": 5,
     "costTier": 1,
     "scalable": {
       "min": 0.75,
@@ -8853,6 +8858,7 @@
       "fibre": 8
     },
     "allergens": [
+      "celery",
       "gluten",
       "eggs",
       "fish",
@@ -9155,6 +9161,7 @@
       "fibre": 19
     },
     "allergens": [
+      "celery",
       "gluten"
     ],
     "dietTags": [
@@ -9598,12 +9605,12 @@
     },
     "allergens": [
       "celery",
+      "gluten",
       "fish",
       "milk"
     ],
     "dietTags": [
-      "halal_friendly",
-      "gluten_free"
+      "halal_friendly"
     ],
     "mainProtein": "lamb"
   },
@@ -9851,7 +9858,7 @@
     ],
     "servings": 1,
     "prepMin": 5,
-    "cookMin": 0,
+    "cookMin": 3,
     "costTier": 2,
     "scalable": {
       "min": 0.75,
@@ -9976,7 +9983,7 @@
     ],
     "servings": 1,
     "prepMin": 5,
-    "cookMin": 0,
+    "cookMin": 10,
     "costTier": 2,
     "scalable": {
       "min": 0.75,
@@ -11607,7 +11614,7 @@
     ],
     "servings": 2,
     "prepMin": 10,
-    "cookMin": 0,
+    "cookMin": 4,
     "costTier": 1,
     "scalable": {
       "min": 0.5,
@@ -17395,7 +17402,8 @@
       "gluten",
       "eggs",
       "fish",
-      "milk"
+      "milk",
+      "mustard"
     ],
     "dietTags": [
       "pescatarian",
@@ -18093,13 +18101,14 @@
       "fibre": 1
     },
     "allergens": [
-      "milk"
+      "gluten",
+      "milk",
+      "soybeans"
     ],
     "dietTags": [
       "halal_friendly",
       "high_protein",
-      "low_carb",
-      "gluten_free"
+      "low_carb"
     ],
     "mainProtein": "beef"
   },
@@ -18524,7 +18533,7 @@
     ],
     "servings": 2,
     "prepMin": 10,
-    "cookMin": 0,
+    "cookMin": 8,
     "costTier": 2,
     "scalable": {
       "min": 0.5,
@@ -19591,6 +19600,7 @@
       "fibre": 5.4
     },
     "allergens": [
+      "gluten",
       "fish",
       "sesame",
       "soybeans",
@@ -19601,7 +19611,6 @@
       "halal_friendly",
       "high_protein",
       "low_carb",
-      "gluten_free",
       "dairy_free"
     ],
     "mainProtein": "fish"
@@ -20350,7 +20359,7 @@
   },
   {
     "id": "shrimp-zoodle-scampi",
-    "title": "Prawn and courgette noodle scampi",
+    "title": "Chilli-tomato prawns with courgetti",
     "cuisine": "italian",
     "slots": [
       "dinner"
@@ -20373,28 +20382,28 @@
         "grams": 400
       },
       {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
         "foodId": "garlic",
         "grams": 10
       },
       {
-        "foodId": "butter",
-        "grams": 10
+        "foodId": "green-chilli",
+        "grams": 8
       },
       {
         "foodId": "olive-oil",
-        "grams": 15
+        "grams": 20
       },
       {
         "foodId": "lemon-juice",
         "grams": 15
       },
       {
-        "foodId": "parsley",
+        "foodId": "basil",
         "grams": 8
-      },
-      {
-        "foodId": "parmesan",
-        "grams": 20
       },
       {
         "foodId": "salt",
@@ -20402,30 +20411,30 @@
       }
     ],
     "steps": [
-      "Spiralise or julienne the courgettes.",
-      "Fry the garlic in butter and oil, then add the prawns until pink.",
-      "Toss in the courgette noodles for 2 minutes.",
-      "Finish with lemon, parsley and parmesan."
+      "Spiralise or julienne the courgettes and chop the tomatoes.",
+      "Warm the oil and soften the garlic and chilli for a minute, then add the tomatoes and cook until they start to break down.",
+      "Add the prawns and cook for 3 minutes until pink.",
+      "Toss in the courgette noodles for 2 minutes, then finish with lemon and torn basil."
     ],
     "source": "repwise-original",
     "licence": "proprietary",
     "perServing": {
-      "kcal": 356,
-      "protein": 46.7,
-      "carbs": 8.9,
-      "fat": 15.7,
-      "fibre": 2.3
+      "kcal": 331,
+      "protein": 44.5,
+      "carbs": 14.7,
+      "fat": 12,
+      "fibre": 4.1
     },
     "allergens": [
-      "crustaceans",
-      "milk"
+      "crustaceans"
     ],
     "dietTags": [
       "pescatarian",
       "halal_friendly",
       "high_protein",
       "low_carb",
-      "gluten_free"
+      "gluten_free",
+      "dairy_free"
     ],
     "mainProtein": "shellfish"
   },
@@ -24663,7 +24672,8 @@
     },
     "allergens": [
       "eggs",
-      "milk"
+      "milk",
+      "mustard"
     ],
     "dietTags": [
       "halal_friendly",
@@ -24897,7 +24907,8 @@
     },
     "allergens": [
       "eggs",
-      "fish"
+      "fish",
+      "mustard"
     ],
     "dietTags": [
       "pescatarian",
@@ -25686,7 +25697,8 @@
     },
     "allergens": [
       "eggs",
-      "milk"
+      "milk",
+      "mustard"
     ],
     "dietTags": [
       "halal_friendly",
@@ -26360,7 +26372,8 @@
     },
     "allergens": [
       "eggs",
-      "fish"
+      "fish",
+      "mustard"
     ],
     "dietTags": [
       "pescatarian",
