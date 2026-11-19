@@ -35,10 +35,25 @@ export function setMealStatus(id: string, status: MealStatus, now: number = Date
 }
 
 /** Swap: the meal keeps its slot; the old recipe id is remembered in swapped_from. */
-export function swapMeal(id: string, recipeId: string, now: number = Date.now()): Meal | undefined {
+export function swapMeal(
+  id: string,
+  recipeId: string,
+  now: number = Date.now(),
+  portion?: number,
+): Meal | undefined {
   const m = mealsRepo.get(id);
   if (!m) return undefined;
-  return mealsRepo.update(id, { recipeId, swappedFrom: m.recipeId, status: 'planned', eatenAt: null }, now);
+  return mealsRepo.update(
+    id,
+    {
+      recipeId,
+      swappedFrom: m.recipeId,
+      status: 'planned',
+      eatenAt: null,
+      ...(portion !== undefined ? { portion } : {}),
+    },
+    now,
+  );
 }
 
 export function useMealPlan(date: string): MealPlan | undefined {

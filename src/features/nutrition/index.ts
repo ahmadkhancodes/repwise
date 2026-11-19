@@ -1,5 +1,7 @@
 /**
- * nutrition domain (sheet 13): components/, hooks/, logic/ (pure, unit-tested), repo.ts (Drizzle).
- * Screens are re-exported by thin routes in app/.
+ * nutrition domain (sheet 13): food logs, day intake, water. logic/ is pure and unit-tested;
+ * repo.ts is Drizzle. Screens are re-exported by thin routes in app/.
  */
-export {};
+export { dayIntake } from './logic/intake';
+export { totalWaterMl, formatWater } from './logic/water';
+export { getWaterGoal, setWaterGoal } from './waterGoal';
