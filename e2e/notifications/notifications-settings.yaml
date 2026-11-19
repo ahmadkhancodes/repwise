@@ -1,0 +1,46 @@
+# P0 (RW-43, P-N1, S38 → Notifications): permission, toggles, a time picker, quiet hours.
+# Runs on iOS and Android (testIDs only; the OS permission is pre-granted).
+appId: com.client.repwise
+tags:
+  - notifications
+---
+- launchApp:
+    permissions:
+      notifications: allow
+- tapOn:
+    id: open-settings
+- tapOn:
+    id: open-notifications
+- assertVisible:
+    id: screen-notifications
+- assertNotVisible:
+    id: turn-on
+- assertVisible: Morning brief
+- tapOn:
+    id: toggle-meals
+- tapOn:
+    id: toggle-meals
+- scrollUntilVisible:
+    element:
+      id: time-workout
+    direction: DOWN
+- tapOn:
+    id: time-workout
+- assertVisible:
+    id: time-save
+- tapOn:
+    id: time-save
+- scrollUntilVisible:
+    element:
+      id: toggle-quiet
+    direction: DOWN
+- assertVisible:
+    id: time-quiet-start
+- tapOn:
+    id: toggle-quiet
+- assertNotVisible:
+    id: time-quiet-start
+- tapOn:
+    id: toggle-quiet
+- assertVisible:
+    id: time-quiet-start
