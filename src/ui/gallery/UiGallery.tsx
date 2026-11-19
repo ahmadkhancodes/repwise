@@ -5,20 +5,29 @@ import { View } from 'react-native';
 
 import { sizes, spacing, ThemeScope, useTheme, type ColorScheme } from '@/theme';
 
+import { Badge } from '../Badge';
 import { BigNumber } from '../BigNumber';
+import { BigTimer } from '../BigTimer';
 import { Button } from '../Button';
 import { Card } from '../Card';
 import { Chip } from '../Chip';
 import { EmptyState } from '../EmptyState';
 import { IconButton } from '../IconButton';
 import { ListRow } from '../ListRow';
+import { MacroRings } from '../MacroRings';
 import { ProgressRing } from '../ProgressRing';
 import { Screen } from '../Screen';
+import { SearchBar } from '../SearchBar';
 import { Segmented } from '../Segmented';
 import { Sheet } from '../Sheet';
+import { Skeleton, SkeletonCard, SkeletonGroup, SkeletonText } from '../Skeleton';
+import { StepProgress } from '../StepProgress';
 import { Stepper } from '../Stepper';
+import { Switch } from '../Switch';
 import { Text } from '../Text';
-import { showToast, Toast } from '../Toast';
+import { Checkbox, Tick } from '../Tick';
+import { showToast, showUndoToast, Toast } from '../Toast';
+import { WeekStrip, type WeekDay } from '../WeekStrip';
 import { WheelPicker } from '../WheelPicker';
 
 type Mode = 'both' | ColorScheme;
@@ -36,6 +45,14 @@ const VIEWS = [
   { value: 'day', label: 'Day' },
   { value: 'week', label: 'Week' },
 ] as const;
+
+const WEEK: WeekDay[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((weekday, i) => ({
+  key: String(i),
+  weekday,
+  day: 16 + i,
+  status: i < 2 ? 'done' : i === 2 ? 'missed' : i === 5 ? 'rest' : 'planned',
+  locked: i === 6,
+}));
 
 /** A themed block: everything inside renders in `scheme`, on that scheme's background. */
 function SchemeBlock({ scheme, children }: { scheme: ColorScheme; children: ReactNode }) {
@@ -99,6 +116,11 @@ export function UiGallery() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(true);
   const [volume, setVolume] = useState(12450);
+  const [ticked, setTicked] = useState(false);
+  const [bought, setBought] = useState(true);
+  const [sound, setSound] = useState(true);
+  const [day, setDay] = useState('3');
+  const [rest, setRest] = useState(90_000);
   const schemes: ColorScheme[] = mode === 'both' ? ['light', 'dark'] : [mode];
 
   return (
@@ -300,6 +322,97 @@ export function UiGallery() {
               onAction={() => undefined}
             />
           </>
+        )}
+      </Section>
+
+      <Section title="Hero type · BigTimer" schemes={schemes}>
+        {() => (
+          <>
+            <Text variant="hero">12,450</Text>
+            <BigTimer
+              remainingMs={rest}
+              totalMs={120_000}
+              onAdjust={(d) => setRest((r) => Math.max(0, r + d * 1000))}
+              onSkip={() => setRest(0)}
+              next="Next: Bench press · set 3 · 80 kg × 8"
+            />
+          </>
+        )}
+      </Section>
+
+      <Section title="Tick · Checkbox · Switch" schemes={schemes}>
+        {() => (
+          <>
+            <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
+              <Tick checked={ticked} onChange={setTicked} accessibilityLabel="Set done" />
+              <Tick
+                checked={ticked}
+                onChange={setTicked}
+                accessibilityLabel="Set done (gym)"
+                size="gym"
+              />
+              <Switch value={sound} onValueChange={setSound} accessibilityLabel="Sound" />
+            </View>
+            <Checkbox
+              checked={bought}
+              onChange={setBought}
+              label="Rolled oats"
+              description="2 × 500 g"
+              strikeWhenChecked
+            />
+          </>
+        )}
+      </Section>
+
+      <Section title="Badge · StepProgress · WeekStrip" schemes={schemes}>
+        {() => (
+          <>
+            <View style={{ flexDirection: 'row', gap: spacing.xs, flexWrap: 'wrap' }}>
+              <Badge label="Chest" />
+              <Badge label="Pro" tone="accent" />
+              <Badge label="Best value" tone="inverse" />
+              <Badge label="Yours" tone="outline" />
+            </View>
+            <StepProgress total={6} current={2} accessibilityLabel="Quiz progress" />
+            <StepProgress
+              fractions={[1, 1, 0.5, 0]}
+              color="accent"
+              accessibilityLabel="Workout progress"
+            />
+            <WeekStrip days={WEEK} selectedKey={day} todayKey="3" onSelect={setDay} />
+          </>
+        )}
+      </Section>
+
+      <Section title="MacroRings · SearchBar" schemes={schemes}>
+        {() => (
+          <>
+            <MacroRings
+              eaten={{ kcal: 550, protein: 40, carbs: 60, fat: 20 }}
+              target={{ kcal: 2400, protein: 180, carbs: 250, fat: 70 }}
+            />
+            <SearchBar
+              placeholder="Search exercises"
+              accessibilityLabel="Search exercises"
+              onOpenFilters={() => undefined}
+              filterCount={2}
+            />
+            <Button
+              label="Show undo toast"
+              variant="secondary"
+              onPress={() => showUndoToast('Set deleted', () => undefined)}
+            />
+          </>
+        )}
+      </Section>
+
+      <Section title="Skeleton" schemes={schemes}>
+        {() => (
+          <SkeletonGroup label="Loading example">
+            <Skeleton height={sizes.button} />
+            <SkeletonText lines={2} />
+            <SkeletonCard media lines={2} />
+          </SkeletonGroup>
         )}
       </Section>
 
