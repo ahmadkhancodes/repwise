@@ -26959,5 +26959,272 @@
       "gluten_free"
     ],
     "mainProtein": "dairy"
+  },
+  {
+    "id": "ricotta-berry-protein-bowl",
+    "title": "Ricotta, yoghurt and berry protein bowl",
+    "cuisine": "italian",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "ricotta",
+        "grams": 150
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 100
+      },
+      {
+        "foodId": "mixed-berries",
+        "grams": 100
+      },
+      {
+        "foodId": "hemp-seeds",
+        "grams": 10
+      },
+      {
+        "foodId": "honey",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Beat the ricotta and yoghurt together until smooth.",
+      "Top with the berries, hemp seeds and a drizzle of honey."
+    ],
+    "mediaId": "repwise/recipes/ricotta-berry-protein-bowl",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 381,
+      "protein": 30.9,
+      "carbs": 27.8,
+      "fat": 17.2,
+      "fibre": 2.5
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "whey-banana-smoothie",
+    "title": "Whey, banana and milk smoothie",
+    "cuisine": "american",
+    "slots": [
+      "breakfast",
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "whey-protein",
+        "grams": 30
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 300
+      },
+      {
+        "foodId": "banana",
+        "grams": 100
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Blend everything with a few ice cubes until smooth.",
+      "Drink straight away."
+    ],
+    "mediaId": "repwise/recipes/whey-banana-smoothie",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 349,
+      "protein": 28.5,
+      "carbs": 46.7,
+      "fat": 6.7,
+      "fibre": 3.1
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "labneh-cucumber-mint-pot",
+    "title": "Labneh pot with cucumber and mint",
+    "cuisine": "gulf",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 200
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "mint",
+        "grams": 3
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 0.5
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Season the yoghurt with salt and spoon into a bowl.",
+      "Top with diced cucumber, torn mint, a drizzle of oil and a pinch of paprika."
+    ],
+    "mediaId": "repwise/recipes/labneh-cucumber-mint-pot",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 159,
+      "protein": 21.1,
+      "carbs": 10.6,
+      "fat": 4,
+      "fibre": 0.8
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "cottage-cheese-lentil-salad",
+    "title": "Cottage cheese and lentil salad",
+    "cuisine": "british",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "cottage-cheese",
+        "grams": 200
+      },
+      {
+        "foodId": "lentils",
+        "grams": 60
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "rocket",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "vinegar-cider",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Simmer the lentils for 20 minutes until tender, drain and cool.",
+      "Toss with the chopped tomato, cucumber, rocket, oil and vinegar.",
+      "Top with the cottage cheese."
+    ],
+    "mediaId": "repwise/recipes/cottage-cheese-lentil-salad",
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 456,
+      "protein": 38,
+      "carbs": 55.6,
+      "fat": 10.8,
+      "fibre": 8.5
+    },
+    "allergens": [
+      "milk",
+      "sulphites"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
   }
 ]

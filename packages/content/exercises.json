@@ -12795,5 +12795,151 @@
     ],
     "source": "repwise-original",
     "licence": "proprietary"
+  },
+  {
+    "id": "floor-triceps-dip",
+    "name": "Floor triceps dip",
+    "aliases": [
+      "Crab dip",
+      "Floor dip"
+    ],
+    "pattern": "isolation_triceps",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "triceps"
+    ],
+    "secondaryMuscles": [
+      "front_delts",
+      "chest"
+    ],
+    "equipment": [
+      "bodyweight"
+    ],
+    "level": "beginner",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "shoulder",
+      "wrist"
+    ],
+    "instructions": [
+      "Sit on the floor with knees bent and hands behind your hips, fingers pointing toward your feet.",
+      "Lift your hips a little off the floor.",
+      "Bend your elbows to lower your upper body toward the floor, then straighten them to push back up.",
+      "Keep the hips lifted for the whole set."
+    ],
+    "cues": [
+      "Elbows point straight back, not out.",
+      "Move your feet further away to make it harder."
+    ],
+    "commonMistakes": [
+      "Letting the hips drop to the floor between reps.",
+      "Shrugging the shoulders up."
+    ],
+    "mediaId": "repwise/exercises/floor-triceps-dip",
+    "alternatives": [
+      "bench-dip",
+      "diamond-push-up",
+      "bodyweight-triceps-extension"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "reverse-nordic",
+    "name": "Reverse Nordic",
+    "aliases": [
+      "Kneeling quad lean-back"
+    ],
+    "pattern": "isolation_quads",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "quads"
+    ],
+    "secondaryMuscles": [
+      "hip_flexors",
+      "abs"
+    ],
+    "equipment": [
+      "bodyweight",
+      "mat"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "knee"
+    ],
+    "instructions": [
+      "Kneel upright on a mat with knees hip-width apart and toes tucked or flat.",
+      "Keep a straight line from knees to head and lean back slowly.",
+      "Go only as far as you can control, then pull yourself back up with your thighs.",
+      "Start with a small range and build depth over weeks."
+    ],
+    "cues": [
+      "Squeeze your glutes to keep the hips straight.",
+      "Slow on the way back."
+    ],
+    "commonMistakes": [
+      "Bending at the hips to make it easier.",
+      "Dropping into a range you cannot return from."
+    ],
+    "mediaId": "repwise/exercises/reverse-nordic",
+    "alternatives": [
+      "sissy-squat",
+      "wall-sit",
+      "leg-extension"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
+  },
+  {
+    "id": "bridge-walkout",
+    "name": "Glute bridge walkout",
+    "aliases": [
+      "Hamstring walkout"
+    ],
+    "pattern": "isolation_hamstrings",
+    "patternFamily": "isolation",
+    "primaryMuscles": [
+      "hamstrings"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "lower_back"
+    ],
+    "equipment": [
+      "bodyweight",
+      "mat"
+    ],
+    "level": "intermediate",
+    "unilateral": false,
+    "mechanics": "isolation",
+    "contraindications": [
+      "lower_back",
+      "knee"
+    ],
+    "instructions": [
+      "Lie on your back and lift into a glute bridge with feet under your knees.",
+      "Keeping the hips up, take small heel steps away from you until your legs are nearly straight.",
+      "Walk the heels back in to the start.",
+      "Lower the hips only at the end of the set."
+    ],
+    "cues": [
+      "Hips stay high the whole time.",
+      "Smaller steps make it harder."
+    ],
+    "commonMistakes": [
+      "Letting the hips sag as the feet move out.",
+      "Arching the lower back instead of using the hamstrings."
+    ],
+    "mediaId": "repwise/exercises/bridge-walkout",
+    "alternatives": [
+      "slider-leg-curl",
+      "nordic-curl",
+      "stability-ball-leg-curl"
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary"
   }
 ]
