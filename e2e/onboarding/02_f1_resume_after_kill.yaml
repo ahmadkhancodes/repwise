@@ -1,0 +1,53 @@
+# F1 edge case: killing the app mid-quiz resumes on the same question with answers kept (MMKV).
+# Also checks validation copy and Back. testIDs render on iOS and Android.
+appId: com.client.repwise
+tags:
+  - onboarding
+  - p0
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: deny
+- extendedWaitUntil:
+    visible:
+      id: "screen-welcome"
+    timeout: 15000
+- tapOn:
+    id: "welcome-start"
+- tapOn:
+    id: "option-muscle_gain"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-about"
+    timeout: 5000
+# Continue without choosing → readable reason, no crash, still on the step.
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "quiz-error"
+- assertVisible: "Choose the option that fits you best."
+- tapOn:
+    id: "option-male"
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "screen-quiz-body"
+# Kill and relaunch → back on the body step.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-body"
+    timeout: 15000
+# Back keeps the earlier answer.
+- tapOn:
+    id: "quiz-back"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-about"
+    timeout: 5000
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "screen-quiz-body"

@@ -1,0 +1,149 @@
+# F1 (P0) "First open → personal plan": welcome → 15-step quiz → notification primer ("Not now")
+# → plan build → W1 reveal from the real offline planner → Today. No account, no network needed.
+# Fresh install; notifications denied so the primer (S06) shows. testIDs render on iOS and Android.
+appId: com.client.repwise
+tags:
+  - onboarding
+  - p0
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: deny
+# S02 Welcome
+- extendedWaitUntil:
+    visible:
+      id: "screen-welcome"
+    timeout: 15000
+- assertVisible: "Get started"
+- assertVisible: "I already use Repwise"
+- tapOn:
+    id: "welcome-start"
+# S03 goal (single choice → auto-advance)
+- assertVisible:
+    id: "screen-quiz-goal"
+- assertVisible:
+    id: "quiz-progress"
+- tapOn:
+    id: "option-fat_loss"
+# about: sex + year of birth (wheel starts on a real value)
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-about"
+    timeout: 5000
+- tapOn:
+    id: "option-female"
+- tapOn:
+    id: "quiz-next"
+# body: height + weight wheels prefilled
+- assertVisible:
+    id: "screen-quiz-body"
+- assertVisible:
+    id: "wheel-height"
+- tapOn:
+    id: "quiz-next"
+# target (optional for fat loss) → skip
+- assertVisible:
+    id: "screen-quiz-target"
+- tapOn:
+    id: "quiz-skip"
+# S04 training
+- assertVisible:
+    id: "screen-quiz-experience"
+- tapOn:
+    id: "option-beginner"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-days"
+    timeout: 5000
+- assertVisible:
+    id: "weekday"
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "screen-quiz-length"
+- tapOn:
+    id: "option-45"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-equipment"
+    timeout: 5000
+- tapOn:
+    id: "option-gym"
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "screen-quiz-injuries"
+- tapOn:
+    id: "quiz-skip"
+- assertVisible:
+    id: "screen-quiz-activity"
+- tapOn:
+    id: "option-light"
+# S05 food
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-diet"
+    timeout: 5000
+- tapOn:
+    id: "option-omnivore"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-avoid"
+    timeout: 5000
+- tapOn:
+    id: "quiz-skip"
+- assertVisible:
+    id: "screen-quiz-cuisines"
+- tapOn:
+    id: "quiz-skip"
+- assertVisible:
+    id: "screen-quiz-kitchen"
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "screen-quiz-meals"
+- assertVisible: "Build my plan"
+- tapOn:
+    id: "quiz-next"
+# S06 notification primer: the system prompt is never shown before the user asks
+- extendedWaitUntil:
+    visible:
+      id: "screen-notify"
+    timeout: 5000
+- assertVisible: "Turn on reminders"
+- tapOn:
+    id: "notify-later"
+# S07 plan build → W1 reveal (real planner output)
+- extendedWaitUntil:
+    visible:
+      id: "screen-plan"
+    timeout: 20000
+- assertVisible:
+    id: "reveal-targets"
+- assertVisible:
+    id: "reveal-kcal"
+- assertVisible:
+    id: "reveal-week"
+- assertVisible:
+    id: "reveal-day-0"
+- assertVisible: "Start my plan"
+- tapOn:
+    id: "plan-continue"
+# Paywall only when payments are on; it always has a visible close.
+- tapOn:
+    id: "paywall-close"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 10000
+# Relaunch lands on Today, not onboarding.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 10000
+- assertNotVisible:
+    id: "screen-welcome"

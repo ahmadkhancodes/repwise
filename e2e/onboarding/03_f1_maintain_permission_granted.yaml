@@ -1,0 +1,96 @@
+# F1 variants: "Stay fit" hides the target-weight step; with notifications already granted the
+# primer skips itself and goes straight to the plan build. testIDs render on iOS and Android.
+appId: com.client.repwise
+tags:
+  - onboarding
+  - p0
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: allow
+- extendedWaitUntil:
+    visible:
+      id: "screen-welcome"
+    timeout: 15000
+- tapOn:
+    id: "welcome-start"
+- tapOn:
+    id: "option-maintain"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-about"
+    timeout: 5000
+- tapOn:
+    id: "option-female"
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "screen-quiz-body"
+- tapOn:
+    id: "quiz-next"
+# No target step for maintain → experience comes next.
+- assertVisible:
+    id: "screen-quiz-experience"
+- assertNotVisible:
+    id: "screen-quiz-target"
+- tapOn:
+    id: "option-intermediate"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-days"
+    timeout: 5000
+- tapOn:
+    id: "quiz-next"
+- tapOn:
+    id: "option-60"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-equipment"
+    timeout: 5000
+- tapOn:
+    id: "option-home"
+- tapOn:
+    id: "quiz-next"
+- tapOn:
+    id: "quiz-skip"
+- tapOn:
+    id: "option-moderate"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-diet"
+    timeout: 5000
+- tapOn:
+    id: "option-vegetarian"
+- extendedWaitUntil:
+    visible:
+      id: "screen-quiz-avoid"
+    timeout: 5000
+- tapOn:
+    id: "quiz-skip"
+- tapOn:
+    id: "quiz-skip"
+- assertVisible:
+    id: "screen-quiz-kitchen"
+- tapOn:
+    id: "quiz-next"
+- assertVisible:
+    id: "screen-quiz-meals"
+- tapOn:
+    id: "quiz-next"
+# Primer skipped (already granted) → plan reveal.
+- extendedWaitUntil:
+    visible:
+      id: "screen-plan"
+    timeout: 20000
+- assertVisible:
+    id: "reveal-targets"
+- tapOn:
+    id: "plan-continue"
+- tapOn:
+    id: "paywall-close"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 10000
