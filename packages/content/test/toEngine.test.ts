@@ -27,26 +27,9 @@ const {
 
 /**
  * Items the engine cannot take yet, with the reason. Pinned: a new exclusion fails this test.
- * Cardio needs a MET value (engine contract, RW-24 calories) and the content catalogue has none:
- * content must add `met` (Compendium of Physical Activities) to these 13 items (D28).
+ * Empty since the 13 cardio exercises gained Compendium MET values (D28 closed by D33).
  */
-const ALLOWED_EXCLUSIONS: Record<string, string> = Object.fromEntries(
-  [
-    'treadmill-run',
-    'incline-walk',
-    'outdoor-walk',
-    'stationary-bike',
-    'bike-intervals',
-    'rowing-machine',
-    'elliptical',
-    'stair-climber',
-    'jump-rope',
-    'burpee',
-    'mountain-climber',
-    'kettlebell-swing-intervals',
-    'sled-push-intervals',
-  ].map((id) => [id, 'cardio_without_met']),
-);
+const ALLOWED_EXCLUSIONS: Record<string, string> = {};
 
 describe('toEngine adapter', () => {
   const out = toEngineCatalogues();
@@ -80,6 +63,16 @@ describe('toEngine adapter', () => {
   it('macros are carried, never recomputed or invented', () => {
     const byId = new Map(recipes.map((r) => [r.id, r]));
     for (const r of out.recipes) assert.deepEqual(r.perServing, byId.get(r.id)!.perServing);
+  });
+
+  it('every cardio exercise carries its Compendium MET value into the engine', () => {
+    const cardio = exercises.filter((e) => e.pattern === 'cardio');
+    assert.ok(cardio.length >= 13);
+    const byId = new Map(out.exercises.map((e) => [e.id, e]));
+    for (const e of cardio) {
+      assert.ok(e.met !== undefined && e.met > 0, e.id);
+      assert.equal(byId.get(e.id)?.met, e.met, e.id);
+    }
   });
 
   it('ingredient grams are per serving and keep the USDA fdcId', () => {
