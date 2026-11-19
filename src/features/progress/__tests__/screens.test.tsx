@@ -3,6 +3,7 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
 import { saveProfile } from '@/features/settings/repo';
+import { sessionsRepo } from '@/features/workout/repo';
 import { useBillingStore } from '@/services/billing';
 import { useToastStore } from '@/ui';
 
@@ -114,8 +115,8 @@ afterEach(() => {
 });
 
 /** Give charts a width (onLayout) so Skia + labels render. */
-function layout(testID: string, width = 320, height = 200) {
-  fireEvent(screen.getByTestId(testID), 'layout', {
+async function layout(testID: string, width = 320, height = 200) {
+  await fireEvent(screen.getByTestId(testID), 'layout', {
     nativeEvent: { layout: { width, height, x: 0, y: 0 } },
   });
 }
@@ -214,7 +215,7 @@ describe.each(SCHEMES)('Body (S30) (%s)', (scheme) => {
     await renderThemed(<BodyScreen />, scheme);
     expect(await screen.findByLabelText('7-day average, 80.1 kg')).toBeTruthy();
     expect(screen.getByTestId('weight-change')).toHaveTextContent('+0.1 kg');
-    layout('weight-chart-plot');
+    await layout('weight-chart-plot');
     await fireEvent(screen.getByTestId('weight-chart-plot'), 'responderGrant', {
       nativeEvent: { locationX: 0 },
     });
@@ -229,7 +230,7 @@ describe('Body states', () => {
   it('empty, error and delete with undo', async () => {
     const { unmount } = await renderThemed(<BodyScreen />);
     expect(await screen.findByTestId('body-empty')).toBeTruthy();
-    unmount();
+    await unmount();
 
     const spy = jest
       .spyOn(repo, 'useLiveBody')
@@ -237,7 +238,7 @@ describe('Body states', () => {
     const second = await renderThemed(<BodyScreen />);
     expect(screen.getByTestId('body-error')).toBeTruthy();
     spy.mockRestore();
-    second.unmount();
+    await second.unmount();
 
     seedBody();
     await renderThemed(<BodyScreen />);
@@ -278,7 +279,7 @@ describe.each(SCHEMES)('Strength (S31) (%s)', (scheme) => {
     expect(screen.getByTestId('exercise-chart')).toBeTruthy();
     expect(screen.getByTestId('exercise-pr-0')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('exercise-metric-volume'));
-    layout('exercise-chart-plot');
+    await layout('exercise-chart-plot');
     await fireEvent(screen.getByTestId('exercise-chart-plot'), 'responderGrant', {
       nativeEvent: { locationX: 1000 },
     });
@@ -303,7 +304,7 @@ describe.each(SCHEMES)('Heatmap (S32) (%s)', (scheme) => {
     expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Chest/);
     expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/2 hard sets in 7 days/);
     // Tap on the figure: left pec in viewBox (85, 90) at scale 360/400.
-    fireEvent(screen.getByTestId('body-map'), 'responderRelease', {
+    await fireEvent(screen.getByTestId('body-map'), 'responderRelease', {
       nativeEvent: { locationX: 85 * 0.9, locationY: 90 * 0.9 },
     });
     expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Chest/);
@@ -331,7 +332,7 @@ describe.each(SCHEMES)('Trends (%s)', (scheme) => {
     await renderThemed(<TrendsScreen />, scheme);
     expect(await screen.findByTestId('volume-chart')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('volume-chest'));
-    layout('volume-chart-plot');
+    await layout('volume-chart-plot');
     await fireEvent(screen.getByTestId('volume-chart-plot'), 'responderGrant', {
       nativeEvent: { locationX: 150 },
     });
@@ -373,7 +374,7 @@ describe.each(SCHEMES)('Photos (S33) (%s)', (scheme) => {
     await renderThemed(<PhotosScreen />, scheme);
     await fireEvent.press(await screen.findByTestId('photos-mode-compare'));
     expect(screen.getByTestId('compare-days')).toHaveTextContent('70 days apart');
-    layout('compare-slider', 300, 400);
+    await layout('compare-slider', 300, 400);
     await fireEvent(screen.getByTestId('compare-slider'), 'responderMove', {
       nativeEvent: { locationX: 75 },
     });
@@ -458,12 +459,10 @@ describe('History states', () => {
   it('empty, and free users see 30 days', async () => {
     const first = await renderThemed(<HistoryScreen />);
     expect(await screen.findByTestId('history-empty')).toBeTruthy();
-    first.unmount();
+    await first.unmount();
     useBillingStore.setState({ paymentsEnabled: true });
     seedTraining();
-    await (
-      await import('@/features/workout/repo')
-    ).sessionsRepo.insert({
+    sessionsRepo.insert({
       id: 'old',
       date: '2026-09-01',
       title: 'Old',

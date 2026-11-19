@@ -5,7 +5,7 @@ export const fileSystemMock = () => {
     parts
       .map((p) => (typeof p === 'string' ? p : p.uri))
       .join('/')
-      .replace(/([^:])\/{2,}/g, '$1/');
+      .replace(/([^:/])\/{2,}/g, '$1/');
   class File {
     uri: string;
     constructor(...parts: (string | { uri: string })[]) {
