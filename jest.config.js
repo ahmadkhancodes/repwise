@@ -2,6 +2,11 @@
  * Every test runs twice: once as iOS and once as Android (jest-expo platform
  * presets), so Platform.OS-specific behaviour is covered on both (owner override).
  */
+// node:sqlite (the expo-sqlite test double) prints an ExperimentalWarning; workers inherit this.
+if (!/disable-warning=ExperimentalWarning/.test(process.env.NODE_OPTIONS ?? '')) {
+  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --disable-warning=ExperimentalWarning`.trim();
+}
+
 const shared = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {

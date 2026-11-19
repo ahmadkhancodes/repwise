@@ -51,3 +51,69 @@ jest.mock('react-native-mmkv', () => ({
     };
   },
 }));
+
+// expo-sqlite → real SQLite in memory via node:sqlite (see test/mocks/expoSqlite.ts).
+jest.mock('expo-sqlite', () => require('./test/mocks/expoSqlite'));
+
+// expo-crypto → Node crypto.
+jest.mock('expo-crypto', () => {
+  const nodeCrypto = require('node:crypto');
+  return {
+    getRandomBytes: (n: number) => new Uint8Array(nodeCrypto.randomBytes(n)),
+    digestStringAsync: async (_alg: string, data: string) =>
+      nodeCrypto.createHash('sha256').update(data).digest('hex'),
+    CryptoDigestAlgorithm: { SHA256: 'SHA-256' },
+    CryptoEncoding: { HEX: 'hex', BASE64: 'base64' },
+  };
+});
+
+// expo-secure-store → in-memory map (reset with __reset in tests).
+jest.mock('expo-secure-store', () => {
+  const m = new Map<string, string>();
+  return {
+    getItemAsync: jest.fn(async (k: string) => m.get(k) ?? null),
+    setItemAsync: jest.fn(async (k: string, v: string) => {
+      m.set(k, v);
+    }),
+    deleteItemAsync: jest.fn(async (k: string) => {
+      m.delete(k);
+    }),
+    AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY: 0,
+    __reset: () => m.clear(),
+  };
+});
+
+jest.mock('expo-apple-authentication', () => {
+  const React = require('react');
+  const { Pressable } = require('react-native');
+  return {
+    isAvailableAsync: jest.fn(async () => true),
+    signInAsync: jest.fn(async () => ({ identityToken: 'apple-id-token', user: 'apple-user' })),
+    AppleAuthenticationScope: { FULL_NAME: 0, EMAIL: 1 },
+    AppleAuthenticationButtonType: { SIGN_IN: 0, CONTINUE: 1 },
+    AppleAuthenticationButtonStyle: { WHITE: 0, WHITE_OUTLINE: 1, BLACK: 2 },
+    AppleAuthenticationButton: ({ onPress, ...rest }: { onPress: () => void }) =>
+      React.createElement(Pressable, {
+        ...rest,
+        onPress,
+        accessibilityRole: 'button',
+        accessibilityLabel: 'Continue with Apple',
+        testID: 'apple-sign-in',
+      }),
+  };
+});
+
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    hasPlayServices: jest.fn(async () => true),
+    signIn: jest.fn(async () => ({ type: 'success', data: { idToken: 'google-id-token' } })),
+    signOut: jest.fn(async () => null),
+  },
+  statusCodes: {
+    SIGN_IN_CANCELLED: 'SIGN_IN_CANCELLED',
+    IN_PROGRESS: 'IN_PROGRESS',
+    PLAY_SERVICES_NOT_AVAILABLE: 'PLAY_SERVICES_NOT_AVAILABLE',
+  },
+  isErrorWithCode: (e: unknown) => typeof e === 'object' && e !== null && 'code' in e,
+}));
