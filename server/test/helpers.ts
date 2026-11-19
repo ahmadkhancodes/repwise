@@ -134,5 +134,5 @@ export async function signInEmail(t: TestCtx, email: string, extra: { token?: st
 }
 
 export function row(id: string, updatedAt: number, fields: Record<string, unknown> = {}) {
-  return { id, created_at: updatedAt - 1000, updated_at: updatedAt, deleted_at: null, ...fields };
+  return { id, created_at: Math.max(0, updatedAt - 1000), updated_at: updatedAt, deleted_at: null, ...fields };
 }
