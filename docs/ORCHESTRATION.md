@@ -83,3 +83,10 @@ Each paused slice has a WIP commit on its branch and a "Paused: next steps" list
   2. Re-audit: UI + perf/gym + bugs, read-only, then fix.
   3. Device QA through the workflows; the repo must be public temporarily, which is the owner's call.
   4. Final tested-app report to Ahmad.
+- **Extra parallel lane (18:55 UTC).** Worktrees `/home/user/repwise-x-*`, branches `feat/x-*`:
+  - x-server: AI quality, security, deploy scripts;
+  - x-engine: property-based plan QA;
+  - x-content: recipes up to about 600, plus an exercise muscle audit;
+  - x-native: widgets, Live Activity, the timer module's native side;
+  - x-web: landing page plus the legal/support site.
+  - Merge each when it reports, with `npm run test:all` green.
