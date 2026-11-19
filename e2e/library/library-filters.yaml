@@ -1,0 +1,26 @@
+# P0 (RW-27, S18): filter by muscle and equipment, then clear.
+appId: com.client.repwise
+tags:
+  - library
+  - p0
+---
+- launchApp
+- tapOn:
+    id: tab-library
+- tapOn:
+    id: library-filters
+- assertVisible: Filters
+- tapOn:
+    id: filter-muscle-chest
+- tapOn:
+    id: filter-equipment-dumbbell
+- tapOn:
+    id: filter-apply
+- assertVisible: Results
+- assertVisible:
+    id: active-filter-m:chest
+- tapOn:
+    id: active-filter-m:chest
+- tapOn:
+    id: active-filter-e:dumbbell
+- assertVisible: All exercises

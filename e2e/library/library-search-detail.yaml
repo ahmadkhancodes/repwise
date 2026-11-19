@@ -1,0 +1,34 @@
+# P0 (RW-27, S18 → S19): search the library, open an exercise, favourite it.
+# Runs on iOS and Android: testIDs map to accessibilityIdentifier / resource-id.
+appId: com.client.repwise
+tags:
+  - library
+  - p0
+---
+- launchApp
+- tapOn:
+    id: tab-library
+- assertVisible:
+    id: screen-library
+- tapOn:
+    id: library-search
+- inputText: back squat
+- tapOn:
+    id: exercise-row-barbell-back-squat
+- assertVisible:
+    id: screen-exercise
+- assertVisible: Barbell back squat
+- assertVisible:
+    text: Muscles worked.*
+- scrollUntilVisible:
+    element: How to do it
+    direction: DOWN
+- tapOn:
+    id: exercise-favourite
+- tapOn:
+    id: exercise-back
+- tapOn:
+    id: library-search-clear
+- hideKeyboard
+- assertVisible: Favourites
+- assertVisible: Recently used

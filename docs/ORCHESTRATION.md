@@ -10,9 +10,9 @@
 
 | Phase | Work | Status |
 |---|---|---|
-| 1 | app-shell, engine, server, content | merged except engine (in progress) |
-| 2a | data layer (SQLite/drizzle, repos, sync, api, auth UI) | in progress (`feat/data`) |
-| 2b | billing (react-native-iap, usePro, paywall, subscription screen) | in progress (`feat/billing`) |
+| 1 | app-shell, engine, server, content | MERGED |
+| 2a | data layer (SQLite/drizzle, repos, sync, api, auth UI) | MERGED |
+| 2b | billing (react-native-iap, usePro, paywall, subscription screen) | MERGED |
 | 2c | onboarding quiz + plan reveal (S02–S07); wire engine → server Planner | after engine + data |
 | 2d | Today + assistant + weekly check-in (S11, S12, S28) | after data |
 | 2e | workout player (S13–S17), rest timer, iOS Live Activity / Android ongoing notification | after data |
@@ -29,3 +29,8 @@
 - The server sync allow-list (`server/src/sync/tables.ts`) must equal the app schema columns.
 - The `BillingApi` interface is implemented by `src/services/api.ts`.
 - The server `Planner` interface (`server/src/ai/planner.ts`) is implemented by `@repwise/engine`.
+
+## Status, 19 Nov ~08:00 UTC
+- **In progress:** `feat/integrate` (engine/content adapter, real-data acceptance, server Planner wiring) and the 7 screen builders: `feat/onboarding`, `feat/today`, `feat/workout`, `feat/library`, `feat/meals`, `feat/progress`, `feat/notify`.
+- **Worktrees** share `node_modules` via a symlink to `/home/user/repwise/node_modules`.
+- **Shared brief** for the screen builders: the scratchpad `repwise_screen_brief.md`, summarised as "UI and functionality non-negotiable, tokens, motion, haptics, light/dark, a11y, tests for both platforms".

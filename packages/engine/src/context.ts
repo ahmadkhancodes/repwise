@@ -54,6 +54,8 @@ export interface PlanningContext {
   recConstraints: RecipeConstraints;
   exercisePool: Exercise[];
   nutrition: NutritionTargets;
+  /** Weekly check-in delta used for `nutrition` (kept so the meal planner can recompute targets). */
+  adjustmentKcal?: number;
   split: SplitType;
   rotation: string[];
   trainingDates: ISODate[];
@@ -234,6 +236,7 @@ export function buildContext(profileIn: ProfileInput, historyIn: HistoryInput, c
     recConstraints,
     exercisePool,
     nutrition,
+    ...(opts.adjustmentKcal !== undefined ? { adjustmentKcal: opts.adjustmentKcal } : {}),
     split,
     rotation,
     trainingDates,

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ChevronLeft, CreditCard, Palette, Shield, UserRound } from 'lucide-react-native';
+import { Bell, ChevronLeft, CreditCard, Palette, Shield, UserRound } from 'lucide-react-native';
 
 import { usePro } from '@/features/billing/hooks/usePro';
 import { useAuth } from '@/services/auth';
@@ -38,6 +38,14 @@ export function SettingsScreen() {
         onChange={setPreference}
         accessibilityLabel="Theme"
         testID="theme"
+      />
+      <Text variant="headline">Reminders</Text>
+      <ListRow
+        icon={Bell}
+        title="Notifications"
+        subtitle="Morning brief, meals, workouts, quiet hours"
+        onPress={() => router.push('/settings/notifications')}
+        testID="open-notifications"
       />
       <Text variant="headline">Account</Text>
       <ListRow

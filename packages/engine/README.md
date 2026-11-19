@@ -88,6 +88,10 @@ If the targets still can't be reached, the planner adds snacks, up to 8 eating o
 
 **4. Validation.** The planner runs `validatePlan` and stores the result in `plan.validation`. If volume can't be reached with the user's days, time and equipment, the rules plan's figure becomes the enforced range, with a `volume_capped` warning. This keeps the rules plan the best feasible plan.
 
+## Real catalogue (D26–D28)
+
+Production uses `engineCatalogues()` from `@repwise/content`, which maps the content JSON onto these schemas (`packages/content/src/toEngine.ts`). The enums below include the content vocabulary (mobility, hip_flexors, the full equipment list, EU-14 extras, cuisine groups, pork/soy/nuts_seeds/grains). Behaviour added for real data: `mat` is never required and `cardio_machine` covers each machine (`equipmentOk`); cuisine preferences match across fine values and catalogue groups (`cuisineMatches`); core filler slots top up thin sessions; the protein target moves inside 1.6–2.2 g/kg when the default is infeasible (`protein_target_adjusted`); a main meal with nothing safe left is skipped (`slot_skipped`). `EQUIPMENT_PRESETS` gives the onboarding kits. `test/real-catalogue.test.ts` reruns the acceptance checks on the real data.
+
 ## Catalogue contract (for `packages/content`)
 
 `exercises.json` must parse with `ExerciseCatalogueSchema` and `recipes.json` with `RecipeCatalogueSchema`. Both are arrays with unique IDs.
