@@ -26,24 +26,14 @@ jest.mock('expo-router', () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
   useLocalSearchParams: () => ({}),
 }));
-jest.mock(
-  'expo-notifications',
-  () => ({
-    scheduleNotificationAsync: jest.fn(async () => 'id'),
-    cancelScheduledNotificationAsync: jest.fn(async () => undefined),
-    dismissNotificationAsync: jest.fn(async () => undefined),
-    setNotificationChannelAsync: jest.fn(async () => null),
-    AndroidImportance: { HIGH: 4, LOW: 2 },
-  }),
-  { virtual: true },
-);
+jest.mock('@/features/notifications/restTimer', () => ({ updateRestTimerSurface: jest.fn(async () => undefined) }));
 const mockRouter = (jest.requireMock('expo-router') as { router: Record<string, jest.Mock> }).router as {
   push: jest.Mock;
   replace: jest.Mock;
   back: jest.Mock;
   canGoBack: jest.Mock;
 };
-const mockNotifications = jest.requireMock('expo-notifications') as { scheduleNotificationAsync: jest.Mock };
+const mockSurface = jest.requireMock('@/features/notifications/restTimer') as { updateRestTimerSurface: jest.Mock };
 
 const events: { e: string; p: Record<string, unknown> }[] = [];
 
@@ -125,7 +115,7 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(screen.getByTestId('player-clock')).toBeTruthy();
     });
 
-    it('logs a set in one tap, starts the rest timer and schedules "Rest over"', async () => {
+    it('logs a set in one tap, starts the rest timer and publishes it to the lock screen', async () => {
       const s = plannedSession();
       startWorkout(s.id);
       await renderThemed(<WorkoutPlayerScreen sessionId={s.id} />, scheme);
@@ -134,7 +124,9 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(setsFor(se.id)[0]?.doneAt).not.toBeNull();
       expect(restTimer.getState()).toMatchObject({ status: 'running', durationMs: 120_000, next: { exercise: 'Barbell back squat', setNo: 2 } });
       expect(await screen.findByTestId('rest-pill')).toBeTruthy();
-      expect(mockNotifications.scheduleNotificationAsync).toHaveBeenCalled();
+      expect(mockSurface.updateRestTimerSurface).toHaveBeenCalledWith(
+        expect.objectContaining({ sessionId: s.id, workoutTitle: 'Push day', nextExercise: 'Barbell back squat', nextSet: 2 }),
+      );
       expect(events.find((x) => x.e === 'set_logged')?.p).toEqual({ type: 'working', has_rpe: false, pr: false });
       // Tap again to undo.
       await fireEvent.press(screen.getByTestId('exercise-0-set-0-check'));

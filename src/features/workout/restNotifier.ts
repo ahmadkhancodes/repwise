@@ -1,138 +1,66 @@
 /**
- * Default rest-timer surface: local notifications via expo-notifications (sheet 17, N-5).
- *  - "Rest over · Next: {exercise} set {n}" scheduled at the end time on the high-importance
- *    `timer` channel (iOS: time-sensitive), so it fires with the app backgrounded or killed.
- *  - Android: an ongoing (sticky, silent) notification "Resting · back at 13:10" while it runs.
- * expo-notifications is loaded defensively: without it (tests, a build missing the module) the
- * timer still works in-app. Permission is asked by the notifications primer, never here.
+ * Bridges the workout rest timer to the lock-screen surfaces owned by the notifications feature
+ * (`updateRestTimerSurface`): iOS Live Activity, Android ongoing chronometer notification and the
+ * N-5 "Rest over" alert scheduled at the end time, so it fires with the app backgrounded or killed.
+ * The in-app timer stays the source of truth; surfaces are best effort.
  */
-import { Platform } from 'react-native';
+import type { RestTimerState as SurfaceState } from '@/features/notifications';
 
-import { clockTime } from './logic/dates';
-import { formatCountdown } from './logic/duration';
 import { remainingMs, type ActiveRest } from './logic/restTimer';
+import { getSession } from './repo';
 import { registerRestTimerSurface, type RestTimerSurface } from './restTimerStore';
 
-/** The slice of expo-notifications this surface uses (kept structural so tests can fake it). */
-export type NotificationsLike = {
-  scheduleNotificationAsync(request: {
-    identifier?: string;
-    content: Record<string, unknown>;
-    trigger: Record<string, unknown> | null;
-  }): Promise<string>;
-  cancelScheduledNotificationAsync(id: string): Promise<void>;
-  dismissNotificationAsync(id: string): Promise<void>;
-  setNotificationChannelAsync?(id: string, channel: Record<string, unknown>): Promise<unknown>;
-  AndroidImportance?: { HIGH?: number; LOW?: number };
-};
+export type SurfaceUpdate = (state: SurfaceState | null) => unknown;
 
-export const REST_OVER_ID = 'repwise-rest-over';
-export const REST_ONGOING_ID = 'repwise-rest-ongoing';
-export const TIMER_CHANNEL = 'timer';
-export const ONGOING_CHANNEL = 'timer-ongoing';
-
-export function restOverContent(state: ActiveRest): { title: string; body: string } {
+/** Workout timer state → the notifications feature's surface contract. Pure. */
+export function toSurfaceState(state: ActiveRest, workoutTitle: string | null, now: number): SurfaceState {
+  const paused = state.status === 'paused';
   return {
-    title: 'Rest over',
-    body: state.next ? `Next: ${state.next.exercise} set ${state.next.setNo}` : 'Time for your next set',
+    sessionId: state.sessionId,
+    workoutTitle,
+    startedAt: state.startedAt,
+    endsAt: state.endsAt,
+    paused,
+    remainingMs: paused ? remainingMs(state, now) : null,
+    nextExercise: state.next?.exercise ?? null,
+    nextSet: state.next?.setNo ?? null,
   };
 }
 
-export function ongoingContent(state: ActiveRest, now: number): { title: string; body: string } {
-  const next = state.next ? ` · Next: ${state.next.exercise}` : '';
-  if (state.status === 'paused') {
-    return { title: 'Rest paused', body: `${formatCountdown(remainingMs(state, now))} left${next}` };
+function titleOf(sessionId: string): string | null {
+  try {
+    return getSession(sessionId)?.title ?? null;
+  } catch {
+    return null;
   }
-  return { title: 'Resting', body: `Back at ${clockTime(state.endsAt)}${next}` };
 }
 
-export function createNotificationSurface(
-  n: NotificationsLike,
-  clock: () => number = Date.now,
-): RestTimerSurface {
-  const quiet = (p: Promise<unknown> | undefined) => {
-    p?.catch(() => undefined);
+export function createSurfaceBridge(update: SurfaceUpdate, clock: () => number = Date.now): RestTimerSurface {
+  const publish = (s: ActiveRest) => {
+    try {
+      void update(toSurfaceState(s, titleOf(s.sessionId), clock()));
+    } catch {
+      // best effort
+    }
   };
-  let channelsReady: Promise<unknown> | null = null;
-  const channels = () => {
-    if (Platform.OS !== 'android' || !n.setNotificationChannelAsync) return Promise.resolve();
-    channelsReady ??= Promise.all([
-      n.setNotificationChannelAsync(TIMER_CHANNEL, {
-        name: 'Rest timer',
-        importance: n.AndroidImportance?.HIGH ?? 4,
-        sound: 'default',
-        vibrationPattern: [0, 250, 150, 250],
-      }),
-      n.setNotificationChannelAsync(ONGOING_CHANNEL, {
-        name: 'Rest timer (running)',
-        importance: n.AndroidImportance?.LOW ?? 2,
-        sound: null,
-        enableVibrate: false,
-        showBadge: false,
-      }),
-    ]).catch(() => undefined);
-    return channelsReady;
-  };
-
-  const schedule = (state: ActiveRest) => {
-    quiet(n.cancelScheduledNotificationAsync(REST_OVER_ID));
-    if (state.status !== 'running') return;
-    quiet(
-      channels().then(() =>
-        n.scheduleNotificationAsync({
-          identifier: REST_OVER_ID,
-          content: {
-            ...restOverContent(state),
-            sound: 'default',
-            data: { kind: 'rest_over', sessionId: state.sessionId, url: `/workout/${state.sessionId}` },
-            ...(Platform.OS === 'ios' ? { interruptionLevel: 'timeSensitive' } : { priority: 'max' }),
-          },
-          trigger: { type: 'date', date: state.endsAt, channelId: TIMER_CHANNEL },
-        }),
-      ),
-    );
-  };
-
-  const ongoing = (state: ActiveRest) => {
-    if (Platform.OS !== 'android') return;
-    quiet(
-      channels().then(() =>
-        n.scheduleNotificationAsync({
-          identifier: REST_ONGOING_ID,
-          content: {
-            ...ongoingContent(state, clock()),
-            sticky: true,
-            autoDismiss: false,
-            priority: 'low',
-            data: { kind: 'rest_ongoing', url: `/workout/${state.sessionId}` },
-          },
-          trigger: { channelId: ONGOING_CHANNEL },
-        }),
-      ),
-    );
-  };
-
   return {
-    start(state) {
-      schedule(state);
-      ongoing(state);
-    },
-    update(state) {
-      schedule(state);
-      ongoing(state);
-    },
-    end(reason) {
-      if (reason !== 'done') quiet(n.cancelScheduledNotificationAsync(REST_OVER_ID));
-      if (Platform.OS === 'android') quiet(n.dismissNotificationAsync(REST_ONGOING_ID));
+    start: publish,
+    update: publish,
+    end() {
+      try {
+        void update(null);
+      } catch {
+        // best effort
+      }
     },
   };
 }
 
-function loadNotifications(): NotificationsLike | null {
+function loadUpdate(): SurfaceUpdate | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require('expo-notifications') as NotificationsLike;
-    return typeof mod?.scheduleNotificationAsync === 'function' ? mod : null;
+    const mod = require('@/features/notifications/restTimer') as { updateRestTimerSurface?: SurfaceUpdate };
+    return typeof mod.updateRestTimerSurface === 'function' ? mod.updateRestTimerSurface : null;
   } catch {
     return null;
   }
@@ -140,10 +68,10 @@ function loadNotifications(): NotificationsLike | null {
 
 let installed = false;
 
-/** Install the notification surface once (called when the player mounts). */
-export function installRestNotifier(mod: NotificationsLike | null = loadNotifications()): boolean {
-  if (installed || !mod) return installed;
-  registerRestTimerSurface(createNotificationSurface(mod));
+/** Install the lock-screen bridge once (called when the player mounts). */
+export function installRestNotifier(update: SurfaceUpdate | null = loadUpdate()): boolean {
+  if (installed || !update) return installed;
+  registerRestTimerSurface(createSurfaceBridge(update));
   installed = true;
   return true;
 }

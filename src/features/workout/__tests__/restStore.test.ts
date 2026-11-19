@@ -1,29 +1,8 @@
 import { Platform } from 'react-native';
 
-import { REST_ONGOING_ID, REST_OVER_ID, createNotificationSurface, installRestNotifier, ongoingContent, resetRestNotifierForTests, restOverContent, type NotificationsLike } from '../restNotifier';
+import { createSurfaceBridge, installRestNotifier, resetRestNotifierForTests, toSurfaceState } from '../restNotifier';
 import { registerRestTimerSurface, reloadRestTimerForTests, resetRestTimerForTests, restTimer, type RestTimerSurface } from '../restTimerStore';
 import { startRest } from '../logic/restTimer';
-
-function fakeNotifications() {
-  const calls: { fn: string; arg: unknown }[] = [];
-  const n: NotificationsLike = {
-    scheduleNotificationAsync: jest.fn(async (r) => {
-      calls.push({ fn: 'schedule', arg: r });
-      return r.identifier ?? 'x';
-    }),
-    cancelScheduledNotificationAsync: jest.fn(async (id) => {
-      calls.push({ fn: 'cancel', arg: id });
-    }),
-    dismissNotificationAsync: jest.fn(async (id) => {
-      calls.push({ fn: 'dismiss', arg: id });
-    }),
-    setNotificationChannelAsync: jest.fn(async () => null),
-    AndroidImportance: { HIGH: 4, LOW: 2 },
-  };
-  return { n, calls };
-}
-
-const flush = () => new Promise((r) => setTimeout(r, 0));
 
 beforeEach(() => {
   resetRestTimerForTests();
@@ -79,51 +58,43 @@ describe('restTimer store', () => {
   });
 });
 
-describe(`rest notifications (${Platform.OS})`, () => {
-  it('schedules "Rest over" at the end time and keeps an ongoing notification on Android', async () => {
-    const { n, calls } = fakeNotifications();
-    const surface = createNotificationSurface(n, () => 0);
-    const s = startRest(Date.UTC(2026, 10, 19, 12, 0), 90, 's1', { exercise: 'Squat', setNo: 3 });
-    surface.start(s);
-    await flush();
-    const scheduled = calls.filter((c) => c.fn === 'schedule').map((c) => c.arg as { identifier: string; content: Record<string, unknown>; trigger: Record<string, unknown> });
-    const over = scheduled.find((r) => r.identifier === REST_OVER_ID);
-    expect(over?.content).toMatchObject({ title: 'Rest over', body: 'Next: Squat set 3' });
-    expect(over?.trigger).toMatchObject({ type: 'date', date: s.endsAt, channelId: 'timer' });
-    const ongoing = scheduled.find((r) => r.identifier === REST_ONGOING_ID);
-    if (Platform.OS === 'android') {
-      expect(ongoing?.content).toMatchObject({ title: 'Resting', sticky: true });
-      expect(n.setNotificationChannelAsync).toHaveBeenCalledWith('timer', expect.objectContaining({ importance: 4 }));
-      expect(over?.content).toMatchObject({ priority: 'max' });
-    } else {
-      expect(ongoing).toBeUndefined();
-      expect(over?.content).toMatchObject({ interruptionLevel: 'timeSensitive' });
-    }
+describe(`lock-screen bridge (${Platform.OS})`, () => {
+  it('maps running and paused rests to the notifications contract', () => {
+    const s = startRest(1000, 90, 's1', { exercise: 'Squat', setNo: 3 });
+    expect(toSurfaceState(s, 'Leg day', 2000)).toEqual({
+      sessionId: 's1',
+      workoutTitle: 'Leg day',
+      startedAt: 1000,
+      endsAt: 91_000,
+      paused: false,
+      remainingMs: null,
+      nextExercise: 'Squat',
+      nextSet: 3,
+    });
+    expect(toSurfaceState({ ...s, status: 'paused', pausedAt: 31_000 }, null, 50_000)).toMatchObject({
+      paused: true,
+      remainingMs: 60_000,
+    });
   });
-  it('cancels on skip and pause, but not when it already fired', async () => {
-    const { n, calls } = fakeNotifications();
-    const surface = createNotificationSurface(n, () => 0);
-    const s = startRest(0, 60, 's1');
-    surface.update({ ...s, status: 'paused', pausedAt: 10 });
-    await flush();
-    expect(calls.filter((c) => c.fn === 'schedule' && (c.arg as { identifier: string }).identifier === REST_OVER_ID)).toHaveLength(0);
-    surface.end('done', s);
-    expect(calls.filter((c) => c.fn === 'cancel')).toHaveLength(1); // only the pause cancel
-    surface.end('skipped', s);
-    expect(calls.filter((c) => c.fn === 'cancel')).toHaveLength(2);
-    expect(calls.some((c) => c.fn === 'dismiss')).toBe(Platform.OS === 'android');
-  });
-  it('copy reads well', () => {
-    const s = startRest(0, 60, 's1', { exercise: 'Row', setNo: 1 });
-    expect(restOverContent({ ...s, next: null }).body).toBe('Time for your next set');
-    expect(ongoingContent({ ...s, status: 'paused', pausedAt: 15_000 }, 0)).toEqual({ title: 'Rest paused', body: '0:45 left · Next: Row' });
-  });
-  it('installs once, and only with the module present', () => {
+  it('publishes every transition and null at the end', () => {
+    const update = jest.fn();
     expect(installRestNotifier(null)).toBe(false);
-    const { n } = fakeNotifications();
-    expect(installRestNotifier(n)).toBe(true);
-    expect(installRestNotifier(n)).toBe(true);
-    restTimer.start('s1', 30, null);
-    expect(n.cancelScheduledNotificationAsync).toHaveBeenCalledTimes(1);
+    expect(installRestNotifier(update)).toBe(true);
+    expect(installRestNotifier(update)).toBe(true);
+    restTimer.start('s1', 30, null, 0);
+    restTimer.add(15, 1);
+    restTimer.skip();
+    expect(update).toHaveBeenCalledTimes(3);
+    expect(update.mock.calls[0]?.[0]).toMatchObject({ sessionId: 's1', endsAt: 30_000 });
+    expect(update.mock.calls[1]?.[0]).toMatchObject({ endsAt: 45_000 });
+    expect(update.mock.calls[2]?.[0]).toBeNull();
+  });
+  it('never throws from a failing surface', () => {
+    const bridge = createSurfaceBridge(() => {
+      throw new Error('native');
+    });
+    const s = startRest(0, 30, 's1');
+    expect(() => bridge.start(s)).not.toThrow();
+    expect(() => bridge.end('done', s)).not.toThrow();
   });
 });
