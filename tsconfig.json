@@ -6,7 +6,9 @@
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@repwise/engine": ["./packages/engine/src/index.ts"],
+      "@repwise/content": ["./packages/content/src/index.ts"]
     },
     "types": ["jest"]
   },

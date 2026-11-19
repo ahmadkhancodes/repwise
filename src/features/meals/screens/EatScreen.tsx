@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,7 +10,7 @@ import {
   Utensils,
   UtensilsCrossed,
 } from 'lucide-react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
@@ -43,6 +43,16 @@ export function EatScreen() {
   const today = todayISO();
   const [date, setDate] = useState(today);
   const t = useTheme();
+  // Deep links: widget quick log `/eat?log=1`; meal notification `/eat?mealId=…[&swap=1]`.
+  const params = useLocalSearchParams<{ log?: string; mealId?: string; swap?: string }>();
+  const logKey = params.log === '1' ? 'log' : null;
+  const handledLog = useRef<string | null>(null);
+  useEffect(() => {
+    if (!logKey || handledLog.current === logKey) return;
+    handledLog.current = logKey;
+    router.push({ pathname: '/meal/log', params: { date: today } });
+  }, [logKey, today]);
+  const swapMealId = params.swap === '1' && params.mealId ? params.mealId : null;
 
   const openDay = useCallback((d: string) => {
     setDate(d);
@@ -66,7 +76,7 @@ export function EatScreen() {
       <Segmented options={VIEWS} value={view} onChange={setView} accessibilityLabel="Meal plan view" testID="eat-view" />
       <View style={{ gap: t.spacing.md }}>
         {view === 'day' ? (
-          <DayView date={date} today={today} onDate={setDate} />
+          <DayView date={date} today={today} onDate={setDate} swapMealId={swapMealId} />
         ) : (
           <WeekView anchor={date} today={today} onOpenDay={openDay} />
         )}
@@ -75,11 +85,29 @@ export function EatScreen() {
   );
 }
 
-function DayView({ date, today, onDate }: { date: string; today: string; onDate: (d: string) => void }) {
+function DayView({
+  date,
+  today,
+  onDate,
+  swapMealId,
+}: {
+  date: string;
+  today: string;
+  onDate: (d: string) => void;
+  /** Open the swap sheet for this meal once it is on screen (notification "Swap" action). */
+  swapMealId?: string | null;
+}) {
   const t = useTheme();
   const day = useEatDay(date);
   const { isPro } = usePro();
   const [swap, setSwap] = useState<MealView | null>(null);
+  const handledSwap = useRef<string | null>(null);
+  const linked = swapMealId ? day.meals.find((m) => m.id === swapMealId) : undefined;
+  useEffect(() => {
+    if (!linked || handledSwap.current === linked.id) return;
+    handledSwap.current = linked.id;
+    setSwap(linked);
+  }, [linked]);
   const dates = useMemo(() => weekDates(startOfWeek(date)), [date]);
   const locked = !isPro && date !== today;
   const waterGoal = getWaterGoal();

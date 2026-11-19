@@ -1,5 +1,6 @@
 # P0 (F-today → S13): on a training day, Start workout leaves Today for the workout player in one
-# tap (route /workout/<sessionId>); back returns to Today. Skips itself on a rest day.
+# tap (deep link /train?sessionId=<id>&start=1: Train starts the session and opens the player);
+# back returns to Today. Skips itself on a rest day.
 # Precondition: onboarding finished with a training plan. iOS and Android.
 appId: com.client.repwise
 tags:
@@ -29,9 +30,19 @@ tags:
           id: "workout-title"
       - tapOn:
           id: "start-workout"
-      - assertNotVisible:
-          id: "start-workout"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-workout"
+          timeout: 10000
+      - assertVisible:
+          id: "player-finish"
       - back
+      - extendedWaitUntil:
+          visible:
+            id: "screen-train"
+          timeout: 5000
+      - tapOn:
+          id: "tab-today"
       - extendedWaitUntil:
           visible:
             id: "screen-today"

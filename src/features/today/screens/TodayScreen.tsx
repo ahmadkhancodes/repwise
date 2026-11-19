@@ -18,6 +18,7 @@ import {
   type MealView as EatMealView,
 } from '@/features/meals';
 import { getWaterGoal } from '@/features/nutrition';
+import { trainHref } from '@/features/workout';
 import { GLASS_ML } from '@/features/nutrition/logic/water';
 import { useCatalog } from '@/services/catalog';
 import { haptics } from '@/services/haptics';
@@ -43,7 +44,8 @@ export const ROUTES = {
   train: '/train' as Href,
   settings: '/settings' as Href,
   checkin: '/checkin' as Href,
-  workout: (sessionId: string) => `/workout/${sessionId}` as Href,
+  /** The workout slice's deep link: Train starts (or resumes) the session and opens the player. */
+  workout: (sessionId: string) => trainHref(sessionId) as Href,
 };
 
 /** S11 Today (home): brief, assistant cards, rings, workout, meals, water, evening. */

@@ -5,6 +5,11 @@
 
 export type TrainLink = { sessionId: string; start: boolean };
 
+/** Build the in-app Train deep link (the inverse of `parseTrainLink`). */
+export function trainHref(sessionId: string, start = true): string {
+  return `/train?sessionId=${encodeURIComponent(sessionId)}${start ? '&start=1' : ''}`;
+}
+
 type Param = string | string[] | undefined;
 
 function first(p: Param): string | undefined {

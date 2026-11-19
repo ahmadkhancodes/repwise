@@ -150,3 +150,41 @@ export function planToRows(
       .map(mealPlanRows),
   };
 }
+
+/** The planner-owned fields of a session exercise row. */
+export type ExerciseRowFields = Pick<
+  SessionRows['exercises'][number],
+  'exerciseId' | 'position' | 'targetSets' | 'targetReps' | 'targetLoad' | 'restS'
+>;
+
+/**
+ * True when a session's live exercises are exactly what the planner wrote for it (same exercises,
+ * order and targets). Anything else (a swap, an added, removed or reordered exercise, an edited
+ * target) means the user touched it, and a regenerate must leave it alone.
+ */
+export function sessionMatchesPlan(
+  planned: SessionRows | undefined,
+  live: readonly {
+    exerciseId: string;
+    position: number;
+    targetSets: number | null;
+    targetReps: string | null;
+    targetLoad: number | null;
+    restS: number | null;
+  }[],
+): boolean {
+  if (!planned) return false;
+  const rows = [...live].sort((a, b) => a.position - b.position);
+  if (rows.length !== planned.exercises.length) return false;
+  return planned.exercises.every((p, i) => {
+    const l = rows[i]!;
+    return (
+      l.exerciseId === p.exerciseId &&
+      l.position === p.position &&
+      l.targetSets === p.targetSets &&
+      l.targetReps === p.targetReps &&
+      (l.targetLoad ?? null) === (p.targetLoad ?? null) &&
+      l.restS === p.restS
+    );
+  });
+}

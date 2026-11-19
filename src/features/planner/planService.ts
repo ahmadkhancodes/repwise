@@ -67,8 +67,11 @@ import { decideAiPlan, type AiWeekResponse } from './logic/aiPlan';
 import { buildHistory } from './logic/history';
 import {
   planToRows,
+  sessionMatchesPlan,
+  sessionRows,
   type NutritionPayload,
   type PlanSource,
+  type SessionRows,
   type TrainingPayload,
   type WeekRows,
 } from './logic/planRows';
@@ -175,12 +178,37 @@ function weekVersion(weekStart: string): number {
   return nextVersion(weekStart) - 1;
 }
 
+/** What the planner wrote for this session (from its plan row's payload), if anything. */
+function plannedRowsFor(s: Session): SessionRows | undefined {
+  if (!s.planId || !s.date) return undefined;
+  const p = plansRepo.get(s.planId)?.payload as TrainingPayload | undefined;
+  const ps = p?.kind === 'training' ? p.sessions.find((x) => x.date === s.date) : undefined;
+  return ps ? sessionRows(ps) : undefined;
+}
+
+function liveExercises(sessionId: string): SessionExercise[] {
+  return sessionExercisesRepo.list(
+    eq(sessionExercises.sessionId, sessionId),
+    asc(sessionExercises.position),
+  );
+}
+
+/**
+ * A planned session the user has not touched: not started, from a plan, and its exercises are
+ * exactly what that plan wrote (no swap, add, remove, reorder or edited target). Only these are
+ * ever rewritten by a regenerate or the AI upgrade.
+ */
+export function isUntouchedSession(s: Session): boolean {
+  if (s.status && s.status !== 'planned') return false;
+  return sessionMatchesPlan(plannedRowsFor(s), liveExercises(s.id));
+}
+
 /** Dates (≥ fromDate) whose workout or meals the user has already touched; those are kept. */
 function touchedDates(dates: string[]) {
   const keepSessions = new Set<string>();
   const keepMeals = new Set<string>();
   const sess = dates.length ? sessionsRepo.list(inArray(sessions.date, dates)) : [];
-  for (const s of sess) if (s.status && s.status !== 'planned') keepSessions.add(s.date ?? '');
+  for (const s of sess) if (!isUntouchedSession(s)) keepSessions.add(s.date ?? '');
   const mps = dates.length ? mealPlansRepo.list(inArray(mealPlans.date, dates)) : [];
   const mealRows = mps.length
     ? mealsRepo.list(
@@ -195,6 +223,17 @@ function touchedDates(dates: string[]) {
     if (m.status !== 'planned' || m.swappedFrom) keepMeals.add(dateOf.get(m.mealPlanId) ?? '');
   }
   return { keepSessions, keepMeals, sess, mps, mealRows };
+}
+
+/** Update a session's exercise rows position by position (keeping ids), adding or removing extras. */
+function rewriteExercises(sessionId: string, next: SessionRows['exercises'], now: number) {
+  const live = liveExercises(sessionId);
+  next.forEach((e, i) => {
+    const row = live[i];
+    if (row) sessionExercisesRepo.update(row.id, { ...e, supersetGroup: null }, now);
+    else sessionExercisesRepo.insert({ sessionId, ...e }, now);
+  });
+  for (const extra of live.slice(next.length)) sessionExercisesRepo.remove(extra.id, now);
 }
 
 function writeWeek(
@@ -212,13 +251,13 @@ function writeWeek(
       keepMealDates: touched.keepMeals,
     });
     const now = opts.now;
-    // Replace untouched planned items on the dates we are rewriting (soft delete, so it syncs).
+    // Untouched planned sessions on the dates we are rewriting are updated IN PLACE (same ids, so
+    // an open overview keeps working); touched dates are left alone entirely.
+    const reusable = new Map<string, Session[]>();
     for (const s of touched.sess) {
-      if (touched.keepSessions.has(s.date ?? '')) continue;
-      for (const se of sessionExercisesRepo.list(eq(sessionExercises.sessionId, s.id))) {
-        sessionExercisesRepo.remove(se.id, now);
-      }
-      sessionsRepo.remove(s.id, now);
+      const date = s.date ?? '';
+      if (touched.keepSessions.has(date)) continue;
+      reusable.set(date, [...(reusable.get(date) ?? []), s]);
     }
     for (const mp of touched.mps) {
       if (touched.keepMeals.has(mp.date)) continue;
@@ -250,6 +289,16 @@ function writeWeek(
       now,
     );
     for (const s of rows.sessions) {
+      const existing = reusable.get(s.date)?.shift();
+      if (existing) {
+        sessionsRepo.update(
+          existing.id,
+          { planId: training.id, title: s.title, dayIndex: s.dayIndex },
+          now,
+        );
+        rewriteExercises(existing.id, s.exercises, now);
+        continue;
+      }
       const row = sessionsRepo.insert(
         {
           planId: training.id,
@@ -261,6 +310,13 @@ function writeWeek(
         now,
       );
       for (const e of s.exercises) sessionExercisesRepo.insert({ sessionId: row.id, ...e }, now);
+    }
+    // Untouched sessions on days that are no longer training days (soft delete, so it syncs).
+    for (const left of reusable.values()) {
+      for (const s of left) {
+        for (const se of liveExercises(s.id)) sessionExercisesRepo.remove(se.id, now);
+        sessionsRepo.remove(s.id, now);
+      }
     }
     for (const d of rows.mealPlans) {
       const mp = mealPlansRepo.insert(
@@ -305,6 +361,10 @@ export type GenerateOptions = {
   fromDate?: string;
   /** Ask the Worker for an AI-varied plan afterwards (default true). */
   ai?: boolean;
+  /** Weekly check-in kcal delta (engine `weeklyAdjustment`), passed to `planWeek`. */
+  adjustmentKcal?: number;
+  /** The user asked for a lighter week: the engine plans it as a deload. */
+  deload?: boolean;
   now?: number;
   /** Test seam: replaces the Worker call. */
   fetchAi?: AiFetcher;
@@ -313,13 +373,29 @@ export type GenerateOptions = {
 export type AiFetcher = (body: {
   profile: ProfileInput;
   history: HistoryInput;
-  params: { weekStart: string; now: number; trainingWeekdays: number[] };
+  params: { weekStart: string; now: number; trainingWeekdays: number[]; adjustmentKcal?: number };
 }) => Promise<AiWeekResponse | null>;
 
-function planFor(profile: ProfileInput, weekStart: string, now: number, weekdays: number[]) {
+type WeekTweaks = Pick<GenerateOptions, 'adjustmentKcal' | 'deload'>;
+
+/** Only the tweaks that are set (engine options are exact-optional). */
+function tweaks(opts: WeekTweaks): WeekTweaks {
+  return {
+    ...(opts.adjustmentKcal !== undefined ? { adjustmentKcal: opts.adjustmentKcal } : {}),
+    ...(opts.deload ? { deload: true } : {}),
+  };
+}
+
+function planFor(
+  profile: ProfileInput,
+  weekStart: string,
+  now: number,
+  weekdays: number[],
+  extra: WeekTweaks = {},
+) {
   const history = loadHistory(weekStart);
   const p = { ...profile, trainingWeekdays: weekdays };
-  const plan = planWeek(p, history, getEngineCatalogues(), { now, weekStart });
+  const plan = planWeek(p, history, getEngineCatalogues(), { now, weekStart, ...tweaks(extra) });
   return { plan, history, profile: p };
 }
 
@@ -340,7 +416,7 @@ function generateSync(opts: GenerateOptions = {}): {
   const weekdays = currentWeekdays(base, today);
   let built;
   try {
-    built = planFor(base, weekStart, now, weekdays);
+    built = planFor(base, weekStart, now, weekdays, opts);
   } catch {
     throw new PlannerError('engine_failed');
   }
@@ -361,7 +437,8 @@ function generateSync(opts: GenerateOptions = {}): {
 export async function regenerateWeek(opts: GenerateOptions = {}): Promise<PlanResult> {
   await yieldToUi();
   const out = generateSync(opts);
-  if (opts.ai !== false) {
+  // The Worker cannot be asked for a deload, so a requested deload week stays rules-only.
+  if (opts.ai !== false && !opts.deload) {
     void upgradeWithAi(out.result, out.profile, out.history, out.weekdays, opts);
   }
   return out.result;
@@ -442,10 +519,12 @@ export function validatesLocally(
   profile: ProfileInput,
   history: HistoryInput,
   now: number,
+  extra: WeekTweaks = {},
 ): boolean {
   const ctx = buildContext(profile, history, getEngineCatalogues(), {
     now,
     weekStart: plan.weekStart,
+    ...tweaks(extra),
   });
   ctx.volumeRange = plan.volumeRange;
   ctx.noRepeatDays = plan.noRepeatDays;
@@ -457,7 +536,7 @@ export async function upgradeWithAi(
   profile: ProfileInput,
   history: HistoryInput,
   weekdays: number[],
-  opts: Pick<GenerateOptions, 'fetchAi' | 'now' | 'fromDate'> = {},
+  opts: Pick<GenerateOptions, 'fetchAi' | 'now' | 'fromDate' | 'adjustmentKcal'> = {},
 ): Promise<PlanResult | null> {
   const now = opts.now ?? Date.now();
   const fetchAi = opts.fetchAi ?? workerFetch;
@@ -466,13 +545,18 @@ export async function upgradeWithAi(
     res = await fetchAi({
       profile,
       history,
-      params: { weekStart: rules.weekStart, now, trainingWeekdays: weekdays },
+      params: {
+        weekStart: rules.weekStart,
+        now,
+        trainingWeekdays: weekdays,
+        ...tweaks({ adjustmentKcal: opts.adjustmentKcal }),
+      },
     });
   } catch {
     return null; // offline, timeout, 4xx/5xx, no session: the rules plan stays
   }
   const decision = decideAiPlan(res, rules.weekStart, (p) =>
-    validatesLocally(p, profile, history, now),
+    validatesLocally(p, profile, history, now, { adjustmentKcal: opts.adjustmentKcal }),
   );
   track('ai_plan_result', {
     accepted: decision.accept,

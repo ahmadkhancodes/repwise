@@ -111,6 +111,7 @@ describe('stalls + deload', () => {
     expect(deloadDecision({ weekInBlock: 1, blockWeeks: 5, stalledSessions: 2 })).toEqual({ deload: true, reason: 'stall' });
     expect(deloadDecision({ weekInBlock: 1, blockWeeks: 5, stalledSessions: 1 })).toEqual({ deload: false, reason: null });
     expect(deloadDecision({ weekInBlock: 2, blockWeeks: 5, stalledSessions: 3, weeksSinceDeload: 1 })).toEqual({ deload: false, reason: null });
+    expect(deloadDecision({ weekInBlock: 1, blockWeeks: 5, stalledSessions: 0, weeksSinceDeload: 1, requested: true })).toEqual({ deload: true, reason: 'requested' });
   });
 
   test('−40% volume', () => {

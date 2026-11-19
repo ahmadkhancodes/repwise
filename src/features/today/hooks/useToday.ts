@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { ensureWeekMeals } from '@/features/meals';
+import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { customRecipesRepo } from '@/features/meals/repo';
 import { useCatalog, type Catalog } from '@/services/catalog';
 
@@ -58,6 +59,8 @@ export function useToday(nowOverride?: number): TodayModel {
     if (!catalog || profileStamp == null) return;
     const id = setTimeout(() => {
       try {
+        // Training + meals for this week (no-op when planned), then any missing meal days.
+        ensurePlannedAhead(Date.now());
         ensureWeekMeals(date, Date.now());
       } catch {
         // planning is best effort; Today still shows what is stored

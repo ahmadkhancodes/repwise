@@ -1,10 +1,8 @@
 /**
  * Seam to the planner service (engine + Worker, built by the planner/onboarding slice). Today and
- * the weekly check-in call it; until a planner registers, the hooks degrade gracefully:
- * - no week regeneration → the check-in result is saved (see `latestCheckin`) and the planner
- *   applies it the next time it builds a week.
- *
- * TODO(planner): call `registerPlanner({...})` from the planner service at start-up.
+ * the weekly check-in call it. The planner registers itself at start-up
+ * (`registerPlannerBridge()` in src/features/planner/bridge.ts, called from services/bootstrap);
+ * until then the hooks degrade gracefully: the check-in result is saved (see `latestCheckin`).
  */
 import type { VolumeStep } from '@/features/assistant/logic/checkin';
 

@@ -4,22 +4,22 @@
  *
  * Order of sources:
  *  1. a provider registered by the planner service (`registerSwapProvider`), when present;
- *  2. the engine's `swapExercise` directly, over the content catalogue mapped to engine shape;
+ *  2. the engine's `swapExercise` directly, over the content catalogue mapped to engine shape by
+ *     `@repwise/content`'s `exerciseToEngine` adapter (the one adapter the planner also uses);
  *  3. the catalogue's curated `alternatives` (never empty for a catalogue exercise).
  * The selection rules live in the engine; this file only adapts data and filters equipment
  * against the profile's own vocabulary.
  */
-import type { Exercise as ContentExercise } from '@repwise/content';
-
-import type {
-  Exercise as EngineExercise,
-  Equipment as EngineEquipment,
-  Injury,
-  Muscle as EngineMuscle,
-  Pattern as EnginePattern,
-  ProfileInput,
-} from '../../../../packages/engine/src/schemas';
-import type { PlannedSession } from '../../../../packages/engine/src/types';
+import { exerciseToEngine, type Exercise as ContentExercise } from '@repwise/content';
+import {
+  EQUIPMENT,
+  swapExercise,
+  type Equipment as EngineEquipment,
+  type Exercise as EngineExercise,
+  type Injury,
+  type PlannedSession,
+  type ProfileInput,
+} from '@repwise/engine';
 
 export type SwapRequest = {
   /** Session date ('YYYY-MM-DD'). */
@@ -55,30 +55,9 @@ export type SwapProfile = {
   sessionMin?: number | null;
 };
 
-const ENGINE_PATTERN: Record<string, EnginePattern | null> = {
-  squat: 'squat',
-  hinge: 'hinge',
-  lunge: 'lunge',
-  push_h: 'push_h',
-  push_v: 'push_v',
-  pull_h: 'pull_h',
-  pull_v: 'pull_v',
-  carry: 'carry',
-  cardio: 'cardio',
-  mobility: null,
-};
-
-const ENGINE_MUSCLES = new Set<string>([
-  'chest', 'lats', 'upper_back', 'traps', 'front_delts', 'side_delts', 'rear_delts', 'biceps',
-  'triceps', 'forearms', 'abs', 'obliques', 'lower_back', 'glutes', 'quads', 'hamstrings',
-  'adductors', 'abductors', 'calves',
-]);
 const ENGINE_INJURIES = new Set<string>(['shoulder', 'knee', 'lower_back', 'wrist', 'elbow', 'hip', 'ankle', 'neck']);
-const ALL_ENGINE_EQUIPMENT: EngineEquipment[] = [
-  'barbell', 'dumbbell', 'cable', 'machine', 'kettlebell', 'band', 'bodyweight', 'smith', 'ez_bar',
-  'trap_bar', 'pullup_bar', 'bench', 'cardio_machine',
-];
-const LEVEL: Record<string, 1 | 2 | 3> = { beginner: 1, intermediate: 2, advanced: 3 };
+/** Equipment is filtered in the content vocabulary (`hasEquipment`) before the engine runs. */
+const ALL_ENGINE_EQUIPMENT: EngineEquipment[] = [...EQUIPMENT];
 
 /** Profile equipment that may be written in either vocabulary → content vocabulary. */
 const PROFILE_ALIASES: Record<string, string[]> = {
@@ -87,40 +66,14 @@ const PROFILE_ALIASES: Record<string, string[]> = {
   cardio_machine: ['treadmill', 'bike', 'rower', 'elliptical', 'stair_climber'],
 };
 
-export function enginePattern(pattern: string): EnginePattern | null {
-  if (pattern in ENGINE_PATTERN) return ENGINE_PATTERN[pattern] ?? null;
-  if (pattern.startsWith('core_')) return 'core';
-  if (pattern.startsWith('isolation_')) return 'isolation';
-  return null;
-}
-
-/** Content catalogue item → engine `Exercise`. Null for kinds the engine does not plan (mobility). */
+/**
+ * Content catalogue item → engine `Exercise`, via `@repwise/content`'s adapter. Null when the item
+ * cannot be planned (e.g. cardio without a MET value) or is mobility (never swapped in).
+ */
 export function toEngineExercise(ex: ContentExercise): EngineExercise | null {
-  const pattern = enginePattern(ex.pattern);
-  if (!pattern) return null;
-  const primary = ex.primaryMuscles.filter((m) => ENGINE_MUSCLES.has(m)) as EngineMuscle[];
-  const secondary = ex.secondaryMuscles.filter((m) => ENGINE_MUSCLES.has(m)) as EngineMuscle[];
-  const primaryMuscles = primary.length ? primary : secondary.slice(0, 1);
-  if (primaryMuscles.length === 0) return null;
-  return {
-    id: ex.id,
-    name: ex.name,
-    aliases: ex.aliases,
-    pattern,
-    primaryMuscles,
-    secondaryMuscles: secondary.filter((m) => !primaryMuscles.includes(m)),
-    // Equipment is filtered by `hasEquipment` in the content vocabulary before the engine runs.
-    equipment: ['bodyweight'],
-    level: LEVEL[ex.level] ?? 2,
-    unilateral: ex.unilateral,
-    mediaId: ex.mediaId,
-    contraindications: ex.contraindications.filter((c) => ENGINE_INJURIES.has(c)) as Injury[],
-    compound: ex.mechanics === 'compound',
-    steps: ex.instructions,
-    tips: ex.cues,
-    source: ex.source,
-    licence: ex.licence,
-  };
+  const e = exerciseToEngine(ex);
+  if ('reason' in e || e.pattern === 'mobility') return null;
+  return e;
 }
 
 /** Equipment the user has, in content vocabulary. Null = not set (assume a full gym). */
@@ -160,8 +113,6 @@ export function toEngineProfile(p: SwapProfile | null | undefined): ProfileInput
   };
 }
 
-type EnginePlanner = typeof import('../../../../packages/engine/src/planner');
-
 function engineSwap(
   req: SwapRequest,
   catalogue: readonly ContentExercise[],
@@ -194,9 +145,7 @@ function engineSwap(
       loadKg: null,
     })),
   };
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const planner = require('../../../../packages/engine/src/planner') as EnginePlanner;
-  return planner.swapExercise({
+  return swapExercise({
     profile: toEngineProfile(profile),
     history: {
       sessions: req.recentSessions.filter((s) => s.date < req.date),
