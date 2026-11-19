@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 
 import { getRawDb, resetDbForTests } from '@/db/client';
 import { onLocalWrite } from '@/db/events';
-import { migrateDb } from '@/db/migrate';
+import { migrateDb, migrations } from '@/db/migrate';
 import { setRowOwner } from '@/db/owner';
 import { nextUpdatedAt } from '@/db/repo';
 import { sets } from '@/db/schema';
@@ -25,6 +25,22 @@ beforeEach(async () => {
 });
 
 describe('migrations', () => {
+  it('0001 backfills meal_id on existing plan logs from the eaten meal of that slot', () => {
+    const plan = mealPlansRepo.insert({ date: '2026-11-19' }, 1);
+    const lunch = mealsRepo.insert({ mealPlanId: plan.id, slot: 'lunch', recipeId: 'r1', status: 'eaten', eatenAt: 5 }, 1);
+    mealsRepo.insert({ mealPlanId: plan.id, slot: 'dinner', recipeId: 'r2', status: 'planned' }, 1);
+    const legacy = foodLogsRepo.insert({ date: '2026-11-19', source: 'plan', name: 'Lunch', slot: 'lunch', kcal: 500 }, 2);
+    const search = foodLogsRepo.insert({ date: '2026-11-19', source: 'search', name: 'Apple', slot: 'lunch', kcal: 80 }, 2);
+    const orphan = foodLogsRepo.insert({ date: '2026-11-19', source: 'plan', name: 'Dinner', slot: 'dinner', kcal: 700 }, 2);
+    const sql = migrations.migrations.m0001.split('--> statement-breakpoint').find((x) => x.includes('UPDATE'))!;
+    getRawDb().execSync(sql);
+    expect(foodLogsRepo.get(legacy.id)!.mealId).toBe(lunch.id);
+    expect(foodLogsRepo.get(search.id)!.mealId).toBeNull();
+    expect(foodLogsRepo.get(orphan.id)!.mealId).toBeNull(); // dinner not eaten: stays a legacy log
+    expect(foodLogsRepo.get(legacy.id)!.dirty).toBe(1); // untouched otherwise (insert left it pending)
+  });
+
+
   it('create every table and are idempotent', async () => {
     await migrateDb(); // second run is a no-op
     const rows = getRawDb().getAllSync(

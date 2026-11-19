@@ -10,7 +10,7 @@ import { getCatalog } from '@/services/catalog';
 import { kv } from '@/services/storage';
 
 import { addDays, startOfWeek, todayISO, weekDates } from '../logic/dates';
-import { mealPlanForDate, mealsForPlan } from '../repo';
+import { mealPlanForDate, mealsForPlan, mealsRepo } from '../repo';
 import {
   addWater,
   applySwap,
@@ -141,6 +141,17 @@ describe('meal actions', () => {
     expect(todays().find((m) => m.id === lunch.id)!.status).toBe('planned');
   });
 
+  it('swapping an eaten meal re-opens it and removes its intake log (tile and rings agree)', () => {
+    const lunch = todays().find((m) => m.slot === 'lunch')!;
+    markMealEaten(lunch.id, 1, NOW);
+    expect(logsForDate(TODAY)).toHaveLength(1);
+    const opt = swapChoices(lunch.id, NOW)[0]!;
+    applySwap(lunch.id, opt, NOW + 1);
+    expect(todays().find((m) => m.id === lunch.id)!.status).toBe('planned');
+    expect(logsForDate(TODAY)).toHaveLength(0);
+    expect(dayIntake(logsForDate(TODAY), [])).toMatchObject({ kcal: 0 });
+  });
+
   it('swap: 3 alternatives, apply keeps the slot and remembers the old recipe', () => {
     const dinner = todays().find((m) => m.slot === 'dinner')!;
     const opts = swapChoices(dinner.id, NOW);
@@ -187,6 +198,43 @@ describe('meal actions', () => {
     expect(res).toMatchObject({ status: 'ready', created: 3 });
     expect(mealPlanForDate(TODAY)!.id).toBe(lunch.mealPlanId);
     expect(mealPlanForDate(tomorrow)!.id).not.toBe(oldTomorrow);
+  });
+});
+
+describe('several snacks share the snack slot (4–6 meals a day)', () => {
+  beforeEach(() => {
+    onboard({ mealsPerDay: 5 });
+    ensureWeekMeals(TODAY, NOW);
+  });
+  const snacks = () => mealsForPlan(mealPlanForDate(TODAY)!.id).filter((m) => m.slot === 'snack');
+  const eatenView = () =>
+    mealsForPlan(mealPlanForDate(TODAY)!.id).map((m) => ({ id: m.id, slot: m.slot, status: m.status, kcal: 100_000, protein: 0, carbs: 0, fat: 0 }));
+
+  it('ticking one snack never deletes another snack\'s log; undo removes only its own', () => {
+    const [a, b] = snacks();
+    expect(a && b).toBeTruthy();
+    markMealEaten(a!.id, 1, NOW);
+    markMealEaten(b!.id, 1, NOW + 1);
+    const logs = logsForDate(TODAY).filter((l) => l.slot === 'snack');
+    expect(logs).toHaveLength(2);
+    expect(logs.map((l) => l.mealId).sort()).toEqual([a!.id, b!.id].sort());
+    // Both logged: no meal falls back to the (huge) view kcal, and both logs count.
+    const both = dayIntake(logsForDate(TODAY), eatenView());
+    expect(both.kcal).toBe(logs[0]!.kcal + logs[1]!.kcal);
+
+    setMealOpen(a!.id, 'planned', NOW + 2);
+    const left = logsForDate(TODAY).filter((l) => l.slot === 'snack');
+    expect(left.map((l) => l.mealId)).toEqual([b!.id]);
+  });
+
+  it('an eaten snack without its own log still counts even when another snack has one', () => {
+    const [a, b] = snacks();
+    markMealEaten(a!.id, 1, NOW);
+    // b ticked from elsewhere (e.g. another device) with no log.
+    mealsRepo.update(b!.id, { status: 'eaten', eatenAt: NOW }, NOW);
+    const logs = logsForDate(TODAY);
+    const total = dayIntake(logs, eatenView());
+    expect(total.kcal).toBe(logs[0]!.kcal + 100_000);
   });
 });
 

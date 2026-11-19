@@ -17,6 +17,7 @@ import { buildSummary } from './logic/summary';
 import { formatWeight } from './logic/units';
 import type { WeightUnit } from './logic/engine';
 import {
+  activeSession,
   exerciseHistory,
   exercisesForSession,
   finishWorkout,
@@ -25,6 +26,7 @@ import {
   resumeWorkout,
   setDone,
   setsForSession,
+  setsRepo,
   startWorkout,
   type SetPatch,
   type WorkoutSet,
@@ -42,12 +44,24 @@ export function pausedSince(sessionId: string): number | null {
   }
 }
 
-export function startWorkoutAction(sessionId: string, catalog: Catalog | null, now: number = Date.now()): void {
+export type StartResult = { started: true } | { started: false; activeSessionId: string };
+
+/**
+ * Start a planned session. Refused while another workout is active or paused (it would be
+ * orphaned): the caller sends the user back to that one to finish or discard it first.
+ */
+export function startWorkoutAction(sessionId: string, catalog: Catalog | null, now: number = Date.now()): StartResult {
+  const running = activeSession();
+  if (running && running.id !== sessionId) {
+    showToast({ message: 'Finish or discard the workout in progress first' });
+    return { started: false, activeSessionId: running.id };
+  }
   const before = getSession(sessionId);
   const s = startWorkout(sessionId, (id) => exerciseMeta(id, catalog).cardio, now);
   if (s && before?.status === 'planned') {
     track('workout_started', { source: before.planId ? 'plan' : 'custom', exercises: exercisesForSession(sessionId).length });
   }
+  return { started: true };
 }
 
 export function pauseWorkoutAction(sessionId: string, now: number = Date.now()): void {
@@ -113,6 +127,8 @@ export function logSetAction(opts: {
   now?: number;
 }): PR | null {
   const now = opts.now ?? Date.now();
+  // Fresh state, not the render's: a double tap before the list re-renders must not log twice.
+  if (setsRepo.get(opts.set.id)?.doneAt != null) return null;
   const saved = setDone(opts.set.id, true, opts.patch ?? {}, now);
   if (!saved) return null;
   const meta = exerciseMeta(opts.exerciseId, opts.catalog);
@@ -143,6 +159,7 @@ export function logSetAction(opts: {
 }
 
 export function undoSetAction(set: WorkoutSet, now: number = Date.now()): void {
+  if (setsRepo.get(set.id)?.doneAt == null) return; // already undone (double tap)
   setDone(set.id, false, {}, now);
 }
 

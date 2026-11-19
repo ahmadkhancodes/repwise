@@ -8,6 +8,13 @@
       "when": 1795073215259,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795086465078,
+      "tag": "0001_food_log_meal_id",
+      "breakpoints": true
     }
   ]
 }

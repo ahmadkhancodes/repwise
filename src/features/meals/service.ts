@@ -239,13 +239,24 @@ export function swapChoices(mealId: string, now: number = Date.now()): PlannedMe
 }
 
 export function applySwap(mealId: string, option: PlannedMeal, now: number = Date.now()): Meal | undefined {
+  // Swapping an eaten meal re-opens it: its intake log goes too, so tile and rings agree.
+  const ctx = mealContext(mealId);
+  if (ctx?.meal.status === 'eaten') for (const l of planLogsFor(ctx)) removeLog(l.id, now);
   const saved = swapMeal(mealId, option.recipeId, now, option.servings);
   if (saved) track('meal_swapped', { slot: saved.slot });
   return saved;
 }
 
-function planLogsFor(date: string, slot: string): FoodLog[] {
-  return logsForDate(date).filter((l) => l.source === 'plan' && l.slot === slot);
+/**
+ * The 'plan' logs recording this meal. Keyed by meal id: with 4–6 meals a day several snacks share
+ * the 'snack' slot, and ticking one must never touch another's log. A legacy log (no meal id) is
+ * only claimed when the slot is unambiguous (one meal in it that day).
+ */
+function planLogsFor({ meal, plan, rows }: MealContext): FoodLog[] {
+  const slotIsUnique = rows.filter((m) => m.slot === meal.slot).length === 1;
+  return logsForDate(plan.date).filter(
+    (l) => l.source === 'plan' && (l.mealId ? l.mealId === meal.id : slotIsUnique && l.slot === meal.slot),
+  );
 }
 
 /** Core action "Ate it" (fraction < 1 = partial). Writes the intake log in the same tap. */
@@ -254,7 +265,7 @@ export function markMealEaten(mealId: string, fraction = 1, now: number = Date.n
   if (!ctx) return false;
   const { meal, plan } = ctx;
   const recipe = engineRecipe(meal.recipeId);
-  for (const l of planLogsFor(plan.date, meal.slot)) removeLog(l.id, now);
+  for (const l of planLogsFor(ctx)) removeLog(l.id, now);
   if (recipe && (meal.slot === 'breakfast' || meal.slot === 'lunch' || meal.slot === 'dinner' || meal.slot === 'snack')) {
     const eaten = mealFromRecipe(recipe, meal.slot, meal.portion * fraction);
     logFood(
@@ -267,6 +278,7 @@ export function markMealEaten(mealId: string, fraction = 1, now: number = Date.n
         p: eaten.protein,
         c: eaten.carbs,
         f: eaten.fat,
+        mealId: meal.id,
       },
       now,
     );
@@ -276,11 +288,11 @@ export function markMealEaten(mealId: string, fraction = 1, now: number = Date.n
   return true;
 }
 
-/** Undo a tick or skip a meal; the plan log for that slot goes too. */
+/** Undo a tick or skip a meal; that meal's plan log goes too (never another meal's). */
 export function setMealOpen(mealId: string, status: Exclude<MealStatus, 'eaten' | 'swapped'>, now: number = Date.now()): boolean {
   const ctx = mealContext(mealId);
   if (!ctx) return false;
-  for (const l of planLogsFor(ctx.plan.date, ctx.meal.slot)) removeLog(l.id, now);
+  for (const l of planLogsFor(ctx)) removeLog(l.id, now);
   setMealStatus(mealId, status, now);
   return true;
 }
@@ -296,7 +308,7 @@ export function rebalanceDay(date: ISODate, now: number = Date.now()): number {
     .flatMap((m) => {
       const r = engineRecipe(m.recipeId);
       return r && (['breakfast', 'lunch', 'dinner', 'snack'] as const).includes(m.slot as never)
-        ? [{ ...mealFromRecipe(r, m.slot as 'lunch', m.portion), status: 'eaten' }]
+        ? [{ ...mealFromRecipe(r, m.slot as 'lunch', m.portion), id: m.id, status: 'eaten' }]
         : [];
     });
   const consumed = dayIntake(logsForDate(date), eatenMeals);

@@ -101,7 +101,8 @@ class RepwiseTimerModule : Module() {
       .setContentIntent(contentIntent(p.sessionId))
 
     if (p.paused) {
-      builder.setUsesChronometer(false).setShowWhen(false)
+      // A paused rest has no end time: still remove it eventually if the app is killed meanwhile.
+      builder.setUsesChronometer(false).setShowWhen(false).setTimeoutAfter(PAUSED_TIMEOUT_MS)
     } else {
       builder.setUsesChronometer(true)
         .setChronometerCountDown(true)
@@ -121,5 +122,6 @@ class RepwiseTimerModule : Module() {
   companion object {
     const val CHANNEL_ID = "timer-ongoing"
     const val NOTIFICATION_ID = 7301
+    const val PAUSED_TIMEOUT_MS = 2L * 60L * 60L * 1000L
   }
 }

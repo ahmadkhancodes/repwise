@@ -39,6 +39,8 @@ export type NewFoodLog = {
   p?: number | null;
   c?: number | null;
   f?: number | null;
+  /** For source 'plan': the planned meal this records. */
+  mealId?: string | null;
 };
 
 /** Add one log row (S23/S26). */
@@ -53,6 +55,7 @@ export function logFood(v: NewFoodLog, now: number = Date.now()): FoodLog {
       p: v.p ?? null,
       c: v.c ?? null,
       f: v.f ?? null,
+      mealId: v.mealId ?? null,
     },
     now,
   );

@@ -171,6 +171,22 @@ describe('single-flight refresh', () => {
     expect(events).toEqual([{ type: 'signedOut', reason: 'expired' }]);
   });
 
+  it('a refresh whose reply was lost is retried at once (server grace returns the same successor)', async () => {
+    await signedIn(NOW - 1);
+    configureApi({ timeoutMs: 20 });
+    let n = 0;
+    fake.on('POST /auth/refresh', (c) => {
+      n++;
+      expect(c.body).toEqual({ refreshToken: 'rt-0' });
+      if (n === 1) return new Promise(() => undefined); // rotated server-side, reply lost
+      return { status: 200, body: tokenResponse(1) };
+    });
+    const s = await refreshSession();
+    expect(n).toBe(2);
+    expect(s.refreshToken).toBe(tokenResponse(1).refreshToken);
+    expect(peekSession()?.refreshToken).toBe(tokenResponse(1).refreshToken);
+  });
+
   it('offline during refresh keeps the tokens', async () => {
     await signedIn(NOW - 1);
     fake.setOffline(true);

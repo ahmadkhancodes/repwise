@@ -113,6 +113,7 @@ export function loadSnapshot(
 
   const times = resolveMealTimes(prefs, profile?.mealTimes);
   const meals: MealForSnapshot[] = mealsFor(date).map(({ meal, info }) => ({
+    id: meal.id,
     slot: meal.slot,
     name: info.name,
     kcal: info.kcal,
@@ -134,6 +135,7 @@ export function loadSnapshot(
     p: l.p ?? 0,
     c: l.c ?? 0,
     f: l.f ?? 0,
+    mealId: l.mealId ?? null,
   }));
   const eaten = eatenTotals(logs, meals);
   const plan = mealPlanForDate(date);
