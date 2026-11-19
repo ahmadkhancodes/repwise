@@ -1,1 +1,1 @@
-export { TodayScreen as default } from '@/features/planner/screens/TodayScreen';
+export { TodayScreen as default } from '@/features/today/screens/TodayScreen';

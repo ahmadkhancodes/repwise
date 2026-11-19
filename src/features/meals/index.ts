@@ -15,8 +15,9 @@ export {
   replanFrom,
   setMealOpen,
   swapChoices,
+  undoLog,
 } from './service';
-export { useEatDay, useEatWeek, type MealView } from './hooks/useEat';
+export { toMealView, useEatDay, useEatWeek, type MealView } from './hooks/useEat';
 export { MealTile } from './components/MealTile';
 export { MacroRings } from './components/MacroRings';
 export { SwapSheet } from './components/SwapSheet';

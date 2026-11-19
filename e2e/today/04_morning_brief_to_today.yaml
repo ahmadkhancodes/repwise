@@ -1,0 +1,32 @@
+# P0 (F-today, N-1): the morning brief notification opens Today (data.url '/today'). The tap is
+# simulated with the same deep link the notification handler navigates to, on a cold start.
+# Precondition: onboarding finished (run the onboarding flow first). iOS and Android.
+appId: com.client.repwise
+tags:
+  - today
+  - p0
+---
+- launchApp
+- stopApp
+- openLink: repwise://today
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 15000
+- assertVisible:
+    id: "today-date"
+# Morning: the brief card (W2) with today's workout and next meal. Evening: progress + tomorrow.
+- runFlow:
+    when:
+      visible:
+        id: "today-brief"
+    commands:
+      - assertVisible:
+          id: "today-brief-row-0"
+- runFlow:
+    when:
+      notVisible:
+        id: "today-brief"
+    commands:
+      - assertVisible:
+          id: "today-evening"

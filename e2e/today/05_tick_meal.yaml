@@ -1,0 +1,36 @@
+# P0 (P5 core action): tick a planned meal on Today in one tap; the count updates, the toast offers
+# Undo for 5 s, and Undo restores it. Meals are planned offline by the meals domain on first open.
+# Precondition: onboarding finished (run the onboarding flow first). iOS and Android.
+appId: com.client.repwise
+tags:
+  - today
+  - p0
+---
+- launchApp
+- tapOn:
+    id: "tab-today"
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "today-meals"
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: "today-meal-lunch"
+    timeout: 15000
+- assertVisible:
+    id: "meals-count"
+    text: "0 of .* eaten"
+- tapOn:
+    id: "today-meal-lunch"
+- assertVisible: "Lunch logged"
+- assertVisible:
+    id: "meals-count"
+    text: "1 of .* eaten"
+- tapOn: "Undo"
+- assertVisible:
+    id: "meals-count"
+    text: "0 of .* eaten"
