@@ -48,7 +48,7 @@ export function toMealView(m: Meal, cat: Catalog | null, mealTimes: readonly str
     eng && isMealSlot(m.slot)
       ? mealFromRecipe(eng, m.slot, m.portion)
       : recipe
-        ? { ...macrosFor(recipe, m.portion), kcal: Math.round(macrosFor(recipe, m.portion).kcal) }
+        ? macrosFor(recipe, m.portion)
         : { kcal: 0, protein: 0, carbs: 0, fat: 0 };
   return {
     id: m.id,
