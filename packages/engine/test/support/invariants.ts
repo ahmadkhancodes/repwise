@@ -6,7 +6,6 @@
 import {
   KCAL_CEILING,
   MAX_LEVEL,
-  SPLIT_ROTATIONS,
   TEMPLATES,
   VOLUME_GROUPS,
   VOLUME_GROUP_KEYS,
@@ -18,6 +17,7 @@ import {
   equipmentOk,
   injuryOk,
   kcalFromMacros,
+  rotationFor,
   sessionFingerprint,
   weeklyVolume,
   type Catalogues,
@@ -129,10 +129,14 @@ export function usable(p: Profile, ex: Exercise, neverShow: ReadonlySet<string> 
   return equipmentOk(ex, p.equipment) && injuryOk(ex, p.injuries) && ex.level <= MAX_LEVEL[p.experience] && !neverShow.has(ex.id) && ex.pattern !== 'cardio';
 }
 
-/** Volume groups some slot of the plan's rotation can train with a primary muscle, given the profile's kit. */
+/**
+ * Volume groups some slot of this week's templates can train with a primary muscle, given the
+ * profile's kit ("per the split rules": a 2-day upper/lower week never sees Upper B's chest slot).
+ */
 export function trainableGroups(p: Profile, plan: WeekPlan, ix: Indexed): Set<VolumeGroup> {
   const out = new Set<VolumeGroup>();
-  const slots = SPLIT_ROTATIONS[plan.split].flatMap((t) => TEMPLATES[t]?.slots ?? []);
+  const keys = plan.sessions.length ? [...new Set(plan.sessions.map((s) => s.templateKey))] : rotationFor(plan.split, p.daysPerWeek);
+  const slots = keys.flatMap((t) => TEMPLATES[t]?.slots ?? []);
   for (const ex of ix.cat.exercises) {
     if (!usable(p, ex)) continue;
     if (!slots.some((s) => s.pattern === ex.pattern && (s.pattern !== 'isolation' || !s.muscle || ex.primaryMuscles.includes(s.muscle)))) continue;

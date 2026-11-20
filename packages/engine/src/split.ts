@@ -80,6 +80,12 @@ export const TEMPLATES: Record<string, DayTemplate> = {
     name: 'Pull',
     slots: [S('pull_v_main', 'pull_v', 'main'), S('pull_h_2', 'pull_h', 'secondary'), S('pull_v_acc', 'pull_v', 'accessory'), iso('rear_delts'), iso('biceps'), S('hinge_acc', 'hinge', 'accessory'), core],
   },
+  /** 1-day weeks: one session must reach every group, so the big patterns come first (ENGINE_QA bug 4). */
+  full_1: {
+    key: 'full_1',
+    name: 'Full body',
+    slots: [S('squat_main', 'squat', 'main'), S('push_h_main', 'push_h', 'main'), S('pull_v_2', 'pull_v', 'secondary'), S('hinge_acc', 'hinge', 'accessory'), S('push_v_2', 'push_v', 'secondary'), iso('biceps'), iso('triceps'), iso('hamstrings'), core],
+  },
   legs: {
     key: 'legs',
     name: 'Legs',
@@ -106,6 +112,11 @@ export const SPLIT_ROTATIONS: Record<SplitType, string[]> = {
   ppl: ['push', 'pull', 'legs'],
   ppl_ul: ['push', 'pull', 'legs', 'upper_a', 'lower_a'],
 };
+
+/** Template rotation for a split; a 1-day week uses the single all-groups full-body template. */
+export function rotationFor(split: SplitType, daysPerWeek: number): string[] {
+  return daysPerWeek === 1 && split === 'full_body' ? ['full_1'] : SPLIT_ROTATIONS[split];
+}
 
 /** Default by days per week; a user preference wins when it fits the days. */
 export function chooseSplit(daysPerWeek: number, preference?: SplitType): SplitType {

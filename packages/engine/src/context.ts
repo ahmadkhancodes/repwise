@@ -24,13 +24,13 @@ import {
   type SplitType,
 } from './schemas';
 import {
-  SPLIT_ROTATIONS,
   TEMPLATES,
   VOLUME_GROUP_KEYS,
   chooseSplit,
   groupContribution,
   isCompound,
   patternKey,
+  rotationFor,
   trainingWeekdays,
   volumeTargets,
   type SlotDef,
@@ -68,6 +68,8 @@ export interface PlanningContext {
   allocationRange: VolumeRange;
   /** Range the validator enforces (deload-adjusted, capped to what is feasible). */
   volumeRange: VolumeRange;
+  /** Groups some slot of the rotation can train with a primary muscle (others get min 0). */
+  trainableGroups?: ReadonlySet<VolumeGroup>;
   noRepeatDays: number;
   mealSlots: MealSlot[];
   neverShow: Set<string>;
@@ -183,7 +185,7 @@ export function buildContext(profileIn: ProfileInput, historyIn: HistoryInput, c
 
   const nutrition = computeTargets(profile, weekStart, opts.adjustmentKcal !== undefined ? { adjustmentKcal: opts.adjustmentKcal } : {});
   const split = chooseSplit(profile.daysPerWeek, profile.splitPreference);
-  const rotation = SPLIT_ROTATIONS[split];
+  const rotation = rotationFor(split, profile.daysPerWeek);
   const weekdays = trainingWeekdays(profile.daysPerWeek, profile.trainingWeekdays);
   const trainingDates = dates.filter((d) => weekdays.includes(weekdayMon0(d)));
 
@@ -247,6 +249,7 @@ export function buildContext(profileIn: ProfileInput, historyIn: HistoryInput, c
     deloadReason: deload ? dd.reason ?? 'stall' : null,
     allocationRange,
     volumeRange,
+    trainableGroups: trainable,
     noRepeatDays: clampNoRepeatDays(opts.noRepeatDays),
     mealSlots: mealSlotsFor(profile.mealsPerDay),
     neverShow,

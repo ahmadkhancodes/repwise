@@ -266,6 +266,7 @@ export function planSessions(ctx: PlanningContext, warnings: PlanWarning[]): Pla
     records.push(sessionRecord(ctx, session));
   });
 
+  coverGroups(ctx, sessions, rng.fork('cover'));
   // Weekly set allocation against the (pre-deload) range, then deload cut.
   allocateSets(sessions, ctx.exById, ctx.allocationRange, setsPerSession(ctx.profile.sessionMin));
   dropOverVolume(ctx, sessions);
@@ -285,6 +286,51 @@ export function planSessions(ctx: PlanningContext, warnings: PlanWarning[]): Pla
     }
   }
   return sessions;
+}
+
+/**
+ * Short sessions keep only their first template slots, so a group trained only by a later slot can
+ * get no work all week (ENGINE_QA bug 4: biceps/hamstrings on 1-day and 30-min weeks). For each such
+ * trainable group, swap a session's last non-main item that is not the only work for its own groups
+ * for a candidate of an unused slot of that session's template that trains the group.
+ */
+function coverGroups(ctx: PlanningContext, sessions: PlannedSession[], rng: Rng): void {
+  const trainable = ctx.trainableGroups;
+  if (!trainable) return;
+  for (const g of VOLUME_GROUP_KEYS) {
+    if (!trainable.has(g) || weeklyVolume(sessions, ctx.exById)[g] > 0) continue;
+    done: for (let si = sessions.length - 1; si >= 0; si--) {
+      const s = sessions[si] as PlannedSession;
+      const template = TEMPLATES[s.templateKey];
+      if (!template) continue;
+      const usedSlots = new Set(s.items.map((it) => it.slotKey));
+      const used = new Set(s.items.map((it) => it.exerciseId));
+      for (const slot of template.slots) {
+        if (usedSlots.has(slot.key)) continue;
+        const cands = slotCandidates(ctx.exercisePool, slot).filter((e) => !used.has(e.id) && !ctx.mainLiftIds.has(e.id) && groupContribution(e)[g] === 1);
+        const pick = rng.fork(`${s.date}/${g}`).weighted(cands, (e) => exerciseWeight(e, { moreLike: ctx.moreLike }));
+        if (!pick) continue;
+        const vol = weeklyVolume(sessions, ctx.exById);
+        let idx = -1;
+        for (let k = s.items.length - 1; k >= 0; k--) {
+          const it = s.items[k] as PlannedExercise;
+          if (it.role === 'main') continue;
+          const ex = ctx.exById.get(it.exerciseId);
+          const c = ex ? groupContribution(ex) : undefined;
+          if (c && VOLUME_GROUP_KEYS.every((h) => c[h] === 0 || vol[h] - c[h] * it.sets > 0)) {
+            idx = k;
+            break;
+          }
+        }
+        const item = prescribe(ctx, pick, slot.key, slot.role);
+        if (s.items.length < exercisesPerSession(ctx.profile.sessionMin)) s.items.push(item);
+        else if (idx >= 0) s.items[idx] = item;
+        else continue;
+        s.fingerprint = sessionFingerprint(s.items.map((it) => it.exerciseId));
+        break done;
+      }
+    }
+  }
 }
 
 /**
