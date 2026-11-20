@@ -72,14 +72,16 @@ export function useToday(nowOverride?: number): TodayModel {
     const id = setTimeout(() => {
       try {
         // Training for this week (no-op when planned), then any missing meal days.
-        ensurePlannedAhead(Date.now());
-        if (mealsMissing) ensureWeekMeals(date, Date.now());
+        // The screen's clock (nowOverride in screenshots/Maestro/tests), not the real one (R2-7).
+        const at = nowOverride ?? Date.now();
+        ensurePlannedAhead(at);
+        if (mealsMissing) ensureWeekMeals(date, at);
       } catch {
         // planning is best effort; Today still shows what is stored
       }
     }, PLAN_DELAY_MS);
     return () => clearTimeout(id);
-  }, [catalog, date, profileStamp, mealsMissing]);
+  }, [catalog, date, profileStamp, mealsMissing, nowOverride]);
   const minutes = minutesOfDay(now);
 
   const view = useMemo(

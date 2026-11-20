@@ -448,8 +448,8 @@ function generateSync(opts: GenerateOptions = {}): {
 export async function regenerateWeek(opts: GenerateOptions = {}): Promise<PlanResult> {
   await yieldToUi();
   const out = generateSync(opts);
-  // The Worker cannot be asked for a deload, so a requested deload week stays rules-only.
-  if (opts.ai !== false && !opts.deload) {
+  // The Worker accepts `deload` too, so a deload week gets the same AI variety (validated the same).
+  if (opts.ai !== false) {
     void upgradeWithAi(out.result, out.profile, out.history, out.weekdays, opts);
   }
   return out.result;
@@ -527,9 +527,10 @@ export function dedupePlannedSessions(
 
 /** Make sure the week containing `date` has a plan (no-op when one exists). */
 export function ensureWeekPlanned(
-  date: string = localToday(),
+  day?: string,
   now: number = Date.now(),
 ): PlanResult | null {
+  const date = day ?? localToday(now); // the injected clock, never the real one (R2-7)
   const weekStart = startOfWeek(date);
   if (plansRepo.first(and(eq(plans.type, 'training'), eq(plans.weekStart, weekStart)))) return null;
   if (!toEngineProfile(getProfile())) return null;
@@ -546,7 +547,8 @@ export type TodayPlan = {
 };
 
 /** Today's workout and meals from SQLite (plans the week first if it is missing). */
-export function planToday(date: string = localToday(), now: number = Date.now()): TodayPlan {
+export function planToday(day?: string, now: number = Date.now()): TodayPlan {
+  const date = day ?? localToday(now);
   try {
     ensureWeekPlanned(date, now);
   } catch {
@@ -601,9 +603,11 @@ export async function upgradeWithAi(
   profile: ProfileInput,
   history: HistoryInput,
   weekdays: number[],
-  opts: Pick<GenerateOptions, 'fetchAi' | 'now' | 'fromDate' | 'adjustmentKcal'> = {},
+  opts: Pick<GenerateOptions, 'fetchAi' | 'now' | 'fromDate' | 'adjustmentKcal' | 'deload'> = {},
 ): Promise<PlanResult | null> {
   const now = opts.now ?? Date.now();
+  const startedAt = Date.now(); // only to measure elapsed time, never as "now"
+  const extra = tweaks({ adjustmentKcal: opts.adjustmentKcal, deload: opts.deload });
   const fetchAi = opts.fetchAi ?? workerFetch;
   let res: AiWeekResponse | null = null;
   try {
@@ -614,14 +618,14 @@ export async function upgradeWithAi(
         weekStart: rules.weekStart,
         now,
         trainingWeekdays: weekdays,
-        ...tweaks({ adjustmentKcal: opts.adjustmentKcal }),
+        ...extra,
       },
     });
   } catch {
     return null; // offline, timeout, 4xx/5xx, no session: the rules plan stays
   }
   const decision = decideAiPlan(res, rules.weekStart, (p) =>
-    validatesLocally(p, profile, history, now, { adjustmentKcal: opts.adjustmentKcal }),
+    validatesLocally(p, profile, history, now, extra),
   );
   track('ai_plan_result', {
     accepted: decision.accept,
@@ -636,7 +640,10 @@ export async function upgradeWithAi(
     fromDate,
     trainingWeekdays: weekdays,
     source: 'ai',
-    now: Date.now(),
+    // The injected clock plus the time the Worker took (≥ 1 ms): deterministic under a fixed
+    // `now`, and strictly newer than the rules rows it replaces in place, so the in-place update
+    // still wins last-write-wins on the server (R2-7).
+    now: now + Math.max(1, Date.now() - startedAt),
   });
 }
 
