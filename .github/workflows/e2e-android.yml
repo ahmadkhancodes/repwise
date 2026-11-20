@@ -41,7 +41,8 @@ jobs:
   android:
     name: Build APK + Maestro (API 34)
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    # ~20 min build + ~29 flows at 1-3 min each on the emulator.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 
