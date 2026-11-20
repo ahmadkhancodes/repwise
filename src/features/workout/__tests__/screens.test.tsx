@@ -13,7 +13,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 import { flushSetWrites, resetSetWritesForTests } from '../actions';
 import { optimisticSets, resetOptimisticForTests } from '../optimistic';
-import { exercisesForSession, getSession, setsFor, startWorkout } from '../repo';
+import { exercisesForSession, getSession, sessionsRepo, setsFor, startWorkout } from '../repo';
 import { resetRestTimerForTests, restTimer } from '../restTimerStore';
 import { resetRestNotifierForTests } from '../restNotifier';
 import { weekOf } from '../logic/dates';
@@ -538,6 +538,17 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       const id = target.split('/').pop()!;
       expect(getSession(id)).toMatchObject({ status: 'active', title: 'Upper A' });
       expect(setsFor(exercisesForSession(id)[0]!.id)).toHaveLength(4);
+    });
+
+    it('Start while another workout runs opens that one and creates no orphan (R2-3)', async () => {
+      const running = plannedSession();
+      startWorkout(running.id);
+      const r = routinesRepo.insert({ name: 'Upper A', items: [{ exerciseId: 'barbell-bench-press', sets: 3, reps: '8-12', restS: 90 }] });
+      await renderThemed(<RoutineBuilderScreen routineId={r.id} />, scheme);
+      const before = sessionsRepo.list().length;
+      await fireEvent.press(screen.getByTestId('routine-start'));
+      expect(mockRouter.replace).toHaveBeenLastCalledWith(`/workout/${running.id}`);
+      expect(sessionsRepo.list()).toHaveLength(before);
     });
 
     it('picker adds to a live session and shows no-match state', async () => {
