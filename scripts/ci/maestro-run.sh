@@ -153,6 +153,9 @@ for flow in $ORDERED; do
     fi
     attempt=$((attempt + 1))
     [ "$attempt" -gt "$RETRIES" ] && break
+    # Keep the failed attempt's evidence; the retry overwrites the plain names.
+    cp "$OUT/logs/$slug.maestro.log" "$OUT/logs/$slug.try$attempt.maestro.log" 2>/dev/null
+    cp "$OUT/screenshots/$slug.png" "$OUT/screenshots/$slug.try$attempt.png" 2>/dev/null
     echo "Retrying $flow"
   done
   secs=$(($(date +%s) - start))

@@ -7,8 +7,12 @@ appId: com.client.repwise
     id: "tab-eat"
 - extendedWaitUntil:
     visible:
-      id: "meal-dinner"
+      id: "meal-lunch"
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "meal-dinner"
+    direction: DOWN
 - tapOn:
     id: "meal-dinner"
 - assertVisible:

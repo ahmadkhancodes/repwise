@@ -5,7 +5,12 @@ tags:
 ---
 - launchApp
 - stopApp
+# The widget's quick-log link opens Log food over Eat (EatScreen `log=1`).
 - openLink: repwise://eat?log=1
+- assertVisible:
+    id: screen-log
+- tapOn:
+    id: back
 - assertVisible:
     id: screen-eat
 - stopApp

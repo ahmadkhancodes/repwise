@@ -9,6 +9,10 @@ appId: com.client.repwise
     visible:
       id: "meal-lunch"
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "open-log"
+    direction: DOWN
 - tapOn:
     id: "open-log"
 - tapOn:
@@ -18,6 +22,10 @@ appId: com.client.repwise
 - tapOn:
     id: "log-out-save"
 - assertVisible: "Meal out logged.*"
+- scrollUntilVisible:
+    element:
+      id: "open-water"
+    direction: DOWN
 - tapOn:
     id: "open-water"
 - tapOn:
@@ -26,6 +34,10 @@ appId: com.client.repwise
     id: "water-entries"
 - tapOn:
     id: "back"
+- scrollUntilVisible:
+    element:
+      id: "eat-rings"
+    direction: UP
 - tapOn:
     id: "eat-rings"
 - assertVisible:

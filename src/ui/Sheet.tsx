@@ -8,7 +8,6 @@ import {
 import { X } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { BackHandler, Platform, useWindowDimensions, View } from 'react-native';
-import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
@@ -61,7 +60,6 @@ export function Sheet({
   const t = useTheme();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
-  const reduceMotion = useReducedMotion();
   const ref = useRef<BottomSheetModal>(null);
   const maxHeight = sheetMaxHeight(height, insets.top);
 
@@ -121,7 +119,8 @@ export function Sheet({
       maxDynamicContentSize={maxHeight}
       onDismiss={onClose}
       backdropComponent={renderBackdrop}
-      animateOnMount={!reduceMotion}
+      // Keep gorhom's default mount animation: it already honours reduced motion (instant snap).
+      // animateOnMount={false} left the sheet off-screen on Android with animations removed.
       backgroundStyle={{
         backgroundColor: t.colors.bg,
         borderTopLeftRadius: t.radius.sheet,

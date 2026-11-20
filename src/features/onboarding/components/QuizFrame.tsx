@@ -1,7 +1,7 @@
 import { ChevronLeft } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
-import Animated, { FadeIn, FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInRight, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
@@ -49,9 +49,12 @@ export function QuizFrame({
 }: QuizFrameProps) {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const enter = FadeInRight.springify()
-    .damping(t.motion.spring.damping)
-    .stiffness(t.motion.spring.stiffness);
+  // Reduced motion (Android "Remove animations"): no entering animation at all. A delayed entering
+  // animation could leave the options invisible there.
+  const reduceMotion = useReducedMotion();
+  const enter = reduceMotion
+    ? undefined
+    : FadeInRight.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness);
 
   return (
     <KeyboardAvoidingView
@@ -122,7 +125,7 @@ export function QuizFrame({
           ) : null}
         </Animated.View>
         <Animated.View
-          entering={enter.delay(t.motion.listStagger * 3)}
+          entering={enter?.delay(t.motion.listStagger * 3)}
           style={{ gap: t.spacing.sm }}
         >
           {children}

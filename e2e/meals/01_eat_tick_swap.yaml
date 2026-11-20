@@ -15,6 +15,10 @@ appId: com.client.repwise
     id: "tick-lunch"
 - assertVisible: ".*logged"
 - tapOn: "Undo"
+- scrollUntilVisible:
+    element:
+      id: "swap-dinner"
+    direction: DOWN
 - tapOn:
     id: "swap-dinner"
 - extendedWaitUntil:
@@ -24,6 +28,10 @@ appId: com.client.repwise
 - tapOn:
     id: "swap-option-0"
 - assertVisible: "Swapped to.*"
+- scrollUntilVisible:
+    element:
+      text: "Week"
+    direction: UP
 - tapOn: "Week"
 - assertVisible:
     id: "week-days"
