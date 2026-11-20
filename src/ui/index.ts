@@ -98,3 +98,4 @@ export { SectionHeader, type SectionHeaderProps } from './SectionHeader';
 export { Enter } from './Enter';
 export { enterAt, exitFade, layoutSpring, staggerDelay, STAGGER_CAP } from './listMotion';
 export { Sparkline, sparkPath, sparkPoints, type SparklineProps, type SparkPoint } from './Sparkline';
+export { StepNumber } from './StepNumber';

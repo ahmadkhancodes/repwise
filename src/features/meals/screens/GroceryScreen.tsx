@@ -44,7 +44,7 @@ export function GroceryScreen() {
     else next.add(id);
     setGroceryChecked(weekStart, [...next]);
     setChecked(next);
-    if (next.size === total && total > 0 && !checked.has(id)) haptics.success();
+    if (next.size === total && total > 0 && !checked.has(id)) haptics.light();
   };
 
   const clear = () => {

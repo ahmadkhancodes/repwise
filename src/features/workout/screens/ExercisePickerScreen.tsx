@@ -55,7 +55,7 @@ export function ExercisePickerScreen({
             items: [...parseRoutineItems(r.items), { exerciseId: item.id, ...DEFAULT_ITEM }],
           });
       }
-      haptics.success();
+      haptics.light();
       showToast({ message: `${item.name} added`, tone: 'success', silent: true });
       if (router.canGoBack()) router.back();
       else router.replace('/(tabs)/train');

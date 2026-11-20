@@ -130,7 +130,7 @@ export function NotificationSettingsScreen() {
     setAsking(true);
     const r = await requestPermission();
     setAsking(false);
-    if (r === 'granted') haptics.success();
+    if (r === 'granted') haptics.light();
   };
 
   if (permission === 'unknown') {

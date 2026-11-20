@@ -229,7 +229,7 @@ export function WeekStrip({ days }: { days: StripDay[] }) {
         }))}
         selectedKey={null}
         todayKey={today}
-        onSelect={() => undefined}
+        readOnly
       />
       <Text variant="callout" color="textSecondary" testID="reveal-week-line">
         {training.length

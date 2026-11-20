@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { Badge, Button, EmptyState, IconButton, PressableScale, Screen, SectionHeader, Skeleton, SkeletonGroup, SkeletonText, Text } from '@/ui';
+import { Badge, Button, EmptyState, IconButton, PressableScale, Screen, SectionHeader, Skeleton, SkeletonGroup, SkeletonText, StepNumber, Text } from '@/ui';
 
 import { AddToWorkoutSheet } from '../components/AddToWorkoutSheet';
 import { MuscleLegend } from '../components/BodyMap';
@@ -54,20 +54,7 @@ function Lines({
           accessibilityLabel={numbered ? `Step ${i + 1}. ${line}` : line}
         >
           {numbered ? (
-            <View
-              style={{
-                width: disc,
-                height: disc,
-                borderRadius: t.radius.pill,
-                backgroundColor: t.colors.inverse,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text variant="caption" color="onInverse" tabular maxFontSizeMultiplier={1.2}>
-                {i + 1}
-              </Text>
-            </View>
+            <StepNumber n={i + 1} />
           ) : (
             <View
               style={{

@@ -1,5 +1,6 @@
 import { Check, Lock } from 'lucide-react-native';
-import { View } from 'react-native';
+import type { ReactNode } from 'react';
+import { View, type Insets, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/theme';
 
@@ -45,7 +46,13 @@ export type WeekStripProps = {
   days: readonly WeekDay[];
   selectedKey: string | null;
   todayKey?: string;
-  onSelect: (key: string) => void;
+  /** Required unless `readOnly`. */
+  onSelect?: (key: string) => void;
+  /**
+   * Display only (the plan reveal): no presses, no haptics, no tab semantics — each day reads as
+   * plain text (UI audit P2-8).
+   */
+  readOnly?: boolean;
   testID?: string;
 };
 
@@ -54,13 +61,23 @@ export type WeekStripProps = {
  * a 360dp screen at 130% font: each cell is flex 1 with minWidth 0 and numbers shrink to fit.
  * Selected = inverse pill (Uber); today = bold ring; done = accent dot with a check.
  */
-export function WeekStrip({ days, selectedKey, todayKey, onSelect, testID }: WeekStripProps) {
+export function WeekStrip({
+  days,
+  selectedKey,
+  todayKey,
+  onSelect,
+  readOnly = false,
+  testID,
+}: WeekStripProps) {
   const t = useTheme();
   const dot = t.spacing.xxxl;
+  // Seven flex cells are ~42dp wide at 360dp: the slop covers the gaps so every target is ≥ 48dp
+  // wide where it counts (P2-21) without overlapping a neighbour.
+  const slop = { left: t.spacing.xxs / 2, right: t.spacing.xxs / 2, top: 0, bottom: 0 };
   return (
     <View
       testID={testID}
-      accessibilityRole="tablist"
+      accessibilityRole={readOnly ? undefined : 'tablist'}
       style={{ flexDirection: 'row', gap: t.spacing.xxs, alignSelf: 'stretch' }}
     >
       {days.map((d) => {
@@ -71,14 +88,14 @@ export function WeekStrip({ days, selectedKey, todayKey, onSelect, testID }: Wee
         const ringed = !done && (isToday || status === 'planned' || status === 'active');
         const fg = isSel ? 'onInverse' : 'textPrimary';
         return (
-          <PressableScale
+          <Cell
             key={d.key}
+            readOnly={readOnly}
             testID={`day-${d.key}`}
-            feedback="selection"
-            onPress={() => onSelect(d.key)}
-            accessibilityRole="tab"
+            hitSlop={slop}
+            onPress={() => onSelect?.(d.key)}
             accessibilityLabel={weekDayLabel(d, isToday)}
-            accessibilityState={{ selected: isSel }}
+            selected={isSel}
             style={{
               flex: 1,
               minWidth: 0,
@@ -144,9 +161,57 @@ export function WeekStrip({ days, selectedKey, todayKey, onSelect, testID }: Wee
                 strokeWidth={t.sizes.iconStroke}
               />
             ) : null}
-          </PressableScale>
+          </Cell>
         );
       })}
     </View>
+  );
+}
+
+function Cell({
+  readOnly,
+  selected,
+  accessibilityLabel,
+  onPress,
+  hitSlop,
+  testID,
+  style,
+  children,
+}: {
+  readOnly: boolean;
+  selected: boolean;
+  accessibilityLabel: string;
+  onPress: () => void;
+  hitSlop: Insets;
+  testID: string;
+  style: ViewStyle;
+  children: ReactNode;
+}) {
+  if (readOnly) {
+    return (
+      <View
+        testID={testID}
+        accessible
+        accessibilityRole="text"
+        accessibilityLabel={accessibilityLabel}
+        style={style}
+      >
+        {children}
+      </View>
+    );
+  }
+  return (
+    <PressableScale
+      testID={testID}
+      feedback="selection"
+      onPress={onPress}
+      hitSlop={hitSlop}
+      accessibilityRole="tab"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ selected }}
+      style={style}
+    >
+      {children}
+    </PressableScale>
   );
 }

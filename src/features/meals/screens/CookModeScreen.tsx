@@ -65,7 +65,7 @@ export function CookModeScreen() {
       const i = Number(k);
       if (v.endsAt !== null && remainingSeconds(v.endsAt, now) === 0 && !announced.current.has(i)) {
         announced.current.add(i);
-        haptics.success();
+        haptics.light();
         showToast({ message: `Step ${i + 1} timer is done`, tone: 'success', silent: true });
         setTimers((s) => ({ ...s, [i]: { ...v, endsAt: null, left: 0, done: true } }));
       }
@@ -137,7 +137,7 @@ export function CookModeScreen() {
       markMealEaten(String(params.mealId));
       showToast({ message: `Enjoy! ${recipe.title} is logged.`, tone: 'success' });
     } else {
-      haptics.success();
+      haptics.light();
     }
     router.back();
   };

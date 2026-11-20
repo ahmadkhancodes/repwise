@@ -6,7 +6,7 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { BackButton, Badge, BigNumber, Button, Card, EmptyState, Screen, SectionHeader, Skeleton, SkeletonGroup, SkeletonText, Stepper, Text } from '@/ui';
+import { BackButton, Badge, BigNumber, Button, Card, EmptyState, Screen, SectionHeader, Skeleton, SkeletonGroup, SkeletonText, StepNumber, Stepper, Text } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
 
 import { MacroChips } from '../components/MacroChips';
@@ -170,21 +170,14 @@ export function RecipeScreen() {
 
       <SectionHeader title="Steps" />
       {recipe.steps.map((s, i) => (
-        <Animated.View key={i} entering={enterAt(i, reduce)} style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-          <View
-            style={{
-              width: t.spacing.xl + t.spacing.xxs,
-              height: t.spacing.xl + t.spacing.xxs,
-              borderRadius: t.radius.pill,
-              backgroundColor: t.colors.surface,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text variant="caption" tabular>
-              {i + 1}
-            </Text>
-          </View>
+        <Animated.View
+          key={i}
+          entering={enterAt(i, reduce)}
+          style={{ flexDirection: 'row', gap: t.spacing.sm }}
+          accessible
+          accessibilityLabel={`Step ${i + 1}. ${s}`}
+        >
+          <StepNumber n={i + 1} />
           <Text style={{ flex: 1 }}>{s}</Text>
         </Animated.View>
       ))}

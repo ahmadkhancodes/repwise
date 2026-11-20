@@ -202,7 +202,7 @@ export function usePlayer(sessionId: string) {
     if (!swapFor) return;
     const meta = exerciseMeta(id, catalog);
     swapExerciseRow(swapFor.se.id, id, { cardio: meta.cardio });
-    haptics.success();
+    haptics.light();
     showToast({ message: `Swapped to ${meta.name}`, tone: 'success', silent: true });
     setSwap(null);
   };

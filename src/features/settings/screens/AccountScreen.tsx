@@ -65,7 +65,7 @@ function SignIn({ loading }: { loading: boolean }) {
     try {
       const r = await fn();
       if (r && r.ok) {
-        haptics.success();
+        haptics.light();
         showToast({ message: 'Signed in. Backing up your data.', tone: 'success', silent: true });
       }
     } catch (e) {
