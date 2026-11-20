@@ -1,16 +1,25 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { fireEvent, screen } from '@testing-library/react-native';
 import { BackHandler, Platform } from 'react-native';
+import type { ReactElement } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { ThemeScope, type ColorScheme } from '@/theme';
 
 import { renderThemed, SCHEMES } from '../../../test/render';
-import { Sheet, sheetMaxHeight } from '../Sheet';
+import { Sheet, SheetHost, sheetMaxHeight, snapHeight } from '../Sheet';
 import { Text } from '../Text';
+
+/** Same providers as renderThemed, so a rerender keeps the component instances. */
+const themed = (ui: ReactElement, scheme: ColorScheme = 'light') => (
+  <SafeAreaProvider>
+    <ThemeScope scheme={scheme}>{ui}</ThemeScope>
+  </SafeAreaProvider>
+);
 
 describe.each(SCHEMES)('Sheet (%s)', (scheme) => {
   afterEach(() => jest.restoreAllMocks());
 
   it('presents when open and shows title, content and a labelled close button', async () => {
-    const present = jest.spyOn(BottomSheetModal.prototype, 'present');
     const onClose = jest.fn();
     await renderThemed(
       <Sheet open onClose={onClose} title="Swap exercise" testID="s">
@@ -18,22 +27,33 @@ describe.each(SCHEMES)('Sheet (%s)', (scheme) => {
       </Sheet>,
       scheme,
     );
-    expect(present).toHaveBeenCalled();
     expect(screen.getByRole('header', { name: 'Swap exercise' })).toBeTruthy();
     expect(screen.getByText('Alternatives')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('dismisses when closed', async () => {
-    const dismiss = jest.spyOn(BottomSheetModal.prototype, 'dismiss');
-    await renderThemed(
-      <Sheet open={false} onClose={jest.fn()}>
+  it('renders nothing when closed; the scrim closes it', async () => {
+    const onClose = jest.fn();
+    const r = await renderThemed(
+      <Sheet open={false} onClose={onClose} testID="s">
         <Text>Body</Text>
       </Sheet>,
       scheme,
     );
-    expect(dismiss).toHaveBeenCalled();
+    expect(screen.queryByText('Body')).toBeNull();
+    await r.rerender(
+      themed(
+        <Sheet open onClose={onClose} testID="s">
+          <Text>Body</Text>
+        </Sheet>,
+        scheme,
+      ),
+    );
+    expect(screen.getByText('Body')).toBeTruthy();
+    // The sheet is accessibilityViewIsModal, so the scrim is hidden from screen readers (Close is not).
+    await fireEvent.press(screen.getByTestId('s-scrim', { includeHiddenElements: true }));
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('hardware back closes the sheet on Android only', async () => {
@@ -89,6 +109,56 @@ describe.each(SCHEMES)('Sheet (%s)', (scheme) => {
     );
     expect(screen.getByTestId('plain')).toBeTruthy();
     expect(screen.queryByTestId('plain-scroll')).toBeNull();
+  });
+});
+
+describe('sheet swap and host', () => {
+  const two = (a: boolean) => (
+    <>
+      <Sheet open={a} onClose={jest.fn()}>
+        <Text>Menu</Text>
+      </Sheet>
+      <Sheet open={!a} onClose={jest.fn()}>
+        <Text>Discard</Text>
+      </Sheet>
+    </>
+  );
+
+  it('swaps sheets in one render (menu → discard)', async () => {
+    const r = await renderThemed(two(true));
+    expect(screen.getByText('Menu')).toBeTruthy();
+    expect(screen.queryByText('Discard')).toBeNull();
+    await r.rerender(themed(two(false)));
+    expect(screen.queryByText('Menu')).toBeNull();
+    expect(screen.getByText('Discard')).toBeTruthy();
+  });
+
+  it('with a SheetHost mounted, open sheets render in the host', async () => {
+    const r = await renderThemed(
+      <>
+        {two(true)}
+        <SheetHost />
+      </>,
+    );
+    expect(screen.getByText('Menu')).toBeTruthy();
+    await r.rerender(
+      themed(
+        <>
+          {two(false)}
+          <SheetHost />
+        </>,
+      ),
+    );
+    expect(screen.queryByText('Menu')).toBeNull();
+    expect(screen.getByText('Discard')).toBeTruthy();
+    await r.unmount();
+  });
+});
+
+describe('snapHeight', () => {
+  it('reads dp and window percentages', () => {
+    expect(snapHeight(320, 800)).toBe(320);
+    expect(snapHeight('50%', 800)).toBe(400);
   });
 });
 

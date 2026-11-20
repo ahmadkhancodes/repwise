@@ -1,15 +1,18 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  BottomSheetView,
-  type BottomSheetBackdropProps,
-} from '@gorhom/bottom-sheet';
 import { X } from 'lucide-react-native';
-import { useCallback, useEffect, useRef, type ReactNode } from 'react';
-import { BackHandler, Platform, useWindowDimensions, View } from 'react-native';
-import { ReduceMotion } from 'react-native-reanimated';
+import { useEffect, useId, useLayoutEffect, type ReactNode } from 'react';
+import {
+  BackHandler,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { create } from 'zustand';
 
 import { useTheme } from '@/theme';
 
@@ -25,9 +28,8 @@ export type SheetProps = {
   snapPoints?: (string | number)[];
   /**
    * Long content (ingredients, filters, a 12-exercise reorder): the body scrolls inside the
-   * sheet with gorhom's own scroll view (so the pan gesture never swallows it on Android),
-   * the title row stays pinned, and the sheet never grows past {@link SHEET_MAX_RATIO} of
-   * the screen.
+   * sheet, the title row stays pinned, and the sheet never grows past {@link SHEET_MAX_RATIO}
+   * of the screen.
    */
   scrollable?: boolean;
   /** Pinned under the body (scrollable sheets): the one primary action, e.g. "Show 24". */
@@ -43,13 +45,89 @@ export function sheetMaxHeight(windowHeight: number, topInset: number): number {
   return Math.max(0, Math.round(windowHeight * SHEET_MAX_RATIO - topInset));
 }
 
+/** Open sheets drawn by the root {@link SheetHost} (above every screen), by sheet id. */
+const useSheetPortal = create<{
+  hosts: number;
+  nodes: Record<string, ReactNode>;
+}>(() => ({ hosts: 0, nodes: {} }));
+
+function putSheet(id: string, node: ReactNode | null): void {
+  useSheetPortal.setState((s) => {
+    const nodes = { ...s.nodes };
+    if (node) nodes[id] = node;
+    else delete nodes[id];
+    return { nodes };
+  });
+}
+
+/**
+ * Mount once at the app root, above the navigator (app/_layout.tsx). Sheets render here, over
+ * every screen, like a portal. Without a host (component tests) a sheet renders in place.
+ */
+export function SheetHost() {
+  const nodes = useSheetPortal((s) => s.nodes);
+  useEffect(() => {
+    useSheetPortal.setState((s) => ({ hosts: s.hosts + 1 }));
+    return () => useSheetPortal.setState((s) => ({ hosts: s.hosts - 1 }));
+  }, []);
+  const open = Object.entries(nodes);
+  if (open.length === 0) return null;
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+      {open.map(([id, node]) => (
+        <View key={id} style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          {node}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** Height of a fixed snap point ('60%' of the window, or dp). Pure. */
+export function snapHeight(point: string | number, windowHeight: number): number {
+  if (typeof point === 'number') return point;
+  const pct = Number.parseFloat(point);
+  return Number.isFinite(pct) ? Math.round((windowHeight * pct) / 100) : windowHeight;
+}
+
 /**
  * Bottom sheet for every secondary action (sheet 11): swap, log, filters.
  * Radius 16, grabber, scrim backdrop, visible close button. Android's back
  * button closes it before leaving the screen.
+ *
+ * A plain overlay drawn by {@link SheetHost} (scrim + panel that springs up). @gorhom/bottom-sheet
+ * 5.2.14 never opens with Reanimated 4.3+ on the New Architecture (gorhom issue #2696): on the
+ * first device builds no sheet appeared. No native Modal either: iOS cannot present one while
+ * another is animating away, and screens swap sheets in one render (menu → discard).
  */
-export function Sheet({
-  open,
+export function Sheet(props: SheetProps) {
+  const id = useId();
+  const hosted = useSheetPortal((s) => s.hosts > 0);
+  const { open, onClose } = props;
+
+  useEffect(() => {
+    if (!open || Platform.OS !== 'android') return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      onClose();
+      return true;
+    });
+    return () => sub.remove();
+  }, [open, onClose]);
+
+  const node = open ? <SheetPanel {...props} /> : null;
+  useLayoutEffect(() => {
+    if (hosted) putSheet(id, node);
+  });
+  useLayoutEffect(() => () => putSheet(id, null), [id]);
+  if (hosted || !node) return null;
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+      {node}
+    </View>
+  );
+}
+
+function SheetPanel({
   onClose,
   title,
   children,
@@ -61,36 +139,22 @@ export function Sheet({
   const t = useTheme();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
-  const ref = useRef<BottomSheetModal>(null);
   const maxHeight = sheetMaxHeight(height, insets.top);
+  const fixedHeight = snapPoints?.length
+    ? Math.min(maxHeight, snapHeight(snapPoints[snapPoints.length - 1]!, height))
+    : undefined;
 
+  // Springs up from below when it mounts (Reanimated honours reduced motion: it then jumps).
+  const offset = useSharedValue(height);
   useEffect(() => {
-    if (open) ref.current?.present();
-    else ref.current?.dismiss();
-  }, [open]);
-
-  useEffect(() => {
-    if (!open || Platform.OS !== 'android') return;
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      onClose();
-      return true;
+    offset.value = withSpring(0, {
+      damping: t.motion.spring.damping,
+      stiffness: t.motion.spring.stiffness,
+      mass: t.motion.spring.mass,
+      overshootClamping: true,
     });
-    return () => sub.remove();
-  }, [open, onClose]);
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        pressBehavior="close"
-        style={[props.style, { backgroundColor: t.colors.scrim }]}
-        opacity={1}
-      />
-    ),
-    [t.colors.scrim],
-  );
+  }, [offset, t.motion.spring]);
+  const slide = useAnimatedStyle(() => ({ transform: [{ translateY: offset.value }] }));
 
   const header = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
@@ -113,30 +177,43 @@ export function Sheet({
   const bottomPad = insets.bottom + t.spacing.lg;
 
   return (
-    <BottomSheetModal
-      ref={ref}
-      snapPoints={snapPoints}
-      enableDynamicSizing={!snapPoints}
-      maxDynamicContentSize={maxHeight}
-      onDismiss={onClose}
-      backdropComponent={renderBackdrop}
-      // gorhom 5.2 under reduced motion (Android "Remove animations") presents the sheet but never
-      // moves it on-screen, with or without animateOnMount. Its own snap animation always runs.
-      overrideReduceMotion={ReduceMotion.Never}
-      backgroundStyle={{
-        backgroundColor: t.colors.bg,
-        borderTopLeftRadius: t.radius.sheet,
-        borderTopRightRadius: t.radius.sheet,
-      }}
-      handleIndicatorStyle={{ backgroundColor: t.colors.borderStrong, width: t.spacing.xxxl }}
-      accessibilityLabel={title}
-    >
-      {scrollable ? (
-        // Column capped at maxHeight: header + footer keep their size, the scroll view shrinks.
-        <BottomSheetView style={{ maxHeight }}>
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, justifyContent: 'flex-end' }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Close sheet"
+        onPress={onClose}
+        style={[StyleSheet.absoluteFill, { backgroundColor: t.colors.scrim }]}
+        testID={testID ? `${testID}-scrim` : undefined}
+      />
+      <Animated.View
+        accessibilityViewIsModal
+        style={[
+          {
+            maxHeight,
+            height: fixedHeight,
+            backgroundColor: t.colors.bg,
+            borderTopLeftRadius: t.radius.sheet,
+            borderTopRightRadius: t.radius.sheet,
+            paddingTop: t.spacing.xs,
+          },
+          slide,
+        ]}
+      >
+        <View
+          style={{
+            alignSelf: 'center',
+            width: t.spacing.xxxl,
+            height: t.spacing.xxs,
+            borderRadius: t.spacing.xxs,
+            backgroundColor: t.colors.borderStrong,
+            marginBottom: t.spacing.xs,
+          }}
+        />
+        {scrollable ? (
+          // Column capped at maxHeight: header + footer keep their size, the scroll view shrinks.
           <View testID={testID} style={{ flexShrink: 1 }}>
             <View style={[pad, { paddingBottom: t.spacing.xs }]}>{header}</View>
-            <BottomSheetScrollView
+            <ScrollView
               testID={testID ? `${testID}-scroll` : undefined}
               style={{ flexShrink: 1 }}
               contentContainerStyle={[
@@ -146,7 +223,7 @@ export function Sheet({
               keyboardShouldPersistTaps="handled"
             >
               {children}
-            </BottomSheetScrollView>
+            </ScrollView>
             {footer ? (
               <View
                 testID={testID ? `${testID}-footer` : undefined}
@@ -165,16 +242,14 @@ export function Sheet({
               </View>
             ) : null}
           </View>
-        </BottomSheetView>
-      ) : (
-        <BottomSheetView>
+        ) : (
           <View testID={testID} style={[pad, { paddingBottom: bottomPad, gap: t.spacing.md }]}>
             {header}
             {children}
             {footer}
           </View>
-        </BottomSheetView>
-      )}
-    </BottomSheetModal>
+        )}
+      </Animated.View>
+    </KeyboardAvoidingView>
   );
 }

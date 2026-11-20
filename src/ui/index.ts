@@ -25,7 +25,7 @@ export {
   type SearchBarProps,
 } from './SearchBar';
 export { Segmented, type SegmentedProps, type SegmentOption } from './Segmented';
-export { Sheet, SHEET_MAX_RATIO, sheetMaxHeight, type SheetProps } from './Sheet';
+export { Sheet, SheetHost, SHEET_MAX_RATIO, sheetMaxHeight, type SheetProps } from './Sheet';
 export {
   Skeleton,
   SkeletonCard,

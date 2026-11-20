@@ -22,6 +22,7 @@ import { markFirstFrame, markStartup } from '@/services/startupTrace';
 import { useTheme } from '@/theme';
 // Direct import, not the '@/ui' barrel: the root must not evaluate Skia, sheets and pickers.
 import { ToastHost } from '@/ui/Toast';
+import { SheetHost } from '@/ui/Sheet';
 
 /*
  * Module load stays tiny (perf audit A7/A8): hold the splash, start crash reporting (so a startup
@@ -102,6 +103,8 @@ function RootLayout() {
               <Stack.Screen name="dev/ui" />
             </Stack>
           </DatabaseProvider>
+          {/* Sheets draw over every screen; toasts stay above them. */}
+          <SheetHost />
           <ToastHost />
         </BottomSheetModalProvider>
       </SafeAreaProvider>

@@ -171,19 +171,27 @@ describe('catalog', () => {
     const g = globalThis as { requestIdleCallback?: unknown };
     const saved = g.requestIdleCallback;
     // Start from an empty catalogue; the reset also stops idle loads queued by earlier tests.
+    // Fake timers: the urgent load's macrotask runs exactly when the test advances the clock.
     resetCatalogForTests();
     g.requestIdleCallback = () => undefined; // a busy startup: no idle slice
+    jest.useFakeTimers();
     try {
       const h = await renderHook(() => useCatalogFor('exercises'));
       expect(h.result.current).toBeNull();
-      // Not idle-sliced: it arrives although requestIdleCallback never calls back.
-      await waitFor(() => expect(h.result.current).not.toBeNull());
+      // Not idle-sliced: the next macrotask loads it although idle never comes.
+      await act(async () => {
+        jest.advanceTimersByTime(0);
+      });
+      expect(h.result.current).not.toBeNull();
       expect(isCatalogPartLoaded('recipes')).toBe(false);
       // Recipes are not urgent: they still wait for an idle slice.
       const r = await renderHook(() => useCatalogFor('recipes'));
-      await act(() => new Promise<void>((res) => setTimeout(res, 5)));
+      await act(async () => {
+        jest.advanceTimersByTime(5_000);
+      });
       expect(r.result.current).toBeNull();
     } finally {
+      jest.useRealTimers();
       g.requestIdleCallback = saved;
     }
   });
