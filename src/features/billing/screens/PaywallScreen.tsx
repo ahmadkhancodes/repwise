@@ -120,7 +120,7 @@ function PlanRow({
         paddingVertical: t.spacing.sm,
         borderRadius: t.radius.card,
         borderWidth: t.sizes.borderThick,
-        borderColor: selected ? t.colors.accent : t.colors.border,
+        borderColor: selected ? t.colors.accent : t.colors.borderStrong,
         backgroundColor: selected ? t.colors.accentSoft : t.colors.surface,
       }}
     >

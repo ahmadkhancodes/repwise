@@ -25,7 +25,12 @@ export function TextField({
 }: TextFieldProps) {
   const t = useTheme();
   const [focused, setFocused] = useState(false);
-  const borderColor = error ? t.colors.danger : focused ? t.colors.textPrimary : t.colors.border;
+  // Unfocused outline is borderStrong (≥ 3:1, WCAG 1.4.11, P2-18); focus / error get borderThick.
+  const borderColor = error
+    ? t.colors.danger
+    : focused
+      ? t.colors.textPrimary
+      : t.colors.borderStrong;
   return (
     <View style={{ gap: t.spacing.xxs }}>
       <Text
@@ -54,7 +59,7 @@ export function TextField({
           minHeight: t.sizes.button,
           paddingHorizontal: t.spacing.md,
           borderRadius: t.radius.input,
-          borderWidth: focused || error ? 2 * t.sizes.hairline : t.sizes.hairline,
+          borderWidth: focused || error ? t.sizes.borderThick : t.sizes.hairline,
           borderColor,
           backgroundColor: t.colors.surface,
           color: t.colors.textPrimary,

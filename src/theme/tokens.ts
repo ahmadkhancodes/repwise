@@ -198,6 +198,8 @@ export const sizes = {
   /** BigTimer / kcal-reveal ring. Fits a 360dp screen with screen padding. */
   ringHero: 240,
   ringStroke: 10,
+  /** Small macro rings beside the kcal ring. */
+  ringStrokeThin: 5,
   /** Wheel picker row height at 100% font scale. */
   wheelRow: 44,
 } as const;

@@ -62,6 +62,15 @@ function loadCheckin(today: ISODate) {
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
+/**
+ * Where "Add today's weight" starts (P2-20): the profile weight in the user's units, else a
+ * neutral default. Never a fixed 75 kg for everyone. Pure.
+ */
+export function startWeight(profileKg: number | null, imperial: boolean): number {
+  if (profileKg != null && profileKg > 0) return displayWeight(profileKg, imperial);
+  return imperial ? 165 : 75;
+}
+
 /** S28 weekly check-in: weigh-in → energy/sleep → your week → adjustments → approve (flow F4). */
 export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
   const t = useTheme();
@@ -293,7 +302,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
                 />
               </>
             ) : (
-              <Button label="Add today’s weight" variant="secondary" onPress={() => setWeight(imperial ? 165 : 75)} testID="checkin-add-weight" />
+              <Button label="Add today’s weight" variant="secondary" onPress={() => setWeight(startWeight(data?.profile?.weightKg ?? null, imperial))} testID="checkin-add-weight" />
             )}
           </View>
         ) : null}
@@ -383,7 +392,8 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
               </Text>
               {kcalKnown ? (
                 <>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, marginTop: t.spacing.xs }}>
+                  {/* Wraps at 130% font on 360dp instead of overflowing (P2-20). */}
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: t.spacing.sm, rowGap: t.spacing.xxs, marginTop: t.spacing.xs }}>
                     <Text variant="title2" color="textSecondary" tabular style={{ textDecorationLine: result.adjustment.deltaKcal ? 'line-through' : 'none' }} testID="kcal-before">
                       {fmt(result.before.kcal)}
                     </Text>

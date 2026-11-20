@@ -11,6 +11,9 @@ export function clampProgress(p: number): number {
   return Math.min(1, Math.max(0, p));
 }
 
+/** Empty-track opacity over borderStrong (visible on bg AND surface, still quiet). */
+export const TRACK_OPACITY = 0.35;
+
 export type ProgressRingProps = {
   /** 0..1 */
   progress: number;
@@ -70,7 +73,9 @@ export function ProgressRing({
           style="stroke"
           strokeWidth={stroke}
           strokeCap="round"
-          color={t.colors.surface2}
+          // borderStrong at 35%: an empty track stays visible on surface cards (P2-23).
+          color={t.colors.borderStrong}
+          opacity={TRACK_OPACITY}
         />
         <Path
           path={path}

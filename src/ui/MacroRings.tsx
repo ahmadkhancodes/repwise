@@ -53,6 +53,8 @@ export function MacroRings({ eaten, target, size = 'default', testID }: MacroRin
     <View testID={testID} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.lg }}>
       <ProgressRing
         progress={m.kcal}
+        // Over target: the full ring turns warning so it never reads as "done" (P2-22).
+        color={m.over ? 'warning' : undefined}
         size={ring}
         strokeWidth={stroke}
         accessibilityLabel={`Calories: ${Math.round(eaten.kcal)} of ${Math.round(target.kcal)}, ${m.kcalValue} ${m.over ? 'over' : 'left'}`}
@@ -86,7 +88,7 @@ export function MacroRings({ eaten, target, size = 'default', testID }: MacroRin
               progress={m[mac.key]}
               color={mac.color}
               size={t.sizes.touch - t.spacing.xs}
-              strokeWidth={t.spacing.xxs + t.spacing.xxs / 4}
+              strokeWidth={t.sizes.ringStrokeThin}
               accessibilityLabel={`${mac.label}: ${Math.round(eaten[mac.key])} of ${Math.round(target[mac.key])} grams`}
             />
             <View style={{ flex: 1, minWidth: 0 }}>

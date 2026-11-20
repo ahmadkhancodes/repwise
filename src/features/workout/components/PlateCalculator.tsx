@@ -18,7 +18,7 @@ export function PlateCalculator({ unit, initial }: { unit: WeightUnit; initial?:
   const [target, setTarget] = useState(initial ?? (unit === 'kg' ? 100 : 225));
   const res = platesPerSide(target, { unit, bar });
   const biggest = Math.max(...DEFAULT_PLATES[unit]);
-  const sleeveH = t.sizes.button * 1.6;
+  const sleeveH = t.sizes.hitGymLarge + t.spacing.xl;
 
   return (
     <View style={{ gap: t.spacing.md }} testID="plate-calculator">
@@ -63,8 +63,8 @@ export function PlateCalculator({ unit, initial }: { unit: WeightUnit; initial?:
           }
           style={{ flexDirection: 'row', alignItems: 'center', minHeight: sleeveH, gap: t.spacing.xxs }}
         >
-          <View style={{ width: t.spacing.xxl, height: t.spacing.xs, borderRadius: 2, backgroundColor: t.colors.textTertiary }} />
-          <View style={{ width: t.spacing.xs, height: t.spacing.xl, borderRadius: 2, backgroundColor: t.colors.textSecondary }} />
+          <View style={{ width: t.spacing.xxl, height: t.spacing.xs, borderRadius: t.radius.pill, backgroundColor: t.colors.borderStrong }} />
+          <View style={{ width: t.spacing.xs, height: t.spacing.xl, borderRadius: t.radius.pill, backgroundColor: t.colors.borderStrong }} />
           {res.perSide.map((p, i) => (
             <Animated.View
               key={`${i}-${p}`}
@@ -80,7 +80,7 @@ export function PlateCalculator({ unit, initial }: { unit: WeightUnit; initial?:
               }}
             />
           ))}
-          <View style={{ flex: 1, height: t.spacing.xs, borderRadius: 2, backgroundColor: t.colors.textTertiary }} />
+          <View style={{ flex: 1, height: t.spacing.xs, borderRadius: t.radius.pill, backgroundColor: t.colors.borderStrong }} />
         </View>
         <Text variant="title2" tabular testID="plate-per-side" style={{ marginTop: t.spacing.sm }}>
           {res.perSide.length ? res.perSide.map(trimNumber).join(' + ') : 'Just the bar'}
