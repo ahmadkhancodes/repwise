@@ -43,3 +43,16 @@ it('useScreenFocused counts as focused outside a navigator', async () => {
   const { result } = await renderHook(() => useScreenFocused());
   expect(result.current).toBe(true);
 });
+
+it('useProfile has the row on the first render: no kg → lb flash for lb users (r2 N13)', async () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { saveProfile, useProfile } = require('@/features/settings/repo') as typeof import('@/features/settings/repo');
+  saveProfile({ units: 'imperial' } as never);
+  const seen: (string | null | undefined)[] = [];
+  await renderHook(() => {
+    const p = useProfile();
+    seen.push(p?.units);
+    return p;
+  });
+  expect(seen[0]).toBe('imperial');
+});

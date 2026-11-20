@@ -167,6 +167,25 @@ describe('catalog', () => {
     expect(peekCatalog()).toBe(all.result.current);
   });
 
+  it('a screen that needs exercises gets them on the next macrotask, even when idle never comes (r2 N19)', async () => {
+    const g = globalThis as { requestIdleCallback?: unknown };
+    const saved = g.requestIdleCallback;
+    g.requestIdleCallback = () => undefined; // a busy startup: no idle slice
+    try {
+      const h = await renderHook(() => useCatalogFor('exercises'));
+      expect(h.result.current).toBeNull();
+      await act(() => new Promise<void>((r) => setTimeout(r, 5)));
+      expect(h.result.current).not.toBeNull();
+      expect(isCatalogPartLoaded('recipes')).toBe(false);
+      // Recipes are not urgent: they still wait for an idle slice.
+      const r = await renderHook(() => useCatalogFor('recipes'));
+      await act(() => new Promise<void>((res) => setTimeout(res, 5)));
+      expect(r.result.current).toBeNull();
+    } finally {
+      g.requestIdleCallback = saved;
+    }
+  });
+
   it('re-renders subscribers when a lazy read loads a part', async () => {
     const h = await renderHook(() => useCatalogFor('foods'));
     await act(async () => {

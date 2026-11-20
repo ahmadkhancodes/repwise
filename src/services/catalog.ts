@@ -275,6 +275,14 @@ function subscribe(l: () => void): () => void {
 }
 
 /**
+ * Parts a screen cannot render without (names in the workout player): when a mounted screen asks
+ * for one, it loads on the next macrotask (about 10–30 ms for exercises), not in an idle slice that
+ * a busy startup can push back by up to 2 s (perf audit r2 N19: a notification tap into the
+ * player showed a skeleton). Recipes and foods (the large parts) stay idle-sliced.
+ */
+export const URGENT_PARTS: readonly CatalogPart[] = ['exercises'];
+
+/**
  * Catalogue for screens that read only some parts: null until those parts are loaded (show a
  * skeleton), then the catalogue. E.g. the player: `useCatalogFor('exercises')`.
  */
@@ -284,7 +292,22 @@ export function useCatalogFor(...want: CatalogPart[]): Catalog | null {
   const c = useSyncExternalStore(subscribe, snap, snap);
   useEffect(() => {
     const ps = key.split(',') as CatalogPart[];
-    if (!peekCatalogFor(ps)) loadCatalogParts(ps).catch(() => undefined);
+    if (peekCatalogFor(ps)) return;
+    const urgent = ps.filter((p) => URGENT_PARTS.includes(p) && parts[p] == null);
+    const timer =
+      urgent.length > 0
+        ? setTimeout(() => {
+            try {
+              for (const p of urgent) part(p);
+            } catch {
+              // the idle load below retries and reports
+            }
+          }, 0)
+        : null;
+    loadCatalogParts(ps).catch(() => undefined);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [key]);
   return c;
 }
