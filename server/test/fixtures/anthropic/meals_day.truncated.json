@@ -12,7 +12,7 @@
       },
       {
         "type": "text",
-        "text": "{\"meals\":[{\"slot\":\"breakfast\",\"recipe_id\":\"spanish-tortilla\",\"note\":\"A warm, savoury start that keeps you going.\"},{\"slot\":\"lunch\",\"recipe_id\":\"daal-chawal\""
+        "text": "{\"meals\":[{\"slot\":\"breakfast\",\"recipe_id\":\"namkeen-dalia-egg\",\"note\":\"A warm, savoury start that keeps you going.\"},{\"slot\":\"lunch\",\"recipe_id\":\"chapli-keb"
       }
     ],
     "stop_reason": "max_tokens",

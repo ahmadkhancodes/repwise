@@ -86,6 +86,12 @@ type ApiConfig = {
   now: () => number;
   /** Refresh this long before the access token's expiry. */
   refreshSkewMs: number;
+  /**
+   * Waits before each retry of `/auth/refresh` after a transient failure (offline, timeout, 5xx).
+   * The first retry is immediate (inside the server's reuse grace); later ones give a resumed
+   * phone's radio time to come back. A transient failure never signs the user out.
+   */
+  refreshRetryDelaysMs: readonly number[];
 };
 
 const defaults = (): ApiConfig => ({
@@ -94,6 +100,7 @@ const defaults = (): ApiConfig => ({
   timeoutMs: 15_000,
   now: () => Date.now(),
   refreshSkewMs: 30_000,
+  refreshRetryDelaysMs: [0, 1_000, 3_000],
 });
 
 let config: ApiConfig = defaults();
@@ -194,15 +201,30 @@ async function doRefresh(): Promise<StoredSession> {
   if (!s) throw new ApiError('unauthorized', null, 'no_session');
   const post = () =>
     send('/auth/refresh', { method: 'POST', body: { refreshToken: s.refreshToken } }, null);
-  let res: Response;
-  try {
-    res = await post();
-  } catch (e) {
-    // The Worker may have rotated the token and only the reply was lost. Retrying at once lands
-    // inside its reuse grace window, which hands back the same successor instead of revoking.
-    if (!(isApiError(e) && (e.kind === 'timeout' || e.kind === 'offline'))) throw e;
-    res = await post();
+  // The Worker may have rotated the token and only the reply was lost. Retrying lands inside its
+  // reuse grace window (or, after a long suspend, its one-time late recovery), which hands back
+  // the same successor instead of revoking (R2-5).
+  const transient = (e: unknown) => isApiError(e) && (e.kind === 'timeout' || e.kind === 'offline');
+  const delays = config.refreshRetryDelaysMs;
+  let res: Response | null = null;
+  for (let attempt = 0; ; attempt++) {
+    let failure: unknown = null;
+    try {
+      res = await post();
+    } catch (e) {
+      if (!transient(e)) throw e;
+      failure = e;
+    }
+    if (res && res.status < 500) break;
+    if (attempt >= delays.length) {
+      if (failure) throw failure;
+      break; // 5xx after every retry: parse() reports it; the session stays
+    }
+    res = null;
+    const wait = delays[attempt] ?? 0;
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
   }
+  if (!res) throw new ApiError('offline');
   if (res.status === 401) {
     await expireSession(s.refreshToken);
     throw new ApiError('unauthorized', 401, 'session_expired');
