@@ -49,5 +49,7 @@ export const securityHeaders: MiddlewareHandler = async (c, next) => {
   c.header('X-Frame-Options', 'DENY');
   c.header('Referrer-Policy', 'no-referrer');
   c.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  c.header('Cross-Origin-Resource-Policy', 'same-origin');
   if (!c.res.headers.has('Cache-Control')) c.header('Cache-Control', 'no-store');
 };

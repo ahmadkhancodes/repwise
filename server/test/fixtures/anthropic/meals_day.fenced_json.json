@@ -1,0 +1,33 @@
+{
+  "body": {
+    "id": "msg_01GoldenRecording0000000000",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-haiku-5-5",
+    "content": [
+      {
+        "type": "thinking",
+        "thinking": "",
+        "signature": "EqQBCkgIBhABGAIiQGolden"
+      },
+      {
+        "type": "text",
+        "text": "```json\n{\"meals\":[{\"slot\":\"breakfast\",\"recipe_id\":\"spanish-tortilla\",\"note\":\"A warm, savoury start that keeps you going.\"},{\"slot\":\"lunch\",\"recipe_id\":\"daal-chawal\",\"note\":\"Hearty and easy to batch for the week.\"},{\"slot\":\"dinner\",\"recipe_id\":\"lamb-kofta-tzatziki\",\"note\":\"A fresh, simple plate to round off the day.\"}]}\n```"
+      }
+    ],
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 412,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 7350,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 389,
+      "service_tier": "standard"
+    }
+  }
+}

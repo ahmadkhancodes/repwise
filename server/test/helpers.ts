@@ -10,6 +10,7 @@ import { loadConfig } from '../src/config';
 import { MemoryDb } from '../src/db/memory';
 import type { Env } from '../src/env';
 import type { Deps } from '../src/types';
+import { memoryLogger } from '../src/lib/log';
 
 export const GOOGLE_AUD = 'test-web-client.apps.googleusercontent.com';
 export const T0 = Date.UTC(2026, 10, 19, 12, 0, 0);
@@ -56,6 +57,7 @@ export interface TestCtx {
   apple: Issuer;
   play: FakePlay;
   env: Env;
+  log: ReturnType<typeof memoryLogger>;
 }
 
 export async function setup(
@@ -82,6 +84,7 @@ export async function setup(
   const google = await makeIssuer('https://accounts.google.com', GOOGLE_AUD);
   const apple = await makeIssuer('https://appleid.apple.com', 'com.client.repwise');
   const play = new FakePlay();
+  const log = memoryLogger();
   const deps: Deps = {
     config,
     db: async () => db,
@@ -94,9 +97,10 @@ export async function setup(
     verifyPubsub: opts.verifyPubsub ?? (async () => false),
     planner: opts.planner ?? stubPlanner,
     llm: opts.llm ?? null,
+    log,
   };
   const app = createApp(() => deps);
-  return { app, deps, db, mailer, clock, google, apple, play, env };
+  return { app, deps, db, mailer, clock, google, apple, play, env, log };
 }
 
 export async function call(
@@ -124,11 +128,12 @@ export async function call(
 }
 
 /** Full email sign-in; returns the token response. */
-export async function signInEmail(t: TestCtx, email: string, extra: { token?: string } = {}) {
-  const start = await call(t, 'POST', '/auth/email/start', { body: { email } });
+export async function signInEmail(t: TestCtx, email: string, extra: { token?: string } = {}, ip?: string) {
+  const ipHeader = ip ? { headers: { 'cf-connecting-ip': ip } } : {};
+  const start = await call(t, 'POST', '/auth/email/start', { body: { email }, ...ipHeader });
   if (start.status !== 200) throw new Error(`email start ${start.status} ${start.text}`);
   const code = /(\d{6})/.exec(t.mailer.sent.at(-1)!.subject)![1];
-  const res = await call(t, 'POST', '/auth/email/verify', { body: { email, code }, ...(extra.token ? { token: extra.token } : {}) });
+  const res = await call(t, 'POST', '/auth/email/verify', { body: { email, code }, ...ipHeader, ...(extra.token ? { token: extra.token } : {}) });
   if (res.status !== 200) throw new Error(`email verify ${res.status} ${res.text}`);
   return res.body as { accessToken: string; refreshToken: string; user: { id: string; email: string | null; anonymous: boolean } };
 }

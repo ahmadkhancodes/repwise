@@ -2,8 +2,10 @@ import { Hono, type MiddlewareHandler } from 'hono';
 import { appleToPurchase, playToPurchase, publicEntitlement, savePurchase } from '../billing/entitlement';
 import type { PlaySubscriptionV2 } from '../billing/play';
 import type { Db } from '../db/types';
-import { HttpError, badRequest, notFound, readJson, str } from '../lib/http';
+import { HttpError, badRequest, notFound } from '../lib/http';
 import { rateLimit, requireUser } from '../lib/middleware';
+import { parseJson } from '../lib/validate';
+import { BillingVerifyBody } from '../schemas';
 import type { AppEnv, Deps } from '../types';
 
 /** Every billing route (and webhook) is a 404 while payments_enabled is off. */
@@ -44,7 +46,7 @@ billingRoutes.use('*', paymentsGate);
 billingRoutes.use('*', requireUser());
 
 billingRoutes.post('/verify', async (c) => {
-  const body = await readJson(c, 64 * 1024);
+  const body = await parseJson(c, BillingVerifyBody, 64 * 1024);
   const userId = c.get('userId');
   await rateLimit(c, `billing:${userId}`, 30, 60_000);
   const deps = c.get('deps');
@@ -53,8 +55,7 @@ billingRoutes.post('/verify', async (c) => {
   const now = deps.now();
 
   if (body.platform === 'ios') {
-    const jws = str(body, 'signedTransaction', { max: 64 * 1024 });
-    let tx = await deps.appleStore.verifyTransaction(jws);
+    let tx = await deps.appleStore.verifyTransaction(body.signedTransaction);
     if (tx.bundleId !== cfg.apple.bundleId) throw badRequest('wrong_app');
     if (tx.type && tx.type !== 'Auto-Renewable Subscription') throw badRequest('not_a_subscription');
     // Prefer the App Store Server API's current status when keys are configured.
@@ -70,9 +71,9 @@ billingRoutes.post('/verify', async (c) => {
     const doc = existing && existing.lastEventAt > eventAt ? { ...existing, userId, updatedAt: now } : fresh;
     // The verifying account owns the purchase (restore on a new account transfers it).
     await savePurchase(deps, db, doc, existing?.userId ?? null);
-  } else if (body.platform === 'android') {
-    const token = str(body, 'purchaseToken', { max: 1024 });
-    const productId = str(body, 'productId', { max: 200 });
+  } else {
+    const token = body.purchaseToken;
+    const productId = body.productId;
     if (productId !== cfg.plans.android.subscriptionId) throw badRequest('unknown_product');
     const sub = await deps.play.getSubscription(token);
     if (!sub) throw badRequest('invalid_purchase');
@@ -83,8 +84,6 @@ billingRoutes.post('/verify', async (c) => {
     await acknowledgeIfNeeded(deps, sub, token);
     await retireLinkedPlayToken(deps, db, sub);
     await savePurchase(deps, db, doc, existing?.userId ?? null);
-  } else {
-    throw badRequest('invalid_platform');
   }
   return c.json(publicEntitlement(await db.getEntitlement(userId), now));
 });

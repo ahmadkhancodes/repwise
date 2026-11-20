@@ -12,6 +12,7 @@
  * Request `params` (all optional unless noted):
  *   weekStart / date ('YYYY-MM-DD', user-local), now (epoch ms, for the recovery heatmap),
  *   utcOffsetMin (when the server must work out "today"), noRepeatDays (7–30), adjustmentKcal,
+ *   deload (boolean: the user asked for a lighter week; the engine plans it as a deload),
  *   swap only: item ('exercise' | 'meal', required), date (required), index (required), currentId.
  */
 import { engineCatalogues } from '@repwise/content';
@@ -45,7 +46,7 @@ import {
   type WeekPlan,
 } from '@repwise/engine';
 import { HttpError, badRequest, isPlainObject } from '../lib/http';
-import type { FinalizeResult, JsonObject, JsonValue, PlanRequest, Planner, PlannerContext } from './planner';
+import type { Catalogue, CatalogueKey, FinalizeResult, JsonObject, JsonValue, PlanRequest, Planner, PlannerContext } from './planner';
 
 /** Pool size caps keep the prompt small (IDs only, ~8 tokens each). */
 export const MAX_EXERCISE_POOL = 8;
@@ -111,9 +112,31 @@ export interface EnginePlannerOptions {
   catalogues?: () => Catalogues;
 }
 
+/**
+ * One compact line per ID, sorted by ID so the text is byte-stable (it is a cached prompt block):
+ *   exercises: `id | pattern | main muscles | equipment`
+ *   recipes:   `id | cuisine | main protein | slots`
+ */
+export function catalogueText(cat: Catalogues, key: CatalogueKey): Catalogue {
+  const clean = (v: string) => v.replace(/[|\n\r]/g, ' ');
+  if (key === 'exercises') {
+    const rows = [...cat.exercises].sort((a, b) => (a.id < b.id ? -1 : 1));
+    return {
+      ids: rows.map((e) => e.id),
+      text: rows.map((e) => [e.id, e.pattern, e.primaryMuscles.join(','), e.equipment.join(',')].map(clean).join(' | ')).join('\n'),
+    };
+  }
+  const rows = [...cat.recipes].sort((a, b) => (a.id < b.id ? -1 : 1));
+  return {
+    ids: rows.map((r) => r.id),
+    text: rows.map((r) => [r.id, r.cuisine, r.proteinSource, r.slots.join(',')].map(clean).join(' | ')).join('\n'),
+  };
+}
+
 export function createEnginePlanner(options: EnginePlannerOptions): Planner {
   const internals = new WeakMap<PlannerContext, Internal>();
   const catalogues = options.catalogues ?? (() => engineCatalogues());
+  const catalogueMemo = new Map<CatalogueKey, Catalogue>();
 
   function parse(req: PlanRequest): Parsed {
     const profile = ProfileSchema.safeParse(req.profile);
@@ -128,11 +151,13 @@ export function createEnginePlanner(options: EnginePlannerOptions): Planner {
     const now = num(p.now, 'now', 0, 8.64e15) ?? Date.parse(`${weekStart}T00:00:00Z`);
     const noRepeatDays = num(p.noRepeatDays, 'noRepeatDays', 7, 30);
     const adjustmentKcal = num(p.adjustmentKcal, 'adjustmentKcal', -1000, 1000);
+    if (p.deload !== undefined && p.deload !== null && typeof p.deload !== 'boolean') throw badRequest('invalid_deload');
     const opts: PlanOptions = {
       now,
       weekStart,
       ...(noRepeatDays !== undefined ? { noRepeatDays } : {}),
       ...(adjustmentKcal !== undefined ? { adjustmentKcal } : {}),
+      ...(p.deload === true ? { deload: true } : {}),
     };
     return { profile: profile.data, history: history.data, opts, date };
   }
@@ -168,7 +193,9 @@ export function createEnginePlanner(options: EnginePlannerOptions): Planner {
     const ctx: PlannerContext = {
       rulesPlan: toJson({ week: rules, notes: {} }),
       candidates: book.pools,
-      constraints: { sessions, rule: 'one exercise_id per slot, in slot order, from that slot pool' },
+      // `deload` tells the copy it is a lighter week; the engine already cut the volume.
+      constraints: { deload: rules.deload, sessions, rule: 'one exercise_id per slot, in slot order, from that slot pool' },
+      catalogue: 'exercises',
     };
     return { ctx, internal: { parsed, rules, slotPools } };
   }
@@ -194,6 +221,7 @@ export function createEnginePlanner(options: EnginePlannerOptions): Planner {
       rulesPlan: toJson({ date: parsed.date, day, notes: [] }),
       candidates: book.pools,
       constraints: { date: parsed.date, meals: day.meals.map((m, i) => ({ slot: m.slot, pool: names[i] as string })), rule: 'one recipe_id per meal, in order, from that meal pool' },
+      catalogue: 'recipes',
     };
     return { ctx, internal: { parsed, rules, slotPools: { [parsed.date]: names } } };
   }
@@ -230,6 +258,7 @@ export function createEnginePlanner(options: EnginePlannerOptions): Planner {
       rulesPlan: toJson({ item, date: parsed.date, index, options: options.slice(0, 3), note: null }),
       candidates: { options: options.map(idOf) },
       constraints: { item, pick: 'up to 3 options from the options pool, best first' },
+      catalogue: item === 'exercise' ? 'exercises' : 'recipes',
     };
     return { ctx, internal: { parsed, rules, slotPools: {}, swapById } };
   }
@@ -298,6 +327,11 @@ export function createEnginePlanner(options: EnginePlannerOptions): Planner {
 
   return {
     name: 'repwise-engine',
+    catalogue(key) {
+      let c = catalogueMemo.get(key);
+      if (!c) catalogueMemo.set(key, (c = catalogueText(catalogues(), key)));
+      return c;
+    },
     prepare(req) {
       const parsed = parse(req);
       let r: { ctx: PlannerContext; internal: Internal };

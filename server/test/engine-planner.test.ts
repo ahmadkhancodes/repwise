@@ -179,12 +179,13 @@ describe('engine planner: Anthropic (mocked fetch)', () => {
     };
     const b = await boot({ pick: wrongSlot });
     const r = await post(b, '/ai/plan/week', { profile, params: { weekStart: WEEK } });
-    expect(r.body).toMatchObject({ source: 'rules', fallbackReason: 'validator_rejected' });
+    // Caught by the per-slot pool check before the engine runs.
+    expect(r.body).toMatchObject({ source: 'rules', fallbackReason: 'invalid_output' });
     expect(r.body.plan.week.generatedBy).toBe('rules');
 
     const missing: Picker = (u) => ({ sessions: (echoRules(u) as any).sessions.slice(1) });
     const b2 = await boot({ pick: missing });
-    expect((await post(b2, '/ai/plan/week', { profile, params: { weekStart: WEEK } })).body.fallbackReason).toBe('validator_rejected');
+    expect((await post(b2, '/ai/plan/week', { profile, params: { weekStart: WEEK } })).body.fallbackReason).toBe('invalid_output');
   });
 
   it('meals_day: picks are portioned and validated by the engine; wrong slot order falls back', async () => {
@@ -198,7 +199,7 @@ describe('engine planner: Anthropic (mocked fetch)', () => {
 
     const reversed: Picker = (u) => ({ meals: (echoRules(u) as any).meals.reverse() });
     const b2 = await boot({ pick: reversed });
-    expect((await post(b2, '/ai/meals/day', { profile, params: { date: '2026-11-25' } })).body).toMatchObject({ source: 'rules', fallbackReason: 'validator_rejected' });
+    expect((await post(b2, '/ai/meals/day', { profile, params: { date: '2026-11-25' } })).body).toMatchObject({ source: 'rules', fallbackReason: 'invalid_output' });
   });
 
   it('swap: the LLM orders engine options; meal options keep engine portions', async () => {
