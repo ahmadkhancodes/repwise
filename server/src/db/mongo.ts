@@ -1,5 +1,6 @@
 import { uuidv7 } from '../lib/crypto';
 import { TABLE_NAMES } from '../sync/tables';
+import { INDEXES, INDEX_VERSION } from './indexes';
 import type {
   AiCacheDoc,
   AiSpendDoc,
@@ -85,7 +86,6 @@ export function resetMongoClientCache(): void {
   cached = null;
 }
 
-const INDEX_VERSION = 2;
 let indexesReady: Promise<void> | null = null;
 
 const isDup = (e: unknown) => typeof e === 'object' && e !== null && (e as { code?: number }).code === 11000;
@@ -118,25 +118,7 @@ export class MongoDb implements Db {
   private async ensureIndexes(): Promise<void> {
     const meta = await this.c('_meta').findOne({ _id: 'indexes' });
     if (meta && meta.v === INDEX_VERSION) return;
-    const str = (f: string) => ({ partialFilterExpression: { [f]: { $type: 'string' } }, unique: true });
-    await Promise.all([
-      this.c('users').createIndex({ email: 1 }, str('email')),
-      this.c('users').createIndex({ googleSub: 1 }, str('googleSub')),
-      this.c('users').createIndex({ appleSub: 1 }, str('appleSub')),
-      this.c('refresh_tokens').createIndex({ tokenHash: 1 }, { unique: true }),
-      this.c('refresh_tokens').createIndex({ userId: 1 }),
-      this.c('refresh_tokens').createIndex({ familyId: 1 }),
-      this.c('refresh_tokens').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-      this.c('email_codes').createIndex({ email: 1 }),
-      this.c('email_codes').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-      this.c('rate_limits').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-      this.c('sync_leases').createIndex({ userId: 1, floor: 1 }),
-      this.c('sync_leases').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-      this.c('purchases').createIndex({ userId: 1 }),
-      this.c('ai_cache').createIndex({ userId: 1 }),
-      this.c('ai_cache').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-      ...TABLE_NAMES.map((t) => this.c(t).createIndex({ userId: 1, syncedAt: 1, _id: 1 })),
-    ]);
+    await Promise.all(INDEXES.map((i) => this.c(i.collection).createIndex(i.key, i.options)));
     await this.c('_meta').replaceOne({ _id: 'indexes' }, { _id: 'indexes', v: INDEX_VERSION }, { upsert: true });
   }
 

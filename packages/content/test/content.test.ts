@@ -30,8 +30,8 @@ describe('schemas', () => {
 
   it('meets the catalogue size targets', () => {
     assert.ok(exercises.length >= 220, `exercises: ${exercises.length}`);
-    assert.ok(recipes.length >= 240, `recipes: ${recipes.length}`);
-    assert.ok(foods.length >= 250, `foods: ${foods.length}`);
+    assert.ok(recipes.length >= 600, `recipes: ${recipes.length}`);
+    assert.ok(foods.length >= 290, `foods: ${foods.length}`);
   });
 });
 

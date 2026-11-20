@@ -1,9 +1,17 @@
 /**
  * Content catalogues (@repwise/content): exercises, recipes and foods, read-only and offline.
  *
- * The JSON is ~800 KB, so it is never parsed on the startup path: `warmCatalog()` loads it after
- * startup when the JS thread is idle, and any lookup before that loads it on demand. Search uses a prebuilt
- * normalised index (name + aliases + key tags) and runs in well under 50 ms for the whole set.
+ * Loading is lazy and incremental (perf audit A4), so the catalogue never sits on the startup path:
+ * - The three files are three independent parts. Each is `require`d (parsed) only when something
+ *   first reads it: the player and Today read exercises, Eat reads recipes, the food log reads foods.
+ * - `lazyCatalog()` returns the catalogue at once; its fields are lazy getters, so
+ *   `lazyCatalog().recipeById` parses recipes only (so do `getRecipe` & co). `getCatalog()` keeps its
+ *   contract (everything loaded on return). Id maps are built with their part (cheap); the search
+ *   index of a part is built on its first search, never on load.
+ * - `loadCatalog()` / `warmCatalog()` load the parts one per idle slice (exercises first), so no
+ *   single block holds the JS thread for the whole ~1 MB. The warm-up then builds the search indexes,
+ *   again one part per idle slice, so the first keystroke in a search is instant.
+ * - `useCatalogFor('exercises')` lets a screen render as soon as the parts it reads are in.
  * Only types come from the package entry, so zod never reaches the app bundle.
  */
 import type { Exercise, Food, Recipe } from '@repwise/content';
@@ -23,11 +31,19 @@ export type Catalog = {
   index: { exercises: Indexed<Exercise>[]; recipes: Indexed<Recipe>[]; foods: Indexed<Food>[] };
 };
 
+export type CatalogPart = 'exercises' | 'recipes' | 'foods';
+/** Load order: what the first screens need comes first. */
+export const CATALOG_PARTS: readonly CatalogPart[] = ['exercises', 'recipes', 'foods'];
+
+type ItemOf = { exercises: Exercise; recipes: Recipe; foods: Food };
+
+const NON_ASCII = /[^\x00-\x7f]/;
+
 /** Lowercase, strip accents and punctuation: "Pull-Up (Wide)" → "pull up wide". */
 export function normalise(s: string): string {
-  return s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+  // NFD is the slow step and almost every name is plain ASCII, so it only runs when needed.
+  const base = NON_ASCII.test(s) ? s.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : s;
+  return base
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
@@ -39,9 +55,16 @@ function indexed<T>(item: T, name: string, extra: string[]): Indexed<T> {
   return { item, name: n, words: [...new Set(hay.split(' ').filter(Boolean))], hay };
 }
 
+const INDEXERS: { [P in CatalogPart]: (x: ItemOf[P]) => Indexed<ItemOf[P]> } = {
+  exercises: (e) =>
+    indexed(e, e.name, [...e.aliases, ...e.primaryMuscles, ...e.equipment, e.pattern]),
+  recipes: (r) => indexed(r, r.title, [r.cuisine, r.mainProtein, ...r.dietTags]),
+  foods: (f) => indexed(f, f.name, [f.category]),
+};
+
 export type CatalogSource = { exercises: Exercise[]; recipes: Recipe[]; foods: Food[] };
 
-/** Build lookup maps and the search index (pure; exported for tests). */
+/** Build lookup maps and the search index eagerly (pure; exported for tests and scripts). */
 export function buildCatalog(src: CatalogSource): Catalog {
   return {
     ...src,
@@ -49,43 +72,137 @@ export function buildCatalog(src: CatalogSource): Catalog {
     recipeById: new Map(src.recipes.map((r) => [r.id, r])),
     foodById: new Map(src.foods.map((f) => [f.id, f])),
     index: {
-      exercises: src.exercises.map((e) =>
-        indexed(e, e.name, [...e.aliases, ...e.primaryMuscles, ...e.equipment, e.pattern]),
-      ),
-      recipes: src.recipes.map((r) =>
-        indexed(r, r.title, [r.cuisine, r.mainProtein, ...r.dietTags]),
-      ),
-      foods: src.foods.map((f) => indexed(f, f.name, [f.category])),
+      exercises: src.exercises.map(INDEXERS.exercises),
+      recipes: src.recipes.map(INDEXERS.recipes),
+      foods: src.foods.map(INDEXERS.foods),
     },
   };
 }
 
-function readSource(): CatalogSource {
-  return {
-    exercises: require('@repwise/content/exercises.json') as Exercise[],
-    recipes: require('@repwise/content/recipes.json') as Recipe[],
-    foods: require('@repwise/content/foods.json') as Food[],
-  };
+/** One static require per file, so Metro bundles each and evaluates it only on first call. */
+function readPart<P extends CatalogPart>(part: P): ItemOf[P][] {
+  switch (part) {
+    case 'exercises':
+      return require('@repwise/content/exercises.json') as ItemOf[P][];
+    case 'recipes':
+      return require('@repwise/content/recipes.json') as ItemOf[P][];
+    default:
+      return require('@repwise/content/foods.json') as ItemOf[P][];
+  }
 }
 
-let catalog: Catalog | null = null;
+type Part<T> = { list: T[]; byId: Map<string, T>; index: Indexed<T>[] | null };
+type Parts = { [P in CatalogPart]?: Part<ItemOf[P]> };
+
+let parts: Parts = {};
 let loading: Promise<Catalog> | null = null;
+let warming = false;
 const listeners = new Set<() => void>();
+let notifyQueued = false;
+/** Work counters for deterministic performance tests (no wall clock). */
+const stats = { parsed: [] as CatalogPart[], indexBuilds: [] as CatalogPart[], scored: 0 };
 
-function set(c: Catalog): Catalog {
-  catalog = c;
-  for (const l of [...listeners]) l();
-  return c;
+/** Tell subscribers on a microtask: a lazy getter may run during a render, which must not set state. */
+function notify(): void {
+  if (notifyQueued) return;
+  notifyQueued = true;
+  queueMicrotask(() => {
+    notifyQueued = false;
+    for (const l of [...listeners]) l();
+  });
 }
 
-/** Synchronous load (used when a lookup happens before the background warm-up finished). */
+function part<P extends CatalogPart>(p: P): Part<ItemOf[P]> {
+  const have = parts[p] as Part<ItemOf[P]> | undefined;
+  if (have) return have;
+  const list = readPart(p);
+  const made: Part<ItemOf[P]> = {
+    list,
+    byId: new Map(list.map((x) => [(x as { id: string }).id, x])),
+    index: null,
+  };
+  (parts as Record<CatalogPart, unknown>)[p] = made;
+  stats.parsed.push(p);
+  notify();
+  return made;
+}
+
+function indexOf<P extends CatalogPart>(p: P): Indexed<ItemOf[P]>[] {
+  const pt = part(p);
+  if (!pt.index) {
+    pt.index = pt.list.map(INDEXERS[p] as (x: ItemOf[P]) => Indexed<ItemOf[P]>);
+    stats.indexBuilds.push(p);
+  }
+  return pt.index;
+}
+
+/** The one catalogue object: every field loads only its own part, on first read. */
+const facade: Catalog = {
+  get exercises() {
+    return part('exercises').list;
+  },
+  get recipes() {
+    return part('recipes').list;
+  },
+  get foods() {
+    return part('foods').list;
+  },
+  get exerciseById() {
+    return part('exercises').byId;
+  },
+  get recipeById() {
+    return part('recipes').byId;
+  },
+  get foodById() {
+    return part('foods').byId;
+  },
+  index: {
+    get exercises() {
+      return indexOf('exercises');
+    },
+    get recipes() {
+      return indexOf('recipes');
+    },
+    get foods() {
+      return indexOf('foods');
+    },
+  },
+};
+
+export function isCatalogPartLoaded(p: CatalogPart): boolean {
+  return parts[p] != null;
+}
+
+function allLoaded(want: readonly CatalogPart[]): boolean {
+  return want.every((p) => parts[p] != null);
+}
+
+/**
+ * The catalogue, loaded synchronously (when a read happens before the idle warm-up finished).
+ * Parses the parts not yet loaded but never builds a search index (that waits for a first search).
+ * Prefer `lazyCatalog()` when only one part is read.
+ */
 export function getCatalog(): Catalog {
-  return catalog ?? set(buildCatalog(readSource()));
+  for (const p of CATALOG_PARTS) part(p);
+  return facade;
 }
 
-/** Already loaded, or null — never parses. */
+/**
+ * The catalogue without loading anything: each field parses only its own part on first read, e.g.
+ * `lazyCatalog().recipeById` never touches exercises or foods.
+ */
+export function lazyCatalog(): Catalog {
+  return facade;
+}
+
+/** Already fully loaded, or null — never parses. */
 export function peekCatalog(): Catalog | null {
-  return catalog;
+  return allLoaded(CATALOG_PARTS) ? facade : null;
+}
+
+/** The catalogue once the given parts are loaded (reading those fields is then free), else null. */
+export function peekCatalogFor(want: readonly CatalogPart[]): Catalog | null {
+  return allLoaded(want) ? facade : null;
 }
 
 /** Run when the JS thread is idle (RN 0.88 removed InteractionManager), else on the next tick. */
@@ -97,28 +214,56 @@ function afterIdle(fn: () => void): void {
   else setTimeout(fn, 0);
 }
 
-/** Load off the startup path (when idle). Resolves with the catalogue. */
-export function loadCatalog(): Promise<Catalog> {
-  if (catalog) return Promise.resolve(catalog);
-  if (!loading) {
-    loading = new Promise<Catalog>((resolve, reject) => {
+/** Run `steps` one per idle slice, so the JS thread can paint and handle taps in between. */
+function inSlices(steps: (() => void)[]): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const next = (i: number) => {
+      if (i >= steps.length) return resolve();
       afterIdle(() => {
         try {
-          resolve(getCatalog());
+          steps[i]!();
         } catch (e) {
           reject(e);
+          return;
         }
+        next(i + 1);
       });
-    }).finally(() => {
+    };
+    next(0);
+  });
+}
+
+/** Load the given parts off the startup path, one idle slice each. Resolves with the catalogue. */
+export function loadCatalogParts(want: readonly CatalogPart[]): Promise<Catalog> {
+  const missing = CATALOG_PARTS.filter((p) => want.includes(p) && parts[p] == null);
+  if (missing.length === 0) return Promise.resolve(facade);
+  return inSlices(missing.map((p) => () => void part(p))).then(() => facade);
+}
+
+/** Load every part off the startup path (one idle slice per part). Resolves with the catalogue. */
+export function loadCatalog(): Promise<Catalog> {
+  if (peekCatalog()) return Promise.resolve(facade);
+  if (!loading) {
+    loading = loadCatalogParts(CATALOG_PARTS).finally(() => {
       loading = null;
     });
   }
   return loading;
 }
 
-/** Fire-and-forget warm-up from the root layout. */
+/**
+ * Fire-and-forget warm-up after startup: the parts, then their search indexes, one idle slice
+ * each (never one long block).
+ */
 export function warmCatalog(): void {
-  loadCatalog().catch(() => undefined);
+  if (warming) return;
+  warming = true;
+  loadCatalog()
+    .then(() => inSlices(CATALOG_PARTS.map((p) => () => void indexOf(p))))
+    .catch(() => undefined)
+    .finally(() => {
+      warming = false;
+    });
 }
 
 function subscribe(l: () => void): () => void {
@@ -128,23 +273,34 @@ function subscribe(l: () => void): () => void {
   };
 }
 
-/** Catalogue for screens: null while loading (show a skeleton), then the data. */
-export function useCatalog(): Catalog | null {
-  const c = useSyncExternalStore(subscribe, peekCatalog, peekCatalog);
+/**
+ * Catalogue for screens that read only some parts: null until those parts are loaded (show a
+ * skeleton), then the catalogue. E.g. the player: `useCatalogFor('exercises')`.
+ */
+export function useCatalogFor(...want: CatalogPart[]): Catalog | null {
+  const key = want.join(',');
+  const snap = () => peekCatalogFor(want);
+  const c = useSyncExternalStore(subscribe, snap, snap);
   useEffect(() => {
-    if (!peekCatalog()) loadCatalog().catch(() => undefined);
-  }, []);
+    const ps = key.split(',') as CatalogPart[];
+    if (!peekCatalogFor(ps)) loadCatalogParts(ps).catch(() => undefined);
+  }, [key]);
   return c;
 }
 
+/** Catalogue for screens: null while loading (show a skeleton), then the data. */
+export function useCatalog(): Catalog | null {
+  return useCatalogFor(...CATALOG_PARTS);
+}
+
 export function getExercise(id: string): Exercise | undefined {
-  return getCatalog().exerciseById.get(id);
+  return part('exercises').byId.get(id);
 }
 export function getRecipe(id: string): Recipe | undefined {
-  return getCatalog().recipeById.get(id);
+  return part('recipes').byId.get(id);
 }
 export function getFood(id: string): Food | undefined {
-  return getCatalog().foodById.get(id);
+  return part('foods').byId.get(id);
 }
 
 /**
@@ -180,6 +336,7 @@ function search<T>(
     const s = score(e, q, qWords);
     if (s > 0) hits.push({ e, s });
   }
+  stats.scored += pool.length;
   hits.sort((a, b) => b.s - a.s || a.e.name.localeCompare(b.e.name));
   return hits.slice(0, limit).map((h) => h.e.item);
 }
@@ -187,18 +344,31 @@ function search<T>(
 export type SearchOptions<T> = { limit?: number; filter?: (item: T) => boolean };
 
 export function searchExercises(query: string, o: SearchOptions<Exercise> = {}): Exercise[] {
-  return search(getCatalog().index.exercises, query, o.limit ?? 50, o.filter);
+  return search(indexOf('exercises'), query, o.limit ?? 50, o.filter);
 }
 export function searchRecipes(query: string, o: SearchOptions<Recipe> = {}): Recipe[] {
-  return search(getCatalog().index.recipes, query, o.limit ?? 50, o.filter);
+  return search(indexOf('recipes'), query, o.limit ?? 50, o.filter);
 }
 export function searchFoods(query: string, o: SearchOptions<Food> = {}): Food[] {
-  return search(getCatalog().index.foods, query, o.limit ?? 50, o.filter);
+  return search(indexOf('foods'), query, o.limit ?? 50, o.filter);
+}
+
+/** Tests only: what has been parsed / indexed / scored since the last reset. */
+export function catalogStatsForTests(): {
+  parsed: CatalogPart[];
+  indexBuilds: CatalogPart[];
+  scored: number;
+} {
+  return { parsed: [...stats.parsed], indexBuilds: [...stats.indexBuilds], scored: stats.scored };
 }
 
 /** Tests only. */
 export function resetCatalogForTests(): void {
-  catalog = null;
+  parts = {};
   loading = null;
+  warming = false;
   listeners.clear();
+  stats.parsed = [];
+  stats.indexBuilds = [];
+  stats.scored = 0;
 }

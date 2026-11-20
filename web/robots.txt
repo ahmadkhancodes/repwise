@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /_screenshots/
+Disallow: /_tools/
+
+Sitemap: https://repwise.app/sitemap.xml

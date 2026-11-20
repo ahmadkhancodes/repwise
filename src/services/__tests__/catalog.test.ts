@@ -1,15 +1,26 @@
+import { act, renderHook, waitFor } from '@testing-library/react-native';
+
 import {
+  buildCatalog,
+  catalogStatsForTests,
   getCatalog,
   getExercise,
   getFood,
   getRecipe,
+  isCatalogPartLoaded,
+  lazyCatalog,
   loadCatalog,
+  loadCatalogParts,
   normalise,
   peekCatalog,
+  peekCatalogFor,
   resetCatalogForTests,
   searchExercises,
   searchFoods,
   searchRecipes,
+  useCatalog,
+  useCatalogFor,
+  warmCatalog,
 } from '@/services/catalog';
 
 beforeEach(() => resetCatalogForTests());
@@ -17,11 +28,49 @@ beforeEach(() => resetCatalogForTests());
 describe('catalog', () => {
   it('is not parsed at import time; loadCatalog loads when idle', async () => {
     expect(peekCatalog()).toBeNull();
+    expect(catalogStatsForTests().parsed).toEqual([]);
     const c = await loadCatalog();
     expect(c.exercises.length).toBeGreaterThan(200);
     expect(c.recipes.length).toBeGreaterThan(200);
     expect(c.foods.length).toBeGreaterThan(200);
     expect(peekCatalog()).toBe(c);
+  });
+
+  it('loads parts incrementally, exercises first, and never builds a search index on load', async () => {
+    await loadCatalog();
+    const s = catalogStatsForTests();
+    expect(s.parsed).toEqual(['exercises', 'recipes', 'foods']);
+    expect(s.indexBuilds).toEqual([]);
+  });
+
+  it('getCatalog() loads every part synchronously but builds no search index', () => {
+    const c = getCatalog();
+    expect(peekCatalog()).toBe(c);
+    expect(catalogStatsForTests().parsed).toEqual(['exercises', 'recipes', 'foods']);
+    expect(catalogStatsForTests().indexBuilds).toEqual([]);
+  });
+
+  it('lazyCatalog() parses only the part whose field is read', () => {
+    const c = lazyCatalog();
+    expect(catalogStatsForTests().parsed).toEqual([]);
+    expect(c.recipeById.size).toBeGreaterThan(200);
+    expect(catalogStatsForTests().parsed).toEqual(['recipes']);
+    expect(isCatalogPartLoaded('exercises')).toBe(false);
+    expect(isCatalogPartLoaded('foods')).toBe(false);
+    expect(peekCatalog()).toBeNull(); // not every part yet
+    expect(peekCatalogFor(['recipes'])).toBe(c);
+    // A notification rebuild (getRecipe) never pays for exercises or foods.
+    getRecipe(c.recipes[0]!.id);
+    expect(catalogStatsForTests().parsed).toEqual(['recipes']);
+  });
+
+  it('loadCatalogParts loads only what it is asked for', async () => {
+    await loadCatalogParts(['exercises']);
+    expect(catalogStatsForTests().parsed).toEqual(['exercises']);
+    expect(peekCatalogFor(['exercises'])).not.toBeNull();
+    expect(peekCatalogFor(['exercises', 'recipes'])).toBeNull();
+    await loadCatalogParts(['exercises']); // already in: no work
+    expect(catalogStatsForTests().parsed).toEqual(['exercises']);
   });
 
   it('looks up by id', () => {
@@ -37,6 +86,17 @@ describe('catalog', () => {
   it('normalises accents and punctuation', () => {
     expect(normalise('  Pull-Up (Wide) ')).toBe('pull up wide');
     expect(normalise('Crème Brûlée')).toBe('creme brulee');
+    expect(normalise('Açaí bowl')).toBe('acai bowl');
+    expect(normalise('ALREADY ascii')).toBe('already ascii');
+  });
+
+  it('the lazy catalogue indexes exactly like the eager buildCatalog', () => {
+    const c = getCatalog();
+    const eager = buildCatalog({ exercises: c.exercises, recipes: c.recipes, foods: c.foods });
+    expect(c.index.exercises).toEqual(eager.index.exercises);
+    expect(c.index.recipes).toEqual(eager.index.recipes);
+    expect(c.index.foods).toEqual(eager.index.foods);
+    expect(eager.exerciseById.get(c.exercises[0]!.id)).toBe(c.exercises[0]);
   });
 
   it('ranks name matches first and supports word prefixes', () => {
@@ -62,8 +122,9 @@ describe('catalog', () => {
     expect(r.every((x) => x.dietTags.includes('vegan'))).toBe(true);
   });
 
-  it('searches the whole catalogue in under 50 ms', () => {
-    getCatalog(); // index built once
+  it('search is one linear pass over a once-built index (deterministic work, not wall clock)', () => {
+    const c = getCatalog();
+    const n = c.exercises.length + c.recipes.length + c.foods.length;
     const queries = [
       'squat',
       'bench press',
@@ -75,11 +136,42 @@ describe('catalog', () => {
       'paneer',
     ];
     for (const q of queries) {
-      const t0 = performance.now();
       searchExercises(q);
       searchRecipes(q);
       searchFoods(q);
-      expect(performance.now() - t0).toBeLessThan(50);
     }
+    const s = catalogStatsForTests();
+    // Each index is built once, on its first search, and never again.
+    expect(s.indexBuilds).toEqual(['exercises', 'recipes', 'foods']);
+    // Every query scores each entry exactly once: no re-indexing, no quadratic work.
+    expect(s.scored).toBe(n * queries.length);
+  });
+
+  it('warmCatalog loads every part, then builds the indexes, in idle slices', async () => {
+    warmCatalog();
+    warmCatalog(); // idempotent while running
+    expect(catalogStatsForTests().parsed).toEqual([]); // nothing on the calling tick
+    await waitFor(() => expect(catalogStatsForTests().indexBuilds).toHaveLength(3));
+    expect(catalogStatsForTests().parsed).toEqual(['exercises', 'recipes', 'foods']);
+  });
+
+  it('useCatalogFor resolves when only its parts are in; useCatalog waits for all', async () => {
+    expect(peekCatalogFor(['exercises'])).toBeNull();
+    const parts = await renderHook(() => useCatalogFor('exercises'));
+    await waitFor(() => expect(parts.result.current).not.toBeNull());
+    expect(isCatalogPartLoaded('recipes')).toBe(false);
+
+    expect(peekCatalog()).toBeNull();
+    const all = await renderHook(() => useCatalog());
+    await waitFor(() => expect(all.result.current).not.toBeNull());
+    expect(peekCatalog()).toBe(all.result.current);
+  });
+
+  it('re-renders subscribers when a lazy read loads a part', async () => {
+    const h = await renderHook(() => useCatalogFor('foods'));
+    await act(async () => {
+      getFood('x'); // synchronous load from elsewhere (e.g. a service)
+    });
+    expect(h.result.current).not.toBeNull();
   });
 });

@@ -38,7 +38,13 @@ export interface Env {
   AI_LIMITS_JSON?: string;
   AI_TIMEOUT_MS?: string;
   AI_ADMIN_TOKEN?: string;
+  /** 'off' drops the cached catalogue block from AI prompts. */
+  AI_CATALOGUE?: string;
+  /** '5m' | '1h' (default) TTL for the cached system blocks. */
+  AI_CACHE_TTL?: string;
   // Misc
   FEATURE_FLAGS_JSON?: string;
   CORS_ORIGINS?: string;
+  /** `debug` adds debug lines; anything else logs info and above. */
+  LOG_LEVEL?: string;
 }

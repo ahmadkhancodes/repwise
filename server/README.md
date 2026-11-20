@@ -10,7 +10,8 @@ npm run check        # tsc --noEmit + vitest
 npm run dev          # wrangler dev (copy .dev.vars.example to .dev.vars first)
 ```
 
-Deploying is a manual step (`npx wrangler deploy`) after the secrets below are set. Nothing here deploys automatically.
+Deploying is a manual step after the secrets below are set; the runbook (secrets, commands, Atlas
+indexes, smoke test) is [`docs/DEPLOY_SERVER.md`](../docs/DEPLOY_SERVER.md). Nothing here deploys automatically.
 
 ## Routes
 
@@ -19,7 +20,7 @@ Errors are always `{ "error": "<code>" }` with no stack traces.
 
 | Route | Auth | Notes |
 |---|---|---|
-| `GET /health` | none | Liveness. Does not touch the DB. |
+| `GET /health` | none | Liveness: `{ ok, service, time }` only. Does not touch the DB, exposes no config. |
 | `GET /config` | none | `{ payments_enabled, ai_provider, plans, features }`. Cached 5 min. |
 | `POST /auth/anonymous` | none | Silent account (sheet 15) for AI + purchases before sign-in. Cannot sync. 10/h/IP. |
 | `POST /auth/google` | optional anon JWT | `{ idToken, deviceId? }`, verified with Google JWKS (`jose`). |
@@ -51,15 +52,26 @@ Every `/billing/*` and `/webhooks/*` route returns **404 while `PAYMENTS_ENABLED
 - **Access JWT:** HS256, `iss`/`aud` checked, 15 min. Each request looks the user up, so a token issued before account deletion is rejected (401). Garbage tokens are 401, never 500.
 - **Refresh tokens:** opaque, 60 days, stored as sha256 only, rotated on every use. The successor is derived (HMAC) from the presented token, so a retry within 60 s of a lost response gets the very same successor. Reuse after that window, or after the successor was used, looks like theft and revokes the family. The app still runs refreshes single-flight.
 - **Pro comes only from the stored entitlement** (`entitlements` collection), written only by `/billing/verify` and the webhooks. A purchase belongs to the account that last verified it (restore on another account moves it).
-- **Security:** CORS `*` with no credentials (no cookies anywhere), body caps with 413, malformed JSON 400, `nosniff`, `no-store`, CSP `default-src 'none'`.
+- **Inputs:** every body, query string and decoded webhook payload is parsed with zod (`src/schemas.ts`); failures are `400 { error: <code> }`, never zod's text. Unknown AI `params` keys are dropped.
+- **Security:** no cookies anywhere, so CORS never allows credentials; production allows no browser origin unless `CORS_ORIGINS` is set (other environments allow `*`). Body caps with 413, malformed JSON 400, `nosniff`, `no-store`, CSP `default-src 'none'`, HSTS. JWT algorithms are pinned (access HS256; Google, Apple and Pub/Sub RS256; App Store JWS ES256 with a pinned root). Per-IP limits on auth, webhooks and `/ai/usage`; per-user limits on sync, billing and AI.
+- **Logs:** one structured JSON line per request (`reqId`, method, route pattern, status, ms) plus AI outcome/cost lines; `x-request-id` is echoed (a well-formed client value is kept). `src/lib/log.ts` redacts credential keys and credential-looking values (JWTs, API keys, refresh tokens, connection strings, emails, query-string secrets). Raw URLs are never logged.
 
 ## AI planner (sheet 28 + owner decision D10)
 
 Pipeline per request: **engine** (`Planner.prepare`) builds targets, candidate pools (IDs only) and the
 rules-only plan → **Claude** picks/orders candidate IDs and writes titles + one-line notes as strict JSON
-(`output_config.format` JSON schema) → **checks**: shape, copy length, banned medical/dosing words, every ID
-from the pools → **engine** `Planner.finalize` validates constraints and adds all maths → on any failure
-or the 8 s timeout, the rules-only plan ships with `source: "rules"`.
+(`output_config.format` JSON schema whose ID fields are an `enum` of the whole static catalogue) →
+**checks** (`checkOutput`): exact keys, one entry per planned day/meal in order, every ID from ITS slot's
+pool, no repeats, swap ≤ 3, copy length, no numbers/markup/links, banned medical/dosing/body words →
+**engine** `Planner.finalize` validates constraints and adds all maths → on any failure or the 8 s
+timeout, the rules-only plan ships with `source: "rules"` (byte-identical to the rules-only answer).
+
+The prompt is two cached system blocks: the instructions (`src/ai/prompts.ts`: role, tone, rules,
+deload guidance and three worked examples) and a compact catalogue for the route (`id | pattern |
+muscles | equipment` or `id | cuisine | protein | slots`, sorted, byte-stable). The per-request JSON is
+the user turn after the last breakpoint. Golden tests (`test/golden.test.ts`) replay recorded API
+responses, valid and malformed, and pin the request layout and a hash of the prompt: after a prompt
+or content change, run the prompt eval, then `GOLDEN_RECORD=1 npx vitest run test/golden.test.ts`.
 
 Response contract (`contractVersion: 1`):
 
@@ -74,7 +86,7 @@ The planner is `src/ai/enginePlanner.ts`: `@repwise/engine` over the `@repwise/c
 
 | Route | `plan` | Request `params` (all optional unless marked) |
 |---|---|---|
-| `/ai/plan/week` | `{ week: WeekPlan, notes: { [date]: string } }` | `weekStart`, `now`, `utcOffsetMin`, `noRepeatDays`, `adjustmentKcal` |
+| `/ai/plan/week` | `{ week: WeekPlan, notes: { [date]: string } }` | `weekStart`, `now`, `utcOffsetMin`, `noRepeatDays`, `adjustmentKcal`, `deload` (boolean: plan a lighter week; AI still varies it) |
 | `/ai/meals/day` | `{ date, day: DayMealPlan, notes: string[] }` | `date`, plus the above |
 | `/ai/swap` | `{ item, date, index, options: (exerciseId \| PlannedMeal)[], note }` | **`item`** (`exercise` \| `meal`), **`date`**, **`index`**, `currentId` (the item the app shows, if the plan was AI-varied) |
 
@@ -86,21 +98,24 @@ The planner is `src/ai/enginePlanner.ts`: `@repwise/engine` over the `@repwise/c
 
 Cost controls:
 
-- Model `claude-haiku-5-5` (cheapest capable; `AI_MODEL` to change), `effort: "low"`, `max_tokens` 3000 / 1500 / 600 (week / meals / swap).
-- Static system prompt (> 512 tokens) sent with `cache_control`, so repeats within 5 minutes are billed at 0.1×.
+- Model `claude-haiku-5-5` (cheapest capable; `AI_MODEL` to change, any model with a price in the table), `effort: "low"`, thinking at the model default (pinned, so the cache holds), `max_tokens` 3000 / 1500 / 600 (week / meals / swap).
+- Instructions (~1.8k tokens) and catalogue (~4.3k exercises / ~4.9k recipes) are cached with `cache_control` and a 1-hour TTL (`AI_CACHE_TTL=5m` to change; `AI_CATALOGUE=off` drops the catalogue block). Reads bill at 0.1× input; a 1-hour write at 2×, at most about once an hour per block.
+- The budget reservation assumes 2 chars/token for everything sent (real text is ~3.5) at the dearest prompt rate, plus the full `max_tokens`, so a call can never bill more than it reserved (`ai_cost_over_reservation` is logged if it ever does). `test/load.test.ts` runs 50 concurrent requests against a tiny budget and proves no overspend, even transiently.
 - Only compact candidate ID lists are sent. Profile fields never reach the prompt; `name`, `email`, `phone` and similar keys are stripped from every request.
 - Results are cached per user by a hash of the request (profile + history + params): 3 days / 1 day / 6 hours.
 - **Budget guard:** every call's cost = `usage` tokens × the price table (`DEFAULT_PRICES`, override with `AI_PRICES_JSON`), accumulated per calendar month (UTC) in `ai_spend`. At ≥ 80% of `AI_MONTHLY_BUDGET_USD` free users get rules-only, Pro users still get AI. At ≥ 100% (including the worst case of the next call) everyone gets rules-only until the month changes. Timeouts book their worst case. A model without a price is never called.
 - **Daily LLM calls per user** (`AI_LIMITS_JSON`): free 2 / 3 / 10, Pro 6 / 10 / 40 (week / meals / swap). Over the limit → rules-only. Hard abuse cap 200 requests/kind/day → 429.
 - `AnthropicProvider.createBatch/getBatch/batchResults` wrap the Message Batches API (50% off) for a future overnight weekly regeneration job; not scheduled yet.
 
-### Cost estimate (Claude Haiku 5.5: $0.10 in / $0.50 out per MTok, cache read $0.01, cache write $0.125)
+### Cost estimate (Claude Haiku 5.5: $0.10 in / $0.50 out per MTok, cache read $0.01, 1-hour cache write $0.20)
 
-| Call | Input (uncached) | System prompt | Output (incl. thinking) | Cost/call |
+| Call | Input (uncached) | Cached blocks (read) | Output (incl. thinking) | Cost/call (warm) |
 |---|---|---|---|---|
-| plan_week | ~1,000 | ~700 (cache write) | ~900 | ≈ $0.00064 |
-| meals_day | ~600 | ~700 | ~500 | ≈ $0.00040 |
-| swap | ~200 | ~700 | ~250 | ≈ $0.00023 |
+| plan_week | ~1,000 | ~6,100 | ~900 | ≈ $0.00061 |
+| meals_day | ~600 | ~6,700 | ~500 | ≈ $0.00038 |
+| swap | ~200 | ~6,100 | ~250 | ≈ $0.00020 |
+
+- Cold cache adds ≈ $0.0012–0.0013 per write; worst case (every block rewritten every hour all month) ≈ $2/month fixed.
 
 - **Typical active user:** 5 weekly plans + 30 meal days + 30 swaps a month ≈ **$0.022/month**.
 - **Worst case at the daily caps:** Pro ≈ $0.51/month, free ≈ $0.14/month.
@@ -111,7 +126,9 @@ Cost controls:
 
 Vars (in `wrangler.toml`, not secret): `ENVIRONMENT`, `JWT_ISSUER`, `JWT_AUDIENCE`, `MONGODB_DB`,
 `APPLE_BUNDLE_ID`, `PLAY_PACKAGE_NAME`, `PAYMENTS_ENABLED` (default `false`), `AI_PROVIDER` (`anthropic` | `none`),
-`AI_MODEL`, `AI_MONTHLY_BUDGET_USD` (50), `AI_TIMEOUT_MS` (8000), `MAIL_PROVIDER` (`console` | `resend`).
+`AI_MODEL`, `AI_MONTHLY_BUDGET_USD` (50), `AI_TIMEOUT_MS` (8000, clamped 10–30000), `AI_CACHE_TTL` (`1h` | `5m`),
+`AI_CATALOGUE` (`on` | `off`), `MAIL_PROVIDER` (`console` | `resend`), `LOG_LEVEL` (`info` | `debug`).
+`[env.staging]` repeats them for `wrangler deploy --env staging`.
 Optional: `MAIL_FROM`, `CORS_ORIGINS`, `PLANS_JSON`, `AI_LIMITS_JSON`, `AI_PRICES_JSON`, `FEATURE_FLAGS_JSON`,
 `GOOGLE_IOS_CLIENT_ID`, `GOOGLE_ANDROID_CLIENT_ID`, `APPLE_SERVICES_ID`, `PLAY_PUBSUB_AUDIENCE`, `PLAY_PUBSUB_SERVICE_ACCOUNT`.
 

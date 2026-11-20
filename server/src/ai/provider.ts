@@ -5,12 +5,23 @@ export interface LlmUsage {
   inputTokens: number;
   outputTokens: number;
   cacheReadTokens: number;
+  /** Cache writes at the 5-minute rate. */
   cacheWriteTokens: number;
+  /** Cache writes at the 1-hour rate. */
+  cacheWrite1hTokens?: number;
 }
+
+export type CacheTtl = '5m' | '1h';
 
 export interface LlmRequest {
   kind: AiKind;
+  /** Static instructions (cached). */
   system: string;
+  /** Static catalogue (cached, after `system`). */
+  catalogue?: string | undefined;
+  /** TTL of the cached system blocks. */
+  cacheTtl?: CacheTtl | undefined;
+  /** Per-request JSON (never cached). */
   user: string;
   schema: JsonObject;
   maxTokens: number;

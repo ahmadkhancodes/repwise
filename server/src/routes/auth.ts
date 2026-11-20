@@ -5,29 +5,16 @@ import { issueTokens, successorRefreshToken } from '../auth/session';
 import { recomputeEntitlement } from '../billing/entitlement';
 import { DuplicateKeyError, type Db, type UserDoc } from '../db/types';
 import { hmacSha256Hex, randomDigits, safeEqual, sha256Hex, uuidv7 } from '../lib/crypto';
-import { HttpError, badRequest, clientIp, readJson, str, unauthorized } from '../lib/http';
+import { HttpError, clientIp, unauthorized } from '../lib/http';
 import { bearer, rateLimit } from '../lib/middleware';
+import { parseJson } from '../lib/validate';
+import { AnonymousBody, AppleBody, EmailStartBody, EmailVerifyBody, GoogleBody, RefreshBody } from '../schemas';
 import type { AppEnv } from '../types';
 
 const MIN = 60_000;
 /** A rotated refresh token presented again within this window gets the same successor back. */
 export const REFRESH_REUSE_GRACE_MS = 60_000;
 export const EMAIL_CODE_MAX_ATTEMPTS = 5;
-const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,63}$/;
-const DEVICE_RE = /^[A-Za-z0-9._:-]{1,128}$/;
-
-function normEmail(raw: string): string {
-  const e = raw.trim().toLowerCase();
-  if (e.length > 254 || !EMAIL_RE.test(e)) throw badRequest('invalid_email');
-  return e;
-}
-
-function deviceId(body: Record<string, unknown>): string | undefined {
-  const d = body.deviceId;
-  if (d === undefined || d === null) return undefined;
-  if (typeof d !== 'string' || !DEVICE_RE.test(d)) throw badRequest('invalid_device_id');
-  return d;
-}
 
 /** The anonymous account the caller is upgrading, if it sent a valid access token for one. */
 async function currentAnonymous(c: Context<AppEnv>, db: Db): Promise<UserDoc | null> {
@@ -106,35 +93,31 @@ authRoutes.use('*', async (c, next) => {
 });
 
 authRoutes.post('/anonymous', async (c) => {
-  const body = await readJson(c, 4 * 1024);
+  const body = await parseJson(c, AnonymousBody, 4 * 1024);
   await rateLimit(c, `auth:anon:${clientIp(c)}`, 10, 60 * MIN);
   const deps = c.get('deps');
   const db = await deps.db();
   const now = deps.now();
   const user: UserDoc = { _id: uuidv7(now), anonymous: true, createdAt: now, lastSeenAt: now };
   await db.createUser(user);
-  return c.json(await issueTokens(deps, db, user, { deviceId: deviceId(body) }), 201);
+  return c.json(await issueTokens(deps, db, user, { deviceId: body.deviceId ?? undefined }), 201);
 });
 
 authRoutes.post('/google', async (c) => {
-  const body = await readJson(c, 16 * 1024);
-  const idToken = str(body, 'idToken', { max: 8192 });
-  const identity = await c.get('deps').verifyGoogle(idToken);
-  return c.json(await signIn(c, 'google', identity, deviceId(body)));
+  const body = await parseJson(c, GoogleBody, 16 * 1024);
+  const identity = await c.get('deps').verifyGoogle(body.idToken);
+  return c.json(await signIn(c, 'google', identity, body.deviceId ?? undefined));
 });
 
 authRoutes.post('/apple', async (c) => {
-  const body = await readJson(c, 16 * 1024);
-  const identityToken = str(body, 'identityToken', { max: 8192 });
+  const body = await parseJson(c, AppleBody, 16 * 1024);
   // Required: the token's nonce claim must be sha256(raw nonce), binding it to this client's flow.
-  const nonce = str(body, 'nonce', { max: 256 });
-  const identity = await c.get('deps').verifyApple(identityToken, { nonce });
-  return c.json(await signIn(c, 'apple', identity, deviceId(body)));
+  const identity = await c.get('deps').verifyApple(body.identityToken, { nonce: body.nonce });
+  return c.json(await signIn(c, 'apple', identity, body.deviceId ?? undefined));
 });
 
 authRoutes.post('/email/start', async (c) => {
-  const body = await readJson(c, 4 * 1024);
-  const email = normEmail(str(body, 'email', { max: 320 }));
+  const { email } = await parseJson(c, EmailStartBody, 4 * 1024);
   await rateLimit(c, `auth:email-start:ip:${clientIp(c)}`, 10, 60 * MIN);
   await rateLimit(c, `auth:email-start:${await sha256Hex(email)}`, 3, 15 * MIN);
   const deps = c.get('deps');
@@ -159,10 +142,8 @@ authRoutes.post('/email/start', async (c) => {
 });
 
 authRoutes.post('/email/verify', async (c) => {
-  const body = await readJson(c, 4 * 1024);
-  const email = normEmail(str(body, 'email', { max: 320 }));
-  const code = str(body, 'code', { max: 12 });
-  if (!/^\d{6}$/.test(code)) throw badRequest('invalid_code');
+  const body = await parseJson(c, EmailVerifyBody, 4 * 1024);
+  const { email, code } = body;
   await rateLimit(c, `auth:email-verify:ip:${clientIp(c)}`, 20, 15 * MIN);
   // Per email as well, so guesses spread over many IPs still hit a wall (3 codes × 5 attempts).
   await rateLimit(c, `auth:email-verify:${await sha256Hex(email)}`, 3 * EMAIL_CODE_MAX_ATTEMPTS, 15 * MIN);
@@ -182,12 +163,11 @@ authRoutes.post('/email/verify', async (c) => {
   if (!safeEqual(hash, doc.codeHash)) throw unauthorized('invalid_code');
   if (!(await db.consumeEmailCode(doc._id))) throw unauthorized('invalid_code'); // single use
   await db.deleteEmailCodes(email);
-  return c.json(await signIn(c, 'email', { sub: email, email, emailVerified: true }, deviceId(body)));
+  return c.json(await signIn(c, 'email', { sub: email, email, emailVerified: true }, body.deviceId ?? undefined));
 });
 
 authRoutes.post('/refresh', async (c) => {
-  const body = await readJson(c, 4 * 1024);
-  const token = str(body, 'refreshToken', { max: 256 });
+  const { refreshToken: token } = await parseJson(c, RefreshBody, 4 * 1024);
   const deps = c.get('deps');
   const db = await deps.db();
   const now = deps.now();
@@ -213,8 +193,7 @@ authRoutes.post('/refresh', async (c) => {
 });
 
 authRoutes.post('/logout', async (c) => {
-  const body = await readJson(c, 4 * 1024);
-  const token = str(body, 'refreshToken', { max: 256 });
+  const { refreshToken: token } = await parseJson(c, RefreshBody, 4 * 1024);
   const deps = c.get('deps');
   const db = await deps.db();
   const res = await db.consumeRefreshToken(await sha256Hex(token), deps.now(), REFRESH_REUSE_GRACE_MS);

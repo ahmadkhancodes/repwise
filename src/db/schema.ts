@@ -9,7 +9,15 @@
  * enforces it. Arrays/objects are JSON text. No foreign keys: rows sync table by table in any order.
  * After changing this file run `npm run db:generate` to add a migration.
  */
-import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import {
+  index,
+  integer,
+  real,
+  sqliteTable,
+  text,
+  type SQLiteColumn,
+} from 'drizzle-orm/sqlite-core';
 
 const common = {
   id: text('id').primaryKey().notNull(),
@@ -19,6 +27,15 @@ const common = {
   deletedAt: integer('deleted_at'),
   dirty: integer('dirty').notNull().default(1),
 };
+
+/**
+ * Partial index for the sync engine's push scan (`WHERE dirty = 1`): it only holds rows waiting to
+ * be pushed, so it stays tiny and costs nothing for clean rows (migration 0002, perf audit A5).
+ */
+const dirtyIdx = (table: string, t: { dirty: SQLiteColumn }) =>
+  index(`${table}_dirty_idx`)
+    .on(t.dirty)
+    .where(sql`dirty = 1`);
 
 const json = <T>(name: string) => text(name, { mode: 'json' }).$type<T>();
 
@@ -69,7 +86,7 @@ export const plans = sqliteTable(
     version: integer('version'),
     generatedBy: text('generated_by').$type<'rules' | 'ai'>(),
   },
-  (t) => [index('plans_type_week_idx').on(t.type, t.weekStart)],
+  (t) => [index('plans_type_week_idx').on(t.type, t.weekStart), dirtyIdx('plans', t)],
 );
 
 export const sessions = sqliteTable(
@@ -86,7 +103,14 @@ export const sessions = sqliteTable(
     pausedMs: integer('paused_ms'),
     notes: text('notes'),
   },
-  (t) => [index('sessions_date_idx').on(t.date)],
+  (t) => [
+    index('sessions_date_idx').on(t.date),
+    // History / PR / active-session queries: WHERE status = ? ORDER BY ended_at | started_at.
+    index('sessions_status_ended_idx').on(t.status, t.endedAt),
+    index('sessions_status_started_idx').on(t.status, t.startedAt),
+    index('sessions_user_date_idx').on(t.userId, t.date),
+    dirtyIdx('sessions', t),
+  ],
 );
 
 export const sessionExercises = sqliteTable(
@@ -103,7 +127,13 @@ export const sessionExercises = sqliteTable(
     restS: integer('rest_s'),
     notes: text('notes'),
   },
-  (t) => [index('session_exercises_session_idx').on(t.sessionId)],
+  (t) => [
+    // (session_id, position): the player's list comes back already in order (no sort step).
+    index('session_exercises_session_pos_idx').on(t.sessionId, t.position),
+    // "Previous" column and PR detection look up every session of one exercise.
+    index('session_exercises_exercise_idx').on(t.exerciseId),
+    dirtyIdx('session_exercises', t),
+  ],
 );
 
 export const sets = sqliteTable(
@@ -120,32 +150,44 @@ export const sets = sqliteTable(
     distanceM: real('distance_m'),
     doneAt: integer('done_at'),
   },
-  (t) => [index('sets_session_exercise_idx').on(t.sessionExerciseId)],
+  (t) => [
+    // (session_exercise_id, idx): sets of an exercise in order, no sort step.
+    index('sets_session_exercise_idx_idx').on(t.sessionExerciseId, t.idx),
+    dirtyIdx('sets', t),
+  ],
 );
 
 /** User-created exercises only; the catalogue lives in @repwise/content (src/services/catalog.ts). */
-export const exercises = sqliteTable('exercises', {
-  ...common,
-  name: text('name').notNull(),
-  mediaUrl: text('media_url'),
-  primaryMuscles: json<string[]>('primary_muscles'),
-  secondary: json<string[]>('secondary'),
-  equipment: json<string[]>('equipment'),
-  pattern: text('pattern'),
-  difficulty: integer('difficulty'),
-  steps: json<string[]>('steps'),
-  tips: json<string[]>('tips'),
-  source: text('source'),
-  licence: text('licence'),
-  isCustom: integer('is_custom', { mode: 'boolean' }).notNull().default(true),
-});
+export const exercises = sqliteTable(
+  'exercises',
+  {
+    ...common,
+    name: text('name').notNull(),
+    mediaUrl: text('media_url'),
+    primaryMuscles: json<string[]>('primary_muscles'),
+    secondary: json<string[]>('secondary'),
+    equipment: json<string[]>('equipment'),
+    pattern: text('pattern'),
+    difficulty: integer('difficulty'),
+    steps: json<string[]>('steps'),
+    tips: json<string[]>('tips'),
+    source: text('source'),
+    licence: text('licence'),
+    isCustom: integer('is_custom', { mode: 'boolean' }).notNull().default(true),
+  },
+  (t) => [dirtyIdx('exercises', t)],
+);
 
-export const routines = sqliteTable('routines', {
-  ...common,
-  name: text('name').notNull(),
-  folder: text('folder'),
-  items: json<unknown[]>('items'),
-});
+export const routines = sqliteTable(
+  'routines',
+  {
+    ...common,
+    name: text('name').notNull(),
+    folder: text('folder'),
+    items: json<unknown[]>('items'),
+  },
+  (t) => [dirtyIdx('routines', t)],
+);
 
 export const mealPlans = sqliteTable(
   'meal_plans',
@@ -156,7 +198,7 @@ export const mealPlans = sqliteTable(
     kcalTarget: integer('kcal_target'),
     macros: json<Macros>('macros'),
   },
-  (t) => [index('meal_plans_date_idx').on(t.date)],
+  (t) => [index('meal_plans_date_updated_idx').on(t.date, t.updatedAt), dirtyIdx('meal_plans', t)],
 );
 
 export const meals = sqliteTable(
@@ -171,27 +213,31 @@ export const meals = sqliteTable(
     swappedFrom: text('swapped_from'),
     eatenAt: integer('eaten_at'),
   },
-  (t) => [index('meals_meal_plan_idx').on(t.mealPlanId)],
+  (t) => [index('meals_plan_created_idx').on(t.mealPlanId, t.createdAt), dirtyIdx('meals', t)],
 );
 
 /** User-created recipes only; the catalogue lives in @repwise/content. */
-export const recipes = sqliteTable('recipes', {
-  ...common,
-  title: text('title').notNull(),
-  cuisine: text('cuisine'),
-  dietTags: json<string[]>('diet_tags'),
-  allergens: json<string[]>('allergens'),
-  ingredients: json<unknown[]>('ingredients'),
-  steps: json<string[]>('steps'),
-  prepMin: integer('prep_min'),
-  costLevel: integer('cost_level'),
-  kcal: integer('kcal'),
-  protein: real('protein'),
-  carb: real('carb'),
-  fat: real('fat'),
-  imageUrl: text('image_url'),
-  isCustom: integer('is_custom', { mode: 'boolean' }).notNull().default(true),
-});
+export const recipes = sqliteTable(
+  'recipes',
+  {
+    ...common,
+    title: text('title').notNull(),
+    cuisine: text('cuisine'),
+    dietTags: json<string[]>('diet_tags'),
+    allergens: json<string[]>('allergens'),
+    ingredients: json<unknown[]>('ingredients'),
+    steps: json<string[]>('steps'),
+    prepMin: integer('prep_min'),
+    costLevel: integer('cost_level'),
+    kcal: integer('kcal'),
+    protein: real('protein'),
+    carb: real('carb'),
+    fat: real('fat'),
+    imageUrl: text('image_url'),
+    isCustom: integer('is_custom', { mode: 'boolean' }).notNull().default(true),
+  },
+  (t) => [dirtyIdx('recipes', t)],
+);
 
 export const foodLogs = sqliteTable(
   'food_logs',
@@ -208,7 +254,11 @@ export const foodLogs = sqliteTable(
     /** The planned meal this 'plan' log records (several snacks share one slot, so never key by slot). */
     mealId: text('meal_id'),
   },
-  (t) => [index('food_logs_date_idx').on(t.date)],
+  (t) => [
+    index('food_logs_date_idx').on(t.date),
+    index('food_logs_meal_idx').on(t.mealId),
+    dirtyIdx('food_logs', t),
+  ],
 );
 
 export const bodyMetrics = sqliteTable(
@@ -226,7 +276,7 @@ export const bodyMetrics = sqliteTable(
     bodyFatPct: real('body_fat_pct'),
     note: text('note'),
   },
-  (t) => [index('body_metrics_date_idx').on(t.date)],
+  (t) => [index('body_metrics_date_idx').on(t.date), dirtyIdx('body_metrics', t)],
 );
 
 export const photos = sqliteTable(
@@ -238,7 +288,7 @@ export const photos = sqliteTable(
     cloudKey: text('cloud_key'),
     pose: text('pose'),
   },
-  (t) => [index('photos_date_idx').on(t.date)],
+  (t) => [index('photos_date_idx').on(t.date), dirtyIdx('photos', t)],
 );
 
 export const cards = sqliteTable(
@@ -251,7 +301,7 @@ export const cards = sqliteTable(
     action: text('action'),
     state: text('state'),
   },
-  (t) => [index('cards_date_idx').on(t.date)],
+  (t) => [index('cards_date_idx').on(t.date), dirtyIdx('cards', t)],
 );
 
 /** Every synced table by its SQL name, in the server's TABLE_NAMES order. */
