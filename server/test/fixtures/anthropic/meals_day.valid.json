@@ -12,7 +12,7 @@
       },
       {
         "type": "text",
-        "text": "{\"meals\":[{\"slot\":\"breakfast\",\"recipe_id\":\"spanish-tortilla\",\"note\":\"A warm, savoury start that keeps you going.\"},{\"slot\":\"lunch\",\"recipe_id\":\"daal-chawal\",\"note\":\"Hearty and easy to batch for the week.\"},{\"slot\":\"dinner\",\"recipe_id\":\"lamb-kofta-tzatziki\",\"note\":\"A fresh, simple plate to round off the day.\"}]}"
+        "text": "{\"meals\":[{\"slot\":\"breakfast\",\"recipe_id\":\"namkeen-dalia-egg\",\"note\":\"A warm, savoury start that keeps you going.\"},{\"slot\":\"lunch\",\"recipe_id\":\"chapli-kebab-burger\",\"note\":\"Hearty and easy to batch for the week.\"},{\"slot\":\"dinner\",\"recipe_id\":\"maghmour\",\"note\":\"A fresh, simple plate to round off the day.\"}]}"
       }
     ],
     "stop_reason": "end_turn",
