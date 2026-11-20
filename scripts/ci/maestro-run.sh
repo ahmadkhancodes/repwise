@@ -134,6 +134,8 @@ for flow in $ORDERED; do
 
   # Workout flows turn airplane mode on; never let one leak into the next flow.
   [ "$PLATFORM" = android ] && adb_ shell cmd connectivity airplane-mode disable >/dev/null 2>&1
+  # A cold emulator can show "Pixel Launcher isn't responding" over the app; close system dialogs.
+  [ "$PLATFORM" = android ] && adb_ shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
 
   attempt=0
   status=failed

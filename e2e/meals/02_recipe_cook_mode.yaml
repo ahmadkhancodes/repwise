@@ -15,8 +15,14 @@ appId: com.client.repwise
     direction: DOWN
 - tapOn:
     id: "meal-dinner"
-- assertVisible:
-    id: "recipe-ingredients"
+- scrollUntilVisible:
+    element:
+      id: "recipe-ingredients"
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      id: "servings-inc"
+    direction: UP
 - tapOn:
     id: "servings-inc"
 - tapOn:
