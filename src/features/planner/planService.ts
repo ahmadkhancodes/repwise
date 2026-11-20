@@ -30,7 +30,7 @@ import {
   type WeekPlan,
 } from './engine';
 import { toEngineCatalogues } from '@repwise/content';
-import { and, asc, desc, eq, gte, inArray, lt } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNotNull, lt, lte } from 'drizzle-orm';
 
 import { getRawDb } from '@/db/client';
 import {
@@ -469,6 +469,60 @@ export async function generateInitialPlan(opts: Omit<GenerateOptions, 'date' | '
     next = await regenerateWeek({ ...opts, now, date: addDays(startOfWeek(today), 7) });
   }
   return { first, next };
+}
+
+/**
+ * #16 / R2-6: collapse duplicate planned sessions. Two devices that each planned the same week
+ * (onboarding on a new phone, then signing in) end up with two plan-written sessions per training
+ * day after a pull, because sync merges by id. Plans write at most one session per date, so the
+ * plan slot is the date. Per date with more than one plan-written session:
+ * - every touched one (started, done, swapped, edited) is kept;
+ * - untouched ones are soft-deleted (with their exercises, so it syncs) when a touched one exists,
+ *   otherwise all but one: the one from the newest plan (createdAt, then id; ties by session id).
+ * Deterministic on synced fields only, so both devices keep the same row. Ad-hoc sessions (no
+ * plan) are never touched. Returns how many sessions were removed.
+ */
+export function dedupePlannedSessions(
+  range: { from?: string; to?: string } = {},
+  now: number = Date.now(),
+): number {
+  const where = [isNotNull(sessions.planId)];
+  if (range.from) where.push(gte(sessions.date, range.from));
+  if (range.to) where.push(lte(sessions.date, range.to));
+  const rows = sessionsRepo.list(and(...where));
+  const byDate = new Map<string, Session[]>();
+  for (const r of rows) {
+    if (!r.date) continue;
+    byDate.set(r.date, [...(byDate.get(r.date) ?? []), r]);
+  }
+  const groups = [...byDate.values()].filter((g) => g.length > 1);
+  if (groups.length === 0) return 0;
+  let removed = 0;
+  getRawDb().withTransactionSync(() => {
+    const planRank = new Map<string, string>();
+    const rank = (s: Session) => {
+      const id = s.planId ?? '';
+      let r = planRank.get(id);
+      if (r === undefined) {
+        const p = plansRepo.get(id);
+        r = `${String(p?.createdAt ?? 0).padStart(16, '0')}|${id}`;
+        planRank.set(id, r);
+      }
+      return `${r}|${s.id}`;
+    };
+    for (const group of groups) {
+      const untouched = group.filter(isUntouchedSession);
+      const hasTouched = untouched.length < group.length;
+      const sorted = [...untouched].sort((a, b) => (rank(a) < rank(b) ? 1 : -1));
+      const drop = hasTouched ? sorted : sorted.slice(1);
+      for (const s of drop) {
+        for (const se of liveExercises(s.id)) sessionExercisesRepo.remove(se.id, now);
+        sessionsRepo.remove(s.id, now);
+        removed++;
+      }
+    }
+  });
+  return removed;
 }
 
 /** Make sure the week containing `date` has a plan (no-op when one exists). */

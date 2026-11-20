@@ -7,9 +7,10 @@ import { AppState } from 'react-native';
 
 import { latestCheckin } from '@/features/assistant/repo';
 import { registerPlanner, type Planner, type RegenerateInput } from '@/features/today/plannerBridge';
+import { onPullMerged } from '@/sync/syncEngine';
 
 import { addDays, startOfWeek, weekdayMon0 } from './engine';
-import { ensureWeekPlanned, localToday, regenerateWeek } from './planService';
+import { dedupePlannedSessions, ensureWeekPlanned, localToday, regenerateWeek } from './planService';
 
 export function createPlannerBridge(clock: () => number = Date.now): Required<Planner> {
   return {
@@ -41,6 +42,20 @@ export function registerPlannerBridge(): void {
   if (registered) return;
   registered = true;
   registerPlanner(createPlannerBridge());
+  onPullMerged(dedupeAfterPull);
+}
+
+/**
+ * R2-6: after a pull brought sessions or plans, collapse the duplicates two devices planned for
+ * the same days (a no-op otherwise). Exported for tests.
+ */
+export function dedupeAfterPull(changed: ReadonlySet<string>, now: number = Date.now()): number {
+  if (!changed.has('sessions') && !changed.has('session_exercises') && !changed.has('plans')) return 0;
+  try {
+    return dedupePlannedSessions({}, now);
+  } catch {
+    return 0; // best effort; the plan keeper tries again on the next foreground
+  }
 }
 
 /**
@@ -59,6 +74,12 @@ export function ensurePlannedAhead(now: number = Date.now()): number {
     } catch {
       // Best effort: screens show what is stored; the next foreground tries again.
     }
+  }
+  try {
+    // Backstop for duplicates a pull left before the bridge was listening (R2-6).
+    dedupePlannedSessions({ from: startOfWeek(today), to: addDays(startOfWeek(today), 13) }, now);
+  } catch {
+    // best effort
   }
   return planned;
 }

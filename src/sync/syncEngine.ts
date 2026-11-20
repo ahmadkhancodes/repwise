@@ -238,7 +238,42 @@ export function mergeRemoteRows(
   return changed;
 }
 
+type PullListener = (changed: ReadonlySet<SyncTableName>) => void;
+const pullListeners = new Set<PullListener>();
+
+/**
+ * Called once after a pull finished merging, with the tables whose local rows changed. For
+ * follow-ups that need the whole pull in place first (e.g. collapsing duplicate planned sessions
+ * a second device wrote, R2-6). Returns the unsubscribe.
+ */
+export function onPullMerged(listener: PullListener): () => void {
+  pullListeners.add(listener);
+  return () => {
+    pullListeners.delete(listener);
+  };
+}
+
+function notifyPullMerged(changed: ReadonlySet<SyncTableName>): void {
+  if (changed.size === 0) return;
+  for (const l of [...pullListeners]) {
+    try {
+      l(changed);
+    } catch {
+      // a follow-up must never fail the sync
+    }
+  }
+}
+
 async function pull(userId: string): Promise<number> {
+  const changed = new Set<SyncTableName>();
+  try {
+    return await pullPages(userId, changed);
+  } finally {
+    if (syncAccountId() === userId) notifyPullMerged(changed);
+  }
+}
+
+async function pullPages(userId: string, changed: Set<SyncTableName>): Promise<number> {
   let since = getPullSince(userId);
   let cursor: string | null = null;
   let pulled = 0;
@@ -251,7 +286,9 @@ async function pull(userId: string): Promise<number> {
     if (syncAccountId() !== userId) return pulled;
     for (const [table, rows] of Object.entries(res.changes ?? {})) {
       if ((SYNC_TABLE_NAMES as string[]).includes(table) && Array.isArray(rows)) {
-        pulled += mergeRemoteRows(table as SyncTableName, rows, userId);
+        const n = mergeRemoteRows(table as SyncTableName, rows, userId);
+        if (n > 0) changed.add(table as SyncTableName);
+        pulled += n;
       }
     }
     cursor = res.nextCursor;
