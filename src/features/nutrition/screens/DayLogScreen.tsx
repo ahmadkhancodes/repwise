@@ -5,16 +5,15 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { BackButton } from '@/features/meals/components/BackButton';
 import { MacroChips } from '@/features/meals/components/MacroChips';
-import { MacroRings } from '@/features/meals/components/MacroRings';
-import { SkeletonList } from '@/features/meals/components/SkeletonBlock';
-import { enterAt, layoutSpring } from '@/features/meals/components/motion';
+import { mealArt } from '@/features/meals/components/MealTile';
+import { RecipeArt } from '@/features/meals/components/RecipeArt';
+import { enterAt, layoutSpring } from '@/ui/listMotion';
 import { useEatDay, type MealView } from '@/features/meals/hooks/useEat';
 import { dayLabel, isISODate, todayISO } from '@/features/meals/logic/dates';
 import { slotLabel } from '@/features/meals/logic/slots';
 import { markMealEaten, setMealOpen } from '@/features/meals/service';
-import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { Button, Card, Chip, EmptyState, IconButton, Screen, Text, showToast } from '@/ui';
+import { Button, Card, Chip, EmptyState, IconButton, Screen, Text, showUndoToast, MacroRings, SkeletonCard, SkeletonGroup } from '@/ui';
 
 import { isWaterLog } from '../logic/water';
 import { logFood, removeLog, type FoodLog } from '../repo';
@@ -31,32 +30,28 @@ export function DayLogScreen() {
   const day = useEatDay(date);
   const logs = day.logs.filter((l) => !isWaterLog(l));
 
+  // The radio chips own the (selection) haptic; nothing here buzzes again.
   const setMeal = (m: MealView, action: 'eaten' | 'half' | 'skipped') => {
     if (action === 'skipped') {
       setMealOpen(m.id, m.status === 'skipped' ? 'planned' : 'skipped');
-      haptics.selection();
       return;
     }
     if (m.status === 'eaten' && action === 'eaten') {
       setMealOpen(m.id, 'planned');
-      haptics.selection();
       return;
     }
     markMealEaten(m.id, action === 'half' ? 0.5 : 1);
-    haptics.success();
   };
 
   const remove = (l: FoodLog) => {
     removeLog(l.id);
-    haptics.light();
-    showToast({
-      message: `${l.name} removed`,
-      actionLabel: 'Undo',
-      onAction: () => logFood({ date: l.date, source: l.source, name: l.name, slot: l.slot, kcal: l.kcal, p: l.p, c: l.c, f: l.f }),
+    showUndoToast(`${l.name} removed`, () => {
+      logFood({ date: l.date, source: l.source, name: l.name, slot: l.slot, kcal: l.kcal, p: l.p, c: l.c, f: l.f, mealId: l.mealId });
     });
   };
 
-  const halfOf = (m: MealView) => logs.find((l) => l.source === 'plan' && l.slot === m.slot && l.kcal < m.kcal * 0.75);
+  const halfOf = (m: MealView) =>
+    logs.find((l) => l.source === 'plan' && (l.mealId ? l.mealId === m.id : l.slot === m.slot) && l.kcal < m.kcal * 0.75);
 
   return (
     <Screen
@@ -66,9 +61,13 @@ export function DayLogScreen() {
       footer={<Button label="Log food" onPress={() => router.push({ pathname: '/meal/log', params: { date, mode: 'food' } })} testID="day-log-add" />}
     >
       {day.state === 'loading' ? (
-        <SkeletonList rows={3} testID="day-log-loading" />
+        <SkeletonGroup testID="day-log-loading" style={{ gap: t.spacing.sm }}>
+          {Array.from({ length: 3 }, (_, i) => (
+            <SkeletonCard key={i} lines={2} />
+          ))}
+        </SkeletonGroup>
       ) : day.state === 'error' ? (
-        <EmptyState icon={CircleAlert} title="Couldn't load this day" actionLabel="Try again" onAction={day.retry} testID="day-log-error" />
+        <EmptyState icon={CircleAlert} title="Couldn’t load this day" actionLabel="Try again" onAction={day.retry} testID="day-log-error" />
       ) : (
         <>
           <Card testID="day-log-rings">
@@ -88,16 +87,21 @@ export function DayLogScreen() {
                 return (
                   <Animated.View key={m.id} entering={enterAt(i, reduce)} layout={layoutSpring(reduce)}>
                     <Card testID={`day-meal-${m.slot}`}>
-                      <Text variant="caption" color="textSecondary">
-                        {slotLabel(m.slot)}
-                      </Text>
-                      <Text variant="headline" numberOfLines={2}>
-                        {m.title}
-                      </Text>
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs, marginTop: t.spacing.xs }}>
-                        <Chip label="Ate it" selected={m.status === 'eaten' && !half} onPress={() => setMeal(m, 'eaten')} testID={`ate-${m.slot}`} />
-                        <Chip label="Half" selected={half} onPress={() => setMeal(m, 'half')} testID={`half-${m.slot}`} />
-                        <Chip label="Skipped" selected={m.status === 'skipped'} onPress={() => setMeal(m, 'skipped')} testID={`skip-${m.slot}`} />
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
+                        <RecipeArt art={mealArt(m)} />
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <Text variant="caption" color="textSecondary">
+                            {slotLabel(m.slot)}
+                          </Text>
+                          <Text variant="headline" numberOfLines={2}>
+                            {m.title}
+                          </Text>
+                        </View>
+                      </View>
+                      <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs, marginTop: t.spacing.xs }}>
+                        <Chip role="radio" label="Ate it" selected={m.status === 'eaten' && !half} onPress={() => setMeal(m, 'eaten')} testID={`ate-${m.slot}`} />
+                        <Chip role="radio" label="Half" selected={half} onPress={() => setMeal(m, 'half')} testID={`half-${m.slot}`} />
+                        <Chip role="radio" label="Skipped" selected={m.status === 'skipped'} onPress={() => setMeal(m, 'skipped')} testID={`skip-${m.slot}`} />
                       </View>
                     </Card>
                   </Animated.View>

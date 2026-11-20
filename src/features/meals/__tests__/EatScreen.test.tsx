@@ -38,7 +38,11 @@ describe.each(SCHEMES)('EatScreen (%s)', (scheme) => {
     expect(screen.getByTestId('meal-breakfast')).toBeTruthy();
     expect(screen.getByTestId('meal-dinner')).toBeTruthy();
     expect(screen.getByTestId('eat-rings')).toBeTruthy();
-    expect(screen.getByText(/^Today/)).toBeTruthy();
+    expect(screen.getAllByText(/^Today/).length).toBeGreaterThan(0);
+    // Every meal row has designed art, and the tick is its own checkbox (sibling of the body).
+    expect(screen.getByTestId('meal-art-lunch', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getAllByRole('checkbox', { name: /eaten$/ }).length).toBeGreaterThanOrEqual(3);
+    expect(screen.getByTestId('meal-lunch').props.accessibilityRole).toBe('button');
   });
 });
 
@@ -46,7 +50,7 @@ describe('EatScreen interactions', () => {
   beforeEach(() => onboard());
 
   it('shows a skeleton while the catalogue loads', async () => {
-    const spy = jest.spyOn(catalog, 'useCatalog').mockReturnValue(null);
+    const spy = jest.spyOn(catalog, 'useCatalogFor').mockReturnValue(null);
     await renderThemed(<EatScreen />);
     expect(screen.getByTestId('eat-loading')).toBeTruthy();
     expect(screen.queryByTestId('meal-lunch')).toBeNull();
@@ -112,6 +116,7 @@ describe('EatScreen interactions', () => {
     await fireEvent.press(screen.getByRole('tab', { name: 'Week' }));
     expect(await screen.findByTestId('week-days')).toBeTruthy();
     expect(screen.getByTestId('week-label').props.children).toBe('This week');
+    expect(screen.getByTestId('week-today-badge')).toHaveTextContent('Today');
     await fireEvent.press(screen.getByTestId('week-grocery'));
     expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/grocery' }));
     await fireEvent.press(screen.getByTestId(`week-day-${todayISO()}`));
@@ -140,11 +145,11 @@ describe('EatScreen interactions', () => {
     expect(await screen.findByTestId('meal-lunch')).toBeTruthy();
   });
 
-  it('water card: long-press adds a glass', async () => {
+  it('water card: a visible +250 ml button adds a glass', async () => {
     await renderThemed(<EatScreen />);
     await screen.findByTestId('meal-lunch');
-    await fireEvent(screen.getByTestId('open-water'), 'longPress');
-    await waitFor(() => expect(screen.getByText('250 ml')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('add-water'));
+    await waitFor(() => expect(screen.getByTestId('water-total')).toHaveTextContent('250 ml of 2 L'));
     await fireEvent.press(screen.getByTestId('open-water'));
     expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/meal/water' }));
   });

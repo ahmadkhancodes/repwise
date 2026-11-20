@@ -1,35 +1,37 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import {
-  ChevronLeft,
-  ChevronRight,
-  CircleAlert,
-  Droplet,
-  Lock,
-  ShoppingBasket,
-  Sparkles,
-  Utensils,
-  UtensilsCrossed,
-} from 'lucide-react-native';
+import { Check, ChevronLeft, ChevronRight, CircleAlert, Lock, ShoppingBasket, Utensils, UtensilsCrossed } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { formatWater } from '@/features/nutrition/logic/water';
+import { WaterCard } from '@/features/nutrition/components/WaterCard';
 import { getWaterGoal } from '@/features/nutrition/waterGoal';
 import { usePro } from '@/features/billing/hooks/usePro';
-import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { Card, EmptyState, IconButton, ListRow, PressableScale, Screen, Segmented, Text, showToast } from '@/ui';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  IconButton,
+  ListRow,
+  MacroRings,
+  Screen,
+  Segmented,
+  Skeleton,
+  SkeletonCard,
+  SkeletonGroup,
+  Text,
+  WeekStrip,
+  type WeekDay,
+} from '@/ui';
+import { enterAt } from '@/ui/listMotion';
 
-import { MacroRings } from '../components/MacroRings';
+import { quickAddWater, toggleMeal } from '../actions';
+import { TargetsIcon } from '../components/icons';
 import { MealTile } from '../components/MealTile';
-import { SkeletonList } from '../components/SkeletonBlock';
 import { SwapSheet } from '../components/SwapSheet';
-import { WeekStrip } from '../components/WeekStrip';
-import { enterAt } from '../components/motion';
 import { useEatDay, useEatWeek, type MealView } from '../hooks/useEat';
-import { addDays, dayLabel, shortDate, startOfWeek, todayISO, weekDates } from '../logic/dates';
-import { addWater, markMealEaten, setMealOpen, undoLog } from '../service';
+import { addDays, dayLabel, dayOfMonth, shortDate, shortWeekday, startOfWeek, todayISO, weekDates } from '../logic/dates';
 
 const VIEWS = [
   { value: 'day', label: 'Day' },
@@ -85,6 +87,29 @@ export function EatScreen() {
   );
 }
 
+/** Seven days for the shared WeekStrip (Pro-locked days say so). Pure. */
+export function eatWeekDays(dates: readonly string[], today: string, locked: (d: string) => boolean): WeekDay[] {
+  return dates.map((d) => ({
+    key: d,
+    weekday: shortWeekday(d),
+    day: dayOfMonth(d),
+    locked: locked(d),
+    accessibilityLabel: `${dayLabel(d, today)}${locked(d) ? ', Pro' : ''}`,
+  }));
+}
+
+function EatSkeleton({ testID }: { testID: string }) {
+  const t = useTheme();
+  return (
+    <SkeletonGroup label="Loading meals" testID={testID} style={{ gap: t.spacing.sm }}>
+      <Skeleton height={t.sizes.ring + t.spacing.xl + t.spacing.card * 2} radius={t.radius.card} />
+      <SkeletonCard media lines={2} />
+      <SkeletonCard media lines={2} />
+      <SkeletonCard media lines={2} />
+    </SkeletonGroup>
+  );
+}
+
 function DayView({
   date,
   today,
@@ -108,31 +133,28 @@ function DayView({
     handledSwap.current = linked.id;
     setSwap(linked);
   }, [linked]);
-  const dates = useMemo(() => weekDates(startOfWeek(date)), [date]);
+  const weekDays = useMemo(
+    () => eatWeekDays(weekDates(startOfWeek(date)), today, (d) => !isPro && d !== today),
+    [date, today, isPro],
+  );
   const locked = !isPro && date !== today;
   const waterGoal = getWaterGoal();
 
-  const toggle = (m: MealView) => {
-    if (m.status === 'eaten') {
-      setMealOpen(m.id, 'planned');
-      haptics.light();
-      return;
-    }
-    markMealEaten(m.id);
-    haptics.success();
-    showToast({ message: `${m.title} logged`, tone: 'success', actionLabel: 'Undo', onAction: () => setMealOpen(m.id, 'planned') });
-  };
-
-  const quickWater = () => {
-    const row = addWater(date, 250);
-    haptics.light();
-    showToast({ message: '250 ml water added', actionLabel: 'Undo', onAction: () => undoLog(row.id) });
-  };
+  // Stable handlers (MealTile is memoised); the toggle changes only when the day's meals do.
+  const dayMeals = day.meals;
+  const onToggle = useCallback((m: MealView) => {
+    toggleMeal(m, dayMeals);
+  }, [dayMeals]);
+  const onSwap = useCallback((m: MealView) => setSwap(m), []);
+  const onOpen = useCallback((m: MealView) => {
+    if (!m.recipeId) return;
+    router.push({ pathname: '/recipe/[id]', params: { id: m.recipeId, portion: String(m.portion), mealId: m.id } });
+  }, []);
 
   const header = (
     <>
-      <WeekStrip dates={dates} selected={date} today={today} onSelect={onDate} locked={(d) => !isPro && d !== today} />
-      <Text variant="caption" color="textSecondary" testID="eat-day-label">
+      <WeekStrip days={weekDays} selectedKey={date} todayKey={today} onSelect={onDate} testID="week-strip" />
+      <Text variant="callout" color="textSecondary" testID="eat-day-label">
         {dayLabel(date, today)}
         {day.plan?.dayType ? ` · ${day.plan.dayType === 'training' ? 'Training day' : 'Rest day'}` : ''}
       </Text>
@@ -143,7 +165,7 @@ function DayView({
     return (
       <>
         {header}
-        <SkeletonList testID="eat-loading" />
+        <EatSkeleton testID="eat-loading" />
       </>
     );
   }
@@ -152,7 +174,7 @@ function DayView({
       <EmptyState
         icon={Utensils}
         title="Your meal plan starts with you"
-        body="Answer a few questions about your goal and food, and we'll plan every meal."
+        body="Answer a few questions about your goal and food, and we’ll plan every meal."
         actionLabel="Set up my plan"
         onAction={() => router.push('/welcome' as never)}
         testID="eat-no-profile"
@@ -165,7 +187,7 @@ function DayView({
         {header}
         <EmptyState
           icon={CircleAlert}
-          title="Couldn't build your plan"
+          title="Couldn’t build your plan"
           body="Something went wrong on this phone. Your logged meals are safe."
           actionLabel="Try again"
           onAction={day.retry}
@@ -182,19 +204,20 @@ function DayView({
       {target ? (
         <Card
           onPress={() => router.push({ pathname: '/meal/day/[date]', params: { date } })}
-          accessibilityLabel="Open the day's nutrition log"
+          accessibilityLabel="Open the day’s nutrition log"
           testID="eat-rings"
         >
           <MacroRings
             eaten={{ kcal: day.intake.kcal, protein: day.intake.p, carbs: day.intake.c, fat: day.intake.f }}
             target={target}
+            testID="eat-macros"
           />
         </Card>
       ) : null}
       <ListRow
         title="Daily targets"
-        value={target ? `${target.kcal.toLocaleString('en-US')} kcal` : undefined}
-        icon={Sparkles}
+        value={target ? `${target.kcal.toLocaleString()} kcal` : undefined}
+        icon={TargetsIcon}
         onPress={() => router.push({ pathname: '/meal/targets', params: { date } })}
         chevron
         testID="open-targets"
@@ -204,7 +227,7 @@ function DayView({
         <EmptyState
           icon={Lock}
           title="Plan ahead with Pro"
-          body="Today's meals are free. Pro shows the whole week, swaps and the grocery list."
+          body="Today’s meals are free. Pro shows the whole week, swaps and the grocery list."
           actionLabel="See Pro"
           onAction={() => router.push({ pathname: '/paywall', params: { source: 'eat_week' } })}
           testID="eat-locked"
@@ -225,53 +248,26 @@ function DayView({
       ) : (
         <View style={{ gap: t.spacing.sm }} testID="eat-meals">
           {day.meals.map((m, i) => (
-            <MealTile
-              key={m.id}
-              meal={m}
-              index={i}
-              onOpen={() =>
-                m.recipeId &&
-                router.push({ pathname: '/recipe/[id]', params: { id: m.recipeId, portion: String(m.portion), mealId: m.id } })
-              }
-              onToggle={() => toggle(m)}
-              onSwap={() => setSwap(m)}
-            />
+            <MealTile key={m.id} meal={m} index={i} onOpen={onOpen} onToggle={onToggle} onSwap={onSwap} />
           ))}
         </View>
       )}
 
-      <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-        <PressableScale
-          testID="open-log"
-          onPress={() => router.push({ pathname: '/meal/log', params: { date } })}
-          accessibilityRole="button"
-          accessibilityLabel="Ate out or log food"
-          style={{ flex: 1, minHeight: t.sizes.button + t.spacing.lg, backgroundColor: t.colors.surface, borderRadius: t.radius.card, padding: t.spacing.card, gap: t.spacing.xxs }}
-        >
-          <UtensilsCrossed color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
-          <Text variant="headline">Ate out</Text>
-          <Text variant="caption" color="textSecondary">
-            Log food or a meal out
-          </Text>
-        </PressableScale>
-        <PressableScale
-          testID="open-water"
-          onPress={() => router.push({ pathname: '/meal/water', params: { date } })}
-          onLongPress={quickWater}
-          accessibilityRole="button"
-          accessibilityLabel={`Water: ${formatWater(day.waterMl)} of ${formatWater(waterGoal)}`}
-          accessibilityHint="Long-press to add a glass"
-          style={{ flex: 1, minHeight: t.sizes.button + t.spacing.lg, backgroundColor: t.colors.surface, borderRadius: t.radius.card, padding: t.spacing.card, gap: t.spacing.xxs }}
-        >
-          <Droplet color={t.colors.macroProtein} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
-          <Text variant="headline" tabular>
-            {formatWater(day.waterMl)}
-          </Text>
-          <Text variant="caption" color="textSecondary">
-            of {formatWater(waterGoal)} water
-          </Text>
-        </PressableScale>
-      </View>
+      <ListRow
+        title="Ate out or off-plan?"
+        subtitle="Log food or a meal out"
+        icon={UtensilsCrossed}
+        onPress={() => router.push({ pathname: '/meal/log', params: { date } })}
+        chevron
+        testID="open-log"
+      />
+      <WaterCard
+        totalMl={day.waterMl}
+        goalMl={waterGoal}
+        onAdd={() => quickAddWater(date)}
+        onOpen={() => router.push({ pathname: '/meal/water', params: { date } })}
+        testID="eat-water"
+      />
 
       <SwapSheet meal={swap} onClose={() => setSwap(null)} />
     </>
@@ -287,6 +283,7 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
   const thisWeek = startOfWeek(today);
   const end = addDays(start, 6);
   const label = start === thisWeek ? 'This week' : start === addDays(thisWeek, 7) ? 'Next week' : `Week of ${shortDate(start)}`;
+  const icon = { size: t.sizes.iconSmall, strokeWidth: t.sizes.iconStrokeBold };
 
   return (
     <>
@@ -317,25 +314,21 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
         />
       </View>
 
-      <Card
+      <ListRow
+        title="Grocery list"
+        subtitle="The whole week in one list, by aisle"
+        icon={ShoppingBasket}
         onPress={() => router.push({ pathname: '/grocery', params: { week: start } })}
-        accessibilityLabel="Grocery list for this week"
+        chevron
         testID="week-grocery"
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-          <ShoppingBasket color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
-          <View style={{ flex: 1 }}>
-            <Text variant="headline">Grocery list</Text>
-            <Text variant="caption" color="textSecondary">
-              The whole week in one list, by aisle
-            </Text>
-          </View>
-          <ChevronRight color={t.colors.textTertiary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
-        </View>
-      </Card>
+      />
 
       {week.state === 'loading' ? (
-        <SkeletonList rows={5} testID="week-loading" />
+        <SkeletonGroup label="Loading the week" testID="week-loading" style={{ gap: t.spacing.sm }}>
+          {Array.from({ length: 5 }, (_, i) => (
+            <SkeletonCard key={i} lines={3} />
+          ))}
+        </SkeletonGroup>
       ) : week.state === 'no_profile' ? (
         <EmptyState
           icon={Utensils}
@@ -347,24 +340,26 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
         <View style={{ gap: t.spacing.sm }} testID="week-days">
           {week.days.map((d, i) => {
             const lockedDay = !isPro && d.date !== today;
+            const isToday = d.date === today;
             return (
               <Animated.View key={d.date} entering={enterAt(i, reduce)}>
                 <Card
                   onPress={() => onOpenDay(d.date)}
-                  accessibilityLabel={`${dayLabel(d.date, today)}: ${d.meals.length} meals${lockedDay ? ', Pro' : ''}`}
+                  accessibilityLabel={`${dayLabel(d.date, today)}: ${d.meals.length} meals, ${d.eaten} eaten${lockedDay ? ', Pro' : ''}`}
                   testID={`week-day-${d.date}`}
-                  selected={d.date === today}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: t.spacing.xs }}>
-                    <Text variant="headline" style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+                    <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>
                       {dayLabel(d.date, today)}
                     </Text>
+                    {isToday ? <Badge label="Today" tone="accent" testID="week-today-badge" /> : null}
+                    <View style={{ flex: 1 }} />
                     {lockedDay ? (
                       <Lock color={t.colors.textSecondary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
                     ) : (
                       <Text variant="caption" color="textSecondary" tabular>
                         {d.meals.length
-                          ? `${d.kcal.toLocaleString('en-US')}${d.target ? ` / ${d.target.toLocaleString('en-US')}` : ''} kcal`
+                          ? `${d.kcal.toLocaleString()}${d.target ? ` / ${d.target.toLocaleString()}` : ''} kcal`
                           : d.date < today
                             ? 'Past'
                             : 'Not planned'}
@@ -376,12 +371,28 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
                       {d.meals.length} meals planned
                     </Text>
                   ) : (
-                    d.meals.map((m) => (
-                      <Text key={m.id} variant="callout" color={m.status === 'eaten' ? 'textSecondary' : 'textPrimary'} numberOfLines={1}>
-                        {m.status === 'eaten' ? '✓ ' : ''}
-                        {m.title}
-                      </Text>
-                    ))
+                    <View style={{ gap: t.spacing.xxs, marginTop: t.spacing.xxs }}>
+                      {d.meals.map((m) => {
+                        const ate = m.status === 'eaten';
+                        return (
+                          <View key={m.id} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+                            {ate ? (
+                              <Check color={t.colors.accentText} {...icon} testID={`week-eaten-${m.id}`} />
+                            ) : (
+                              <View style={{ width: t.sizes.iconSmall }} />
+                            )}
+                            <Text
+                              variant="callout"
+                              color={ate ? 'textSecondary' : 'textPrimary'}
+                              numberOfLines={1}
+                              style={{ flex: 1 }}
+                            >
+                              {m.title}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
                   )}
                 </Card>
               </Animated.View>

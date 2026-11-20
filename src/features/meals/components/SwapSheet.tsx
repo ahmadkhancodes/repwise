@@ -1,22 +1,22 @@
 import type { PlannedMeal } from '@repwise/engine';
-import { Ban } from 'lucide-react-native';
+import { Ban, CircleAlert } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { haptics } from '@/services/haptics';
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { Button, EmptyState, PressableScale, Sheet, Text, showToast } from '@/ui';
+import { Button, EmptyState, PressableScale, Sheet, SkeletonCard, SkeletonGroup, Text, showToast } from '@/ui';
+import { enterAt } from '@/ui/listMotion';
 
 import type { MealView } from '../hooks/useEat';
+import { recipeArt } from '../logic/art';
 import { cuisineLabel, totalMinutes } from '../logic/recipe';
 import { slotLabel } from '../logic/slots';
 import { applySwap, swapChoices } from '../service';
 import { addMoreLike, addNeverShow } from '../signals';
 import { MacroChips } from './MacroChips';
-import { SkeletonBlock } from './SkeletonBlock';
-import { enterAt } from './motion';
+import { RecipeArt } from './RecipeArt';
 
 type Props = { meal: MealView | null; onClose: () => void };
 
@@ -28,7 +28,7 @@ type Props = { meal: MealView | null; onClose: () => void };
 export function SwapSheet({ meal, onClose }: Props) {
   const t = useTheme();
   const reduce = useReducedMotion();
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes');
   const [nonce, setNonce] = useState(0);
   const [result, setResult] = useState<{ key: string; options: PlannedMeal[] | null } | null>(null);
   const key = meal ? `${meal.id}|${meal.recipeId}|${nonce}` : '';
@@ -55,7 +55,6 @@ export function SwapSheet({ meal, onClose }: Props) {
     if (!meal) return;
     const saved = applySwap(meal.id, o);
     if (!saved) return;
-    haptics.success();
     const title = cat?.recipeById.get(o.recipeId)?.title ?? 'new meal';
     onClose();
     showToast({
@@ -63,14 +62,14 @@ export function SwapSheet({ meal, onClose }: Props) {
       tone: 'success',
       actionLabel: 'More like this',
       onAction: () => addMoreLike(o.recipeId),
+      silent: true,
     });
   };
 
   const never = () => {
     if (!meal?.recipeId) return;
     addNeverShow(meal.recipeId);
-    haptics.light();
-    showToast({ message: `We won't suggest ${meal.title} again` });
+    showToast({ message: `We won’t suggest ${meal.title} again` });
     setNonce((n) => n + 1);
   };
 
@@ -83,18 +82,19 @@ export function SwapSheet({ meal, onClose }: Props) {
       ) : null}
       {!meal ? null : error ? (
         <EmptyState
-          title="Couldn't load swaps"
+          icon={CircleAlert}
+          title="Couldn’t load swaps"
           body="Something went wrong on this phone. Try again."
           actionLabel="Try again"
           onAction={() => setNonce((n) => n + 1)}
           testID="swap-error"
         />
       ) : options === null ? (
-        <View style={{ gap: t.spacing.sm }} testID="swap-loading">
-          <SkeletonBlock height={t.sizes.row + t.spacing.lg} />
-          <SkeletonBlock height={t.sizes.row + t.spacing.lg} />
-          <SkeletonBlock height={t.sizes.row + t.spacing.lg} />
-        </View>
+        <SkeletonGroup label="Finding swaps" testID="swap-loading" style={{ gap: t.spacing.sm }}>
+          <SkeletonCard media lines={2} />
+          <SkeletonCard media lines={2} />
+          <SkeletonCard media lines={2} />
+        </SkeletonGroup>
       ) : options.length === 0 ? (
         <EmptyState
           title="No close matches"
@@ -116,18 +116,26 @@ export function SwapSheet({ meal, onClose }: Props) {
                     backgroundColor: t.colors.surface,
                     borderRadius: t.radius.card,
                     padding: t.spacing.card,
-                    gap: t.spacing.xxs,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: t.spacing.sm,
                   }}
                 >
-                  <Text variant="headline" numberOfLines={2}>
-                    {r?.title ?? o.recipeId}
-                  </Text>
-                  {r ? (
-                    <Text variant="caption" color="textSecondary">
-                      {cuisineLabel(r.cuisine)} · {totalMinutes(r)} min
+                  <RecipeArt
+                    art={recipeArt(r ? { ...r, slot: meal.slot } : { slot: meal.slot })}
+                    testID={`swap-art-${i}`}
+                  />
+                  <View style={{ flex: 1, minWidth: 0, gap: t.spacing.xxs }}>
+                    <Text variant="headline" numberOfLines={2}>
+                      {r?.title ?? o.recipeId}
                     </Text>
-                  ) : null}
-                  <MacroChips kcal={o.kcal} protein={o.protein} carbs={o.carbs} fat={o.fat} />
+                    {r ? (
+                      <Text variant="caption" color="textSecondary">
+                        {cuisineLabel(r.cuisine)} · {totalMinutes(r)} min
+                      </Text>
+                    ) : null}
+                    <MacroChips kcal={o.kcal} protein={o.protein} carbs={o.carbs} fat={o.fat} />
+                  </View>
                 </PressableScale>
               </Animated.View>
             );

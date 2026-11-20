@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
 import { saveProfile, useProfile } from '@/features/settings/repo';
-import { haptics } from '@/services/haptics';
 import { useTheme, type ColorToken } from '@/theme';
 import { BigNumber, Button, Card, Chip, EmptyState, Screen, Segmented, Sheet, Text, showToast } from '@/ui';
 
@@ -72,7 +71,7 @@ export function TargetsScreen() {
   const save = () => {
     saveProfile({ goal, activityLevel: activity });
     const res = replanFrom(todayISO());
-    haptics.success();
+    // The success toast owns the one success buzz.
     setEditing(false);
     showToast({
       message: res.status === 'ready' && res.created > 0 ? 'Targets updated. Meals re-planned from today.' : 'Targets updated',
@@ -140,7 +139,7 @@ export function TargetsScreen() {
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
           {GOALS.map((g) => (
-            <Chip key={g.value} label={g.label} selected={goal === g.value} onPress={() => setGoal(g.value)} testID={`goal-${g.value}`} />
+            <Chip key={g.value} role="radio" label={g.label} selected={goal === g.value} onPress={() => setGoal(g.value)} testID={`goal-${g.value}`} />
           ))}
         </View>
         <Text variant="callout" color="textSecondary">
@@ -148,7 +147,7 @@ export function TargetsScreen() {
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
           {ACTIVITY.map((a) => (
-            <Chip key={a.value} label={a.label} selected={activity === a.value} onPress={() => setActivity(a.value)} testID={`activity-${a.value}`} />
+            <Chip key={a.value} role="radio" label={a.label} selected={activity === a.value} onPress={() => setActivity(a.value)} testID={`activity-${a.value}`} />
           ))}
         </View>
         <Button label="Save" onPress={save} testID="targets-save" />

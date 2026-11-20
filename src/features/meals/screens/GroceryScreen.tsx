@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Check, Lock, RotateCcw, Share2, ShoppingBasket } from 'lucide-react-native';
+import { Lock, RotateCcw, Share2, ShoppingBasket } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Share, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
@@ -7,11 +7,10 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { usePro } from '@/features/billing/hooks/usePro';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { BigNumber, Button, EmptyState, IconButton, PressableScale, Screen, Text } from '@/ui';
+import { BigNumber, Button, Checkbox, EmptyState, IconButton, Screen, SkeletonCard, SkeletonGroup, Text } from '@/ui';
 
 import { BackButton } from '../components/BackButton';
-import { SkeletonList } from '../components/SkeletonBlock';
-import { enterAt, layoutSpring } from '../components/motion';
+import { enterAt } from '@/ui/listMotion';
 import { useEatWeek } from '../hooks/useEat';
 import { addDays, isISODate, shortDate, startOfWeek, todayISO } from '../logic/dates';
 import { buildGroceryList, formatQty, groceryCount, groceryText } from '../logic/grocery';
@@ -39,20 +38,17 @@ export function GroceryScreen() {
   const left = list.reduce((n, a) => n + a.items.filter((i) => !checked.has(i.foodId)).length, 0);
   const range = `${shortDate(weekStart)} – ${shortDate(addDays(weekStart, 6))}`;
 
+  // The Checkbox owns the selection haptic; the last item ticked earns the success buzz.
   const toggle = (id: string) => {
-    haptics.selection();
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      setGroceryChecked(weekStart, [...next]);
-      if (next.size === total && total > 0) haptics.success();
-      return next;
-    });
+    const next = new Set(checked);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setGroceryChecked(weekStart, [...next]);
+    setChecked(next);
+    if (next.size === total && total > 0 && !checked.has(id)) haptics.success();
   };
 
   const clear = () => {
-    haptics.light();
     setChecked(new Set());
     setGroceryChecked(weekStart, []);
   };
@@ -66,7 +62,7 @@ export function GroceryScreen() {
       <Screen title="Grocery list" headerLeft={<BackButton />} testID="screen-grocery">
         <EmptyState
           icon={Lock}
-          title="Your week's shopping in one tap"
+          title="Your week’s shopping in one tap"
           body="Pro builds the grocery list from your meal plan, grouped by aisle, with amounts merged."
           actionLabel="See Pro"
           onAction={() => router.push({ pathname: '/paywall', params: { source: 'grocery' } })}
@@ -86,7 +82,11 @@ export function GroceryScreen() {
       footer={total > 0 ? <Button label="Share list" icon={Share2} onPress={share} testID="grocery-share" /> : undefined}
     >
       {loading ? (
-        <SkeletonList rows={6} testID="grocery-loading" />
+        <SkeletonGroup testID="grocery-loading" style={{ gap: t.spacing.sm }}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <SkeletonCard key={i} lines={2} />
+          ))}
+        </SkeletonGroup>
       ) : total === 0 ? (
         <EmptyState
           icon={ShoppingBasket}
@@ -99,56 +99,34 @@ export function GroceryScreen() {
           <BigNumber value={left} unit={left === 1 ? 'item left' : 'items left'} label={range} testID="grocery-left" />
           {list.map((aisle, ai) => (
             <Animated.View key={aisle.aisle} entering={enterAt(ai, reduce)} style={{ gap: t.spacing.xxs }}>
-              <Text variant="caption" color="textSecondary" accessibilityRole="header">
-                {aisle.label.toUpperCase()}
+              <Text variant="headline" accessibilityRole="header" style={{ marginTop: t.spacing.xs }}>
+                {aisle.label}
               </Text>
               <View style={{ backgroundColor: t.colors.surface, borderRadius: t.radius.card }}>
                 {aisle.items.map((it, i) => {
                   const on = checked.has(it.foodId);
                   return (
-                    <Animated.View key={it.foodId} layout={layoutSpring(reduce)}>
-                      <PressableScale
+                    <View
+                      key={it.foodId}
+                      style={{
+                        paddingHorizontal: t.spacing.card,
+                        borderTopWidth: i === 0 ? 0 : t.sizes.hairline,
+                        borderTopColor: t.colors.border,
+                      }}
+                    >
+                      <Checkbox
+                        checked={on}
+                        onChange={() => toggle(it.foodId)}
+                        label={it.name}
+                        strikeWhenChecked
+                        trailing={
+                          <Text variant="callout" color="textSecondary" tabular>
+                            {formatQty(it.grams, units)}
+                          </Text>
+                        }
                         testID={`grocery-item-${it.foodId}`}
-                        feedback="none"
-                        onPress={() => toggle(it.foodId)}
-                        accessibilityRole="checkbox"
-                        accessibilityLabel={`${it.name}, ${formatQty(it.grams, units)}`}
-                        accessibilityState={{ checked: on }}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: t.spacing.sm,
-                          minHeight: t.sizes.row,
-                          paddingHorizontal: t.spacing.card,
-                          borderTopWidth: i === 0 ? 0 : t.sizes.hairline,
-                          borderTopColor: t.colors.border,
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: t.spacing.xl,
-                            height: t.spacing.xl,
-                            borderRadius: t.radius.pill,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: on ? t.colors.accent : 'transparent',
-                            borderWidth: on ? 0 : t.sizes.hairline + 1,
-                            borderColor: t.colors.border,
-                          }}
-                        >
-                          {on ? <Check color={t.colors.onAccent} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} /> : null}
-                        </View>
-                        <Text
-                          style={{ flex: 1, textDecorationLine: on ? 'line-through' : 'none' }}
-                          color={on ? 'textTertiary' : 'textPrimary'}
-                        >
-                          {it.name}
-                        </Text>
-                        <Text variant="callout" color="textSecondary" tabular>
-                          {formatQty(it.grams, units)}
-                        </Text>
-                      </PressableScale>
-                    </Animated.View>
+                      />
+                    </View>
                   );
                 })}
               </View>

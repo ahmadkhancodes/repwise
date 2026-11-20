@@ -39,3 +39,20 @@ export function glassCount(goalMl: number, glassMl = GLASS_ML): number {
 export function clampWaterGoal(ml: number): number {
   return Math.min(WATER_GOAL_MAX, Math.max(WATER_GOAL_MIN, Math.round(ml / 250) * 250));
 }
+
+/** Glasses for a dots row: filled = whole glasses drunk (capped at the goal's glass count). */
+export function waterGlasses(totalMl: number, goalMl: number = DEFAULT_WATER_GOAL_ML) {
+  const goal = glassCount(goalMl);
+  const filled = Math.min(goal, Math.floor(Math.max(0, totalMl) / GLASS_ML));
+  return { filled, goal, goalMl };
+}
+
+/** Clock time of a log in the device's locale and 12/24 h setting ("1:05 PM" / "13:05"). */
+export function formatLogTime(ms: number, locale?: string): string {
+  try {
+    return new Date(ms).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
+  } catch {
+    const d = new Date(ms);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+}

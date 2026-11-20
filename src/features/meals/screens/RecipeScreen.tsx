@@ -4,15 +4,16 @@ import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { BigNumber, Button, Card, EmptyState, Screen, Stepper, Text } from '@/ui';
+import { Badge, BigNumber, Button, Card, EmptyState, Screen, SkeletonGroup, Skeleton, SkeletonText, Stepper, Text } from '@/ui';
+import { enterAt } from '@/ui/listMotion';
 
 import { BackButton } from '../components/BackButton';
 import { MacroChips } from '../components/MacroChips';
-import { SkeletonList } from '../components/SkeletonBlock';
-import { enterAt } from '../components/motion';
+import { RecipeArt } from '../components/RecipeArt';
 import { allergenLabel } from '../logic/allergens';
+import { recipeArt } from '../logic/art';
 import {
   COST_LABEL,
   SERVING_MAX,
@@ -36,7 +37,7 @@ export function RecipeScreen() {
   const t = useTheme();
   const reduce = useReducedMotion();
   const params = useLocalSearchParams<{ id: string; portion?: string; mealId?: string }>();
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes', 'foods');
   const recipe = cat?.recipeById.get(String(params.id));
   const [servings, setServings] = useState(() => initialServings(params.portion));
   const ingredients = useMemo(
@@ -47,7 +48,11 @@ export function RecipeScreen() {
   if (!cat) {
     return (
       <Screen headerLeft={<BackButton />} testID="screen-recipe">
-        <SkeletonList rows={5} testID="recipe-loading" />
+        <SkeletonGroup label="Loading recipe" testID="recipe-loading" style={{ gap: t.spacing.md }}>
+          <Skeleton height={t.sizes.ringHero} radius={t.radius.card} />
+          <SkeletonText variant="title1" lines={2} lastLineWidth="60%" />
+          <Skeleton height={t.sizes.ring} radius={t.radius.card} />
+        </SkeletonGroup>
       </Screen>
     );
   }
@@ -80,12 +85,29 @@ export function RecipeScreen() {
         />
       }
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs, flexWrap: 'wrap' }}>
-        <Clock color={t.colors.textSecondary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
-        <Text variant="callout" color="textSecondary">
-          {cuisineLabel(recipe.cuisine)} · {recipe.prepMin} min prep · {recipe.cookMin} min cook · {COST_LABEL[recipe.costTier]}
-        </Text>
-      </View>
+      <RecipeArt
+        art={recipeArt(recipe)}
+        size="hero"
+        accessibilityLabel={`${recipeArt(recipe).label}: ${recipe.title}`}
+        testID="recipe-hero"
+      >
+        <View
+          style={{
+            position: 'absolute',
+            left: t.spacing.sm,
+            bottom: t.spacing.sm,
+            flexDirection: 'row',
+            gap: t.spacing.xs,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Badge label={cuisineLabel(recipe.cuisine)} tone="inverse" />
+          <Badge label={`${recipe.prepMin + recipe.cookMin} min`} icon={Clock} tone="inverse" />
+        </View>
+      </RecipeArt>
+      <Text variant="callout" color="textSecondary" testID="recipe-meta">
+        {recipe.prepMin} min prep · {recipe.cookMin} min cook · {COST_LABEL[recipe.costTier]}
+      </Text>
 
       <Card>
         <BigNumber value={Math.round(total.kcal)} unit="kcal" label={`For ${formatServings(servings)} ${servings === 1 ? 'serving' : 'servings'}`} testID="recipe-kcal" />

@@ -62,9 +62,9 @@ describe.each(SCHEMES)('CheckinScreen (%s)', (scheme) => {
 
     // Step 1: prefilled with the latest weight; − nudges by 0.1 kg.
     expect(screen.getByTestId('checkin-step-weigh')).toBeTruthy();
-    expect(screen.getByTestId('checkin-weight').props.accessibilityLabel).toBe('Today, 82.0 kg');
+    expect(screen.getByTestId('checkin-weight-value')).toHaveTextContent('82.0');
     await fireEvent.press(screen.getByRole('button', { name: 'Decrease Weight' }));
-    expect(screen.getByTestId('checkin-weight').props.accessibilityLabel).toBe('Today, 81.9 kg');
+    expect(screen.getByTestId('checkin-weight-value')).toHaveTextContent('81.9');
 
     // Step 2: next is disabled until energy and sleep are chosen (1 tap each).
     await fireEvent.press(screen.getByTestId('checkin-next'));

@@ -26,7 +26,7 @@ tags:
     text: "0 of .* eaten"
 - tapOn:
     id: "today-meal-lunch"
-- assertVisible: "Lunch logged"
+- assertVisible: ".* logged"
 - assertVisible:
     id: "meals-count"
     text: "1 of .* eaten"

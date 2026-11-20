@@ -96,11 +96,19 @@ describe.each(SCHEMES)('TodayScreen (%s)', (scheme) => {
     expect(within(brief).getByText('Leg day')).toBeTruthy();
     expect(within(brief).getByText('Masala omelette with wholewheat paratha')).toBeTruthy();
     expect(screen.getByTestId('today-rings')).toBeTruthy();
-    expect(screen.getByTestId('kcal-left')).toHaveTextContent('2,300');
+    expect(screen.getByTestId('today-macros-kcal-value').props.defaultValue).toBe('2,300');
+    expect(screen.getByTestId('kcal-eaten')).toHaveTextContent('0 of 2,300 kcal eaten');
     expect(screen.getByTestId('workout-title')).toHaveTextContent('Leg day');
     expect(screen.getByText('Chicken karahi')).toBeTruthy();
     expect(screen.getByTestId('meals-count')).toHaveTextContent('0 of 2 eaten');
     expect(screen.getByTestId('today-water')).toBeTruthy();
+    // Hierarchy: brief → primary action (workout) → meals → rings → water.
+    const order = ['today-brief', 'today-workout', 'today-meals', 'today-rings', 'today-water'];
+    const json = JSON.stringify(screen.toJSON());
+    const at = order.map((id) => json.indexOf(`"testID":"${id}"`));
+    expect(at.every((v) => v >= 0)).toBe(true);
+    expect([...at].sort((a, b) => a - b)).toEqual(at);
+    expect(screen.getByTestId('today-next-meal')).toBeTruthy();
   });
 });
 
@@ -131,13 +139,15 @@ describe('TodayScreen core loop', () => {
     expect(mealsRepo.get(meals[1]!.id)?.status).toBe('eaten');
     expect(logsForDate(TODAY)).toHaveLength(1);
     await waitFor(() => expect(screen.getByTestId('meals-count')).toHaveTextContent('1 of 2 eaten'));
-    expect(screen.getByTestId('kcal-left')).toHaveTextContent('1,656'); // 2,300 − 644
+    expect(screen.getByTestId('today-macros-kcal-value').props.defaultValue).toBe('1,656'); // 2,300 − 644
     expect(screen.getByTestId('today-meal-lunch')).toBeChecked();
     expect(events).toContainEqual(['meal_logged', { slot: 'lunch', from_plan: true, partial: false }]);
     const toast = await screen.findByTestId('toast');
-    expect(within(toast).getByText('Lunch logged')).toBeTruthy();
-    if (Platform.OS === 'ios') expect(Haptics.notificationAsync).toHaveBeenCalledWith('success');
+    expect(within(toast).getByText('Chicken karahi logged')).toBeTruthy();
+    // One buzz: the row's success haptic; the undo toast is silent (no double buzz).
+    if (Platform.OS === 'ios') expect(Haptics.notificationAsync).toHaveBeenCalledTimes(1);
     else expect(Haptics.performAndroidHapticsAsync).toHaveBeenCalledWith('confirm');
+    expect(useToastStore.getState().current?.silent).toBe(true);
     expect(useToastStore.getState().current?.durationMs).toBe(5000);
     await fireEvent.press(within(toast).getByRole('button', { name: 'Undo' }));
     expect(mealsRepo.get(meals[1]!.id)?.status).toBe('planned');
@@ -160,7 +170,7 @@ describe('TodayScreen core loop', () => {
     seedTrainingDay();
     await renderToday();
     await fireEvent.press(screen.getByTestId('add-water'));
-    await waitFor(() => expect(screen.getByTestId('water-total')).toHaveTextContent('250 / 2,000 ml'));
+    await waitFor(() => expect(screen.getByTestId('water-total')).toHaveTextContent('250 ml of 2 L'));
     expect((await screen.findByTestId('toast'))).toBeTruthy();
   });
 
@@ -185,7 +195,9 @@ describe('TodayScreen core loop', () => {
   it('plans the rest of the week offline with the meals domain', async () => {
     seedTrainingDay();
     await renderToday();
-    await waitFor(() => expect(events.map((e) => e[0])).toContain('plan_generated'));
+    // Deferred past first paint (PLAN_DELAY_MS) so it never competes with the first taps.
+    expect(events.map((e) => e[0])).not.toContain('plan_generated');
+    await waitFor(() => expect(events.map((e) => e[0])).toContain('plan_generated'), { timeout: 4000 });
     expect(mealPlanForDate('2026-11-20')).toBeDefined();
   });
 });
@@ -269,6 +281,10 @@ describe('TodayScreen assistant cards', () => {
     seedMealDay(TODAY);
     seedSession('2026-11-18', { title: 'Push day' });
     await renderToday(EVENING);
+    // One card inline; the rest wait behind "1 more suggestion".
+    await screen.findByTestId('today-more-cards');
+    expect(screen.getAllByTestId(/^card-(protein_low|missed_workout)$/)).toHaveLength(1);
+    await fireEvent.press(screen.getByTestId('today-more-cards'));
     expect(await screen.findByTestId('card-protein_low')).toBeTruthy();
     expect(screen.getByTestId('card-missed_workout')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('card-protein_low'));

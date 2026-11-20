@@ -17,12 +17,19 @@ import {
 import { and, asc, gte, inArray, lt } from 'drizzle-orm';
 
 import { mealPlans, meals as mealsTable, type MealStatus } from '@/db/schema';
-import { foodLogsRepo, logFood, logsForDate, removeLog, type FoodLog } from '@/features/nutrition/repo';
+import {
+  foodLogsRepo,
+  logFood,
+  logsForDate,
+  removeLog,
+  type FoodLog,
+} from '@/features/nutrition/repo';
 import { dayIntake } from '@/features/nutrition/logic/intake';
 import { WATER_SLOT, waterName } from '@/features/nutrition/logic/water';
 import { getProfile } from '@/features/settings/repo';
 import { track } from '@/services/analytics';
-import { getCatalog } from '@/services/catalog';
+import { lazyCatalog } from '@/services/catalog';
+import { withTransaction } from '@/db/transaction';
 
 import { addDays, startOfWeek, todayISO, weekDates } from './logic/dates';
 import { engineRecipes } from './logic/engineCatalog';
@@ -55,7 +62,8 @@ export type PlannerInputs = {
   recipeById: Map<string, EngineRecipe>;
 };
 
-let recipeCache: { key: string; list: EngineRecipe[]; byId: Map<string, EngineRecipe> } | null = null;
+let recipeCache: { key: string; list: EngineRecipe[]; byId: Map<string, EngineRecipe> } | null =
+  null;
 
 /** Profile + safe engine recipes, or null until onboarding saved the body fields. */
 export function plannerInputs(): PlannerInputs | null {
@@ -63,7 +71,8 @@ export function plannerInputs(): PlannerInputs | null {
   if (!profile) return null;
   const key = `${[...profile.allergies].sort().join(',')}|${profile.dietType}`;
   if (recipeCache?.key !== key) {
-    const cat = getCatalog();
+    // Only recipes + foods are parsed (exercises never are) — lazy facade.
+    const cat = lazyCatalog();
     const list = engineRecipes(cat.recipes, cat.foodById, {
       allergies: profile.allergies,
       dietType: profile.dietType,
@@ -80,7 +89,10 @@ export function engineRecipe(id: string | null | undefined): EngineRecipe | unde
 
 /** Latest plan row per date in [from, to). */
 export function plansByDate(from: ISODate, to: ISODate): Map<string, MealPlan> {
-  const rows = mealPlansRepo.list(and(gte(mealPlans.date, from), lt(mealPlans.date, to)), asc(mealPlans.updatedAt));
+  const rows = mealPlansRepo.list(
+    and(gte(mealPlans.date, from), lt(mealPlans.date, to)),
+    asc(mealPlans.updatedAt),
+  );
   const out = new Map<string, MealPlan>();
   for (const p of rows) out.set(p.date, p); // ascending updatedAt: the newest wins
   return out;
@@ -103,8 +115,7 @@ export function pastMealRows(from: ISODate, to: ISODate): PastMealRow[] {
 }
 
 export type EnsureResult =
-  | { status: 'no_profile' }
-  | { status: 'ready'; created: number; warnings: PlanWarning[] };
+  { status: 'no_profile' } | { status: 'ready'; created: number; warnings: PlanWarning[] };
 
 /**
  * Offline planner: make sure every day of the week containing `date`, from today on, has a meal
@@ -122,7 +133,10 @@ export function ensureWeekMeals(date: ISODate, now: number = Date.now()): Ensure
   const missing = wanted.filter((d) => !existing.has(d));
   if (missing.length === 0) return { status: 'ready', created: 0, warnings: [] };
 
-  const history = historyFrom(pastMealRows(addDays(weekStart, -HISTORY_DAYS), weekStart), getSignals());
+  const history = historyFrom(
+    pastMealRows(addDays(weekStart, -HISTORY_DAYS), weekStart),
+    getSignals(),
+  );
   const week = planWeekMeals({
     profile: inputs.profile.engine,
     history,
@@ -130,29 +144,44 @@ export function ensureWeekMeals(date: ISODate, now: number = Date.now()): Ensure
     date: weekStart,
     now,
   });
-  let created = 0;
-  for (const day of week.days) {
-    if (!missing.includes(day.date)) continue;
-    const plan = mealPlansRepo.insert(
-      {
-        date: day.date,
-        dayType: day.dayType,
-        kcalTarget: day.targets.kcal,
-        macros: { protein: day.targets.protein, carbs: day.targets.carbs, fat: day.targets.fat },
-      },
-      now,
-    );
-    for (const m of day.meals) {
-      mealsRepo.insert(
-        { mealPlanId: plan.id, slot: m.slot, recipeId: m.recipeId, portion: m.servings, status: 'planned' },
+  // One atomic write for the whole week (perf audit A6): one WAL commit, one change event.
+  const created = withTransaction(() => {
+    let n = 0;
+    for (const day of week.days) {
+      if (!missing.includes(day.date)) continue;
+      const plan = mealPlansRepo.insert(
+        {
+          date: day.date,
+          dayType: day.dayType,
+          kcalTarget: day.targets.kcal,
+          macros: { protein: day.targets.protein, carbs: day.targets.carbs, fat: day.targets.fat },
+        },
         now,
       );
+      for (const m of day.meals) {
+        mealsRepo.insert(
+          {
+            mealPlanId: plan.id,
+            slot: m.slot,
+            recipeId: m.recipeId,
+            portion: m.servings,
+            status: 'planned',
+          },
+          now,
+        );
+      }
+      n++;
     }
-    created++;
-  }
+    return n;
+  });
   if (created > 0) {
     const p = inputs.profile.engine;
-    track('plan_generated', { goal: p.goal, days: p.daysPerWeek, diet_type: p.dietType ?? 'omnivore', kind: 'meals' });
+    track('plan_generated', {
+      goal: p.goal,
+      days: p.daysPerWeek,
+      diet_type: p.dietType ?? 'omnivore',
+      kind: 'meals',
+    });
   }
   return { status: 'ready', created, warnings: week.warnings };
 }
@@ -163,11 +192,19 @@ export function ensureWeekMeals(date: ISODate, now: number = Date.now()): Ensure
  * after); on days with something already eaten or logged the unsafe meals are marked skipped.
  */
 function dropUnsafeDays(from: ISODate, to: ISODate, inputs: PlannerInputs, now: number): void {
+  withTransaction(() => dropUnsafeDaysTx(from, to, inputs, now));
+}
+
+function dropUnsafeDaysTx(from: ISODate, to: ISODate, inputs: PlannerInputs, now: number): void {
   for (const plan of plansByDate(from, to).values()) {
     const rows = mealsOfPlans([plan.id]);
-    const unsafe = rows.filter((m) => m.status === 'planned' && m.recipeId && !inputs.recipeById.has(m.recipeId));
+    const unsafe = rows.filter(
+      (m) => m.status === 'planned' && m.recipeId && !inputs.recipeById.has(m.recipeId),
+    );
     if (unsafe.length === 0) continue;
-    const touched = rows.some((m) => m.status === 'eaten') || logsForDate(plan.date).some((l) => l.slot !== WATER_SLOT);
+    const touched =
+      rows.some((m) => m.status === 'eaten') ||
+      logsForDate(plan.date).some((l) => l.slot !== WATER_SLOT);
     if (touched) {
       for (const m of unsafe) setMealStatus(m.id, 'skipped', now);
       continue;
@@ -184,14 +221,16 @@ function dropUnsafeDays(from: ISODate, to: ISODate, inputs: PlannerInputs, now: 
 export function replanFrom(from: ISODate, now: number = Date.now()): EnsureResult {
   const weekStart = startOfWeek(from);
   const plans = plansByDate(from, addDays(weekStart, 7));
-  for (const plan of plans.values()) {
-    const rows = mealsOfPlans([plan.id]);
-    if (rows.some((m) => m.status === 'eaten')) continue;
-    if (logsForDate(plan.date).some((l) => l.slot !== WATER_SLOT)) continue;
-    for (const m of rows) mealsRepo.remove(m.id, now);
-    mealPlansRepo.remove(plan.id, now);
-  }
-  return ensureWeekMeals(from, now);
+  return withTransaction(() => {
+    for (const plan of plans.values()) {
+      const rows = mealsOfPlans([plan.id]);
+      if (rows.some((m) => m.status === 'eaten')) continue;
+      if (logsForDate(plan.date).some((l) => l.slot !== WATER_SLOT)) continue;
+      for (const m of rows) mealsRepo.remove(m.id, now);
+      mealPlansRepo.remove(plan.id, now);
+    }
+    return ensureWeekMeals(from, now);
+  });
 }
 
 type MealContext = { meal: Meal; plan: MealPlan; rows: Meal[] };
@@ -227,7 +266,10 @@ export function swapChoices(mealId: string, now: number = Date.now()): PlannedMe
   );
   const index = rowIndex.indexOf(ctx.rows.findIndex((r) => r.id === mealId));
   if (index < 0) return [];
-  const rows = pastMealRows(addDays(ctx.plan.date, -HISTORY_DAYS), addDays(ctx.plan.date, HISTORY_DAYS));
+  const rows = pastMealRows(
+    addDays(ctx.plan.date, -HISTORY_DAYS),
+    addDays(ctx.plan.date, HISTORY_DAYS),
+  );
   return swapOptions({
     profile: inputs.profile.engine,
     history: historyFrom(rows, getSignals()),
@@ -238,11 +280,17 @@ export function swapChoices(mealId: string, now: number = Date.now()): PlannedMe
   });
 }
 
-export function applySwap(mealId: string, option: PlannedMeal, now: number = Date.now()): Meal | undefined {
+export function applySwap(
+  mealId: string,
+  option: PlannedMeal,
+  now: number = Date.now(),
+): Meal | undefined {
   // Swapping an eaten meal re-opens it: its intake log goes too, so tile and rings agree.
-  const ctx = mealContext(mealId);
-  if (ctx?.meal.status === 'eaten') for (const l of planLogsFor(ctx)) removeLog(l.id, now);
-  const saved = swapMeal(mealId, option.recipeId, now, option.servings);
+  const saved = withTransaction(() => {
+    const ctx = mealContext(mealId);
+    if (ctx?.meal.status === 'eaten') for (const l of planLogsFor(ctx)) removeLog(l.id, now);
+    return swapMeal(mealId, option.recipeId, now, option.servings);
+  });
   if (saved) track('meal_swapped', { slot: saved.slot });
   return saved;
 }
@@ -255,18 +303,31 @@ export function applySwap(mealId: string, option: PlannedMeal, now: number = Dat
 function planLogsFor({ meal, plan, rows }: MealContext): FoodLog[] {
   const slotIsUnique = rows.filter((m) => m.slot === meal.slot).length === 1;
   return logsForDate(plan.date).filter(
-    (l) => l.source === 'plan' && (l.mealId ? l.mealId === meal.id : slotIsUnique && l.slot === meal.slot),
+    (l) =>
+      l.source === 'plan' &&
+      (l.mealId ? l.mealId === meal.id : slotIsUnique && l.slot === meal.slot),
   );
 }
 
 /** Core action "Ate it" (fraction < 1 = partial). Writes the intake log in the same tap. */
 export function markMealEaten(mealId: string, fraction = 1, now: number = Date.now()): boolean {
+  // Log + status in one transaction: rings and the tick can never disagree after a crash.
+  return withTransaction(() => markMealEatenTx(mealId, fraction, now));
+}
+
+function markMealEatenTx(mealId: string, fraction: number, now: number): boolean {
   const ctx = mealContext(mealId);
   if (!ctx) return false;
   const { meal, plan } = ctx;
   const recipe = engineRecipe(meal.recipeId);
   for (const l of planLogsFor(ctx)) removeLog(l.id, now);
-  if (recipe && (meal.slot === 'breakfast' || meal.slot === 'lunch' || meal.slot === 'dinner' || meal.slot === 'snack')) {
+  if (
+    recipe &&
+    (meal.slot === 'breakfast' ||
+      meal.slot === 'lunch' ||
+      meal.slot === 'dinner' ||
+      meal.slot === 'snack')
+  ) {
     const eaten = mealFromRecipe(recipe, meal.slot, meal.portion * fraction);
     logFood(
       {
@@ -289,12 +350,18 @@ export function markMealEaten(mealId: string, fraction = 1, now: number = Date.n
 }
 
 /** Undo a tick or skip a meal; that meal's plan log goes too (never another meal's). */
-export function setMealOpen(mealId: string, status: Exclude<MealStatus, 'eaten' | 'swapped'>, now: number = Date.now()): boolean {
-  const ctx = mealContext(mealId);
-  if (!ctx) return false;
-  for (const l of planLogsFor(ctx)) removeLog(l.id, now);
-  setMealStatus(mealId, status, now);
-  return true;
+export function setMealOpen(
+  mealId: string,
+  status: Exclude<MealStatus, 'eaten' | 'swapped'>,
+  now: number = Date.now(),
+): boolean {
+  return withTransaction(() => {
+    const ctx = mealContext(mealId);
+    if (!ctx) return false;
+    for (const l of planLogsFor(ctx)) removeLog(l.id, now);
+    setMealStatus(mealId, status, now);
+    return true;
+  });
 }
 
 /** Remaining planned meals re-solved to what's left of the day (RW-34). Returns how many changed. */
@@ -319,16 +386,21 @@ export function rebalanceDay(date: ISODate, now: number = Date.now()): number {
       return recipe ? [{ meal: m, recipe }] : [];
     });
   const target = targetsOf(plan);
-  const servings = rebalance(open, { kcal: target.kcal - consumed.kcal, protein: target.protein - consumed.p });
-  let changed = 0;
-  open.forEach(({ meal }, i) => {
-    const s = servings[i];
-    if (s !== undefined && Math.abs(s - meal.portion) > 1e-9) {
-      mealsRepo.update(meal.id, { portion: s }, now);
-      changed++;
-    }
+  const servings = rebalance(open, {
+    kcal: target.kcal - consumed.kcal,
+    protein: target.protein - consumed.p,
   });
-  return changed;
+  return withTransaction(() => {
+    let changed = 0;
+    open.forEach(({ meal }, i) => {
+      const s = servings[i];
+      if (s !== undefined && Math.abs(s - meal.portion) > 1e-9) {
+        mealsRepo.update(meal.id, { portion: s }, now);
+        changed++;
+      }
+    });
+    return changed;
+  });
 }
 
 export type OffPlanEntry = {
@@ -345,17 +417,41 @@ export type OffPlanEntry = {
 };
 
 /** S23: log an off-plan food or meal, mark the replaced meal skipped and rebalance the rest. */
-export function logOffPlan(e: OffPlanEntry, now: number = Date.now()): { log: FoodLog; rebalanced: number } {
-  const log = logFood({ date: e.date, source: e.source, name: e.name, slot: e.slot, kcal: e.kcal, p: e.p, c: e.c, f: e.f }, now);
+export function logOffPlan(
+  e: OffPlanEntry,
+  now: number = Date.now(),
+): { log: FoodLog; rebalanced: number } {
+  // Each step is atomic on its own (setMealOpen / rebalanceDay use withTransaction); the rebalance
+  // must read the committed log, so this is not one outer transaction.
+  const log = logFood(
+    {
+      date: e.date,
+      source: e.source,
+      name: e.name,
+      slot: e.slot,
+      kcal: e.kcal,
+      p: e.p,
+      c: e.c,
+      f: e.f,
+    },
+    now,
+  );
   if (e.replaceMealId) setMealOpen(e.replaceMealId, 'skipped', now);
   const rebalanced = rebalanceDay(e.date, now);
-  track('meal_logged', { slot: e.slot, from_plan: false, kind: e.source === 'quick' ? 'ate_out' : 'food' });
+  track('meal_logged', {
+    slot: e.slot,
+    from_plan: false,
+    kind: e.source === 'quick' ? 'ate_out' : 'food',
+  });
   return { log, rebalanced };
 }
 
 /** S27 quick add; returns the row so the toast can undo it. */
 export function addWater(date: ISODate, ml: number, now: number = Date.now()): FoodLog {
-  const row = logFood({ date, source: 'quick', name: waterName(ml), slot: WATER_SLOT, kcal: 0 }, now);
+  const row = logFood(
+    { date, source: 'quick', name: waterName(ml), slot: WATER_SLOT, kcal: 0 },
+    now,
+  );
   track('water_logged', { ml_bucket: ml <= 250 ? 'glass' : 'bottle' });
   return row;
 }

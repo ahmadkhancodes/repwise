@@ -12,7 +12,7 @@ import { dayIntake } from '@/features/nutrition/logic/intake';
 import { totalWaterMl } from '@/features/nutrition/logic/water';
 import { useFoodLogs, type DayTotals, type FoodLog } from '@/features/nutrition/repo';
 import { useProfile } from '@/features/settings/repo';
-import { useCatalog, type Catalog, type Recipe } from '@/services/catalog';
+import { useCatalogFor, type Catalog, type Recipe } from '@/services/catalog';
 
 import { addDays, startOfWeek, weekDates } from '../logic/dates';
 import { toMealProfile, type MealProfile } from '../logic/profile';
@@ -122,7 +122,7 @@ export type EatDay = {
 export function useEatDay(date: ISODate): EatDay {
   const row = useProfile();
   const profile = useMemo(() => toMealProfile(row), [row]);
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes', 'foods');
   const { state, retry } = useEnsureWeek(date, profile, cat, row?.updatedAt);
   const planRows = mealPlansRepo.useLive(inArray(mealPlans.date, [date]), asc(mealPlans.updatedAt), [date]).data;
   const plan = planRows[planRows.length - 1];
@@ -159,7 +159,7 @@ export type WeekDaySummary = {
 export function useEatWeek(anyDate: ISODate) {
   const row = useProfile();
   const profile = useMemo(() => toMealProfile(row), [row]);
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes', 'foods');
   const weekStart = startOfWeek(anyDate);
   const dates = useMemo(() => weekDates(weekStart), [weekStart]);
   const { state, retry } = useEnsureWeek(weekStart, profile, cat, row?.updatedAt);

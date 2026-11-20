@@ -1,15 +1,27 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
-import { ListChecks, Pause, Play, RotateCcw, Timer, X } from 'lucide-react-native';
+import { CircleAlert, ListChecks, Pause, Play, RotateCcw, Timer, X } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInLeft, FadeInRight, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { haptics } from '@/services/haptics';
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { Button, EmptyState, IconButton, PressableScale, Sheet, Text, showToast } from '@/ui';
+import {
+  Button,
+  EmptyState,
+  IconButton,
+  PressableScale,
+  Sheet,
+  Skeleton,
+  SkeletonGroup,
+  SkeletonText,
+  StepProgress,
+  Text,
+  showToast,
+} from '@/ui';
 
 import { formatClock, parseStepTimer, remainingSeconds } from '../logic/cook';
 import { formatGrams, formatServings, scaledIngredients } from '../logic/recipe';
@@ -26,9 +38,10 @@ export function CookModeScreen() {
   useKeepAwake();
   const t = useTheme();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const reduce = useReducedMotion();
   const params = useLocalSearchParams<{ id: string; servings?: string; mealId?: string }>();
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes', 'foods');
   const recipe = cat?.recipeById.get(String(params.id));
   const servings = Number(params.servings) > 0 ? Number(params.servings) : 1;
   const [step, setStep] = useState(0);
@@ -54,7 +67,7 @@ export function CookModeScreen() {
       if (v.endsAt !== null && remainingSeconds(v.endsAt, now) === 0 && !announced.current.has(i)) {
         announced.current.add(i);
         haptics.success();
-        showToast({ message: `Step ${i + 1} timer is done`, tone: 'success' });
+        showToast({ message: `Step ${i + 1} timer is done`, tone: 'success', silent: true });
         setTimers((s) => ({ ...s, [i]: { ...v, endsAt: null, left: 0, done: true } }));
       }
     }
@@ -64,11 +77,22 @@ export function CookModeScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: t.colors.bg, paddingTop: insets.top }} testID="screen-cook">
         <Stack.Screen options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
-        <EmptyState
-          title={cat ? 'Recipe not found' : 'Loading recipe'}
-          actionLabel="Close"
-          onAction={() => router.back()}
-        />
+        {cat ? (
+          <EmptyState
+            icon={CircleAlert}
+            title="Recipe not found"
+            body="It may have been removed from the catalogue."
+            actionLabel="Close"
+            onAction={() => router.back()}
+            testID="cook-missing"
+          />
+        ) : (
+          <SkeletonGroup label="Loading recipe" testID="cook-loading" style={{ padding: t.spacing.screen, gap: t.spacing.lg }}>
+            <Skeleton height={t.spacing.xxs} radius={t.radius.pill} />
+            <SkeletonText variant="title2" lines={3} lastLineWidth="55%" />
+            <Skeleton height={t.sizes.ring} radius={t.radius.card} />
+          </SkeletonGroup>
+        )}
       </View>
     );
   }
@@ -81,14 +105,12 @@ export function CookModeScreen() {
 
   const go = (to: number) => {
     if (to < 0 || to >= n) return;
-    haptics.light();
     setDir(to > step ? 1 : -1);
     setStep(to);
   };
 
   const startPause = () => {
     if (!timer) return;
-    haptics.light();
     setTimers((s) => {
       const cur = s[step];
       if (cur?.endsAt != null) {
@@ -102,7 +124,6 @@ export function CookModeScreen() {
   };
 
   const reset = () => {
-    haptics.light();
     announced.current.delete(step);
     setTimers((s) => {
       const next = { ...s };
@@ -113,8 +134,8 @@ export function CookModeScreen() {
 
   const finish = () => {
     if (params.mealId) {
+      // Core action: the success toast owns the one success buzz.
       markMealEaten(String(params.mealId));
-      haptics.success();
       showToast({ message: `Enjoy! ${recipe.title} is logged.`, tone: 'success' });
     } else {
       haptics.success();
@@ -137,24 +158,14 @@ export function CookModeScreen() {
       </View>
 
       {/* Trip-style segmented progress */}
-      <View
-        style={{ flexDirection: 'row', gap: t.spacing.xxs, paddingHorizontal: t.spacing.screen, marginTop: t.spacing.xs }}
-        accessible
-        accessibilityRole="progressbar"
-        accessibilityLabel={`Step ${step + 1} of ${n}`}
-        accessibilityValue={{ min: 1, max: n, now: step + 1 }}
-      >
-        {recipe.steps.map((_, i) => (
-          <View
-            key={i}
-            style={{
-              flex: 1,
-              height: t.spacing.xxs,
-              borderRadius: t.radius.pill,
-              backgroundColor: i <= step ? t.colors.accent : t.colors.surface2,
-            }}
-          />
-        ))}
+      <View style={{ paddingHorizontal: t.spacing.screen, marginTop: t.spacing.xs }}>
+        <StepProgress
+          total={n}
+          current={step}
+          color="accent"
+          accessibilityLabel={`Step ${step + 1} of ${n}`}
+          testID="cook-progress"
+        />
       </View>
 
       <ScrollView contentContainerStyle={{ padding: t.spacing.screen, gap: t.spacing.lg, flexGrow: 1 }}>
@@ -189,33 +200,15 @@ export function CookModeScreen() {
               {formatClock(left)}
             </Text>
             <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-              <PressableScale
-                testID="cook-timer-toggle"
+              <Button
+                label={isRunning ? 'Pause' : state && !state.done && state.left > 0 && state.left < timer.seconds ? 'Resume' : 'Start'}
+                variant="secondary"
+                icon={isRunning ? Pause : Play}
                 onPress={startPause}
-                feedback="none"
-                accessibilityRole="button"
                 accessibilityLabel={isRunning ? 'Pause timer' : 'Start timer'}
-                style={{
-                  minWidth: t.sizes.button * 2,
-                  height: t.sizes.touch,
-                  borderRadius: t.radius.pill,
-                  backgroundColor: t.colors.accent,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: t.spacing.xs,
-                  paddingHorizontal: t.spacing.md,
-                }}
-              >
-                {isRunning ? (
-                  <Pause color={t.colors.onAccent} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
-                ) : (
-                  <Play color={t.colors.onAccent} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
-                )}
-                <Text variant="headline" color="onAccent">
-                  {isRunning ? 'Pause' : state && !state.done && state.left > 0 && state.left < timer.seconds ? 'Resume' : 'Start'}
-                </Text>
-              </PressableScale>
+                testID="cook-timer-toggle"
+                style={{ minWidth: t.sizes.button * 2 }}
+              />
               {state ? <IconButton icon={RotateCcw} accessibilityLabel="Reset timer" onPress={reset} testID="cook-timer-reset" /> : null}
             </View>
           </View>
@@ -254,14 +247,27 @@ export function CookModeScreen() {
       </View>
 
       <Sheet open={showIngredients} onClose={() => setShowIngredients(false)} title={`Ingredients · ${formatServings(servings)} ${servings === 1 ? 'serving' : 'servings'}`} testID="cook-ingredients-sheet">
-        {scaledIngredients(recipe, servings, cat.foodById).map((ing) => (
-          <View key={ing.foodId} style={{ flexDirection: 'row', minHeight: t.sizes.touch, alignItems: 'center' }}>
-            <Text style={{ flex: 1 }}>{ing.name}</Text>
-            <Text variant="callout" color="textSecondary" tabular>
-              {formatGrams(ing.grams)}
-            </Text>
-          </View>
-        ))}
+        {/* Sheet has no scroll of its own: 10–15 ingredients scroll here instead of clipping. */}
+        <ScrollView nestedScrollEnabled style={{ maxHeight: windowHeight * 0.6 }} testID="cook-ingredients-list">
+          {scaledIngredients(recipe, servings, cat.foodById).map((ing, i) => (
+            <View
+              key={ing.foodId}
+              style={{
+                flexDirection: 'row',
+                minHeight: t.sizes.touch,
+                alignItems: 'center',
+                gap: t.spacing.sm,
+                borderTopWidth: i === 0 ? 0 : t.sizes.hairline,
+                borderTopColor: t.colors.border,
+              }}
+            >
+              <Text style={{ flex: 1 }}>{ing.name}</Text>
+              <Text variant="callout" color="textSecondary" tabular>
+                {formatGrams(ing.grams)}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
       </Sheet>
     </View>
   );

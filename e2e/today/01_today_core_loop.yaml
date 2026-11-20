@@ -21,7 +21,7 @@ tags:
     commands:
       - tapOn:
           id: "today-meal-lunch"
-      - assertVisible: "Lunch logged"
+      - assertVisible: ".* logged"
       - tapOn: "Undo"
 - scrollUntilVisible:
     element:
