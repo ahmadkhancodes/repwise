@@ -72,6 +72,7 @@ export const CHANNELS: { id: ChannelId; name: string; description: string; impor
   { id: 'meals', name: 'Meals', description: 'Meal-time reminders from your plan', importance: AndroidImportance.HIGH },
   { id: 'training', name: 'Training', description: 'Workout reminders', importance: AndroidImportance.HIGH },
   { id: 'timer', name: 'Rest timer', description: 'Tells you when rest is over', importance: AndroidImportance.MAX },
+  { id: 'timer-silent', name: 'Rest timer (silent)', description: 'Rest over, without sound (Settings → Rest timer sound off)', importance: AndroidImportance.MAX },
   { id: 'checkin', name: 'Weekly check-in', description: 'Your 30-second weekly check-in', importance: AndroidImportance.DEFAULT },
   { id: 'account', name: 'Account & trial', description: 'Trial reminders', importance: AndroidImportance.DEFAULT },
 ];
@@ -137,8 +138,8 @@ export function ensureChannels(): Promise<void> {
             importance: c.importance,
             lightColor: colors.light.accent,
             lockscreenVisibility: AndroidNotificationVisibility.PUBLIC,
-            vibrationPattern: c.id === 'timer' ? [0, 250, 150, 250] : [0, 200],
-            sound: 'default',
+            vibrationPattern: c.id === 'timer' || c.id === 'timer-silent' ? [0, 250, 150, 250] : [0, 200],
+            sound: c.id === 'timer-silent' ? null : 'default',
           });
         }
       }
@@ -359,6 +360,25 @@ export async function handleResponse(
 
 // ---------- lifecycle ----------
 
+export type ForegroundBehavior = {
+  shouldShowBanner: boolean;
+  shouldShowList: boolean;
+  shouldPlaySound: boolean;
+  shouldSetBadge: boolean;
+};
+
+/**
+ * How a notification shows while the app is open. "Rest over" has exactly one foreground cue
+ * (N5): the in-app one the player presents (`data.inApp`) at the moment the rest ends. The
+ * scheduled alert (iOS) and the Android service's on-time alert, which land ~16 ms earlier, stay
+ * silent and hidden in the foreground; in the background they are the cue. Pure.
+ */
+export function foregroundBehavior(data: unknown, appActive: boolean): ForegroundBehavior {
+  const d = (data && typeof data === 'object' ? data : {}) as { kind?: unknown; inApp?: unknown };
+  const quiet = appActive && d.kind === 'rest' && d.inApp !== true;
+  return { shouldShowBanner: !quiet, shouldShowList: !quiet, shouldPlaySound: !quiet, shouldSetBadge: false };
+}
+
 let started = false;
 let stops: (() => void)[] = [];
 
@@ -371,14 +391,10 @@ export function startNotifications(deps: ResponseDeps = defaultDeps): () => void
   if (started) return stopNotifications;
   started = true;
 
-  // Show reminders while the app is open too (e.g. "Rest over" during a workout).
+  // Show reminders while the app is open too, except the duplicate "Rest over" (N5).
   Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
+    handleNotification: async (n) =>
+      foregroundBehavior(n.request.content.data, AppState.currentState === 'active'),
   });
 
   const sub = Notifications.addNotificationResponseReceivedListener((r) => {

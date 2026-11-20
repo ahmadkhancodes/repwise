@@ -30,7 +30,7 @@ import {
   type WeekPlan,
 } from './engine';
 import { toEngineCatalogues } from '@repwise/content';
-import { and, asc, desc, eq, gte, inArray, lt } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNotNull, lt, lte } from 'drizzle-orm';
 
 import { getRawDb } from '@/db/client';
 import {
@@ -448,8 +448,8 @@ function generateSync(opts: GenerateOptions = {}): {
 export async function regenerateWeek(opts: GenerateOptions = {}): Promise<PlanResult> {
   await yieldToUi();
   const out = generateSync(opts);
-  // The Worker cannot be asked for a deload, so a requested deload week stays rules-only.
-  if (opts.ai !== false && !opts.deload) {
+  // The Worker accepts `deload` too, so a deload week gets the same AI variety (validated the same).
+  if (opts.ai !== false) {
     void upgradeWithAi(out.result, out.profile, out.history, out.weekdays, opts);
   }
   return out.result;
@@ -471,11 +471,66 @@ export async function generateInitialPlan(opts: Omit<GenerateOptions, 'date' | '
   return { first, next };
 }
 
+/**
+ * #16 / R2-6: collapse duplicate planned sessions. Two devices that each planned the same week
+ * (onboarding on a new phone, then signing in) end up with two plan-written sessions per training
+ * day after a pull, because sync merges by id. Plans write at most one session per date, so the
+ * plan slot is the date. Per date with more than one plan-written session:
+ * - every touched one (started, done, swapped, edited) is kept;
+ * - untouched ones are soft-deleted (with their exercises, so it syncs) when a touched one exists,
+ *   otherwise all but one: the one from the newest plan (createdAt, then id; ties by session id).
+ * Deterministic on synced fields only, so both devices keep the same row. Ad-hoc sessions (no
+ * plan) are never touched. Returns how many sessions were removed.
+ */
+export function dedupePlannedSessions(
+  range: { from?: string; to?: string } = {},
+  now: number = Date.now(),
+): number {
+  const where = [isNotNull(sessions.planId)];
+  if (range.from) where.push(gte(sessions.date, range.from));
+  if (range.to) where.push(lte(sessions.date, range.to));
+  const rows = sessionsRepo.list(and(...where));
+  const byDate = new Map<string, Session[]>();
+  for (const r of rows) {
+    if (!r.date) continue;
+    byDate.set(r.date, [...(byDate.get(r.date) ?? []), r]);
+  }
+  const groups = [...byDate.values()].filter((g) => g.length > 1);
+  if (groups.length === 0) return 0;
+  let removed = 0;
+  getRawDb().withTransactionSync(() => {
+    const planRank = new Map<string, string>();
+    const rank = (s: Session) => {
+      const id = s.planId ?? '';
+      let r = planRank.get(id);
+      if (r === undefined) {
+        const p = plansRepo.get(id);
+        r = `${String(p?.createdAt ?? 0).padStart(16, '0')}|${id}`;
+        planRank.set(id, r);
+      }
+      return `${r}|${s.id}`;
+    };
+    for (const group of groups) {
+      const untouched = group.filter(isUntouchedSession);
+      const hasTouched = untouched.length < group.length;
+      const sorted = [...untouched].sort((a, b) => (rank(a) < rank(b) ? 1 : -1));
+      const drop = hasTouched ? sorted : sorted.slice(1);
+      for (const s of drop) {
+        for (const se of liveExercises(s.id)) sessionExercisesRepo.remove(se.id, now);
+        sessionsRepo.remove(s.id, now);
+        removed++;
+      }
+    }
+  });
+  return removed;
+}
+
 /** Make sure the week containing `date` has a plan (no-op when one exists). */
 export function ensureWeekPlanned(
-  date: string = localToday(),
+  day?: string,
   now: number = Date.now(),
 ): PlanResult | null {
+  const date = day ?? localToday(now); // the injected clock, never the real one (R2-7)
   const weekStart = startOfWeek(date);
   if (plansRepo.first(and(eq(plans.type, 'training'), eq(plans.weekStart, weekStart)))) return null;
   if (!toEngineProfile(getProfile())) return null;
@@ -492,7 +547,8 @@ export type TodayPlan = {
 };
 
 /** Today's workout and meals from SQLite (plans the week first if it is missing). */
-export function planToday(date: string = localToday(), now: number = Date.now()): TodayPlan {
+export function planToday(day?: string, now: number = Date.now()): TodayPlan {
+  const date = day ?? localToday(now);
   try {
     ensureWeekPlanned(date, now);
   } catch {
@@ -547,9 +603,11 @@ export async function upgradeWithAi(
   profile: ProfileInput,
   history: HistoryInput,
   weekdays: number[],
-  opts: Pick<GenerateOptions, 'fetchAi' | 'now' | 'fromDate' | 'adjustmentKcal'> = {},
+  opts: Pick<GenerateOptions, 'fetchAi' | 'now' | 'fromDate' | 'adjustmentKcal' | 'deload'> = {},
 ): Promise<PlanResult | null> {
   const now = opts.now ?? Date.now();
+  const startedAt = Date.now(); // only to measure elapsed time, never as "now"
+  const extra = tweaks({ adjustmentKcal: opts.adjustmentKcal, deload: opts.deload });
   const fetchAi = opts.fetchAi ?? workerFetch;
   let res: AiWeekResponse | null = null;
   try {
@@ -560,14 +618,14 @@ export async function upgradeWithAi(
         weekStart: rules.weekStart,
         now,
         trainingWeekdays: weekdays,
-        ...tweaks({ adjustmentKcal: opts.adjustmentKcal }),
+        ...extra,
       },
     });
   } catch {
     return null; // offline, timeout, 4xx/5xx, no session: the rules plan stays
   }
   const decision = decideAiPlan(res, rules.weekStart, (p) =>
-    validatesLocally(p, profile, history, now, { adjustmentKcal: opts.adjustmentKcal }),
+    validatesLocally(p, profile, history, now, extra),
   );
   track('ai_plan_result', {
     accepted: decision.accept,
@@ -582,7 +640,10 @@ export async function upgradeWithAi(
     fromDate,
     trainingWeekdays: weekdays,
     source: 'ai',
-    now: Date.now(),
+    // The injected clock plus the time the Worker took (≥ 1 ms): deterministic under a fixed
+    // `now`, and strictly newer than the rules rows it replaces in place, so the in-place update
+    // still wins last-write-wins on the server (R2-7).
+    now: now + Math.max(1, Date.now() - startedAt),
   });
 }
 

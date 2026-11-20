@@ -55,6 +55,11 @@ export function buildExport(
 }
 
 /** "repwise-export-2026-11-19.json" (local date). Pure. */
+/** True for a file `exportFileName` wrote (any day). Pure. */
+export function isExportFileName(name: string): boolean {
+  return /^repwise-export-\d{4}-\d{2}-\d{2}\.json$/.test(name);
+}
+
 export function exportFileName(now: number): string {
   const d = new Date(now);
   const p = (n: number) => String(n).padStart(2, '0');

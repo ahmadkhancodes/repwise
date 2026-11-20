@@ -169,6 +169,14 @@ export class MongoDb implements Db {
     }
     return { status: 'missing' };
   }
+  async markRefreshTokenRecovered(tokenHash: string, now: number) {
+    const d = await this.c('refresh_tokens').findOneAndUpdate(
+      { tokenHash, rotatedAt: null, recoveredAt: null, expiresAt: { $gt: toDate(now) } },
+      { $set: { recoveredAt: now } },
+      { returnDocument: 'after' },
+    );
+    return !!d;
+  }
   async getRefreshToken(tokenHash: string) {
     const d = await this.c('refresh_tokens').findOne({ tokenHash });
     return d ? normToken(d) : null;

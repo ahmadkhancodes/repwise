@@ -202,6 +202,23 @@ describe('TodayScreen core loop', () => {
   });
 });
 
+describe('TodayScreen with the system clock on another day (R2-7)', () => {
+  it('plans the screen\'s day and week, never the real clock\'s', async () => {
+    const real = jest.spyOn(Date, 'now').mockReturnValue(at(2031, 3, 3, 9)); // a Monday in 2031
+    try {
+      seedTrainingDay();
+      await renderToday();
+      await waitFor(() => expect(events.map((e) => e[0])).toContain('plan_generated'), { timeout: 4000 });
+      expect(mealPlanForDate('2026-11-20')).toBeDefined();
+      expect(mealPlanForDate('2031-03-03')).toBeUndefined();
+      expect(sessionsRepo.list().some((s) => (s.date ?? '').startsWith('2031'))).toBe(false);
+      expect(screen.getByTestId('today-brief')).toBeTruthy();
+    } finally {
+      real.mockRestore();
+    }
+  });
+});
+
 describe('TodayScreen states', () => {
   it('rest day', async () => {
     seedProfile();

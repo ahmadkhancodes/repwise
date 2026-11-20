@@ -147,6 +147,17 @@ describe('planService', () => {
     expect(ensureWeekPlanned(nextWeek, NOW)).toBeNull();
   });
 
+  it('defaults the day to the injected clock, not the real one (R2-7)', () => {
+    completeProfile();
+    const real = jest.spyOn(Date, 'now').mockReturnValue(new Date(2031, 2, 3, 9).getTime());
+    try {
+      expect(ensureWeekPlanned(undefined, NOW)?.weekStart).toBe('2026-11-16');
+      expect(planToday(undefined, NOW).date).toBe(TODAY);
+    } finally {
+      real.mockRestore();
+    }
+  });
+
   describe('AI upgrade', () => {
     async function rulesWeek() {
       completeProfile();
@@ -214,6 +225,34 @@ describe('planService', () => {
       expect(
         plansRepo.list(eq(plans.type, 'training')).every((p) => p.generatedBy === 'rules'),
       ).toBe(true);
+    });
+
+    it('stamps AI rows from the injected clock, strictly after the rules rows (R2-7)', async () => {
+      const { result, profile, cat } = await rulesWeek();
+      const aiPlan: WeekPlan = {
+        ...planWeek(profile, {}, cat, { now: NOW, weekStart: '2026-11-16', seed: 'ai' }),
+        generatedBy: 'llm',
+      };
+      await upgradeWithAi(result, profile, {}, [1, 3, 5], {
+        now: NOW,
+        fetchAi: async () => ({ source: 'ai', plan: aiPlan }),
+      });
+      const ai = plansRepo.list(eq(plans.type, 'training')).find((p) => p.generatedBy === 'ai')!;
+      expect(ai.updatedAt).toBeGreaterThan(NOW);
+      expect(ai.updatedAt).toBeLessThan(NOW + 60_000); // not the real clock (a different day)
+    });
+
+    it('asks the Worker for a deload week with deload: true and validates it as one', async () => {
+      completeProfile();
+      const calls: unknown[] = [];
+      const fetchAi: AiFetcher = async (body) => {
+        calls.push(body);
+        return null;
+      };
+      await regenerateWeek({ now: NOW, deload: true, fetchAi });
+      await new Promise((r) => setTimeout(r, 0));
+      expect(calls).toHaveLength(1);
+      expect(calls[0]).toMatchObject({ params: { weekStart: '2026-11-16', now: NOW, deload: true } });
     });
 
     it('never overwrites a newer local regenerate', async () => {
