@@ -296,7 +296,7 @@ export function SettingsScreen() {
         <ListRow
           icon={Trash2}
           title="Delete all data"
-          subtitle="Two confirmations, then 5 seconds to undo"
+          subtitle="Plan, logs and photos on this phone"
           destructive
           chevron={false}
           onPress={() => setDeleting(true)}
