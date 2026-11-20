@@ -30,7 +30,7 @@ import {
 import { useTheme } from '@/theme';
 
 import { CompareSlider, type ViewRef } from '../components/CompareSlider';
-import { ProgressSkeleton } from '../components/Skeleton';
+import { PhotoGridSkeleton } from '../components/Skeletons';
 import { useToday } from '../hooks/useProgress';
 import { dayLabel } from '../logic/dates';
 import { defaultComparePair, groupByMonth, orderPair, POSES, type Pose } from '../logic/photos';
@@ -84,9 +84,9 @@ export function PhotosScreen() {
     const res = await addProgressPhoto(source, today, pose);
     setBusy(false);
     if (res.status === 'saved') {
-      haptics.success();
       setAdding(false);
-      showToast({ message: 'Photo saved privately', tone: 'success' });
+      // Not a core action: the button already ticked on commit, so the toast stays silent.
+      showToast({ message: 'Photo saved privately', tone: 'success', silent: true });
     } else if (res.status === 'denied') {
       showToast({ message: 'Camera access is off. You can turn it on in Settings.' });
     } else if (res.status === 'error') {
@@ -145,7 +145,7 @@ export function PhotosScreen() {
         Private to this phone. Nothing goes to your gallery unless you share it.
       </Text>
       {photos.loading ? (
-        <ProgressSkeleton />
+        <PhotoGridSkeleton />
       ) : photos.error ? (
         <EmptyState
           icon={CircleAlert}
@@ -242,8 +242,8 @@ export function PhotosScreen() {
                               position: 'absolute',
                               top: t.spacing.xxs,
                               right: t.spacing.xxs,
-                              width: 22,
-                              height: 22,
+                              width: t.sizes.icon,
+                              height: t.sizes.icon,
                               borderRadius: t.radius.pill,
                               backgroundColor: t.colors.accent,
                               alignItems: 'center',

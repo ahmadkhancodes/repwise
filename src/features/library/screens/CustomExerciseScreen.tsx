@@ -1,6 +1,6 @@
 import type { Equipment, Level, Muscle, PatternFamily } from '@repwise/content';
 import { router } from 'expo-router';
-import { Trash2, X } from 'lucide-react-native';
+import { SearchX, Trash2, X } from 'lucide-react-native';
 import { useMemo, useState, type ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
@@ -110,6 +110,7 @@ function leave() {
 
 /** RW-28 create / edit a custom exercise (stored in the synced `exercises` table). */
 export function CustomExerciseScreen({ id }: { id?: string }) {
+  const t = useTheme();
   const editing = Boolean(id);
   const { row, loaded } = useCustomExercise(id ?? '');
   const { items: customs } = useCustomItems();
@@ -142,8 +143,12 @@ export function CustomExerciseScreen({ id }: { id?: string }) {
     let targetId = id;
     if (id) updateCustomExercise(id, draft);
     else targetId = createCustomExercise(draft).id;
-    haptics.success();
-    showToast({ message: editing ? 'Exercise updated' : 'Exercise created', tone: 'success' });
+    // Not a core action: the button already ticked on commit, so the toast stays silent.
+    showToast({
+      message: editing ? 'Exercise updated' : 'Exercise created',
+      tone: 'success',
+      silent: true,
+    });
     if (editing || !targetId) leave();
     else router.replace({ pathname: '/exercise/[id]', params: { id: targetId } });
   };
@@ -153,7 +158,6 @@ export function CustomExerciseScreen({ id }: { id?: string }) {
     deleteCustomExercise(id);
     forget(id);
     setConfirmDelete(false);
-    haptics.success();
     showToast({ message: 'Exercise deleted' });
     if (router.canDismiss()) router.dismissAll();
     else router.replace('/library');
@@ -166,6 +170,7 @@ export function CustomExerciseScreen({ id }: { id?: string }) {
         headerLeft={<IconButton icon={X} accessibilityLabel="Close" onPress={leave} />}
       >
         <EmptyState
+          icon={SearchX}
           title="Exercise not found"
           body="It may have been deleted."
           actionLabel="Back to library"
@@ -179,7 +184,7 @@ export function CustomExerciseScreen({ id }: { id?: string }) {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <Screen
         title={editing ? 'Edit exercise' : 'New exercise'}
@@ -211,7 +216,7 @@ export function CustomExerciseScreen({ id }: { id?: string }) {
           <BodyMap
             primary={draft.primaryMuscles}
             secondary={draft.secondaryMuscles}
-            maxHeight={200}
+            maxHeight={t.sizes.ringHero - t.spacing.xxxl}
           />
         </Card>
         <Field title="Main muscles" error={shown.primaryMuscles}>

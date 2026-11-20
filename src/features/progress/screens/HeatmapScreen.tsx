@@ -7,11 +7,17 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { Card, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
-import { BodyMap } from '../components/BodyMap';
-import { ProgressSkeleton } from '../components/Skeleton';
+import {
+  BodyHeatmap,
+  bodyPalette,
+  heatLegend,
+  viewMuscles,
+  type BodyView,
+} from '@/features/library';
+
+import { HeatmapSkeleton } from '../components/Skeletons';
 import { SectionTitle } from '../components/bits';
 import { useNow, useTraining } from '../hooks/useProgress';
-import { viewMuscles, type BodyView } from '../logic/bodyShapes';
 import type { Muscle } from '../logic/engine';
 import { muscleLabel, rankMuscles, recoveryHeatmap, recoveryLabel } from '../logic/muscles';
 
@@ -27,6 +33,10 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
     [training.sets, training.exById, now],
   );
   const ranked = useMemo(() => rankMuscles(heatmap), [heatmap]);
+  const legend = useMemo(
+    () => heatLegend(bodyPalette(t.colors, t.scheme, 'bg')),
+    [t.colors, t.scheme],
+  );
   const worked = ranked.filter((r) => r.sets > 0);
   const focus = selected ?? worked[0]?.muscle ?? null;
   const back = (
@@ -46,7 +56,7 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
   return (
     <Screen title="Muscle recovery" headerLeft={back} testID="screen-progress-heatmap">
       {training.loading ? (
-        <ProgressSkeleton />
+        <HeatmapSkeleton />
       ) : (
         <>
           <Segmented
@@ -59,11 +69,12 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
             value={view}
             onChange={setView}
           />
-          <BodyMap
-            heatmap={heatmap}
+          <BodyHeatmap
+            heat={heatmap}
             view={view}
             selected={focus}
             onSelect={select}
+            accessibilityLabel={mapLabel(view, worked)}
             testID="body-map"
           />
           <View
@@ -74,9 +85,9 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
               gap: t.spacing.md,
             }}
           >
-            <Legend label="Fresh" color={t.colors.surface2} />
-            <Legend label="Recovering" color={t.colors.accentSoft} />
-            <Legend label="Worked" color={t.colors.accent} />
+            {legend.map((l) => (
+              <Legend key={l.key} label={l.label} color={l.color} />
+            ))}
           </View>
 
           {worked.length === 0 ? (
@@ -128,7 +139,7 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
                     </View>
                     <View
                       style={{
-                        height: 6,
+                        height: t.spacing.xs,
                         borderRadius: t.radius.pill,
                         backgroundColor: t.colors.surface2,
                         overflow: 'hidden',
@@ -136,7 +147,7 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
                     >
                       <View
                         style={{
-                          height: 6,
+                          height: t.spacing.xs,
                           width: `${Math.max(4, r.fatigue * 100)}%`,
                           backgroundColor: t.colors.accent,
                           borderRadius: t.radius.pill,
@@ -157,14 +168,24 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
   );
 }
 
+/** "Front muscle map. Quads recovering, Chest fresh-ish." for screen readers. */
+function mapLabel(view: BodyView, worked: { muscle: Muscle; recovery: number }[]): string {
+  const side = view === 'front' ? 'Front' : 'Back';
+  const shown = worked.filter((w) => viewMuscles(view).includes(w.muscle));
+  const summary = shown
+    .map((w) => `${muscleLabel(w.muscle)} ${recoveryLabel(w.recovery).toLowerCase()}`)
+    .join(', ');
+  return `${side} muscle map. ${summary || 'All muscles shown are fresh.'}`;
+}
+
 function Legend({ label, color }: { label: string; color: string }) {
   const t = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xxs }}>
       <View
         style={{
-          width: 12,
-          height: 12,
+          width: t.spacing.sm,
+          height: t.spacing.sm,
           borderRadius: t.radius.pill,
           backgroundColor: color,
           borderWidth: t.sizes.hairline,

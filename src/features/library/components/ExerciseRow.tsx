@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { PressableScale, Text } from '@/ui';
+import { Badge, PressableScale, Text } from '@/ui';
 
 import { itemSubtitle, type LibraryItem } from '../logic/libraryItem';
 import { useIsFavourite, useLibraryPrefs } from '../prefs';
@@ -17,7 +17,7 @@ type Props = {
   favouriteToggle?: boolean;
 };
 
-/** Library row: poster thumb, name, "Muscle · Equipment", heart toggle (48 dp). */
+/** Library row: muscle-map thumb (or demo), name, "Muscle · Equipment", heart toggle (48 dp). */
 export const ExerciseRow = memo(function ExerciseRow({
   item,
   onPress,
@@ -44,29 +44,13 @@ export const ExerciseRow = memo(function ExerciseRow({
           borderRadius: t.radius.button,
         }}
       >
-        <ExerciseThumb mediaId={item.mediaId} name={item.name} />
+        <ExerciseThumb mediaId={item.mediaId} name={item.name} exercise={item} />
         <View style={{ flex: 1, gap: t.spacing.xxs }}>
-          <Text
-            variant="body"
-            numberOfLines={2}
-            style={{ fontFamily: t.typography.headline.fontFamily }}
-          >
+          <Text variant="headline" numberOfLines={2}>
             {item.name}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
-            {item.custom ? (
-              <View
-                style={{
-                  paddingHorizontal: t.spacing.xs,
-                  borderRadius: t.radius.pill,
-                  backgroundColor: t.colors.accentSoft,
-                }}
-              >
-                <Text variant="caption" color="accentText">
-                  Yours
-                </Text>
-              </View>
-            ) : null}
+            {item.custom ? <Badge label="Yours" tone="accent" /> : null}
             {subtitle ? (
               <Text
                 variant="callout"
@@ -99,8 +83,8 @@ export const ExerciseRow = memo(function ExerciseRow({
           }}
         >
           <Heart
-            color={fav ? t.colors.accent : t.colors.textTertiary}
-            fill={fav ? t.colors.accent : 'transparent'}
+            color={fav ? t.colors.textPrimary : t.colors.textTertiary}
+            fill={fav ? t.colors.textPrimary : 'transparent'}
             size={t.sizes.icon}
             strokeWidth={t.sizes.iconStroke}
           />

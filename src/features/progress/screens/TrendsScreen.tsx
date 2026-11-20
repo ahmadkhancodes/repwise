@@ -7,7 +7,7 @@ import { Card, Chip, EmptyState, IconButton, Screen, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { BarChart } from '../components/BarChart';
-import { ProgressSkeleton } from '../components/Skeleton';
+import { ChartSkeleton } from '../components/Skeletons';
 import { SectionTitle, Stagger } from '../components/bits';
 import { useNutrition, useToday, useTraining } from '../hooks/useProgress';
 import { lastDays, lastWeekStarts, shortDate } from '../logic/dates';
@@ -63,7 +63,7 @@ export function TrendsScreen() {
   return (
     <Screen title="Trends" headerLeft={back} testID="screen-progress-trends">
       {loading ? (
-        <ProgressSkeleton />
+        <ChartSkeleton />
       ) : error ? (
         <EmptyState
           icon={CircleAlert}

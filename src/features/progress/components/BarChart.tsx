@@ -1,5 +1,5 @@
 import { Canvas, DashPathEffect, Group, Line, RoundedRect, vec } from '@shopify/react-native-skia';
-import { useCallback, useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { View } from 'react-native';
 import {
   useReducedMotion,
@@ -13,7 +13,33 @@ import { useTheme, type ColorToken } from '@/theme';
 
 import { layoutBars } from '../logic/chart';
 
-import { CHART_PAD, XLabels, YTicks, useScrub, useWidth } from './chartParts';
+import { CHART_PAD, XLabels, YTicks, useChartSizes, useScrub, useWidth } from './chartParts';
+
+type Bar = { x: number; y: number; width: number; height: number; value: number };
+
+/** One bar (memoised: a scrub only re-renders the bar whose colour changes). */
+const BarRect = memo(function BarRect({
+  b,
+  r,
+  color,
+  min,
+}: {
+  b: Bar;
+  r: number;
+  color: string;
+  min: number;
+}) {
+  return (
+    <RoundedRect
+      x={b.x}
+      y={b.y}
+      width={b.width}
+      height={Math.max(b.height, b.value > 0 ? min : 0)}
+      r={r}
+      color={color}
+    />
+  );
+});
 
 export type BarChartProps = {
   values: number[];
@@ -36,37 +62,36 @@ export function BarChart({
   targets,
   color = 'accent',
   highlightLast = true,
-  height = 160,
+  height: heightProp,
   format,
   accessibilityLabel,
   testID,
 }: BarChartProps) {
   const t = useTheme();
+  const c = useChartSizes();
+  const height = heightProp ?? c.barHeight;
   const reduceMotion = useReducedMotion();
   const [width, onLayout] = useWidth();
   const frame = useMemo(() => ({ width, height, ...CHART_PAD }), [width, height]);
+  const key = values.join(',');
+  const targetKey = targets?.join(',') ?? '';
   const layout = useMemo(
-    () => layoutBars(values, frame, { gap: 6, targets }),
-    [values, frame, targets],
+    () => layoutBars(values, frame, { gap: c.barGap, targets }),
+    // keys stand in for the arrays (callers rebuild them every render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [key, targetKey, frame, c.barGap],
   );
-  const xs = useCallback(
-    (i: number) => {
-      const b = layout.bars[i];
-      return b ? b.x + b.width / 2 : 0;
-    },
-    [layout],
-  );
-  const { index, responder } = useScrub(values.length, xs);
+  const xs = useMemo(() => layout.bars.map((b) => b.x + b.width / 2), [layout]);
+  const { index, responder } = useScrub(xs);
 
   const grow = useSharedValue(reduceMotion ? 1 : 0);
-  const key = values.join(',');
   useEffect(() => {
     grow.set(0);
     grow.set(reduceMotion ? 1 : withSpring(1, t.motion.spring));
   }, [key, reduceMotion, grow, t.motion.spring]);
   const baseY = height - CHART_PAD.padBottom;
   const transform = useDerivedValue(() => [{ scaleY: grow.value }]);
-  const radius = Math.min(t.radius.button / 2, 4);
+  const radius = Math.min(t.radius.button / 2, c.barRadius);
 
   return (
     <View
@@ -87,24 +112,22 @@ export function BarChart({
               <Line
                 key={tick.value}
                 p1={vec(0, tick.y)}
-                p2={vec(width - CHART_PAD.padRight + 4, tick.y)}
+                p2={vec(width - CHART_PAD.padRight + t.spacing.xxs, tick.y)}
                 color={t.colors.border}
                 strokeWidth={t.sizes.hairline}
               >
-                <DashPathEffect intervals={[3, 4]} />
+                <DashPathEffect intervals={c.dash} />
               </Line>
             ))}
             <Group transform={transform} origin={vec(0, baseY)}>
               {layout.bars.map((b, i) => {
                 const strong = !highlightLast || i === values.length - 1 || i === index;
                 return (
-                  <RoundedRect
+                  <BarRect
                     key={i}
-                    x={b.x}
-                    y={b.y}
-                    width={b.width}
-                    height={Math.max(b.height, b.value > 0 ? 2 : 0)}
+                    b={b}
                     r={radius}
+                    min={t.sizes.borderThick}
                     color={strong ? t.colors[color] : t.colors.surface2}
                   />
                 );
@@ -116,10 +139,10 @@ export function BarChart({
               return (
                 <Line
                   key={`t${i}`}
-                  p1={vec(b.x - 2, y)}
-                  p2={vec(b.x + b.width + 2, y)}
+                  p1={vec(b.x - c.target, y)}
+                  p2={vec(b.x + b.width + c.target, y)}
                   color={t.colors.textPrimary}
-                  strokeWidth={2}
+                  strokeWidth={c.target}
                 />
               );
             })}
@@ -133,7 +156,10 @@ export function BarChart({
             style={{
               position: 'absolute',
               top: 0,
-              left: Math.min(Math.max(0, xs(index) - 50), Math.max(0, width - 140)),
+              left: Math.min(
+                Math.max(0, (xs[index] ?? 0) - c.calloutHalf),
+                Math.max(0, width - c.calloutHalf * 2.4),
+              ),
               backgroundColor: t.colors.inverse,
               borderRadius: t.radius.button,
               paddingHorizontal: t.spacing.xs,

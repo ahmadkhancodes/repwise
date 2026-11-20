@@ -164,3 +164,29 @@ export function activeFilterChips(
     })),
   ];
 }
+
+/** Muscle groups offered as one-tap chips under the search bar (S18 "filters as chips"). */
+export const QUICK_MUSCLES: readonly MuscleGroup[] = [
+  'chest',
+  'back',
+  'shoulders',
+  'biceps',
+  'triceps',
+  'core',
+  'glutes',
+  'quads',
+  'hamstrings',
+  'calves',
+];
+
+/**
+ * The chip rail: groups selected in the filter sheet that are not quick chips come first (so a
+ * selection never hides), then the quick chips in a fixed order.
+ */
+export function muscleRail(f: LibraryFilters): MuscleGroup[] {
+  return [...f.muscles.filter((m) => !QUICK_MUSCLES.includes(m)), ...QUICK_MUSCLES];
+}
+
+export function toggleMuscle(f: LibraryFilters, group: MuscleGroup): LibraryFilters {
+  return { ...f, muscles: toggle(f.muscles, group) };
+}

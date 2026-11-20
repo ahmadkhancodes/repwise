@@ -1,7 +1,8 @@
+import { MoveHorizontal } from 'lucide-react-native';
 import { useState, type ComponentRef, type Ref } from 'react';
 import { Image, View, type GestureResponderEvent } from 'react-native';
 
-import { Text } from '@/ui';
+import { Badge, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { daysApart } from '../logic/photos';
@@ -93,8 +94,8 @@ export function CompareSlider({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                left: split * width - 1,
-                width: 2,
+                left: split * width - t.sizes.borderThick / 2,
+                width: t.sizes.borderThick,
                 backgroundColor: t.colors.bg,
               }}
             />
@@ -112,7 +113,11 @@ export function CompareSlider({
                 justifyContent: 'center',
               }}
             >
-              <Text variant="callout">⇆</Text>
+              <MoveHorizontal
+                size={t.sizes.iconMedium}
+                color={t.colors.textPrimary}
+                strokeWidth={t.sizes.iconStroke}
+              />
             </View>
             <Tag text={`Now · ${shortDate(after.date)}`} side="left" />
             <Tag text={`Then · ${shortDate(before.date)}`} side="right" />
@@ -126,24 +131,15 @@ export function CompareSlider({
   );
 }
 
+/** Over a photo, the inverse badge reads best (DS: CompareSlider Tag → Badge inverse). */
 function Tag({ text, side }: { text: string; side: 'left' | 'right' }) {
   const t = useTheme();
   return (
     <View
       pointerEvents="none"
-      style={{
-        position: 'absolute',
-        bottom: t.spacing.sm,
-        [side]: t.spacing.sm,
-        backgroundColor: t.colors.inverse,
-        borderRadius: t.radius.pill,
-        paddingHorizontal: t.spacing.sm,
-        paddingVertical: t.spacing.xxs,
-      }}
+      style={{ position: 'absolute', bottom: t.spacing.sm, [side]: t.spacing.sm }}
     >
-      <Text variant="caption" color="onInverse">
-        {text}
-      </Text>
+      <Badge label={text} tone="inverse" />
     </View>
   );
 }

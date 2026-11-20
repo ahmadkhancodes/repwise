@@ -4,7 +4,12 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { getDb } from '@/db/client';
 import { createRepo, type Row } from '@/db/repo';
 import { exercises, routines, sessionExercises, sessions, sets } from '@/db/schema';
-import { sessionExercisesRepo, type Session, type SessionExercise } from '@/features/workout/repo';
+import {
+  createSession,
+  sessionExercisesRepo,
+  type Session,
+  type SessionExercise,
+} from '@/features/workout/repo';
 
 import { draftToRow, type CustomExerciseDraft } from './logic/customExercise';
 import type { LoggedSet } from './logic/records';
@@ -158,6 +163,21 @@ export function useOpenSessions(today: string, limit = 6): Session[] {
 
 /** Default target for an exercise added by hand; the player lets the user change it. */
 export const ADDED_TARGET_SETS = 3;
+
+/** Title of a workout started from an exercise page when nothing is planned. */
+export const QUICK_WORKOUT_TITLE = 'Quick workout';
+
+/** No plan today: a new ad-hoc session for `today` holding just this exercise (local, instant). */
+export function startWorkoutWithExercise(exerciseId: string, today: string, now?: number): Session {
+  return createSession(
+    {
+      date: today,
+      title: QUICK_WORKOUT_TITLE,
+      exercises: [{ exerciseId, targetSets: ADDED_TARGET_SETS }],
+    },
+    now,
+  );
+}
 
 /** Append to the end of a session (local, instant). */
 export function addExerciseToSession(

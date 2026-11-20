@@ -149,14 +149,21 @@ describe.each(SCHEMES)('Progress home (%s)', (scheme) => {
 });
 
 describe('Progress home gating', () => {
-  it('free users can look back one month; older months open the paywall', async () => {
+  it('free users can look back one month; older months show a locked state', async () => {
     useBillingStore.setState({ paymentsEnabled: true });
     await renderThemed(<ProgressScreen />);
     await screen.findByTestId('progress-empty');
     await fireEvent.press(screen.getByTestId('progress-calendar-prev'));
     expect(screen.getByText('October 2026')).toBeTruthy();
+    expect(screen.queryByTestId('progress-month-locked')).toBeNull();
     await fireEvent.press(screen.getByTestId('progress-calendar-prev'));
+    expect(screen.getByText('September 2026')).toBeTruthy();
+    expect(screen.getByTestId('progress-month-locked')).toBeTruthy();
+    expect(mockRouter.push).not.toHaveBeenCalledWith('/paywall');
+    await fireEvent.press(screen.getByTestId('progress-month-unlock'));
     expect(mockRouter.push).toHaveBeenCalledWith('/paywall');
+    await fireEvent.press(screen.getByTestId('progress-calendar-next'));
+    expect(screen.queryByTestId('progress-month-locked')).toBeNull();
   });
 });
 
@@ -303,11 +310,12 @@ describe.each(SCHEMES)('Heatmap (S32) (%s)', (scheme) => {
     await fireEvent.press(screen.getByTestId('muscle-chest'));
     expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Chest/);
     expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/2 hard sets in 7 days/);
-    // Tap on the figure: left pec in viewBox (85, 90) at scale 360/400.
+    // Tap on the figure: left quad in view units (40, 120) at the default 356 / 212 scale.
+    const k = 356 / 212;
     await fireEvent(screen.getByTestId('body-map'), 'responderRelease', {
-      nativeEvent: { locationX: 85 * 0.9, locationY: 90 * 0.9 },
+      nativeEvent: { locationX: 40 * k, locationY: 120 * k },
     });
-    expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Chest/);
+    expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Quads/);
   });
 
   it('switches to the back view when a back muscle is picked', async () => {

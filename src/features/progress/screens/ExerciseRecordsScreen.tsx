@@ -8,7 +8,7 @@ import { BigNumber, Card, EmptyState, IconButton, ListRow, Screen, Segmented, Te
 import { useTheme } from '@/theme';
 
 import { LineChart } from '../components/LineChart';
-import { ProgressSkeleton } from '../components/Skeleton';
+import { ChartSkeleton } from '../components/Skeletons';
 import { RangePicker, SectionTitle, Stagger } from '../components/bits';
 import { useToday, useTraining, useUnits } from '../hooks/useProgress';
 import { FREE_RANGE, inRange, type Range } from '../logic/body';
@@ -60,7 +60,7 @@ export function ExerciseRecordsScreen() {
       testID="screen-progress-exercise"
     >
       {training.loading ? (
-        <ProgressSkeleton />
+        <ChartSkeleton />
       ) : all.length === 0 ? (
         <EmptyState
           icon={Dumbbell}

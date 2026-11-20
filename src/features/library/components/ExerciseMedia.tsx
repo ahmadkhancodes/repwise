@@ -1,126 +1,511 @@
+import type { Muscle } from '@repwise/content';
+import { BlurMask, Canvas, Circle, Group } from '@shopify/react-native-skia';
 import { Image } from 'expo-image';
-import { Dumbbell } from 'lucide-react-native';
-import { useState } from 'react';
-import { View, type StyleProp, type ViewStyle } from 'react-native';
+import { RotateCcw } from 'lucide-react-native';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { View, type ViewStyle } from 'react-native';
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useDerivedValue,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
-import { Text } from '@/ui';
+import { Badge, PressableScale, Text } from '@/ui';
 
-import { exerciseMediaUrls } from '../logic/media';
+import { resolveItem, useCatalogState, useCustomItems } from '../hooks/useLibrary';
+import { bestView, type BodyView } from '../logic/bodyMap';
+import { bodyPalette } from '../logic/bodyPalette';
+import { EQUIPMENT_GLYPH, LEVEL_GLYPH } from '../logic/glyphs';
+import { heroLabel, heroLayout, heroOverlay, type HeroExercise } from '../logic/hero';
+import {
+  crossfadeCycleMs,
+  crossfadeOpacity,
+  exerciseMediaUrls,
+  type MediaUrls,
+} from '../logic/media';
 
-type Props = { mediaId: string | null; name: string; testID?: string };
+import { BodyFigure, MuscleThumb, useMuscleMotion } from './BodyMap';
 
-/** Calm offline placeholder: icon tile on the surface colour (media are not uploaded yet). */
-function Placeholder({
-  size,
-  caption,
-  style,
-  testID,
-  label,
-}: {
-  size: number;
-  caption?: string;
-  style?: StyleProp<ViewStyle>;
+export type { HeroExercise } from '../logic/hero';
+
+type MediaProps = {
+  mediaId: string | null;
+  name: string;
   testID?: string;
-  /** Spoken label; without one the tile is decorative and hidden from screen readers. */
-  label?: string;
-}) {
+  /** Muscles, kit, pattern and level for the muscle-map hero (a content Exercise fits). */
+  exercise?: HeroExercise | null;
+};
+
+/** Resolve an exercise id in the catalogue / own exercises (the workout player only has the id). */
+function useResolvedExercise(exerciseId: string): HeroExercise | null {
+  const { catalog } = useCatalogState();
+  const { items } = useCustomItems();
+  return resolveItem(exerciseId, catalog, items) ?? null;
+}
+
+const EMPTY: readonly Muscle[] = [];
+
+// ---------------------------------------------------------------------------
+// Thumbnail (lists, shelves)
+// ---------------------------------------------------------------------------
+
+export type ExerciseThumbProps = MediaProps & {
+  /** Square size in px (default: list row 56). */
+  size?: number;
+};
+
+/**
+ * List thumbnail: a muscle-map crop zoomed onto the main muscles (always drawn, so the list never
+ * shows grey tiles). When a licensed demo exists it fades in over the map from the ≤ 15 KB thumb.
+ */
+export const ExerciseThumb = memo(function ExerciseThumb({
+  mediaId,
+  name,
+  testID,
+  exercise: meta,
+  size: sizeProp,
+}: ExerciseThumbProps) {
   const t = useTheme();
-  const a11y = label
-    ? { accessible: true, accessibilityRole: 'image' as const, accessibilityLabel: label }
-    : {
-        importantForAccessibility: 'no-hide-descendants' as const,
-        accessibilityElementsHidden: true,
-      };
+  const size = sizeProp ?? t.sizes.row;
+  const urls = exerciseMediaUrls(mediaId);
+  const [failed, setFailed] = useState(false);
+  const primary = meta?.primaryMuscles ?? EMPTY;
+  const secondary = meta?.secondaryMuscles ?? EMPTY;
+  const view = useMemo(() => bestView(primary, secondary), [primary, secondary]);
+  const box: ViewStyle = {
+    width: size,
+    height: size,
+    borderRadius: t.radius.button,
+    overflow: 'hidden',
+    backgroundColor: t.colors.surface,
+  };
+  return (
+    <View
+      style={box}
+      testID={testID}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+    >
+      <MuscleThumb primary={primary} secondary={secondary} view={view} size={size} />
+      {urls && !failed ? (
+        <Image
+          testID={testID ? `${testID}-image` : undefined}
+          source={urls.thumb}
+          recyclingKey={mediaId ?? undefined}
+          cachePolicy="memory-disk"
+          contentFit="cover"
+          transition={0}
+          accessibilityLabel={`${name} demo`}
+          onError={() => setFailed(true)}
+          style={{ position: 'absolute', width: '100%', height: '100%' }}
+        />
+      ) : null}
+    </View>
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Hero (exercise detail S19, workout player S14)
+// ---------------------------------------------------------------------------
+
+export type ExerciseHeroProps = MediaProps & {
+  /** Alternative to `exercise`: look the exercise up in the catalogue / own exercises. */
+  exerciseId?: string;
+  /** Width / height (default 4:3). */
+  aspectRatio?: number;
+};
+
+function HeroById(props: ExerciseHeroProps & { exerciseId: string }) {
+  const meta = useResolvedExercise(props.exerciseId);
+  return <Hero {...props} exercise={meta} />;
+}
+
+/**
+ * Exercise hero. Without media (Cloudinary off, or no licensed demo) it is a designed muscle map:
+ * the side that shows the main muscles (auto-picked, tap to turn), main muscles in the accent,
+ * secondary in a soft tint, with the kit glyph, movement pattern and difficulty overlaid. When a
+ * demo exists, its two frames crossfade over the map (the map is the placeholder) and a small
+ * muscle inset stays in the corner.
+ */
+export function ExerciseHero(props: ExerciseHeroProps) {
+  const { exercise, exerciseId } = props;
+  return !exercise && exerciseId ? (
+    <HeroById {...props} exerciseId={exerciseId} />
+  ) : (
+    <Hero {...props} />
+  );
+}
+
+function Hero({ mediaId, name, testID, exercise: meta, aspectRatio = 4 / 3 }: ExerciseHeroProps) {
+  const t = useTheme();
+  const urls = exerciseMediaUrls(mediaId);
+  const [failed, setFailed] = useState(false);
+  const [demoReady, setDemoReady] = useState(false);
+  const [width, setWidth] = useState(0);
+  const primary = meta?.primaryMuscles ?? EMPTY;
+  const secondary = meta?.secondaryMuscles ?? EMPTY;
+  const auto = useMemo(() => bestView(primary, secondary), [primary, secondary]);
+  const [picked, setPicked] = useState<BodyView | null>(null);
+  const view = picked ?? auto;
+  const showMedia = Boolean(urls) && !failed;
+  const demo = showMedia && demoReady;
+
   return (
     <View
       testID={testID}
-      {...a11y}
-      style={[
-        { alignItems: 'center', justifyContent: 'center', backgroundColor: t.colors.surface },
-        style,
-      ]}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      style={{
+        width: '100%',
+        aspectRatio,
+        borderRadius: t.radius.card,
+        overflow: 'hidden',
+        backgroundColor: t.colors.surface,
+      }}
     >
-      <Dumbbell color={t.colors.textTertiary} size={size} strokeWidth={t.sizes.iconStroke} />
-      {caption ? (
-        <Text variant="caption" color="textSecondary" style={{ marginTop: t.spacing.xs }}>
-          {caption}
-        </Text>
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={heroLabel(name, meta, view, demo)}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        testID={testID ? `${testID}-map` : undefined}
+      >
+        {width > 0 && !demo ? (
+          <MuscleStage
+            width={width}
+            aspectRatio={aspectRatio}
+            view={view}
+            primary={primary}
+            secondary={secondary}
+          />
+        ) : null}
+      </View>
+      {urls && showMedia ? (
+        <DemoFrames
+          urls={urls}
+          name={name}
+          onReady={() => setDemoReady(true)}
+          onError={() => setFailed(true)}
+          testID={testID ? `${testID}-frames` : undefined}
+        />
       ) : null}
+      {demo ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            right: t.spacing.sm,
+            bottom: t.spacing.sm,
+            borderRadius: t.radius.button,
+            overflow: 'hidden',
+            backgroundColor: t.colors.surface,
+          }}
+          testID={testID ? `${testID}-inset` : undefined}
+        >
+          <MuscleThumb
+            primary={primary}
+            secondary={secondary}
+            view={view}
+            size={t.sizes.hitGymLarge}
+          />
+        </View>
+      ) : (
+        <HeroOverlays
+          meta={meta}
+          view={view}
+          width={width}
+          aspectRatio={aspectRatio}
+          onFlip={meta ? () => setPicked(view === 'front' ? 'back' : 'front') : undefined}
+          testID={testID}
+        />
+      )}
     </View>
   );
 }
 
-/** 56 px list thumbnail: the ≤ 15 KB first-frame poster only, never the loop. */
-export function ExerciseThumb({ mediaId, name, testID }: Props) {
+/** The drawn stage: soft accent halo, then the figure, which turns (scaleX) when flipped. */
+function MuscleStage({
+  width,
+  aspectRatio,
+  view,
+  primary,
+  secondary,
+}: {
+  width: number;
+  aspectRatio: number;
+  view: BodyView;
+  primary: readonly Muscle[];
+  secondary: readonly Muscle[];
+}) {
   const t = useTheme();
-  const urls = exerciseMediaUrls(mediaId);
-  const [failed, setFailed] = useState(false);
-  const box: ViewStyle = {
-    width: t.sizes.row,
-    height: t.sizes.row,
-    borderRadius: t.radius.button,
-    overflow: 'hidden',
-  };
-  if (!urls || failed) {
-    return <Placeholder size={t.sizes.icon} style={box} testID={testID} />;
-  }
+  const reduceMotion = useReducedMotion();
+  const palette = useMemo(() => bodyPalette(t.colors, t.scheme, 'surface'), [t.colors, t.scheme]);
+  const l = heroLayout(width, aspectRatio, t.spacing.md);
+  const { glow, reveal } = useMuscleMotion(`${view}|${primary.join()}|${secondary.join()}`);
+  const turn = useSharedValue(1);
+  useEffect(() => {
+    if (reduceMotion) return;
+    turn.set(0.05);
+    turn.set(withSpring(1, t.motion.spring));
+  }, [view, reduceMotion, turn, t.motion.spring]);
+  const transform = useDerivedValue(() => [
+    { translateX: l.cx },
+    { scaleX: turn.value },
+    { translateX: -l.cx },
+    { translateX: l.x },
+    { translateY: l.y },
+    { scale: l.scale },
+  ]);
+  const secondaryOpacity = useDerivedValue(() => reveal.value);
   return (
-    <View style={[box, { backgroundColor: t.colors.surface }]} testID={testID}>
-      <Image
-        source={urls.thumb}
-        recyclingKey={mediaId ?? undefined}
-        cachePolicy="memory-disk"
-        contentFit="cover"
-        transition={t.motion.duration.fast}
-        accessibilityLabel={`${name} demo`}
-        onError={() => setFailed(true)}
-        style={{ width: '100%', height: '100%' }}
-      />
-    </View>
+    <Canvas style={{ width: l.width, height: l.height }}>
+      <Circle
+        cx={l.cx}
+        cy={l.cy}
+        r={l.height * 0.36}
+        color={palette.glow}
+        opacity={t.scheme === 'dark' ? 0.14 : 0.09}
+      >
+        <BlurMask blur={l.height / 7} style="normal" />
+      </Circle>
+      <Group transform={transform}>
+        <BodyFigure
+          view={view}
+          palette={palette}
+          primary={primary}
+          secondary={secondary}
+          primaryOpacity={glow}
+          secondaryOpacity={secondaryOpacity}
+        />
+      </Group>
+    </Canvas>
+  );
+}
+
+/** Difficulty (top-left), pattern + kit glyph (bottom-left), side label + turn button (right). */
+function HeroOverlays({
+  meta,
+  view,
+  width,
+  aspectRatio,
+  onFlip,
+  testID,
+}: {
+  meta: HeroExercise | null | undefined;
+  view: BodyView;
+  width: number;
+  aspectRatio: number;
+  onFlip?: () => void;
+  testID?: string;
+}) {
+  const t = useTheme();
+  const o = heroOverlay(meta);
+  const l = heroLayout(width, aspectRatio, t.spacing.md);
+  const Glyph = o.equipmentKey ? EQUIPMENT_GLYPH[o.equipmentKey] : null;
+  const LevelGlyph = meta?.level ? LEVEL_GLYPH[meta.level] : undefined;
+  const pad = t.spacing.md;
+  const textWidth = width > 0 ? l.textWidth : undefined;
+  const glyphBox = t.spacing.xxxl;
+  return (
+    <>
+      {o.level ? (
+        <View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: pad, left: pad }}
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+        >
+          <Badge
+            label={o.level}
+            icon={LevelGlyph}
+            tone="outline"
+            testID={testID ? `${testID}-level` : undefined}
+          />
+        </View>
+      ) : null}
+      {o.pattern || o.equipment ? (
+        <View
+          pointerEvents="none"
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+          style={{
+            position: 'absolute',
+            left: pad,
+            bottom: pad,
+            maxWidth: textWidth,
+            gap: t.spacing.xs,
+          }}
+        >
+          {Glyph ? (
+            <View
+              testID={testID ? `${testID}-glyph` : undefined}
+              style={{
+                width: glyphBox,
+                height: glyphBox,
+                borderRadius: t.radius.pill,
+                backgroundColor: t.colors.inverse,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Glyph
+                size={t.sizes.iconMedium}
+                color={t.colors.onInverse}
+                strokeWidth={t.sizes.iconStroke}
+              />
+            </View>
+          ) : null}
+          {o.equipment ? (
+            <Text variant="headline" numberOfLines={2}>
+              {o.equipment}
+            </Text>
+          ) : null}
+          {o.pattern ? (
+            <Text variant="callout" color="textSecondary" numberOfLines={2}>
+              {o.pattern}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+      {meta ? (
+        <Text
+          variant="caption"
+          color="textSecondary"
+          importantForAccessibility="no"
+          accessibilityElementsHidden
+          style={{ position: 'absolute', top: pad, right: pad }}
+        >
+          {view === 'front' ? 'Front' : 'Back'}
+        </Text>
+      ) : null}
+      {onFlip ? (
+        <PressableScale
+          onPress={onFlip}
+          feedback="selection"
+          accessibilityRole="button"
+          accessibilityLabel={view === 'front' ? 'Show back view' : 'Show front view'}
+          testID={testID ? `${testID}-flip` : undefined}
+          style={{
+            position: 'absolute',
+            right: t.spacing.xs,
+            bottom: t.spacing.xs,
+            width: t.sizes.touch,
+            height: t.sizes.touch,
+            borderRadius: t.radius.pill,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: glyphBox - t.spacing.xxs,
+              height: glyphBox - t.spacing.xxs,
+              borderRadius: t.radius.pill,
+              backgroundColor: t.colors.bg,
+              borderWidth: t.sizes.hairline,
+              borderColor: t.colors.border,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <RotateCcw
+              size={t.sizes.iconSmall}
+              color={t.colors.textPrimary}
+              strokeWidth={t.sizes.iconStroke}
+            />
+          </View>
+        </PressableScale>
+      ) : null}
+    </>
   );
 }
 
 /**
- * Detail hero (S19): the poster paints first (placeholder), the animated loop replaces it when
- * ready. Without media (or offline with an empty cache) a placeholder keeps the layout stable.
+ * Two still frames (start / end) crossfading as a slow demo loop (CROSSFADE timing, pure
+ * `crossfadeOpacity` run as a worklet). The start frame fades in over the muscle map once loaded;
+ * the loop starts only when both frames are in. Reduce Motion: the start frame, still.
  */
-export function ExerciseHero({ mediaId, name, testID }: Props) {
+function DemoFrames({
+  urls,
+  name,
+  onReady,
+  onError,
+  testID,
+}: {
+  urls: MediaUrls;
+  name: string;
+  onReady: () => void;
+  onError: () => void;
+  testID?: string;
+}) {
   const t = useTheme();
-  const urls = exerciseMediaUrls(mediaId);
-  const [failed, setFailed] = useState(false);
-  const box: ViewStyle = {
-    width: '100%',
-    aspectRatio: 4 / 3,
-    borderRadius: t.radius.card,
-    overflow: 'hidden',
-    backgroundColor: t.colors.surface,
-  };
-  if (!urls || failed) {
-    return (
-      <Placeholder
-        size={t.sizes.touch}
-        caption="Demo coming soon"
-        label={`${name}: demo coming soon`}
-        style={box}
-        testID={testID ? `${testID}-placeholder` : undefined}
-      />
-    );
-  }
+  const reduceMotion = useReducedMotion();
+  const [loaded, setLoaded] = useState({ start: false, end: false });
+  const startIn = useSharedValue(0);
+  const elapsed = useSharedValue(0);
+  const both = loaded.start && loaded.end;
+
+  useEffect(() => {
+    if (!loaded.start) return;
+    startIn.set(withTiming(1, { duration: t.motion.duration.base }));
+  }, [loaded.start, startIn, t.motion.duration.base]);
+
+  useEffect(() => {
+    if (!both || reduceMotion) return;
+    const cycle = crossfadeCycleMs();
+    elapsed.set(0);
+    elapsed.set(withRepeat(withTiming(cycle, { duration: cycle, easing: Easing.linear }), -1));
+    return () => cancelAnimation(elapsed);
+  }, [both, reduceMotion, elapsed]);
+
+  const startStyle = useAnimatedStyle(() => ({ opacity: startIn.value }));
+  const endStyle = useAnimatedStyle(() => ({ opacity: crossfadeOpacity(elapsed.value) }));
+  const markStart = useCallback(() => {
+    setLoaded((s) => ({ ...s, start: true }));
+    onReady();
+  }, [onReady]);
+  const markEnd = useCallback(() => setLoaded((s) => ({ ...s, end: true })), []);
+  const fill = { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 } as const;
+
   return (
-    <View style={box} testID={testID}>
-      <Image
-        source={urls.loop}
-        placeholder={{ uri: urls.poster }}
-        placeholderContentFit="contain"
-        cachePolicy="memory-disk"
-        contentFit="contain"
-        transition={t.motion.duration.fast}
-        autoplay
-        accessibilityLabel={`${name} demonstration`}
-        onError={() => setFailed(true)}
-        style={{ width: '100%', height: '100%' }}
-      />
+    <View
+      style={fill}
+      pointerEvents="none"
+      testID={testID}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+    >
+      <Animated.View style={[fill, { backgroundColor: t.colors.surface }, startStyle]}>
+        <Image
+          source={urls.frames[0]}
+          placeholder={{ uri: urls.poster }}
+          cachePolicy="memory-disk"
+          contentFit="contain"
+          transition={0}
+          accessibilityLabel={`${name} demonstration`}
+          onLoad={markStart}
+          onError={onError}
+          style={{ width: '100%', height: '100%' }}
+        />
+      </Animated.View>
+      {reduceMotion ? null : (
+        <Animated.View style={[fill, endStyle]}>
+          <Image
+            source={urls.frames[1]}
+            cachePolicy="memory-disk"
+            contentFit="contain"
+            transition={0}
+            onLoad={markEnd}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </Animated.View>
+      )}
     </View>
   );
 }
