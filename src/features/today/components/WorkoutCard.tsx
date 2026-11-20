@@ -43,7 +43,7 @@ export const WorkoutCard = memo(function WorkoutCard({
           ) : (
             <Dumbbell color={t.colors.textSecondary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
           )}
-          <Text variant="caption" color={workout.done ? 'accentText' : 'textSecondary'} style={{ textTransform: 'uppercase' }}>
+          <Text variant="eyebrow" color={workout.done ? 'accentText' : 'textSecondary'}>
             {workout.done ? 'Workout done' : workout.inProgress ? 'In progress' : 'Today’s workout'}
           </Text>
         </View>

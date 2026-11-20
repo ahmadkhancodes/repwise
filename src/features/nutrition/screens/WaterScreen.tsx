@@ -4,12 +4,11 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSpring } from 'react-native-reanimated';
 
-import { BackButton } from '@/features/meals/components/BackButton';
 import { dayLabel, isISODate, todayISO } from '@/features/meals/logic/dates';
 import { addWater, undoLog } from '@/features/meals/service';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { BigNumber, Button, Chip, IconButton, ProgressRing, Screen, Stepper, Text, ringInnerWidth, showUndoToast } from '@/ui';
+import { BackButton, BigNumber, Button, Chip, IconButton, ProgressRing, ringInnerWidth, Screen, showUndoToast, Stepper, Text } from '@/ui';
 
 import { progress } from '../logic/intake';
 import {
@@ -83,7 +82,7 @@ export function WaterScreen() {
   return (
     <Screen
       title="Water"
-      headerLeft={<BackButton />}
+      headerLeft={<BackButton fallback="/eat" />}
       testID="screen-water"
       footer={<Button label={`Add a glass · ${GLASS_ML} ml`} onPress={() => add(GLASS_ML)} testID="water-add" />}
     >

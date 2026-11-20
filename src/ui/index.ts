@@ -92,3 +92,9 @@ export {
   type SwapChoice,
   type SwapChooserProps,
 } from './SwapChooser';
+export { BackButton, goBack, type BackButtonProps } from './BackButton';
+export { ListGroup, type ListGroupProps } from './ListGroup';
+export { SectionHeader, type SectionHeaderProps } from './SectionHeader';
+export { Enter } from './Enter';
+export { enterAt, exitFade, layoutSpring, staggerDelay, STAGGER_CAP } from './listMotion';
+export { Sparkline, sparkPath, sparkPoints, type SparklineProps, type SparkPoint } from './Sparkline';

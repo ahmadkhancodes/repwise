@@ -1,14 +1,5 @@
 import { router } from 'expo-router';
-import {
-  Camera,
-  ChevronLeft,
-  CircleAlert,
-  ImagePlus,
-  Images,
-  Lock,
-  Share2,
-  Trash2,
-} from 'lucide-react-native';
+import { Camera, CircleAlert, ImagePlus, Images, Lock, Share2, Trash2 } from 'lucide-react-native';
 import { useMemo, useRef, useState } from 'react';
 import { Image, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -16,16 +7,16 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { usePro } from '@/features/billing/hooks/usePro';
 import { haptics } from '@/services/haptics';
 import {
+  BackButton,
   Button,
   Chip,
   EmptyState,
-  IconButton,
   PressableScale,
   Screen,
   Segmented,
   Sheet,
-  Text,
   showToast,
+  Text,
 } from '@/ui';
 import { useTheme } from '@/theme';
 
@@ -70,14 +61,7 @@ export function PhotosScreen() {
     return a && b ? orderPair(a, b) : defaultComparePair(photos.data);
   }, [photos.data, picked]);
   const tile = Math.floor((screenW - t.spacing.screen * 2 - t.spacing.xs * (COLS - 1)) / COLS);
-  const back = (
-    <IconButton
-      icon={ChevronLeft}
-      accessibilityLabel="Back"
-      onPress={() => router.back()}
-      testID="back"
-    />
-  );
+  const back = <BackButton fallback="/progress" />;
 
   const add = async (source: PhotoSource) => {
     setBusy(true);
@@ -107,7 +91,7 @@ export function PhotosScreen() {
           title="Progress photos are part of Pro"
           body="Private photos that stay on your phone, with a side-by-side compare."
           actionLabel="See Pro"
-          onAction={() => router.push('/paywall')}
+          onAction={() => router.push({ pathname: '/paywall', params: { source: 'photos' } })}
           testID="photos-locked"
         />
       </Screen>

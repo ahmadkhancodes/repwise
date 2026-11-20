@@ -222,8 +222,8 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
           .stiffness(t.motion.spring.stiffness)}
         style={{ gap: t.spacing.xs, paddingTop: t.spacing.lg }}
       >
-        <Text variant="caption" color="accentText">
-          YOUR PLAN IS READY
+        <Text variant="eyebrow" color="accentText">
+          Your plan is ready
         </Text>
         <Text variant="title1" accessibilityRole="header">
           {labelOf(GOAL_OPTIONS, goal) || 'Your plan'}

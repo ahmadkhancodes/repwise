@@ -78,7 +78,10 @@ describe(`paywall (${Platform.OS})`, () => {
       expect(screen.getByRole('button', { name: 'Start free trial' })).toBeTruthy();
       // Honest trial timeline: today → day 5 reminder → day 7 billed at the store price.
       expect(screen.getByTestId('paywall-timeline')).toBeTruthy();
-      expect(screen.getByText('Day 5'.toUpperCase())).toBeTruthy();
+      expect(screen.getByText('Day 5')).toBeTruthy(); // eyebrow: uppercase by style only
+      // One hero title (N7): no second Screen title; direct opens get the generic headline.
+      expect(screen.getAllByRole('header')).toHaveLength(1);
+      expect(screen.getByTestId('paywall-title')).toHaveTextContent('Train and eat to plan.');
       expect(screen.getByText('Billed £45.99/year')).toBeTruthy();
       expect(screen.getAllByRole('radio')).toHaveLength(4);
       expect(screen.getByTestId('paywall-cancel')).toHaveTextContent(
@@ -86,6 +89,14 @@ describe(`paywall (${Platform.OS})`, () => {
       );
     },
   );
+
+  it('the headline follows where the paywall opened from (N7)', async () => {
+    await start();
+    await renderRouter(routes, { initialUrl: '/paywall?source=grocery' });
+    expect(await screen.findByTestId('paywall-title')).toHaveTextContent(
+      'Your grocery list, done.',
+    );
+  });
 
   it('switching plan updates the CTA and the plain price line', async () => {
     await start();

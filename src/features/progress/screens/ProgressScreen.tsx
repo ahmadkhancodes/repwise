@@ -19,13 +19,12 @@ import { ScrollView, View } from 'react-native';
 
 import { usePro } from '@/features/billing/hooks/usePro';
 import { BodyHeatmap, bestView } from '@/features/library';
-import { BigNumber, Button, Card, EmptyState, ListRow, PressableScale, Screen, Text } from '@/ui';
+import { BigNumber, Button, Card, EmptyState, Enter, ListGroup, ListRow, PressableScale, Screen, SectionHeader, Sparkline, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { MonthCalendar } from '../components/MonthCalendar';
 import { HomeSkeleton } from '../components/Skeletons';
-import { Sparkline } from '../components/Sparkline';
-import { SectionTitle, Stat, Stagger } from '../components/bits';
+import { Stat } from '../components/bits';
 import { useNow, useNutrition, useToday, useTraining, useUnits } from '../hooks/useProgress';
 import { weightSeries } from '../logic/body';
 import {
@@ -162,7 +161,7 @@ function ProgressHome({ onRetry }: { onRetry: () => void }) {
               testID="progress-empty"
             />
           ) : (
-            <Stagger index={0}>
+            <Enter index={0}>
               <StreakCard
                 current={streak.current}
                 longest={streak.longest}
@@ -171,10 +170,10 @@ function ProgressHome({ onRetry }: { onRetry: () => void }) {
                 volume={formatLoad(volume7d, units)}
                 prs30={prs30}
               />
-            </Stagger>
+            </Enter>
           )}
 
-          <Stagger index={1}>
+          <Enter index={1}>
             <MonthCalendar
               month={month}
               rows={rows}
@@ -183,11 +182,11 @@ function ProgressHome({ onRetry }: { onRetry: () => void }) {
               canNext={canNext}
               locked={locked ? <LockedMonth month={month} /> : undefined}
             />
-          </Stagger>
+          </Enter>
 
           {prs.length > 0 ? (
-            <Stagger index={2}>
-              <SectionTitle title="Recent PRs" />
+            <Enter index={2}>
+              <SectionHeader title="Recent PRs" />
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -209,11 +208,11 @@ function ProgressHome({ onRetry }: { onRetry: () => void }) {
                   />
                 ))}
               </ScrollView>
-            </Stagger>
+            </Enter>
           ) : null}
 
-          <Stagger index={3}>
-            <SectionTitle title="At a glance" />
+          <Enter index={3}>
+            <SectionHeader title="At a glance" />
             <View style={{ gap: t.spacing.sm, marginTop: t.spacing.xs }}>
               <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
                 <Tile
@@ -259,16 +258,15 @@ function ProgressHome({ onRetry }: { onRetry: () => void }) {
                 />
               </View>
             </View>
-          </Stagger>
+          </Enter>
 
-          <Stagger index={4}>
-            <View>
+          <Enter index={4}>
+            <ListGroup title="More" testID="progress-more">
               <ListRow
                 icon={Dumbbell}
                 title="Strength"
                 subtitle="1RM, volume and PRs per exercise"
                 chevron
-                divider
                 onPress={() => router.push('/progress/records')}
                 testID="nav-records"
               />
@@ -277,7 +275,6 @@ function ProgressHome({ onRetry }: { onRetry: () => void }) {
                 title="Trends"
                 subtitle="Volume, adherence and calories"
                 chevron
-                divider
                 onPress={() => router.push('/progress/trends')}
                 testID="nav-trends"
               />
@@ -289,8 +286,8 @@ function ProgressHome({ onRetry }: { onRetry: () => void }) {
                 onPress={() => router.push('/progress/history')}
                 testID="nav-history"
               />
-            </View>
-          </Stagger>
+            </ListGroup>
+          </Enter>
         </>
       )}
     </Screen>
@@ -389,7 +386,7 @@ function LockedMonth({ month }: { month: MonthKey }) {
       <Button
         label="See Pro"
         variant="secondary"
-        onPress={() => router.push('/paywall')}
+        onPress={() => router.push({ pathname: '/paywall', params: { source: 'progress' } })}
         testID="progress-month-unlock"
       />
     </View>

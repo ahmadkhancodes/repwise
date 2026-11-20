@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { ChevronLeft, ChevronRight, Gift, Share2 } from 'lucide-react-native';
 import { useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react';
@@ -12,7 +11,16 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { haptics } from '@/services/haptics';
-import { Button, EmptyState, IconButton, Screen, StepProgress, Text, showToast } from '@/ui';
+import {
+  BackButton,
+  Button,
+  EmptyState,
+  IconButton,
+  Screen,
+  showToast,
+  StepProgress,
+  Text,
+} from '@/ui';
 import { useTheme } from '@/theme';
 
 import type { ViewRef } from '../components/CompareSlider';
@@ -82,14 +90,7 @@ export function WrappedScreen() {
       'wrapped',
     ).catch(() => showToast({ message: "Couldn't share right now." }));
 
-  const back = (
-    <IconButton
-      icon={ChevronLeft}
-      accessibilityLabel="Back"
-      onPress={() => router.back()}
-      testID="back"
-    />
-  );
+  const back = <BackButton fallback="/progress" />;
   const loading = training.loading || nutrition.loading;
   const empty = !loading && isEmptyWrapped(wrapped);
 

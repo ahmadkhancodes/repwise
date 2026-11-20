@@ -3,7 +3,6 @@ import { CircleAlert, NotebookPen, Trash2 } from 'lucide-react-native';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { BackButton } from '@/features/meals/components/BackButton';
 import { MacroChips } from '@/features/meals/components/MacroChips';
 import { mealArt } from '@/features/meals';
 import { RecipeArt } from '@/features/meals/components/RecipeArt';
@@ -13,7 +12,7 @@ import { dayLabel, isISODate, todayISO } from '@/features/meals/logic/dates';
 import { slotLabel } from '@/features/meals/logic/slots';
 import { markMealEaten, setMealOpen } from '@/features/meals/service';
 import { useTheme } from '@/theme';
-import { Button, Card, Chip, EmptyState, IconButton, Screen, Text, showUndoToast, MacroRings, SkeletonCard, SkeletonGroup } from '@/ui';
+import { BackButton, Button, Card, Chip, EmptyState, IconButton, MacroRings, Screen, showUndoToast, SkeletonCard, SkeletonGroup, Text } from '@/ui';
 
 import { isWaterLog } from '../logic/water';
 import { logFood, removeLog, type FoodLog } from '../repo';
@@ -56,7 +55,7 @@ export function DayLogScreen() {
   return (
     <Screen
       title={dayLabel(date, today)}
-      headerLeft={<BackButton />}
+      headerLeft={<BackButton fallback="/eat" />}
       testID="screen-day-log"
       footer={<Button label="Log food" onPress={() => router.push({ pathname: '/meal/log', params: { date, mode: 'food' } })} testID="day-log-add" />}
     >

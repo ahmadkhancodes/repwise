@@ -2,10 +2,10 @@ import { Children, isValidElement, type ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { Text } from '@/ui';
+import { Text } from './Text';
 
-export type SettingsGroupProps = {
-  /** Small header above the group ("ACCOUNT"). */
+export type ListGroupProps = {
+  /** Small eyebrow header above the group ("Account"). */
   title?: string;
   /** Footnote under the group (plain words, why a setting matters). */
   footnote?: string;
@@ -14,22 +14,23 @@ export type SettingsGroupProps = {
 };
 
 /**
- * Grouped settings list (sheet 11 lists): a quiet header, the rows on one surface card with
- * hairline dividers between them, an optional footnote. Rows are ListRow / ToggleRow.
+ * Grouped list (sheet 11 lists, UI audit P2-13): a quiet eyebrow header, the rows on one surface
+ * card with hairline dividers between them, an optional footnote. Every list of navigation rows
+ * uses it (Settings, Help, Eat, Progress). Rows are ListRow / ToggleRow.
  */
-export function SettingsGroup({ title, footnote, children, testID }: SettingsGroupProps) {
+export function ListGroup({ title, footnote, children, testID }: ListGroupProps) {
   const t = useTheme();
   const rows = Children.toArray(children).filter(isValidElement);
   return (
     <View testID={testID} style={{ gap: t.spacing.xs }}>
       {title ? (
         <Text
-          variant="caption"
+          variant="eyebrow"
           color="textSecondary"
           accessibilityRole="header"
           style={{ paddingHorizontal: t.spacing.xxs }}
         >
-          {title.toUpperCase()}
+          {title}
         </Text>
       ) : null}
       <View

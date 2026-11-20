@@ -1,6 +1,6 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { router } from 'expo-router';
-import { ChevronLeft, CloudUpload, Mail } from 'lucide-react-native';
+
+import { CloudUpload, Mail } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
@@ -21,7 +21,7 @@ import {
 import { useConnectivity } from '@/services/connectivity';
 import { syncNow, useSyncStatus } from '@/sync';
 import { useTheme } from '@/theme';
-import { Button, Card, IconButton, Screen, Sheet, Text, TextField, showToast } from '@/ui';
+import { BackButton, Button, Card, Screen, Sheet, showToast, Text, TextField } from '@/ui';
 
 import { GoogleButton } from '../components/GoogleButton';
 import { backupLabel, errorMessage, providerLabel } from '../logic/account';
@@ -32,14 +32,7 @@ type Busy = null | 'apple' | 'google' | 'email' | 'code' | 'sync' | 'signout' | 
 export function AccountScreen() {
   const status = useAuth((s) => s.status);
   return (
-    <Screen
-      title="Backup & account"
-      keyboard
-      testID="screen-account"
-      headerLeft={
-        <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={() => router.back()} />
-      }
-    >
+    <Screen title="Backup & account" keyboard testID="screen-account" headerLeft={<BackButton />}>
       {status === 'signedIn' ? <SignedIn /> : <SignIn loading={status === 'loading'} />}
     </Screen>
   );
@@ -241,7 +234,8 @@ function SignedIn() {
     setBusy('sync');
     const r = await syncNow({ pull: true });
     setBusy(null);
-    if (r.status === 'ok') showToast({ message: 'Backup up to date.', tone: 'success', silent: true });
+    if (r.status === 'ok')
+      showToast({ message: 'Backup up to date.', tone: 'success', silent: true });
     else if (r.status === 'error') {
       showToast({
         message: r.offline

@@ -14,7 +14,7 @@ import { latestCheckin, setDeloadRequested } from '../repo';
 import { CheckinScreen } from '../screens/CheckinScreen';
 
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), back: jest.fn(), setParams: jest.fn() },
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: jest.fn(() => true), setParams: jest.fn() },
   useLocalSearchParams: jest.fn(() => ({})),
 }));
 
@@ -130,7 +130,7 @@ describe('CheckinScreen states', () => {
     await renderThemed(<CheckinScreen now={SUNDAY} />);
     expect(screen.getByTestId('checkin-pro')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('checkin-pro-action'));
-    expect(router.push).toHaveBeenCalledWith('/paywall');
+    expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
   });
 
   it('before onboarding', async () => {

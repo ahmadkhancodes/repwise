@@ -27,7 +27,7 @@ import {
 import { enterAt } from '@/ui/listMotion';
 
 import { quickAddWater, toggleMeal } from '../actions';
-import { TargetsIcon } from '@/ui';
+import { ListGroup, TargetsIcon } from '@/ui';
 import { openMeal } from '../navigation';
 import { MealTile } from '../components/MealTile';
 import { SwapSheet } from '../components/SwapSheet';
@@ -214,14 +214,16 @@ function DayView({
           />
         </Card>
       ) : null}
-      <ListRow
-        title="Daily targets"
-        value={target ? `${target.kcal.toLocaleString()} kcal` : undefined}
-        icon={TargetsIcon}
-        onPress={() => router.push({ pathname: '/meal/targets', params: { date } })}
-        chevron
-        testID="open-targets"
-      />
+      <ListGroup>
+        <ListRow
+          title="Daily targets"
+          value={target ? `${target.kcal.toLocaleString()} kcal` : undefined}
+          icon={TargetsIcon}
+          onPress={() => router.push({ pathname: '/meal/targets', params: { date } })}
+          chevron
+          testID="open-targets"
+        />
+      </ListGroup>
 
       {locked ? (
         <EmptyState
@@ -253,14 +255,16 @@ function DayView({
         </View>
       )}
 
-      <ListRow
-        title="Ate out or off-plan?"
-        subtitle="Log food or a meal out"
-        icon={UtensilsCrossed}
-        onPress={() => router.push({ pathname: '/meal/log', params: { date } })}
-        chevron
-        testID="open-log"
-      />
+      <ListGroup>
+        <ListRow
+          title="Ate out or off-plan?"
+          subtitle="Log food or a meal out"
+          icon={UtensilsCrossed}
+          onPress={() => router.push({ pathname: '/meal/log', params: { date } })}
+          chevron
+          testID="open-log"
+        />
+      </ListGroup>
       <WaterCard
         totalMl={day.waterMl}
         goalMl={waterGoal}
@@ -314,14 +318,16 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
         />
       </View>
 
-      <ListRow
-        title="Grocery list"
-        subtitle="The whole week in one list, by aisle"
-        icon={ShoppingBasket}
-        onPress={() => router.push({ pathname: '/grocery', params: { week: start } })}
-        chevron
-        testID="week-grocery"
-      />
+      <ListGroup>
+        <ListRow
+          title="Grocery list"
+          subtitle="The whole week in one list, by aisle"
+          icon={ShoppingBasket}
+          onPress={() => router.push({ pathname: '/grocery', params: { week: start } })}
+          chevron
+          testID="week-grocery"
+        />
+      </ListGroup>
 
       {week.state === 'loading' ? (
         <SkeletonGroup label="Loading the week" testID="week-loading" style={{ gap: t.spacing.sm }}>

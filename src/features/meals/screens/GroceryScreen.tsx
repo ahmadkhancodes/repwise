@@ -7,9 +7,8 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { usePro } from '@/features/billing/hooks/usePro';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { BigNumber, Button, Checkbox, EmptyState, IconButton, Screen, SkeletonCard, SkeletonGroup, Text } from '@/ui';
+import { BackButton, BigNumber, Button, Checkbox, EmptyState, IconButton, Screen, SectionHeader, SkeletonCard, SkeletonGroup, Text } from '@/ui';
 
-import { BackButton } from '../components/BackButton';
 import { enterAt } from '@/ui/listMotion';
 import { useEatWeek } from '../hooks/useEat';
 import { addDays, isISODate, shortDate, startOfWeek, todayISO } from '../logic/dates';
@@ -59,7 +58,7 @@ export function GroceryScreen() {
 
   if (!isPro) {
     return (
-      <Screen title="Grocery list" headerLeft={<BackButton />} testID="screen-grocery">
+      <Screen title="Grocery list" headerLeft={<BackButton fallback="/eat" />} testID="screen-grocery">
         <EmptyState
           icon={Lock}
           title="Your week’s shopping in one tap"
@@ -76,7 +75,7 @@ export function GroceryScreen() {
   return (
     <Screen
       title="Grocery list"
-      headerLeft={<BackButton />}
+      headerLeft={<BackButton fallback="/eat" />}
       headerRight={checked.size ? <IconButton icon={RotateCcw} accessibilityLabel="Untick all" onPress={clear} testID="grocery-clear" /> : undefined}
       testID="screen-grocery"
       footer={total > 0 ? <Button label="Share list" icon={Share2} onPress={share} testID="grocery-share" /> : undefined}
@@ -99,9 +98,9 @@ export function GroceryScreen() {
           <BigNumber value={left} unit={left === 1 ? 'item left' : 'items left'} label={range} testID="grocery-left" />
           {list.map((aisle, ai) => (
             <Animated.View key={aisle.aisle} entering={enterAt(ai, reduce)} style={{ gap: t.spacing.xxs }}>
-              <Text variant="headline" accessibilityRole="header" style={{ marginTop: t.spacing.xs }}>
-                {aisle.label}
-              </Text>
+              <View style={{ marginTop: t.spacing.xs }}>
+                <SectionHeader title={aisle.label} level="card" />
+              </View>
               <View style={{ backgroundColor: t.colors.surface, borderRadius: t.radius.card }}>
                 {aisle.items.map((it, i) => {
                   const on = checked.has(it.foodId);

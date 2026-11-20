@@ -28,7 +28,7 @@ export function EveningCard({
   return (
     <Animated.View entering={enterAt(index, reduceMotion)}>
       <Card testID="today-evening">
-        <Text variant="caption" color="textSecondary" testID="today-date" style={{ textTransform: 'uppercase' }}>
+        <Text variant="eyebrow" color="textSecondary" testID="today-date">
           {dateLabel}
         </Text>
         <Text variant="title2" style={{ marginTop: t.spacing.xxs }} testID="evening-headline">
@@ -73,7 +73,7 @@ export function EveningCard({
               <Dumbbell color={t.colors.textSecondary} {...icon} />
             )}
             <View style={{ flex: 1 }}>
-              <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+              <Text variant="eyebrow" color="textSecondary">
                 Tomorrow
               </Text>
               <Text variant="headline">{tomorrow.title}</Text>

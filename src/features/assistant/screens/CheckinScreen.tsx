@@ -14,25 +14,8 @@ import { getPlanner } from '@/features/today/plannerBridge';
 import { track } from '@/services/analytics';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import {
-  Badge,
-  BigNumber,
-  Button,
-  Card,
-  Chip,
-  EmptyState,
-  IconButton,
-  ProgressRing,
-  Screen,
-  Skeleton,
-  SkeletonGroup,
-  SkeletonText,
-  StepProgress,
-  Stepper,
-  Text,
-} from '@/ui';
+import { Badge, BigNumber, Button, Card, Chip, EmptyState, goBack, IconButton, ProgressRing, Screen, Skeleton, SkeletonGroup, SkeletonText, Sparkline, Stepper, StepProgress, Text } from '@/ui';
 
-import { Sparkline } from '../components/Sparkline';
 import {
   appliesFrom,
   CHECKIN_STEPS,
@@ -125,7 +108,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
       setStep((s) => s - 1);
       return true;
     }
-    router.back();
+    goBack();
     return true;
   }, [step, done]);
 
@@ -177,7 +160,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
           title="Weekly check-in is part of Pro"
           body="Each week Repwise tunes your calories, training volume and menus from your own progress."
           actionLabel="See Repwise Pro"
-          onAction={() => router.push('/paywall' as Href)}
+          onAction={() => router.push({ pathname: '/paywall', params: { source: 'checkin' } } as Href)}
           testID="checkin-pro"
         />
       </Screen>
@@ -341,7 +324,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
           <View style={{ gap: t.spacing.md }} testID="checkin-step-week">
             <Text variant="title2">Your week</Text>
             <Card>
-              <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+              <Text variant="eyebrow" color="textSecondary">
                 Weight trend
               </Text>
               {result.trend.length > 0 ? (
@@ -395,7 +378,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
           <View style={{ gap: t.spacing.md }} testID="checkin-step-adjust">
             <Text variant="title2">Next week</Text>
             <Card testID="checkin-kcal">
-              <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+              <Text variant="eyebrow" color="textSecondary">
                 Daily calories
               </Text>
               {kcalKnown ? (
@@ -424,7 +407,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
                 <Dumbbell color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
                 <View style={{ flex: 1 }}>
-                  <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+                  <Text variant="eyebrow" color="textSecondary">
                     Training
                   </Text>
                   <Text variant="headline">{VOLUME_COPY[result.volume].title}</Text>
@@ -438,8 +421,8 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
                 <UtensilsCrossed color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
                 <View style={{ flex: 1 }}>
-                  <Text variant="caption" color="textSecondary">
-                    MENUS
+                  <Text variant="eyebrow" color="textSecondary">
+                    Menus
                   </Text>
                   <Text variant="headline">Fresh menus</Text>
                   <Text variant="callout" color="textSecondary">

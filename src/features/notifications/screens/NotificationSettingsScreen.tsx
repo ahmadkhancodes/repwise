@@ -3,7 +3,6 @@ import {
   Bell,
   BellOff,
   CalendarCheck,
-  ChevronLeft,
   Dumbbell,
   Moon,
   Soup,
@@ -17,7 +16,6 @@ import { View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { usePro } from '@/features/billing/hooks/usePro';
-import { SettingsGroup } from '@/features/settings/components/SettingsGroup';
 import { useProfile } from '@/features/settings/repo';
 import { haptics } from '@/services/haptics';
 import {
@@ -28,10 +26,11 @@ import {
 } from '@/services/notifications';
 import { useTheme } from '@/theme';
 import {
+  BackButton,
   Button,
   Card,
   EmptyState,
-  IconButton,
+  ListGroup,
   ListRow,
   Screen,
   Skeleton,
@@ -78,8 +77,8 @@ function NextUpCard() {
     >
       <Card testID="next-up" accessibilityLabel={`Next up, ${when}: ${next.title}. ${next.body}`}>
         <View style={{ gap: t.spacing.xxs }}>
-          <Text variant="caption" color="textSecondary" tabular>
-            {`NEXT UP · ${when.toUpperCase()}`}
+          <Text variant="eyebrow" color="textSecondary" tabular>
+            {`Next up · ${when}`}
           </Text>
           <Text variant="headline">{next.title}</Text>
           <Text variant="callout" color="textSecondary" numberOfLines={2}>
@@ -117,7 +116,8 @@ export function NotificationSettingsScreen() {
   const time = (hm: string) => displayTime(hm, h12);
   const toggle = (key: keyof NotificationPrefs) => (v: boolean) => setPref(key, v as never);
   const proLock = pro.isPro ? undefined : 'Pro';
-  const openPaywall = () => router.push('/paywall' as Href);
+  const openPaywall = () =>
+    router.push({ pathname: '/paywall', params: { source: 'notifications' } } as Href);
   const editTime = (title: string, value: string, onSave: (hm: string) => void) => () => {
     setSheet({ type: 'time', title, value, onSave });
   };
@@ -196,7 +196,7 @@ export function NotificationSettingsScreen() {
         <NextUpCard />
       )}
 
-      <SettingsGroup title="Every day" footnote="Tap a reminder to change its time.">
+      <ListGroup title="Every day" footnote="Tap a reminder to change its time.">
         <ToggleRow
           icon={Sunrise}
           title="Morning brief"
@@ -258,11 +258,11 @@ export function NotificationSettingsScreen() {
           detailTestID="time-evening"
           testID="toggle-evening"
         />
-      </SettingsGroup>
+      </ListGroup>
 
       {mealsOn ? (
         <Animated.View entering={FadeInDown.duration(t.motion.duration.base)}>
-          <SettingsGroup title="Meal times">
+          <ListGroup title="Meal times">
             {MEAL_SLOTS.map((slot) => (
               <ListRow
                 key={slot}
@@ -272,11 +272,11 @@ export function NotificationSettingsScreen() {
                 testID={`time-${slot}`}
               />
             ))}
-          </SettingsGroup>
+          </ListGroup>
         </Animated.View>
       ) : null}
 
-      <SettingsGroup title="Every week">
+      <ListGroup title="Every week">
         <ToggleRow
           icon={CalendarCheck}
           title="Weekly check-in"
@@ -308,9 +308,9 @@ export function NotificationSettingsScreen() {
             testID="toggle-trial"
           />
         ) : null}
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup title="Quiet hours" footnote="Reminders that fall in quiet hours stay silent.">
+      <ListGroup title="Quiet hours" footnote="Reminders that fall in quiet hours stay silent.">
         <ToggleRow
           icon={Moon}
           title="Quiet hours"
@@ -339,7 +339,7 @@ export function NotificationSettingsScreen() {
             testID="time-quiet-end"
           />
         ) : null}
-      </SettingsGroup>
+      </ListGroup>
 
       <TimeSheet target={sheet} onClose={() => setSheet(null)} twelveHour={h12} />
     </Screen>
@@ -347,5 +347,5 @@ export function NotificationSettingsScreen() {
 }
 
 function Back() {
-  return <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={() => router.back()} />;
+  return <BackButton />;
 }

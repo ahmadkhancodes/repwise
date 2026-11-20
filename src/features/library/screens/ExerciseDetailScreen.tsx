@@ -4,18 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  IconButton,
-  PressableScale,
-  Screen,
-  Skeleton,
-  SkeletonGroup,
-  SkeletonText,
-  Text,
-} from '@/ui';
+import { Badge, Button, EmptyState, IconButton, PressableScale, Screen, SectionHeader, Skeleton, SkeletonGroup, SkeletonText, Text } from '@/ui';
 
 import { AddToWorkoutSheet } from '../components/AddToWorkoutSheet';
 import { MuscleLegend } from '../components/BodyMap';
@@ -37,9 +26,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   const t = useTheme();
   return (
     <View style={{ gap: t.spacing.sm, marginTop: t.spacing.sm }}>
-      <Text variant="title2" accessibilityRole="header">
-        {title}
-      </Text>
+      <SectionHeader title={title} />
       {children}
     </View>
   );

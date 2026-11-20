@@ -1,7 +1,6 @@
 import { router, type Href } from 'expo-router';
 import {
   Bell,
-  ChevronLeft,
   ChevronRight,
   CloudUpload,
   CreditCard,
@@ -28,10 +27,18 @@ import { ToggleRow } from '@/features/notifications/components/ToggleRow';
 import { useAuth } from '@/services/auth';
 import { useShareUsageData } from '@/services/privacy';
 import { useTheme, useThemeStore, type ThemePreference } from '@/theme';
-import { IconButton, ListRow, PressableScale, Screen, Segmented, showToast, Text } from '@/ui';
+import {
+  BackButton,
+  ListGroup,
+  ListRow,
+  PressableScale,
+  Screen,
+  Segmented,
+  showToast,
+  Text,
+} from '@/ui';
 
 import { DeleteDataSheet } from '../components/DeleteDataSheet';
-import { SettingsGroup } from '../components/SettingsGroup';
 import { helpLinks } from '../config';
 import { appVersion, exportAllData } from '../data';
 import { openLink } from '../links';
@@ -104,8 +111,8 @@ function ProfileCard() {
           </Text>
         </View>
         <View style={{ flex: 1, gap: t.spacing.xxs }}>
-          <Text variant="caption" color="onInverse" style={{ opacity: 0.8 }}>
-            PROFILE & PLAN
+          <Text variant="eyebrow" color="onInverse" style={{ opacity: 0.8 }}>
+            Profile & plan
           </Text>
           <Text variant="title2" color="onInverse" numberOfLines={1} testID="profile-goal">
             {s.title}
@@ -161,16 +168,10 @@ export function SettingsScreen() {
   };
 
   return (
-    <Screen
-      title="Settings"
-      testID="screen-settings"
-      headerLeft={
-        <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={() => router.back()} />
-      }
-    >
+    <Screen title="Settings" testID="screen-settings" headerLeft={<BackButton />}>
       <ProfileCard />
 
-      <SettingsGroup title="Preferences" testID="group-preferences">
+      <ListGroup title="Preferences" testID="group-preferences">
         <SegmentRow title="Units">
           <Segmented
             options={UNIT_OPTIONS}
@@ -191,9 +192,9 @@ export function SettingsScreen() {
             testID="theme"
           />
         </SegmentRow>
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup
+      <ListGroup
         title="Workout"
         footnote="The rest-over alert also plays when the phone is locked."
         testID="group-workout"
@@ -220,9 +221,9 @@ export function SettingsScreen() {
           onChange={(v) => setPref('restVibration', v)}
           testID="toggle-rest-vibration"
         />
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup title="Reminders">
+      <ListGroup title="Reminders">
         <ListRow
           icon={Bell}
           title="Notifications"
@@ -230,9 +231,9 @@ export function SettingsScreen() {
           onPress={() => router.push('/settings/notifications')}
           testID="open-notifications"
         />
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup title="Account" testID="group-account">
+      <ListGroup title="Account" testID="group-account">
         <ListRow
           icon={CloudUpload}
           title="Backup & account"
@@ -261,9 +262,9 @@ export function SettingsScreen() {
             testID="restore-purchases"
           />
         ) : null}
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup
+      <ListGroup
         title="Privacy"
         footnote="Anonymous app usage and crash reports help us fix bugs. Never your body stats, meals or photos."
         testID="group-privacy"
@@ -281,9 +282,9 @@ export function SettingsScreen() {
           onPress={() => void openLink(links.privacy)}
           testID="open-privacy"
         />
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup title="Your data" testID="group-data">
+      <ListGroup title="Your data" testID="group-data">
         <ListRow
           icon={Download}
           title={exporting ? 'Preparing export…' : 'Export my data'}
@@ -302,9 +303,9 @@ export function SettingsScreen() {
           onPress={() => setDeleting(true)}
           testID="delete-data"
         />
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup title="Help">
+      <ListGroup title="Help">
         <ListRow
           icon={LifeBuoy}
           title="Help & support"
@@ -326,7 +327,7 @@ export function SettingsScreen() {
             testID="open-dev-ui"
           />
         ) : null}
-      </SettingsGroup>
+      </ListGroup>
 
       <View style={{ alignItems: 'center', gap: t.spacing.xxs, paddingVertical: t.spacing.lg }}>
         <Text variant="callout" color="textSecondary" tabular testID="app-version">

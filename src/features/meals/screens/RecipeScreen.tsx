@@ -6,10 +6,9 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { Badge, BigNumber, Button, Card, EmptyState, Screen, SkeletonGroup, Skeleton, SkeletonText, Stepper, Text } from '@/ui';
+import { BackButton, Badge, BigNumber, Button, Card, EmptyState, Screen, SectionHeader, Skeleton, SkeletonGroup, SkeletonText, Stepper, Text } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
 
-import { BackButton } from '../components/BackButton';
 import { MacroChips } from '../components/MacroChips';
 import { RecipeArt } from '../components/RecipeArt';
 import { allergenLabel } from '../logic/allergens';
@@ -47,7 +46,7 @@ export function RecipeScreen() {
 
   if (!cat) {
     return (
-      <Screen headerLeft={<BackButton />} testID="screen-recipe">
+      <Screen headerLeft={<BackButton fallback="/eat" />} testID="screen-recipe">
         <SkeletonGroup label="Loading recipe" testID="recipe-loading" style={{ gap: t.spacing.md }}>
           <Skeleton height={t.sizes.ringHero} radius={t.radius.card} />
           <SkeletonText variant="title1" lines={2} lastLineWidth="60%" />
@@ -58,7 +57,7 @@ export function RecipeScreen() {
   }
   if (!recipe) {
     return (
-      <Screen title="Recipe" headerLeft={<BackButton />} testID="screen-recipe">
+      <Screen title="Recipe" headerLeft={<BackButton fallback="/eat" />} testID="screen-recipe">
         <EmptyState icon={CircleAlert} title="Recipe not found" body="It may have been removed from the catalogue." testID="recipe-missing" />
       </Screen>
     );
@@ -69,7 +68,7 @@ export function RecipeScreen() {
   return (
     <Screen
       title={recipe.title}
-      headerLeft={<BackButton />}
+      headerLeft={<BackButton fallback="/eat" />}
       testID="screen-recipe"
       footer={
         <Button
@@ -144,9 +143,7 @@ export function RecipeScreen() {
         </View>
       ) : null}
 
-      <Text variant="title2" accessibilityRole="header">
-        Ingredients
-      </Text>
+      <SectionHeader title="Ingredients" />
       <View testID="recipe-ingredients">
         {ingredients.map((ing, i) => (
           <View
@@ -171,9 +168,7 @@ export function RecipeScreen() {
         ))}
       </View>
 
-      <Text variant="title2" accessibilityRole="header">
-        Steps
-      </Text>
+      <SectionHeader title="Steps" />
       {recipe.steps.map((s, i) => (
         <Animated.View key={i} entering={enterAt(i, reduce)} style={{ flexDirection: 'row', gap: t.spacing.sm }}>
           <View

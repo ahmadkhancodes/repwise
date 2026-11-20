@@ -45,10 +45,10 @@ export const MorningBrief = memo(function MorningBrief({
         style={{ backgroundColor: t.colors.inverse, borderRadius: t.radius.card, padding: t.spacing.card }}
       >
         <Text
-          variant="caption"
+          variant="eyebrow"
           color="onInverse"
           testID="today-date"
-          style={{ textTransform: 'uppercase', opacity: 0.72, marginBottom: t.spacing.sm }}
+          style={{ opacity: 0.72, marginBottom: t.spacing.sm }}
         >
           {dateLabel}
         </Text>

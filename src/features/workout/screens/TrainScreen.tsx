@@ -23,10 +23,11 @@ import {
   EmptyState,
   IconButton,
   Screen,
+  SectionHeader,
   Segmented,
+  showToast,
   SkeletonCard,
   SkeletonGroup,
-  showToast,
   Text,
   WeekStrip,
 } from '@/ui';
@@ -348,21 +349,15 @@ export function TrainScreen() {
           </SkeletonGroup>
         ) : (
           <View style={{ gap: t.spacing.md }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'baseline',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Text variant="title2" accessibilityRole="header">
-                This week
-              </Text>
-              <Text variant="callout" color="textSecondary" tabular testID="train-week-count">
-                {counts.total ? `${counts.done} of ${counts.total} done` : ''}
-                {week.data?.blockNo ? ` · Block ${week.data.blockNo}` : ''}
-              </Text>
-            </View>
+            <SectionHeader
+              title="This week"
+              trailing={
+                <Text variant="callout" color="textSecondary" tabular testID="train-week-count">
+                  {counts.total ? `${counts.done} of ${counts.total} done` : ''}
+                  {week.data?.blockNo ? ` · Block ${week.data.blockNo}` : ''}
+                </Text>
+              }
+            />
             <WeekStrip
               days={weekStates(
                 cards.map((c) => c.session),

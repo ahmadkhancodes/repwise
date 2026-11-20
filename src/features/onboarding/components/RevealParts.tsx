@@ -261,8 +261,8 @@ export function WorkoutCard({
   return (
     <Animated.View entering={springIn('workout')}>
       <Card testID="reveal-workout" style={{ gap: t.spacing.sm }}>
-        <Text variant="caption" color="accentText">
-          {rest ? 'TODAY · REST DAY' : 'TODAY'}
+        <Text variant="eyebrow" color="accentText">
+          {rest ? 'Today · Rest day' : 'Today'}
         </Text>
         {rest ? (
           <Text variant="headline">

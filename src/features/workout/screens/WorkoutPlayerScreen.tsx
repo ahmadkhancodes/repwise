@@ -139,8 +139,8 @@ function PlayerFooter({ p }: { p: PlayerController }) {
             paddingHorizontal: t.spacing.xxs,
           }}
         >
-          <Text variant="caption" color="accentText">
-            UP NEXT
+          <Text variant="eyebrow" color="accentText">
+            Up next
           </Text>
           <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>
             {next.item.meta.name}

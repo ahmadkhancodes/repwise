@@ -4,7 +4,7 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { MealRow, type MealRowModel } from '@/features/meals';
 import { useTheme } from '@/theme';
-import { Card, Skeleton, SkeletonGroup, Text } from '@/ui';
+import { Card, SectionHeader, Skeleton, SkeletonGroup, Text } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
 
 import type { MealView } from '../logic/meals';
@@ -95,15 +95,18 @@ export const MealsCard = memo(function MealsCard({
   return (
     <Animated.View entering={enterAt(index, reduceMotion)}>
       <Card testID="today-meals">
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: t.spacing.xs }}>
-          <Text variant="headline" accessibilityRole="header" style={{ flex: 1 }}>
-            Meals
-          </Text>
-          {meals.length > 0 ? (
-            <Text variant="callout" color="textSecondary" tabular testID="meals-count">
-              {eaten} of {meals.length} eaten
-            </Text>
-          ) : null}
+        <View style={{ marginBottom: t.spacing.xs }}>
+          <SectionHeader
+            title="Meals"
+            level="card"
+            trailing={
+              meals.length > 0 ? (
+                <Text variant="callout" color="textSecondary" tabular testID="meals-count">
+                  {eaten} of {meals.length} eaten
+                </Text>
+              ) : null
+            }
+          />
         </View>
         {loading ? (
           <MealsSkeleton rows={Math.max(2, meals.length)} />

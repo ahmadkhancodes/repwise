@@ -1,18 +1,11 @@
 import { router } from 'expo-router';
-import {
-  ChevronLeft,
-  CircleAlert,
-  Dumbbell,
-  History,
-  Lock,
-  UtensilsCrossed,
-} from 'lucide-react-native';
+import { CircleAlert, Dumbbell, History, Lock, UtensilsCrossed } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { SectionList, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePro } from '@/features/billing/hooks/usePro';
-import { Button, EmptyState, IconButton, ListRow, Text } from '@/ui';
+import { BackButton, Button, EmptyState, ListRow, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { RowsSkeleton } from '../components/Skeletons';
@@ -54,12 +47,7 @@ export function HistoryScreen() {
           paddingHorizontal: t.spacing.xs,
         }}
       >
-        <IconButton
-          icon={ChevronLeft}
-          accessibilityLabel="Back"
-          onPress={() => router.back()}
-          testID="back"
-        />
+        <BackButton fallback="/progress" />
       </View>
       <SectionList
         sections={loading || error ? [] : sections}
@@ -139,7 +127,7 @@ export function HistoryScreen() {
               <Button
                 label="See Pro"
                 variant="secondary"
-                onPress={() => router.push('/paywall')}
+                onPress={() => router.push({ pathname: '/paywall', params: { source: 'history' } })}
                 testID="history-pro"
               />
             </View>

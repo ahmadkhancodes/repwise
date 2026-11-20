@@ -40,6 +40,7 @@ export function Text({
           letterSpacing: type.letterSpacing,
         },
         (tabular ?? type.tabular) && { fontVariant: ['tabular-nums'] },
+        type.uppercase && { textTransform: 'uppercase' },
         // Android adds extra top padding to custom fonts; strip it so Inter sits on the baseline.
         Platform.OS === 'android' && { includeFontPadding: false },
         style,
