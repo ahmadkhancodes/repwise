@@ -9,6 +9,7 @@
  * The default surface (restNotifier.ts) schedules the local "Rest over" notification and keeps an
  * ongoing notification on Android.
  */
+import { getAppPrefs } from '@/features/settings/prefs';
 import { haptics } from '@/services/haptics';
 import { kv } from '@/services/storage';
 
@@ -110,7 +111,8 @@ function end(reason: RestEndReason, now: number = Date.now()): void {
   const last = state;
   commit(IDLE);
   // Rest over: the strong triple, once, only when noticed on time (not on a late foreground).
-  if (reason === 'done' && isFreshEnd(last.endsAt, now)) haptics.restEnd();
+  // Settings → "Rest vibration" off: no buzz (N6).
+  if (reason === 'done' && isFreshEnd(last.endsAt, now) && getAppPrefs().restVibration) haptics.restEnd();
   each((s) => s.end(reason, last));
 }
 

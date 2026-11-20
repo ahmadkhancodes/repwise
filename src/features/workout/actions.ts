@@ -9,6 +9,7 @@ import { kv } from '@/services/storage';
 import { showToast } from '@/ui';
 
 import { exerciseMeta } from './exerciseMeta';
+import { holdWorkoutAwake, releaseWorkoutAwake } from './hooks/useWorkoutKeepAwake';
 import { durationBucket } from './logic/duration';
 import type { ItemLike } from './logic/player';
 import { nextAfter } from './logic/player';
@@ -73,6 +74,7 @@ export function startWorkoutAction(
   // part synchronously, so the cardio flag is always right.
   const cat = catalog ?? lazyCatalog();
   const s = startWorkout(sessionId, (id) => exerciseMeta(id, cat).cardio, now);
+  if (s?.status === 'active') holdWorkoutAwake(sessionId);
   if (s && before?.status === 'planned') {
     track('workout_started', {
       source: before.planId ? 'plan' : 'custom',
@@ -113,6 +115,7 @@ export function pauseWorkoutAction(sessionId: string, now: number = Date.now()):
   }
   pauseWorkout(sessionId, now);
   restTimer.pause(now);
+  releaseWorkoutAwake(sessionId); // a paused workout lets the phone sleep
 }
 
 export function resumeWorkoutAction(sessionId: string, now: number = Date.now()): void {
@@ -124,6 +127,7 @@ export function resumeWorkoutAction(sessionId: string, now: number = Date.now())
     // ignore
   }
   restTimer.resume(now);
+  holdWorkoutAwake(sessionId);
 }
 
 /** Who comes next after `setId` (for the rest timer + "Rest over" notification copy). */
@@ -361,6 +365,7 @@ export function finishWorkoutAction(
   if (s.status === 'paused') resumeWorkoutAction(sessionId, now);
   const done = finishWorkout(sessionId, now);
   restTimer.clearFor(sessionId);
+  releaseWorkoutAwake(sessionId);
   haptics.success();
   if (!done) return;
   const map = setsForSession(sessionId);
@@ -395,5 +400,6 @@ export function discardWorkoutAction(
 ): DiscardSnapshot | null {
   flushSetWrites();
   restTimer.clearFor(sessionId);
+  releaseWorkoutAwake(sessionId);
   return discardWorkout(sessionId, now);
 }
