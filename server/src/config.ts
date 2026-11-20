@@ -1,4 +1,5 @@
 import type { Env } from './env';
+import type { Logger } from './lib/log';
 
 export type Plan = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export const PLANS: readonly Plan[] = ['weekly', 'monthly', 'quarterly', 'yearly'];
@@ -17,12 +18,16 @@ export interface ModelPrice {
   input: number;
   output: number;
   cacheRead: number;
+  /** 5-minute cache writes. */
   cacheWrite: number;
+  /** 1-hour cache writes (default 2x input). */
+  cacheWrite1h?: number;
   longThreshold?: number;
   longInput?: number;
   longOutput?: number;
   longCacheRead?: number;
   longCacheWrite?: number;
+  longCacheWrite1h?: number;
 }
 
 export type AiLimits = Record<'free' | 'pro', Record<AiKind, number>>;
@@ -45,6 +50,10 @@ export interface Config {
     limits: AiLimits;
     timeoutMs: number;
     adminToken: string;
+    /** Send the static exercise/recipe catalogue as a cached system block (AI_CATALOGUE, default on). */
+    catalogueContext: boolean;
+    /** TTL of the cached system blocks (AI_CACHE_TTL: '5m' | '1h', default '1h'). */
+    cacheTtl: '5m' | '1h';
   };
   features: Record<string, boolean | string | number>;
   corsOrigins: string[];
@@ -65,7 +74,8 @@ export const DEFAULT_PLANS: PlansConfig = {
 
 /**
  * Anthropic first-party prices (USD / 1M tokens), from the claude-api reference cached 2026-11-03.
- * Cache reads 0.1x input, 5-minute cache writes 1.25x input. Override with AI_PRICES_JSON.
+ * Cache reads 0.1x input (Haiku 5.5; 0.05x on Sonnet/Opus 5.5), 5-minute cache writes 1.25x input,
+ * 1-hour cache writes 2x input. Override with AI_PRICES_JSON.
  */
 export const DEFAULT_PRICES: Record<string, ModelPrice> = {
   'claude-haiku-5-5': {
@@ -73,14 +83,16 @@ export const DEFAULT_PRICES: Record<string, ModelPrice> = {
     output: 0.5,
     cacheRead: 0.01,
     cacheWrite: 0.125,
+    cacheWrite1h: 0.2,
     longThreshold: 100_000,
     longInput: 0.5,
     longOutput: 2.5,
     longCacheRead: 0.05,
     longCacheWrite: 0.625,
+    longCacheWrite1h: 1,
   },
-  'claude-sonnet-5-5': { input: 2, output: 10, cacheRead: 0.1, cacheWrite: 2.5 },
-  'claude-opus-5-5': { input: 4, output: 20, cacheRead: 0.2, cacheWrite: 5 },
+  'claude-sonnet-5-5': { input: 2, output: 10, cacheRead: 0.1, cacheWrite: 2.5, cacheWrite1h: 4 },
+  'claude-opus-5-5': { input: 4, output: 20, cacheRead: 0.2, cacheWrite: 5, cacheWrite1h: 8 },
 };
 
 export const DEFAULT_AI_LIMITS: AiLimits = {
@@ -88,12 +100,13 @@ export const DEFAULT_AI_LIMITS: AiLimits = {
   pro: { plan_week: 6, meals_day: 10, swap: 40 },
 };
 
-function json<T>(raw: string | undefined, fallback: T): T {
+function json<T>(raw: string | undefined, fallback: T, name: string, log?: Logger): T {
   if (!raw) return fallback;
   try {
     return JSON.parse(raw) as T;
   } catch {
-    console.warn('config: ignoring malformed JSON variable');
+    // The variable's name only, never its value.
+    log?.warn('config_malformed_json', { variable: name });
     return fallback;
   }
 }
@@ -110,10 +123,10 @@ function num(raw: string | undefined, fallback: number): number {
   return raw !== undefined && raw !== '' && Number.isFinite(n) ? n : fallback;
 }
 
-export function loadConfig(env: Env): Config {
+export function loadConfig(env: Env, log?: Logger): Config {
   const bundleId = env.APPLE_BUNDLE_ID || 'com.client.repwise';
-  const plansOverride = json<Partial<PlansConfig>>(env.PLANS_JSON, {});
-  const limitsOverride = json<Partial<AiLimits>>(env.AI_LIMITS_JSON, {});
+  const plansOverride = json<Partial<PlansConfig>>(env.PLANS_JSON, {}, 'PLANS_JSON', log);
+  const limitsOverride = json<Partial<AiLimits>>(env.AI_LIMITS_JSON, {}, 'AI_LIMITS_JSON', log);
   return {
     environment: env.ENVIRONMENT || 'production',
     jwt: {
@@ -153,20 +166,22 @@ export function loadConfig(env: Env): Config {
       model: env.AI_MODEL || 'claude-haiku-5-5',
       apiKey: env.ANTHROPIC_API_KEY ?? '',
       monthlyBudgetUsd: num(env.AI_MONTHLY_BUDGET_USD, 50),
-      prices: { ...DEFAULT_PRICES, ...json<Record<string, ModelPrice>>(env.AI_PRICES_JSON, {}) },
+      prices: { ...DEFAULT_PRICES, ...json<Record<string, ModelPrice>>(env.AI_PRICES_JSON, {}, 'AI_PRICES_JSON', log) },
       limits: {
         free: { ...DEFAULT_AI_LIMITS.free, ...(limitsOverride.free ?? {}) },
         pro: { ...DEFAULT_AI_LIMITS.pro, ...(limitsOverride.pro ?? {}) },
       },
-      timeoutMs: num(env.AI_TIMEOUT_MS, 8000),
+      timeoutMs: Math.min(30_000, Math.max(10, num(env.AI_TIMEOUT_MS, 8000))),
       adminToken: env.AI_ADMIN_TOKEN ?? '',
+      catalogueContext: (env.AI_CATALOGUE ?? 'on').toLowerCase() !== 'off',
+      cacheTtl: env.AI_CACHE_TTL === '5m' ? '5m' : '1h',
     },
     features: {
       sync_enabled: true,
       google_login: true,
       apple_login: true,
       email_login: true,
-      ...json<Record<string, boolean | string | number>>(env.FEATURE_FLAGS_JSON, {}),
+      ...json<Record<string, boolean | string | number>>(env.FEATURE_FLAGS_JSON, {}, 'FEATURE_FLAGS_JSON', log),
     },
     corsOrigins: list(env.CORS_ORIGINS),
   };

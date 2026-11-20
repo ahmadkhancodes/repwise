@@ -13,25 +13,42 @@ interface MessagesResponse {
     output_tokens?: number;
     cache_read_input_tokens?: number;
     cache_creation_input_tokens?: number;
+    cache_creation?: { ephemeral_5m_input_tokens?: number; ephemeral_1h_input_tokens?: number };
   };
 }
 
+const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0);
+
+/** Token usage, with cache writes split by TTL when the API reports the split. */
 export function usageOf(u: MessagesResponse['usage']): LlmUsage {
+  const total = n(u?.cache_creation_input_tokens);
+  const h1 = Math.min(total, n(u?.cache_creation?.ephemeral_1h_input_tokens));
   return {
-    inputTokens: u?.input_tokens ?? 0,
-    outputTokens: u?.output_tokens ?? 0,
-    cacheReadTokens: u?.cache_read_input_tokens ?? 0,
-    cacheWriteTokens: u?.cache_creation_input_tokens ?? 0,
+    inputTokens: n(u?.input_tokens),
+    outputTokens: n(u?.output_tokens),
+    cacheReadTokens: n(u?.cache_read_input_tokens),
+    cacheWriteTokens: total - h1,
+    cacheWrite1hTokens: h1,
   };
 }
 
-/** Request body for the Messages API (also used for Batch API requests). */
+/**
+ * Request body for the Messages API (also used for Batch API requests).
+ *
+ * Prefix order is system → messages, so the static parts come first and carry the cache
+ * breakpoints: [instructions] (shared by every route) then [catalogue] (one per catalogue). The
+ * per-request JSON is the user turn after the last breakpoint, so it never invalidates the cache.
+ * Thinking stays at the model default (adaptive) and effort is pinned per deployment: changing
+ * either per request would invalidate the cache.
+ */
 export function messagesBody(model: string, req: Omit<LlmRequest, 'timeoutMs' | 'kind'>) {
+  const cache_control = req.cacheTtl === '1h' ? { type: 'ephemeral', ttl: '1h' } : { type: 'ephemeral' };
+  const system: { type: 'text'; text: string; cache_control: typeof cache_control }[] = [{ type: 'text', text: req.system, cache_control }];
+  if (req.catalogue) system.push({ type: 'text', text: req.catalogue, cache_control });
   return {
     model,
     max_tokens: req.maxTokens,
-    // Static system prompt first, cached; the per-request JSON goes in the user turn after it.
-    system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
+    system,
     messages: [{ role: 'user', content: req.user }],
     output_config: { effort: 'low', format: { type: 'json_schema', schema: req.schema } },
   };

@@ -4,8 +4,10 @@ import type { JsonObject, PlanRequest } from '../ai/planner';
 import { runPlanner, usageReport } from '../ai/service';
 import type { AiKind } from '../config';
 import { safeEqual } from '../lib/crypto';
-import { badRequest, isPlainObject, notFound, readJson, unauthorized } from '../lib/http';
+import { badRequest, clientIp, isPlainObject, notFound, unauthorized } from '../lib/http';
 import { bearer, rateLimit, requireUser } from '../lib/middleware';
+import { parseJson, parseQuery, parseWith } from '../lib/validate';
+import { AiBody, AiParams, UsageQuery } from '../schemas';
 import type { AppEnv } from '../types';
 
 /** Keys that could identify a person are dropped before anything is hashed, cached or prompted. */
@@ -25,18 +27,20 @@ export function scrub(v: unknown, depth = 0): unknown {
 }
 
 async function parseRequest(c: Context<AppEnv>, kind: AiKind): Promise<PlanRequest> {
-  const body = await readJson(c, 32 * 1024);
-  if (!isPlainObject(body.profile)) throw badRequest('profile_required');
-  for (const k of ['history', 'params'] as const) {
-    if (body[k] !== undefined && body[k] !== null && !isPlainObject(body[k])) throw badRequest(`invalid_${k}`);
-  }
-  if (kind === 'swap' && !isPlainObject(body.params)) throw badRequest('params_required');
+  const body = await parseJson(c, AiBody, 32 * 1024);
+  if (kind === 'swap' && !body.params) throw badRequest('params_required');
+  // Known params are type- and range-checked; unknown keys are dropped (never cached or prompted).
+  const params = body.params ? (stripUndefined(parseWith(AiParams, body.params)) as JsonObject) : null;
   return {
     kind,
     profile: scrub(body.profile) as JsonObject,
     history: body.history ? (scrub(body.history) as JsonObject) : null,
-    params: body.params ? (scrub(body.params) as JsonObject) : null,
+    params: params && Object.keys(params).length > 0 ? params : kind === 'swap' ? {} : null,
   };
+}
+
+function stripUndefined(o: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
 }
 
 export const aiRoutes = new Hono<AppEnv>();
@@ -46,10 +50,10 @@ aiRoutes.get('/usage', async (c) => {
   const deps = c.get('deps');
   const admin = deps.config.ai.adminToken;
   if (!admin || admin.length < 16) throw notFound();
+  await rateLimit(c, `ai-usage:ip:${clientIp(c)}`, 10, 60_000); // no brute-forcing the admin token
   const token = bearer(c);
   if (!token || !safeEqual(token, admin)) throw unauthorized();
-  const month = c.req.query('month') ?? monthKey(deps.now());
-  if (!/^\d{4}-\d{2}$/.test(month)) throw badRequest('invalid_month');
+  const month = parseQuery(c, UsageQuery).month ?? monthKey(deps.now());
   return c.json(await usageReport(deps.config, await deps.db(), month));
 });
 
@@ -65,6 +69,6 @@ for (const [path, kind] of ROUTES) {
     await rateLimit(c, `ai:min:${userId}`, 20, 60_000);
     const req = await parseRequest(c, kind);
     const deps = c.get('deps');
-    return c.json(await runPlanner(deps, await deps.db(), userId, req));
+    return c.json(await runPlanner(deps, await deps.db(), userId, req, c.get('log')));
   });
 }

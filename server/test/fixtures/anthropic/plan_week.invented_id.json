@@ -1,0 +1,33 @@
+{
+  "body": {
+    "id": "msg_01GoldenRecording0000000000",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-haiku-5-5",
+    "content": [
+      {
+        "type": "thinking",
+        "thinking": "",
+        "signature": "EqQBCkgIBhABGAIiQGolden"
+      },
+      {
+        "type": "text",
+        "text": "{\"sessions\":[{\"day\":\"2026-11-23\",\"title\":\"Lower body strength\",\"note\":\"Own every rep on the main lift, then keep the accessories smooth.\",\"exercise_ids\":[\"super-mega-squat-9000\",\"seal-row\",\"arnold-press\",\"sliding-floor-pulldown\",\"concentration-curl\",\"bodyweight-triceps-extension\"]},{\"day\":\"2026-11-24\",\"title\":\"Upper body push and pull\",\"note\":\"Own every rep on the main lift, then keep the accessories smooth.\",\"exercise_ids\":[\"barbell-back-squat\",\"conventional-deadlift\",\"barbell-reverse-lunge\",\"seated-leg-curl\",\"wall-sit\",\"seated-dumbbell-calf-raise\"]},{\"day\":\"2026-11-26\",\"title\":\"Legs and glutes, steady\",\"note\":\"Own every rep on the main lift, then keep the accessories smooth.\",\"exercise_ids\":[\"standing-dumbbell-press\",\"neutral-grip-pull-up\",\"barbell-bench-press\",\"tripod-dumbbell-row\",\"diamond-push-up\",\"barbell-curl\"]},{\"day\":\"2026-11-27\",\"title\":\"Upper body, new angles\",\"note\":\"Own every rep on the main lift, then keep the accessories smooth.\",\"exercise_ids\":[\"good-morning\",\"assisted-pistol-squat\",\"split-squat\",\"reverse-nordic\",\"lying-leg-curl\",\"donkey-kick\"]}]}"
+      }
+    ],
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 412,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 7350,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 389,
+      "service_tier": "standard"
+    }
+  }
+}

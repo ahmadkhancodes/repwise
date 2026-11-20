@@ -4,11 +4,12 @@ import type { AiUsageDelta, Db } from '../db/types';
 import { canonicalJson, sha256Hex } from '../lib/crypto';
 import { HttpError } from '../lib/http';
 import type { Deps } from '../types';
-import { costMicros, estimateTokens, monthKey } from './cost';
-import type { JsonValue, PlanRequest, PlannerContext } from './planner';
-import { SYSTEM_PROMPT, userMessage } from './prompts';
+import type { Logger } from '../lib/log';
+import { costMicros, estimateTokens, monthKey, worstCaseMicros } from './cost';
+import type { CatalogueKey, JsonObject, JsonValue, PlanRequest, Planner, PlannerContext } from './planner';
+import { SYSTEM_PROMPT, catalogueBlock, userMessage } from './prompts';
 import { LlmCallError, type LlmResult } from './provider';
-import { MAX_TOKENS, OUTPUT_SCHEMAS, checkOutput } from './schemas';
+import { MAX_TOKENS, checkOutput, outputSchema } from './schemas';
 
 export const CONTRACT_VERSION = 1;
 const DAY = 24 * 3600 * 1000;
@@ -43,6 +44,22 @@ export interface AiResponse {
   fallbackReason?: FallbackReason;
   cached: boolean;
   generatedAt: number;
+}
+
+/** Static per (planner, kind, catalogue): the catalogue block text and the output schema. */
+const statics = new WeakMap<Planner, Map<string, { catalogue: string | undefined; schema: JsonObject }>>();
+
+export function staticParts(planner: Planner, kind: AiKind, key: CatalogueKey | undefined, withCatalogue: boolean) {
+  let m = statics.get(planner);
+  if (!m) statics.set(planner, (m = new Map()));
+  const id = `${kind}:${key ?? '-'}:${withCatalogue ? 1 : 0}`;
+  let hit = m.get(id);
+  if (!hit) {
+    const cat = key && planner.catalogue ? planner.catalogue(key) : null;
+    hit = { catalogue: cat && withCatalogue ? catalogueBlock(key!, cat) : undefined, schema: outputSchema(kind, cat?.ids) };
+    m.set(id, hit);
+  }
+  return hit;
 }
 
 /** 80% of the monthly budget: free users drop to rules-only. 100%: everyone does. */
@@ -92,7 +109,15 @@ export function cacheKeyInput(req: PlanRequest): PlanRequest {
  * allowed by provider, budget and the user's daily limit) picks IDs and writes copy; the output is
  * checked structurally and by the engine's validator; any failure ships the rules-only plan.
  */
-export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRequest): Promise<AiResponse> {
+export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRequest, log: Logger = deps.log): Promise<AiResponse> {
+  const started = Date.now();
+  const res = await runPlannerInner(deps, db, userId, req, log);
+  // One line per AI request: outcome and cost signals only, never user data or prompt content.
+  log.info('ai', { kind: req.kind, source: res.source, fallbackReason: res.fallbackReason ?? null, cached: res.cached, model: res.model ?? null, ms: Date.now() - started });
+  return res;
+}
+
+async function runPlannerInner(deps: Deps, db: Db, userId: string, req: PlanRequest, log: Logger): Promise<AiResponse> {
   const cfg = deps.config;
   const now = deps.now();
   const kind = req.kind;
@@ -117,14 +142,11 @@ export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRe
   const isPro = publicEntitlement(await db.getEntitlement(userId), now).pro;
   const user = userMessage(kind, ctx);
   const maxTokens = MAX_TOKENS[kind];
-  // Worst case for this call: every prompt token billed at the dearer of input / cache-write rates.
-  const promptTokens = estimateTokens(SYSTEM_PROMPT + user);
-  const worstCase = Math.ceil(
-    Math.max(
-      costMicros(price, { inputTokens: promptTokens, outputTokens: maxTokens, cacheReadTokens: 0, cacheWriteTokens: 0 }),
-      costMicros(price, { inputTokens: 0, outputTokens: maxTokens, cacheReadTokens: 0, cacheWriteTokens: promptTokens }),
-    ),
-  );
+  const { catalogue, schema } = staticParts(deps.planner, kind, ctx.catalogue, cfg.ai.catalogueContext);
+  // Worst case for this call: a deliberately high token estimate of everything sent (instructions,
+  // catalogue, request, schema) at the dearest prompt rate, plus the full max_tokens of output.
+  const promptTokens = estimateTokens(SYSTEM_PROMPT + (catalogue ?? '') + user + JSON.stringify(schema));
+  const worstCase = worstCaseMicros(price, promptTokens, maxTokens);
   const month = monthKey(now);
   const budget = cfg.ai.monthlyBudgetUsd * 1e6;
   // Reserve the worst case atomically BEFORE calling: concurrent calls cannot overspend the cap.
@@ -147,9 +169,10 @@ export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRe
 
   let result: LlmResult;
   try {
-    result = await llm.generate({ kind, system: SYSTEM_PROMPT, user, schema: OUTPUT_SCHEMAS[kind], maxTokens, timeoutMs: cfg.ai.timeoutMs });
+    result = await llm.generate({ kind, system: SYSTEM_PROMPT, catalogue, cacheTtl: cfg.ai.cacheTtl, user, schema, maxTokens, timeoutMs: cfg.ai.timeoutMs });
   } catch (e) {
     const reason: FallbackReason = e instanceof LlmCallError && e.reason === 'timeout' ? 'timeout' : 'provider_error';
+    log.warn('ai_call_failed', { kind, reason, statusCode: e instanceof LlmCallError ? (e.status ?? null) : null });
     // A timed-out request may still be billed: keep the worst case so the cap stays hard.
     await settle(reason === 'timeout' ? worstCase : 0, { calls: 1, fallbacks: 1 });
     return rules(reason);
@@ -158,21 +181,37 @@ export async function runPlanner(deps: Deps, db: Db, userId: string, req: PlanRe
   const outcome = await (async (): Promise<{ ok: true; plan: JsonValue } | { ok: false; reason: FallbackReason }> => {
     if (result.error) return { ok: false, reason: result.error === 'no_text' ? 'invalid_json' : result.error };
     const shape = checkOutput(kind, result.output, ctx);
-    if (!shape.ok) return { ok: false, reason: 'invalid_output' };
+    if (!shape.ok) {
+      log.warn('ai_output_rejected', { kind, check: shape.reason });
+      return { ok: false, reason: 'invalid_output' };
+    }
     try {
       const fin = await deps.planner.finalize(req, ctx, shape.value);
+      if (!fin.ok) log.warn('ai_output_rejected', { kind, check: fin.reason, stage: 'engine' });
       return fin.ok ? { ok: true, plan: fin.plan } : { ok: false, reason: 'validator_rejected' };
     } catch {
       return { ok: false, reason: 'validator_rejected' };
     }
   })();
 
-  await settle(costMicros(price, result.usage), {
+  const actual = costMicros(price, result.usage);
+  // Never expected (the estimate is deliberately high); if it happens, the estimate needs raising.
+  if (actual > worstCase) log.error('ai_cost_over_reservation', { kind, actualMicros: Math.round(actual), reservedMicros: worstCase });
+  log.info('ai_usage', {
+    kind,
+    costMicros: Math.round(actual),
+    inputTokens: result.usage.inputTokens,
+    outputTokens: result.usage.outputTokens,
+    cacheReadTokens: result.usage.cacheReadTokens,
+    cacheWriteTokens: result.usage.cacheWriteTokens + (result.usage.cacheWrite1hTokens ?? 0),
+    stopReason: result.stopReason,
+  });
+  await settle(actual, {
     calls: 1,
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     cacheReadTokens: result.usage.cacheReadTokens,
-    cacheWriteTokens: result.usage.cacheWriteTokens,
+    cacheWriteTokens: result.usage.cacheWriteTokens + (result.usage.cacheWrite1hTokens ?? 0),
     fallbacks: outcome.ok ? 0 : 1,
   });
   if (!outcome.ok) return rules(outcome.reason);
