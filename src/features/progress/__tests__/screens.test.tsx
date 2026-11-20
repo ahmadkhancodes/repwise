@@ -466,6 +466,17 @@ describe.each(SCHEMES)('Wrapped (S34) (%s)', (scheme) => {
     expect(screen.getByTestId('wrapped-month')).toHaveTextContent('September 2026');
     expect(screen.getByTestId('wrapped-empty')).toBeTruthy();
   });
+
+  it('free users: months older than last month lock, the same rule as Progress (P2-12)', async () => {
+    useBillingStore.setState({ paymentsEnabled: true });
+    seedTraining();
+    await renderThemed(<WrappedScreen />, scheme);
+    await fireEvent.press(await screen.findByTestId('wrapped-prev'));
+    expect(screen.queryByTestId('wrapped-locked')).toBeNull();
+    await fireEvent.press(screen.getByTestId('wrapped-prev'));
+    expect(screen.getByTestId('wrapped-locked')).toHaveTextContent(/September is in your history/);
+    expect(screen.queryByTestId('wrapped-share')).toBeNull();
+  });
 });
 
 describe.each(SCHEMES)('History (S36) (%s)', (scheme) => {
@@ -476,6 +487,14 @@ describe.each(SCHEMES)('History (S36) (%s)', (scheme) => {
     expect(await screen.findByTestId('history-w-s3')).toHaveTextContent(/Push/);
     expect(screen.getByTestId('history-f-2026-11-18')).toHaveTextContent(/300 kcal/);
     expect(screen.queryByTestId('history-more')).toBeNull();
+    // One row design with Train (N4): rows open the summary / the day's food log.
+    await fireEvent.press(screen.getByTestId('history-w-s3'));
+    expect(mockRouter.push).toHaveBeenCalledWith('/workout/s3/summary');
+    await fireEvent.press(screen.getByTestId('history-f-2026-11-18'));
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: '/meal/day/[date]',
+      params: { date: '2026-11-18' },
+    });
   });
 });
 

@@ -66,7 +66,7 @@ export type HistoryEntry = {
  * Finished workouts, newest first, with duration/volume/sets (Train → History): ONE aggregate
  * query (A2). Mount it only while History is shown.
  */
-export function useHistory(limit = 60, active = true) {
+export function useHistory(limit = 60, active = true, attempt = 0) {
   return useLiveValue<HistoryEntry[]>(
     () =>
       doneSessionSummaries(limit).map((r) => ({
@@ -77,7 +77,8 @@ export function useHistory(limit = 60, active = true) {
         exercises: r.exercises,
       })),
     ['sessions', 'session_exercises', 'sets'],
-    [limit],
+    // `attempt` re-runs the query after "Try again".
+    [limit, attempt],
     { active },
   );
 }

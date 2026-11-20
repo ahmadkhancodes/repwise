@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { usePro } from '@/features/billing/hooks/usePro';
 import { haptics } from '@/services/haptics';
 import {
   BackButton,
@@ -24,7 +25,9 @@ import {
 import { useTheme } from '@/theme';
 
 import type { ViewRef } from '../components/CompareSlider';
+import { LockedMonth } from '../components/LockedMonth';
 import { WrappedSkeleton } from '../components/Skeletons';
+import { isMonthLocked } from '../logic/home';
 import { useNutrition, useToday, useTraining, useUnits } from '../hooks/useProgress';
 import { inMonth, monthName, monthOf, sameMonth, shiftMonth, type MonthKey } from '../logic/dates';
 import { muscleLabel } from '../logic/muscles';
@@ -48,6 +51,7 @@ export function WrappedScreen() {
   const units = useUnits();
   const training = useTraining();
   const nutrition = useNutrition();
+  const { isPro } = usePro();
   const { width: screenW } = useWindowDimensions();
   const [month, setMonth] = useState<MonthKey>(() => monthOf(today));
   const [page, setPage] = useState(0);
@@ -92,6 +96,7 @@ export function WrappedScreen() {
 
   const back = <BackButton fallback="/progress" />;
   const loading = training.loading || nutrition.loading;
+  const locked = isMonthLocked(month, monthOf(today), isPro);
   const empty = !loading && isEmptyWrapped(wrapped);
 
   return (
@@ -100,33 +105,15 @@ export function WrappedScreen() {
       headerLeft={back}
       testID="screen-progress-wrapped"
       footer={
-        !loading && !empty ? (
+        !loading && !empty && !locked ? (
           <Button label="Share this card" icon={Share2} onPress={share} testID="wrapped-share" />
         ) : undefined
       }
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <IconButton
-          icon={ChevronLeft}
-          accessibilityLabel="Previous month"
-          onPress={() => changeMonth(-1)}
-          testID="wrapped-prev"
-        />
-        <Text
-          variant="headline"
-          testID="wrapped-month"
-        >{`${monthName(month.month)} ${month.year}`}</Text>
-        <IconButton
-          icon={ChevronRight}
-          accessibilityLabel="Next month"
-          onPress={() => changeMonth(1)}
-          disabled={isCurrent}
-          color={isCurrent ? 'textTertiary' : 'textPrimary'}
-          testID="wrapped-next"
-        />
-      </View>
       {loading ? (
         <WrappedSkeleton />
+      ) : locked ? (
+        <LockedMonth month={month} testID="wrapped-locked" />
       ) : empty ? (
         <EmptyState
           icon={Gift}
@@ -177,6 +164,37 @@ export function WrappedScreen() {
           </Text>
         </>
       )}
+      {/* Stories pattern (P2-12): month paging sits under the cards, away from Back. */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: t.spacing.sm,
+        }}
+      >
+        <IconButton
+          icon={ChevronLeft}
+          accessibilityLabel="Previous month"
+          onPress={() => changeMonth(-1)}
+          testID="wrapped-prev"
+        />
+        <Text
+          variant="headline"
+          tabular
+          align="center"
+          style={{ minWidth: t.sizes.ring }}
+          testID="wrapped-month"
+        >{`${monthName(month.month)} ${month.year}`}</Text>
+        <IconButton
+          icon={ChevronRight}
+          accessibilityLabel="Next month"
+          onPress={() => changeMonth(1)}
+          disabled={isCurrent}
+          color={isCurrent ? 'textTertiary' : 'textPrimary'}
+          testID="wrapped-next"
+        />
+      </View>
     </Screen>
   );
 }

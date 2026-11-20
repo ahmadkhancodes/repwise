@@ -7,6 +7,7 @@ import { finishedBench, freshDb, plannedSession, TODAY } from '../../../../test/
 import { routinesRepo } from '@/features/library/repo';
 import { resetCatalogForTests } from '@/services/catalog';
 import { setAnalyticsSink } from '@/services/analytics';
+import { useBillingStore } from '@/services/billing';
 import { useToastStore } from '@/ui';
 
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
@@ -16,7 +17,7 @@ import { optimisticSets, resetOptimisticForTests } from '../optimistic';
 import { exercisesForSession, getSession, setsFor, startWorkout } from '../repo';
 import { resetRestTimerForTests, restTimer } from '../restTimerStore';
 import { resetRestNotifierForTests } from '../restNotifier';
-import { weekOf } from '../logic/dates';
+import { localDate, weekOf } from '../logic/dates';
 import { ExerciseScreen } from '../screens/ExerciseScreen';
 import { ExercisePickerScreen } from '../screens/ExercisePickerScreen';
 import { RoutineBuilderScreen } from '../screens/RoutineBuilderScreen';
@@ -169,6 +170,25 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       const pushed = mockRouter.push.mock.calls.at(-1)?.[0] as string;
       expect(pushed).toMatch(/^\/workout\/routine\//);
       expect(routinesRepo.list()).toHaveLength(1);
+    });
+
+    it('history: the shared rows, the same free window as Progress, and a link to all history', async () => {
+      useBillingStore.setState({ paymentsEnabled: true });
+      const recent = finishedBench(localDate(), 80, 8, Date.now() - 3_600_000);
+      finishedBench('2025-01-10', 70, 8, Date.UTC(2025, 0, 10, 9));
+      try {
+        await renderThemed(<TrainScreen />, scheme);
+        await fireEvent.press(screen.getByText('History'));
+        expect(await screen.findByTestId('history-0')).toBeTruthy();
+        expect(screen.queryByTestId('history-1')).toBeNull();
+        expect(screen.getByTestId('history-more')).toHaveTextContent(/1 older workout is kept safe/);
+        await fireEvent.press(screen.getByTestId('history-0'));
+        expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${recent.id}/summary`);
+        await fireEvent.press(screen.getByTestId('train-history-all'));
+        expect(mockRouter.push).toHaveBeenCalledWith('/progress/history');
+      } finally {
+        useBillingStore.setState({ paymentsEnabled: false });
+      }
     });
   });
 

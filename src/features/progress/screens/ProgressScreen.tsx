@@ -1,19 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import {
-  BarChart3,
-  Camera,
-  ChartLine,
-  ChevronRight,
-  CircleAlert,
-  Dumbbell,
-  Flame,
-  Gift,
-  History,
-  Lock,
-  Scale,
-  Trophy,
-} from 'lucide-react-native';
+import { BarChart3, Camera, ChartLine, ChevronRight, CircleAlert, Dumbbell, Flame, Gift, History, Scale, Trophy } from 'lucide-react-native';
 import { useMemo, useState, type ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 
@@ -27,17 +14,10 @@ import { HomeSkeleton } from '../components/Skeletons';
 import { Stat } from '../components/bits';
 import { useNow, useNutrition, useToday, useTraining, useUnits } from '../hooks/useProgress';
 import { weightSeries } from '../logic/body';
-import {
-  inMonth,
-  monthName,
-  monthOf,
-  sameMonth,
-  shiftMonth,
-  shortDate,
-  type MonthKey,
-} from '../logic/dates';
+import { inMonth, monthName, monthOf, sameMonth, shiftMonth, shortDate, type MonthKey } from '../logic/dates';
 import { addDays, type Muscle } from '../logic/engine';
 import { isMonthLocked, recoveryTeaser, wrappedTeaser } from '../logic/home';
+import { LockedMonth } from '../components/LockedMonth';
 import { muscleLabel, rankMuscles, recoveryHeatmap } from '../logic/muscles';
 import { personalRecords, type PersonalRecord } from '../logic/strength';
 import { storyColors } from '../logic/storyColors';
@@ -357,39 +337,6 @@ function StreakCard({
         {`Longest streak ${longest} ${longest === 1 ? 'week' : 'weeks'}`}
       </Text>
     </Card>
-  );
-}
-
-/** Free users see older months as a calm locked state, not a sudden paywall jump. */
-function LockedMonth({ month }: { month: MonthKey }) {
-  const t = useTheme();
-  return (
-    <View
-      testID="progress-month-locked"
-      style={{
-        minHeight: t.sizes.ringHero,
-        borderRadius: t.radius.card,
-        backgroundColor: t.colors.surface,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: t.spacing.xl,
-        gap: t.spacing.sm,
-      }}
-    >
-      <Lock size={t.sizes.icon} color={t.colors.textPrimary} strokeWidth={t.sizes.iconStroke} />
-      <Text variant="headline" align="center">
-        {`${monthName(month.month)} is in your history`}
-      </Text>
-      <Text variant="callout" color="textSecondary" align="center">
-        Free shows this month and last month. Pro keeps every month.
-      </Text>
-      <Button
-        label="See Pro"
-        variant="secondary"
-        onPress={() => router.push({ pathname: '/paywall', params: { source: 'progress' } })}
-        testID="progress-month-unlock"
-      />
-    </View>
   );
 }
 
