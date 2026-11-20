@@ -1,9 +1,17 @@
-import { memo } from 'react';
-import { View } from 'react-native';
+import { memo, type ReactNode } from 'react';
+import { View, type ViewStyle } from 'react-native';
 
 import type { MealStatus } from '@/db/schema';
 import { useTheme } from '@/theme';
-import { Badge, IconButton, PressableScale, SwapIcon, Text, Tick } from '@/ui';
+import {
+  Badge,
+  IconButton,
+  PressableScale,
+  SwapIcon,
+  Text,
+  Tick,
+  type PressableScaleProps,
+} from '@/ui';
 
 import type { RecipeArt as Art } from '../logic/art';
 import { MacroChips } from './MacroChips';
@@ -18,9 +26,10 @@ export type MealRowModel = {
   /** Caption above the dish: "Lunch · 13:00 · 1.5 servings". */
   meta: string;
   kcal: number;
-  protein: number;
-  carbs: number;
-  fat: number;
+  /** Grams; omit all three for a kcal-only row (the plan reveal preview). */
+  protein?: number;
+  carbs?: number;
+  fat?: number;
   /** Recipe art; compact rows (Today) leave it out. */
   art?: Art;
 };
@@ -33,9 +42,14 @@ export type MealRowProps = {
   next?: boolean;
   /** Past days for free users: read-only (no tick, no swap). */
   locked?: boolean;
-  onOpen: (id: string) => void;
-  onToggle: (id: string) => void;
-  onSwap: (id: string) => void;
+  /**
+   * Display only (the plan reveal, UI audit P2-10): the same row a minute before Today shows it,
+   * with nothing to press.
+   */
+  preview?: boolean;
+  onOpen?: (id: string) => void;
+  onToggle?: (id: string) => void;
+  onSwap?: (id: string) => void;
   /** testID prefix: "today-" on Today → today-meal-lunch, today-tick-lunch, today-swap-lunch. */
   idPrefix?: string;
 };
@@ -52,13 +66,15 @@ export const MealRow = memo(function MealRow({
   meal,
   compact = false,
   next = false,
-  locked = false,
+  locked: lockedProp = false,
+  preview = false,
   onOpen,
   onToggle,
   onSwap,
   idPrefix = '',
 }: MealRowProps) {
   const t = useTheme();
+  const locked = lockedProp || preview;
   const eaten = meal.status === 'eaten';
   const skipped = meal.status === 'skipped';
   const done = eaten || skipped;
@@ -83,17 +99,17 @@ export const MealRow = memo(function MealRow({
       {locked ? null : (
         <Tick
           checked={eaten}
-          onChange={() => onToggle(meal.id)}
+          onChange={() => onToggle?.(meal.id)}
           accessibilityLabel={`${meal.title} eaten`}
           accessibilityHint={eaten ? 'Marks it as not eaten' : 'Logs it as eaten'}
           testID={id('tick')}
         />
       )}
-      <PressableScale
+      <Body
+        preview={preview}
         testID={id('meal')}
-        onPress={() => onOpen(meal.id)}
-        onLongPress={locked || done ? undefined : () => onSwap(meal.id)}
-        accessibilityRole="button"
+        onPress={() => onOpen?.(meal.id)}
+        onLongPress={locked || done ? undefined : () => onSwap?.(meal.id)}
         accessibilityLabel={`${meal.meta}: ${meal.title}, ${Math.round(meal.kcal)} calories${state}`}
         accessibilityHint={
           locked || done ? 'Opens the recipe' : 'Opens the recipe. Long-press to swap.'
@@ -135,16 +151,25 @@ export const MealRow = memo(function MealRow({
           </Text>
           {skipped ? (
             <Badge label="Skipped" testID={id('meal-skipped')} />
+          ) : meal.protein !== undefined ? (
+            <MacroChips
+              kcal={meal.kcal}
+              protein={meal.protein}
+              carbs={meal.carbs ?? 0}
+              fat={meal.fat ?? 0}
+            />
           ) : (
-            <MacroChips kcal={meal.kcal} protein={meal.protein} carbs={meal.carbs} fat={meal.fat} />
+            <Text variant="callout" tabular>
+              {Math.round(meal.kcal).toLocaleString('en-US')} kcal
+            </Text>
           )}
         </View>
-      </PressableScale>
+      </Body>
       {locked || done ? null : (
         <IconButton
           icon={SwapIcon}
           accessibilityLabel={`Swap ${meal.title}`}
-          onPress={() => onSwap(meal.id)}
+          onPress={() => onSwap?.(meal.id)}
           color="textSecondary"
           testID={id('swap')}
         />
@@ -152,3 +177,46 @@ export const MealRow = memo(function MealRow({
     </View>
   );
 });
+
+/** The row body: pressable normally, plain accessible text in preview. */
+function Body({
+  preview,
+  onPress,
+  onLongPress,
+  accessibilityLabel,
+  accessibilityHint,
+  testID,
+  style,
+  children,
+}: Omit<PressableScaleProps, 'children'> & {
+  preview: boolean;
+  style: ViewStyle;
+  children: ReactNode;
+}) {
+  if (preview) {
+    return (
+      <View
+        testID={testID}
+        accessible
+        accessibilityRole="text"
+        accessibilityLabel={accessibilityLabel}
+        style={style}
+      >
+        {children}
+      </View>
+    );
+  }
+  return (
+    <PressableScale
+      testID={testID}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      style={style}
+    >
+      {children}
+    </PressableScale>
+  );
+}

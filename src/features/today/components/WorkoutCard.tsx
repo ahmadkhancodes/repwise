@@ -1,5 +1,5 @@
 import { CircleCheck, Clock, Dumbbell, Footprints, Moon, Play } from 'lucide-react-native';
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
@@ -19,11 +19,22 @@ export const WorkoutCard = memo(function WorkoutCard({
   onStart,
   onOpen,
   index = 1,
+  preview = false,
+  detail,
+  testID = 'today-workout',
 }: {
   workout: WorkoutView;
-  onStart: () => void;
-  onOpen: () => void;
+  onStart?: () => void;
+  onOpen?: () => void;
   index?: number;
+  /**
+   * The plan reveal (UI audit P2-10): the SAME card the user meets on Today a minute later,
+   * without the action (nothing to start yet).
+   */
+  preview?: boolean;
+  /** Extra lines under the meta line (the reveal lists the first exercises). */
+  detail?: ReactNode;
+  testID?: string;
 }) {
   const t = useTheme();
   const reduceMotion = useReducedMotion();
@@ -36,45 +47,79 @@ export const WorkoutCard = memo(function WorkoutCard({
     .join(' · ');
   return (
     <Animated.View entering={enterAt(index, reduceMotion)}>
-      <Card testID="today-workout">
+      <Card testID={testID}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
           {workout.done ? (
-            <CircleCheck color={t.colors.accentText} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStrokeBold} />
+            <CircleCheck
+              color={t.colors.accentText}
+              size={t.sizes.iconSmall}
+              strokeWidth={t.sizes.iconStrokeBold}
+            />
           ) : (
-            <Dumbbell color={t.colors.textSecondary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
+            <Dumbbell
+              color={t.colors.textSecondary}
+              size={t.sizes.iconSmall}
+              strokeWidth={t.sizes.iconStroke}
+            />
           )}
           <Text variant="eyebrow" color={workout.done ? 'accentText' : 'textSecondary'}>
             {workout.done ? 'Workout done' : workout.inProgress ? 'In progress' : 'Today’s workout'}
           </Text>
         </View>
-        <Text variant="title2" numberOfLines={2} style={{ marginTop: t.spacing.xxs }} testID="workout-title">
+        <Text
+          variant="title2"
+          numberOfLines={2}
+          style={{ marginTop: t.spacing.xxs }}
+          testID="workout-title"
+        >
           {workout.title}
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xxs, marginTop: t.spacing.xxs }}>
-          <Clock color={t.colors.textSecondary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
-          <Text variant="callout" color="textSecondary" tabular numberOfLines={1} style={{ flex: 1 }} testID="workout-meta">
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: t.spacing.xxs,
+            marginTop: t.spacing.xxs,
+          }}
+        >
+          <Clock
+            color={t.colors.textSecondary}
+            size={t.sizes.iconSmall}
+            strokeWidth={t.sizes.iconStroke}
+          />
+          <Text
+            variant="callout"
+            color="textSecondary"
+            tabular
+            numberOfLines={1}
+            style={{ flex: 1 }}
+            testID="workout-meta"
+          >
             {meta}
           </Text>
         </View>
-        <View style={{ marginTop: t.spacing.md }}>
-          {workout.done ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
-              <Text variant="headline" color="accentText" style={{ flex: 1 }}>
-                Done. Great work.
-              </Text>
-              <Button label="View" variant="tertiary" onPress={onOpen} testID="workout-view" />
-            </View>
-          ) : (
-            <Button
-              label={workout.inProgress ? 'Resume workout' : 'Start workout'}
-              accent
-              icon={Play}
-              onPress={onStart}
-              accessibilityHint={`Opens ${workout.title}`}
-              testID="start-workout"
-            />
-          )}
-        </View>
+        {detail ? <View style={{ marginTop: t.spacing.sm }}>{detail}</View> : null}
+        {preview ? null : (
+          <View style={{ marginTop: t.spacing.md }}>
+            {workout.done ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+                <Text variant="headline" color="accentText" style={{ flex: 1 }}>
+                  Done. Great work.
+                </Text>
+                <Button label="View" variant="tertiary" onPress={onOpen} testID="workout-view" />
+              </View>
+            ) : (
+              <Button
+                label={workout.inProgress ? 'Resume workout' : 'Start workout'}
+                accent
+                icon={Play}
+                onPress={onStart}
+                accessibilityHint={`Opens ${workout.title}`}
+                testID="start-workout"
+              />
+            )}
+          </View>
+        )}
       </Card>
     </Animated.View>
   );
@@ -98,7 +143,11 @@ export function RestDayCard({ index = 4 }: { index?: number }) {
               justifyContent: 'center',
             }}
           >
-            <Moon color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
+            <Moon
+              color={t.colors.textPrimary}
+              size={t.sizes.icon}
+              strokeWidth={t.sizes.iconStroke}
+            />
           </View>
           <View style={{ flex: 1 }}>
             <Text variant="title2">Rest day</Text>
@@ -107,8 +156,19 @@ export function RestDayCard({ index = 4 }: { index?: number }) {
             </Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs, marginTop: t.spacing.md }}>
-          <Footprints color={t.colors.textSecondary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: t.spacing.xs,
+            marginTop: t.spacing.md,
+          }}
+        >
+          <Footprints
+            color={t.colors.textSecondary}
+            size={t.sizes.iconSmall}
+            strokeWidth={t.sizes.iconStroke}
+          />
           <Text variant="callout" color="textSecondary" style={{ flex: 1 }}>
             A walk or some light stretching keeps you moving.
           </Text>

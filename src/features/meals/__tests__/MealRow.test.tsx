@@ -20,7 +20,10 @@ const base: MealRowModel = {
 
 function setup(meal: Partial<MealRowModel> = {}, props: Record<string, unknown> = {}) {
   const h = { onOpen: jest.fn(), onToggle: jest.fn(), onSwap: jest.fn() };
-  return { h, render: () => renderThemed(<MealRow meal={{ ...base, ...meal }} {...h} {...props} />, scheme) };
+  return {
+    h,
+    render: () => renderThemed(<MealRow meal={{ ...base, ...meal }} {...h} {...props} />, scheme),
+  };
 }
 let scheme: (typeof SCHEMES)[number] = 'light';
 
@@ -75,5 +78,17 @@ describe.each(SCHEMES)(`MealRow (%s, ${Platform.OS})`, (s) => {
     expect(screen.queryByTestId('swap-lunch')).toBeNull();
     await fireEvent.press(screen.getByTestId('meal-lunch'));
     expect(h.onOpen).toHaveBeenCalled();
+  });
+
+  it('preview (plan reveal): same row, nothing to press, kcal-only without macros', async () => {
+    const { render } = setup(
+      { protein: undefined, carbs: undefined, fat: undefined },
+      { preview: true, idPrefix: 'reveal-' },
+    );
+    await render();
+    expect(screen.queryByTestId('reveal-tick-lunch')).toBeNull();
+    expect(screen.queryByTestId('reveal-swap-lunch')).toBeNull();
+    expect(screen.getByTestId('reveal-meal-lunch').props.accessibilityRole).toBe('text');
+    expect(screen.getByText('644 kcal')).toBeTruthy();
   });
 });

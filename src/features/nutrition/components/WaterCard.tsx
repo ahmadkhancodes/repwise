@@ -1,49 +1,12 @@
 import { GlassWater, Plus } from 'lucide-react-native';
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import { View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
 import { PressableScale, Text } from '@/ui';
 
+import { Glass } from './Glass';
 import { GLASS_ML, formatWater, waterGlasses } from '../logic/water';
-
-/** One glass dot: an outlined ring that fills with the accent (progress colour) on the spring. */
-function Glass({ filled, index }: { filled: boolean; index: number }) {
-  const t = useTheme();
-  const reduceMotion = useReducedMotion();
-  const fill = useSharedValue(filled ? 1 : 0);
-  useEffect(() => {
-    const v = filled ? 1 : 0;
-    fill.set(reduceMotion ? v : withSpring(v, t.motion.spring));
-  }, [filled, fill, reduceMotion, t.motion.spring]);
-  const style = useAnimatedStyle(() => ({ transform: [{ scale: fill.value }], opacity: fill.value }));
-  const size = t.spacing.lg;
-  return (
-    <View
-      testID={`glass-${index}`}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: t.radius.pill,
-        borderWidth: t.sizes.borderThick,
-        borderColor: filled ? t.colors.accent : t.colors.borderStrong,
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-      }}
-    >
-      <Animated.View
-        style={[{ width: size, height: size, borderRadius: t.radius.pill, backgroundColor: t.colors.accent }, style]}
-      />
-    </View>
-  );
-}
 
 /**
  * Water, the same everywhere (Today and Eat): one GlassWater icon, accent progress dots, and a
@@ -132,7 +95,7 @@ export const WaterCard = memo(function WaterCard({
         style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs, marginTop: t.spacing.md }}
       >
         {Array.from({ length: g.goal }, (_, i) => (
-          <Glass key={i} index={i} filled={i < g.filled} />
+          <Glass key={i} index={i} full={i < g.filled} />
         ))}
       </View>
     </View>
