@@ -10,7 +10,7 @@ export const VIEW_W = 100;
 export const VIEW_H = 212;
 
 export type BodyView = 'front' | 'back';
-type Pt = readonly [number, number];
+export type Pt = readonly [number, number];
 
 const r1 = (n: number) => Math.round(n * 100) / 100;
 
@@ -40,8 +40,13 @@ export function mirror(points: readonly Pt[]): Pt[] {
   return points.map(([x, y]) => [VIEW_W - x, y] as const);
 }
 
+/** A muscle region: its SVG path (drawn) and the polygon it was built from (hit-testing, framing). */
+export type RegionShape = { d: string; points: readonly Pt[] };
+const shape = (points: readonly Pt[]): RegionShape => ({ d: blob(points), points });
+
 /** Left-side shape and its mirror. */
-const pair = (points: readonly Pt[]): string[] => [blob(points), blob(mirror(points))];
+const pair = (points: readonly Pt[]): RegionShape[] => [shape(points), shape(mirror(points))];
+const pairD = (points: readonly Pt[]): string[] => pair(points).map((r) => r.d);
 
 // ---------------------------------------------------------------------------
 // Silhouette (same outline for front and back)
@@ -100,12 +105,12 @@ export const BODY_OUTLINE: string[] = [
     [32, 62],
     [26, 40],
   ]),
-  ...pair(UPPER_ARM),
-  ...pair(FOREARM),
+  ...pairD(UPPER_ARM),
+  ...pairD(FOREARM),
   ellipse(13, 112, 4, 6),
   ellipse(87, 112, 4, 6),
-  ...pair(THIGH),
-  ...pair(SHIN),
+  ...pairD(THIGH),
+  ...pairD(SHIN),
   ellipse(40, 204, 6, 3.5),
   ellipse(60, 204, 6, 3.5),
 ];
@@ -128,7 +133,7 @@ const FOREARM_MUSCLE: Pt[] = [
   [14, 90],
 ];
 
-export const MUSCLE_REGIONS: Record<BodyView, Partial<Record<Muscle, string[]>>> = {
+export const MUSCLE_SHAPES: Record<BodyView, Partial<Record<Muscle, RegionShape[]>>> = {
   front: {
     traps: pair([
       [43, 27],
@@ -161,7 +166,7 @@ export const MUSCLE_REGIONS: Record<BodyView, Partial<Record<Muscle, string[]>>>
     ]),
     forearms: pair(FOREARM_MUSCLE),
     abs: [
-      blob([
+      shape([
         [44, 55],
         [56, 55],
         [57, 79],
@@ -212,7 +217,7 @@ export const MUSCLE_REGIONS: Record<BodyView, Partial<Record<Muscle, string[]>>>
   },
   back: {
     traps: [
-      blob([
+      shape([
         [44, 25],
         [56, 25],
         [65, 32],
@@ -245,7 +250,7 @@ export const MUSCLE_REGIONS: Record<BodyView, Partial<Record<Muscle, string[]>>>
       [31, 60],
     ]),
     lower_back: [
-      blob([
+      shape([
         [43, 70],
         [57, 70],
         [58, 86],
@@ -313,5 +318,83 @@ export function muscleRole(
 
 /** Which views have something highlighted (so a back-only exercise still reads at a glance). */
 export function viewsWith(muscles: readonly Muscle[]): BodyView[] {
-  return (['front', 'back'] as const).filter((v) => muscles.some((m) => MUSCLE_REGIONS[v][m]));
+  return (['front', 'back'] as const).filter((v) => muscles.some((m) => MUSCLE_SHAPES[v][m]));
 }
+
+/** Muscles drawn in a view (each once, in drawing order). */
+export function viewMuscles(view: BodyView): Muscle[] {
+  return Object.keys(MUSCLE_SHAPES[view]) as Muscle[];
+}
+
+/**
+ * The side that shows the exercise best: the side with more main muscles; on a tie, the side of
+ * the FIRST main muscle (content lists them by importance, so a squat opens on its quads); then
+ * secondary muscles; then the front (the side people recognise first).
+ */
+export function bestView(primary: readonly Muscle[], secondary: readonly Muscle[] = []): BodyView {
+  const count = (list: readonly Muscle[], v: BodyView) =>
+    list.filter((m) => MUSCLE_SHAPES[v][m]).length;
+  const p = count(primary, 'back') - count(primary, 'front');
+  if (p !== 0) return p > 0 ? 'back' : 'front';
+  const lead = primary.find((m) => !MUSCLE_SHAPES.front[m] !== !MUSCLE_SHAPES.back[m]);
+  if (lead) return MUSCLE_SHAPES.back[lead] ? 'back' : 'front';
+  return count(secondary, 'back') > count(secondary, 'front') ? 'back' : 'front';
+}
+
+/** Ray-casting point-in-polygon. */
+export function pointInPolygon(x: number, y: number, pts: readonly Pt[]): boolean {
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i]!;
+    const [xj, yj] = pts[j]!;
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** Muscle under a point (view units, 0..VIEW_W × 0..VIEW_H), or null. Later shapes win. */
+export function hitTest(view: BodyView, x: number, y: number): Muscle | null {
+  const entries = Object.entries(MUSCLE_SHAPES[view]) as [Muscle, RegionShape[]][];
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const [m, shapes] = entries[i]!;
+    if (shapes.some((s) => pointInPolygon(x, y, s.points))) return m;
+  }
+  return null;
+}
+
+export type Box = { x: number; y: number; w: number; h: number };
+
+/**
+ * A square crop (view units) centred on `muscles` in `view`, used by the list thumbnail so a
+ * 56 dp tile zooms onto what the exercise works instead of a tiny whole figure. Never smaller
+ * than `minSize` (keeps context), never outside the figure. No muscles → the torso.
+ */
+export function focusBox(view: BodyView, muscles: readonly Muscle[], minSize = 64): Box {
+  const pts = muscles.flatMap((m) => (MUSCLE_SHAPES[view][m] ?? []).flatMap((s) => s.points));
+  let cx = VIEW_W / 2;
+  let cy = 60;
+  let size = minSize;
+  if (pts.length) {
+    const xs = pts.map((p) => p[0]);
+    const ys = pts.map((p) => p[1]);
+    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    cx = (x0 + x1) / 2;
+    cy = (y0 + y1) / 2;
+    size = Math.max(minSize, (x1 - x0) * 1.2, (y1 - y0) * 1.2);
+  }
+  size = Math.min(size, VIEW_H);
+  const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+  const x = clamp(cx - size / 2, Math.min(0, VIEW_W - size), Math.max(0, VIEW_W - size));
+  const y = clamp(cy - size / 2, 0, VIEW_H - size);
+  return { x: r1(x), y: r1(y), w: r1(size), h: r1(size) };
+}
+
+/** Drawn paths per view (derived from MUSCLE_SHAPES; kept for callers that only draw). */
+export const MUSCLE_REGIONS: Record<BodyView, Partial<Record<Muscle, string[]>>> = {
+  front: Object.fromEntries(
+    Object.entries(MUSCLE_SHAPES.front).map(([m, s]) => [m, s.map((x) => x.d)]),
+  ),
+  back: Object.fromEntries(
+    Object.entries(MUSCLE_SHAPES.back).map(([m, s]) => [m, s.map((x) => x.d)]),
+  ),
+};

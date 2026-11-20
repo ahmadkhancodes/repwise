@@ -85,21 +85,50 @@ describe('LibraryScreen', () => {
 
   it('applies filters from the sheet and removes them from the chip row', async () => {
     await renderThemed(<LibraryScreen />);
-    await fireEvent.press(screen.getByTestId('library-filters'));
+    await fireEvent.press(screen.getByTestId('library-search-filters'));
     await fireEvent.press(screen.getByTestId('filter-muscle-chest'));
     await fireEvent.press(screen.getByTestId('filter-equipment-dumbbell'));
     const apply = screen.getByTestId('filter-apply');
     expect(screen.getByText(/^Show \d+ exercises?$/)).toBeTruthy();
     await fireEvent.press(apply);
     expect(screen.getByRole('button', { name: 'Filters, 2 on' })).toBeTruthy();
-    expect(screen.getByTestId('active-filter-m:chest')).toBeTruthy();
+    expect(screen.getByTestId('muscle-chip-chest')).toBeChecked();
+    expect(screen.getByTestId('active-filter-e:dumbbell')).toBeTruthy();
     const count = screen.getByTestId('library-count').props.children as number;
     expect(count).toBeGreaterThan(0);
     expect(count).toBeLessThan(total());
-    await fireEvent.press(screen.getByTestId('active-filter-m:chest'));
+    await fireEvent.press(screen.getByTestId('muscle-chip-chest'));
     await fireEvent.press(screen.getByTestId('active-filter-e:dumbbell'));
-    expect(screen.queryByTestId('active-filters')).toBeNull();
+    expect(screen.queryByTestId('active-filter-e:dumbbell')).toBeNull();
+    expect(screen.getByTestId('muscle-chip-chest')).not.toBeChecked();
     expect(screen.getByText('All exercises')).toBeTruthy();
+  });
+
+  it('muscle chips filter in one tap', async () => {
+    await renderThemed(<LibraryScreen />);
+    await fireEvent.press(screen.getByTestId('muscle-chip-back'));
+    expect(screen.getByText('Results')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Filters, 1 on' })).toBeTruthy();
+    const count = screen.getByTestId('library-count').props.children as number;
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThan(total());
+    await fireEvent.press(screen.getByTestId('muscle-chip-back'));
+    expect(screen.getByText('All exercises')).toBeTruthy();
+  });
+
+  it('shows row-shaped skeletons while the catalogue loads', async () => {
+    const { LibrarySkeleton } = jest.requireActual('../screens/LibraryScreen');
+    await renderThemed(<LibrarySkeleton testID="sk" rows={3} />);
+    expect(screen.getByLabelText('Loading exercises')).toBeTruthy();
+  });
+
+  it('clears the search text from the clear button', async () => {
+    await renderThemed(<LibraryScreen />);
+    await fireEvent.changeText(screen.getByTestId('library-search'), 'qqqzzz');
+    expect(await screen.findByTestId('library-empty')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('library-search-clear'));
+    expect(await screen.findByText('All exercises')).toBeTruthy();
+    expect(screen.getByTestId('library-search').props.value).toBe('');
   });
 
   it('favourites appear on their own shelf', async () => {

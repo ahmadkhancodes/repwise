@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
@@ -143,20 +144,34 @@ describe.each(SCHEMES)('Progress home (%s)', (scheme) => {
     expect(screen.getByLabelText('9, workout done')).toBeTruthy();
     expect(screen.getByTestId('pr-0')).toHaveTextContent(/Bench Press/);
     expect(screen.getByTestId('nav-body')).toHaveTextContent(/80\.1 kg/);
+    expect(screen.getByTestId('nav-heatmap')).toHaveTextContent(/Recovery(All fresh|\d+ muscles? worked)/);
+    expect(screen.getByTestId('nav-wrapped')).toHaveTextContent(/November Wrapped/);
+    expect(screen.getByTestId('nav-photos')).toHaveTextContent(/Progress photos/);
     await fireEvent.press(screen.getByTestId('nav-heatmap'));
     expect(mockRouter.push).toHaveBeenCalledWith('/progress/heatmap');
+    await fireEvent.press(screen.getByTestId('nav-wrapped'));
+    expect(mockRouter.push).toHaveBeenCalledWith('/progress/wrapped');
+    await fireEvent.press(screen.getByTestId('pr-0'));
+    expect(mockRouter.push).toHaveBeenCalledWith(expect.stringMatching(/^\/progress\/exercise\//));
   });
 });
 
 describe('Progress home gating', () => {
-  it('free users can look back one month; older months open the paywall', async () => {
+  it('free users can look back one month; older months show a locked state', async () => {
     useBillingStore.setState({ paymentsEnabled: true });
     await renderThemed(<ProgressScreen />);
     await screen.findByTestId('progress-empty');
     await fireEvent.press(screen.getByTestId('progress-calendar-prev'));
     expect(screen.getByText('October 2026')).toBeTruthy();
+    expect(screen.queryByTestId('progress-month-locked')).toBeNull();
     await fireEvent.press(screen.getByTestId('progress-calendar-prev'));
+    expect(screen.getByText('September 2026')).toBeTruthy();
+    expect(screen.getByTestId('progress-month-locked')).toBeTruthy();
+    expect(mockRouter.push).not.toHaveBeenCalledWith('/paywall');
+    await fireEvent.press(screen.getByTestId('progress-month-unlock'));
     expect(mockRouter.push).toHaveBeenCalledWith('/paywall');
+    await fireEvent.press(screen.getByTestId('progress-calendar-next'));
+    expect(screen.queryByTestId('progress-month-locked')).toBeNull();
   });
 });
 
@@ -303,11 +318,12 @@ describe.each(SCHEMES)('Heatmap (S32) (%s)', (scheme) => {
     await fireEvent.press(screen.getByTestId('muscle-chest'));
     expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Chest/);
     expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/2 hard sets in 7 days/);
-    // Tap on the figure: left pec in viewBox (85, 90) at scale 360/400.
+    // Tap on the figure: left quad in view units (40, 120) at the default 356 / 212 scale.
+    const k = 356 / 212;
     await fireEvent(screen.getByTestId('body-map'), 'responderRelease', {
-      nativeEvent: { locationX: 85 * 0.9, locationY: 90 * 0.9 },
+      nativeEvent: { locationX: 40 * k, locationY: 120 * k },
     });
-    expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Chest/);
+    expect(screen.getByTestId('heatmap-focus')).toHaveTextContent(/Quads/);
   });
 
   it('switches to the back view when a back muscle is picked', async () => {
@@ -430,6 +446,14 @@ describe.each(SCHEMES)('Wrapped (S34) (%s)', (scheme) => {
     expect(screen.getByTestId('wrapped-card-prs')).toHaveTextContent(/2 PRs/);
     expect(screen.getByTestId('wrapped-card-muscle')).toHaveTextContent(/Chest/);
     expect(screen.getByTestId('wrapped-next')).toBeDisabled();
+    // Colourful story: cards rotate backgrounds instead of one inverse slab.
+    const bg = (k: string) =>
+      StyleSheet.flatten(screen.getByTestId(`wrapped-card-${k}`).props.style).backgroundColor;
+    expect(new Set(['intro', 'workouts', 'volume', 'prs'].map(bg)).size).toBe(4);
+    expect(screen.getByTestId('wrapped-progress')).toBeTruthy();
+    expect(
+      screen.getByTestId('wrapped-brand-intro', { includeHiddenElements: true }),
+    ).toHaveTextContent('Repwise');
     await fireEvent.press(screen.getByTestId('wrapped-share'));
     await waitFor(() => expect(sharing.shareAsync).toHaveBeenCalled());
   });

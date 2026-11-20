@@ -15,7 +15,7 @@ import { usePro } from '@/features/billing/hooks/usePro';
 import { Button, EmptyState, IconButton, ListRow, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
-import { ProgressSkeleton } from '../components/Skeleton';
+import { RowsSkeleton } from '../components/Skeletons';
 import { useNutrition, useToday, useTraining, useUnits } from '../hooks/useProgress';
 import { addDays } from '../logic/engine';
 import { dayLabel } from '../logic/dates';
@@ -75,7 +75,7 @@ export function HistoryScreen() {
             <Text variant="title1" accessibilityRole="header">
               History
             </Text>
-            {loading ? <ProgressSkeleton /> : null}
+            {loading ? <RowsSkeleton /> : null}
             {error ? (
               <EmptyState
                 icon={CircleAlert}

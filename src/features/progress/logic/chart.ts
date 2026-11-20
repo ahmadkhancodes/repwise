@@ -159,3 +159,22 @@ export function tickLabel(v: number): string {
   if (Math.abs(v) >= 1000) return `${Math.round(v / 100) / 10}k`;
   return String(Math.round(v * 10) / 10);
 }
+
+/** x of each index across series (the first series long enough wins), precomputed once per layout. */
+export function seriesXs(series: readonly (readonly Pt[])[], count: number): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < count; i++) out.push(series.find((s) => s.length > i)?.[i]?.x ?? 0);
+  return out;
+}
+
+/** Index whose x is nearest to `x` (scrub), or null for no points. Ties go to the left. */
+export function nearestIndex(xs: readonly number[], x: number): number | null {
+  if (xs.length === 0 || !Number.isFinite(x)) return null;
+  let best = 0;
+  let bestD = Infinity;
+  for (let i = 0; i < xs.length; i++) {
+    const d = Math.abs(xs[i]! - x);
+    if (d < bestD) [best, bestD] = [i, d];
+  }
+  return best;
+}

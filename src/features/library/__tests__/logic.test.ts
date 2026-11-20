@@ -42,7 +42,12 @@ import {
   searchLibrary,
   type CustomExerciseRow,
 } from '../logic/libraryItem';
-import { crossfadeOpacity, exerciseMediaUrls, isExerciseMediaLive, isSafePublicId } from '../logic/media';
+import {
+  crossfadeOpacity,
+  exerciseMediaUrls,
+  isExerciseMediaLive,
+  isSafePublicId,
+} from '../logic/media';
 import { mergeRecent, pushViewed, VIEWED_CAP } from '../logic/recent';
 import {
   computeRecords,

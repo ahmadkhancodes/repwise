@@ -18,8 +18,16 @@ tags:
 - assertVisible:
     id: screen-exercise
 - assertVisible: Barbell back squat
+# Muscle-map hero (no media in v1): spoken label starts with the name, then the side.
 - assertVisible:
-    text: Muscles worked.*
+    id: exercise-media
+- assertVisible:
+    text: Barbell back squat\. Front view\..*
+- tapOn:
+    id: exercise-media-flip
+- assertVisible:
+    text: Barbell back squat\. Back view\..*
+- assertVisible: Muscles
 - scrollUntilVisible:
     element: How to do it
     direction: DOWN

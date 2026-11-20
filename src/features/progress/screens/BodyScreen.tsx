@@ -19,7 +19,7 @@ import {
 import { useTheme } from '@/theme';
 
 import { LineChart } from '../components/LineChart';
-import { ProgressSkeleton } from '../components/Skeleton';
+import { ChartSkeleton } from '../components/Skeletons';
 import { RangePicker, SectionTitle, Stagger } from '../components/bits';
 import { useToday, useUnits } from '../hooks/useProgress';
 import { FREE_RANGE, measurementSeries, weightSeries, type Range } from '../logic/body';
@@ -110,7 +110,7 @@ export function BodyScreen() {
         onChange={setTab}
       />
       {body.loading ? (
-        <ProgressSkeleton />
+        <ChartSkeleton />
       ) : body.error ? (
         <EmptyState
           icon={CircleAlert}
@@ -221,7 +221,7 @@ export function BodyScreen() {
                   ) : null}
                   {m.points.length > 1 ? (
                     <LineChart
-                      height={96}
+                      height={t.sizes.touch * 2}
                       testID={`measure-chart-${m.key}`}
                       labels={m.points.map((p) => shortDate(p.date))}
                       format={(v) => `${v} ${unit}`}
@@ -231,7 +231,7 @@ export function BodyScreen() {
                           label: m.label,
                           values: m.points.map((p) => p.value),
                           color: 'textPrimary',
-                          strokeWidth: 2,
+                          strokeWidth: t.sizes.borderThick,
                         },
                       ]}
                     />

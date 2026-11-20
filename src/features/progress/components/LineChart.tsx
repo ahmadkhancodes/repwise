@@ -7,17 +7,24 @@ import {
   Path,
   Skia,
   vec,
+  type SkPath,
 } from '@shopify/react-native-skia';
-import { useCallback, useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { View } from 'react-native';
-import { Easing, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  Easing,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 
 import { Text } from '@/ui';
 import { useTheme, type ColorToken } from '@/theme';
 
-import { areaPath, layoutLines, linePath } from '../logic/chart';
+import { areaPath, layoutLines, linePath, seriesXs, type Pt } from '../logic/chart';
 
-import { CHART_PAD, XLabels, YTicks, useScrub, useWidth } from './chartParts';
+import { CHART_PAD, XLabels, YTicks, useChartSizes, useScrub, useWidth } from './chartParts';
 
 export type LineSeries = {
   values: number[];
@@ -43,19 +50,95 @@ export type LineChartProps = {
 
 const svg = (d: string) => Skia.Path.MakeFromSVGString(d) ?? Skia.Path.Make();
 
+type Drawn = {
+  label: string;
+  color: string;
+  dotsOnly: boolean;
+  stroke: number;
+  pts: Pt[];
+  line: SkPath | null;
+  area: SkPath | null;
+};
+
+/**
+ * The static plot (grid + series). Memoised on its data and size: scrubbing re-renders only the
+ * cursor, never re-parses paths, so the canvas stays still between draw-in and the next data.
+ */
+const LinePlot = memo(function LinePlot({
+  drawn,
+  ticksY,
+  width,
+  progress,
+}: {
+  drawn: Drawn[];
+  ticksY: { value: number; y: number }[];
+  width: number;
+  progress: SharedValue<number>;
+}) {
+  const t = useTheme();
+  const c = useChartSizes();
+  return (
+    <Group>
+      {ticksY.map((tick) => (
+        <Line
+          key={tick.value}
+          p1={vec(0, tick.y)}
+          p2={vec(width - CHART_PAD.padRight + t.spacing.xxs, tick.y)}
+          color={t.colors.border}
+          strokeWidth={t.sizes.hairline}
+        >
+          <DashPathEffect intervals={c.dash} />
+        </Line>
+      ))}
+      {drawn.map((s) => {
+        if (s.dotsOnly) {
+          return (
+            <Group key={s.label} opacity={progress}>
+              {s.pts.map((p, i) => (
+                <Circle key={i} cx={p.x} cy={p.y} r={c.dot} color={s.color} />
+              ))}
+            </Group>
+          );
+        }
+        const last = s.pts[s.pts.length - 1];
+        return (
+          <Group key={s.label}>
+            {s.area ? <Path path={s.area} color={s.color} opacity={0.1} /> : null}
+            {s.line ? (
+              <Path
+                path={s.line}
+                color={s.color}
+                style="stroke"
+                strokeWidth={s.stroke}
+                strokeCap="round"
+                strokeJoin="round"
+                end={progress}
+              />
+            ) : null}
+            {last ? <Circle cx={last.x} cy={last.y} r={c.endDot} color={s.color} /> : null}
+          </Group>
+        );
+      })}
+    </Group>
+  );
+});
+
 /** Skia line chart: grid, one or more series drawn in with a calm ease, touch-to-scrub. */
 export function LineChart({
   series,
   labels,
-  height = 200,
+  height: heightProp,
   format,
   accessibilityLabel,
   testID,
 }: LineChartProps) {
   const t = useTheme();
+  const c = useChartSizes();
+  const height = heightProp ?? c.lineHeight;
   const reduceMotion = useReducedMotion();
   const [width, onLayout] = useWidth();
   const frame = useMemo(() => ({ width, height, ...CHART_PAD }), [width, height]);
+  const dataKey = series.map((s) => `${s.label}:${s.values.join(',')}`).join('|');
   const layout = useMemo(
     () =>
       layoutLines(
@@ -63,17 +146,37 @@ export function LineChart({
         frame,
         4,
       ),
-    [series, frame],
+    // dataKey stands in for `series` (callers rebuild the array every render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataKey, frame],
   );
   const n = Math.max(0, ...series.map((s) => s.values.length));
-  const xs = useCallback(
-    (i: number) => layout.series.find((s) => s.length > i)?.[i]?.x ?? 0,
-    [layout],
+  const xs = useMemo(() => seriesXs(layout.series, n), [layout, n]);
+  const { index: sel, responder } = useScrub(xs);
+  const baseY = height - CHART_PAD.padBottom;
+
+  const colorKey = series
+    .map((s) => `${s.color}${s.dotsOnly ? 'd' : ''}${s.area ? 'a' : ''}`)
+    .join();
+  const drawn = useMemo<Drawn[]>(
+    () =>
+      series.map((s, si) => {
+        const pts = layout.series[si] ?? [];
+        return {
+          label: s.label,
+          color: t.colors[s.color],
+          dotsOnly: Boolean(s.dotsOnly),
+          stroke: s.strokeWidth ?? c.stroke,
+          pts,
+          line: !s.dotsOnly && pts.length > 1 ? svg(linePath(pts)) : null,
+          area: !s.dotsOnly && s.area && pts.length > 1 ? svg(areaPath(pts, baseY)) : null,
+        };
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [layout, colorKey, t.colors, c.stroke, baseY],
   );
-  const { index, responder } = useScrub(n, xs);
 
   const progress = useSharedValue(reduceMotion ? 1 : 0);
-  const dataKey = series.map((s) => s.values.join(',')).join('|');
   useEffect(() => {
     if (reduceMotion) {
       progress.set(1);
@@ -84,9 +187,6 @@ export function LineChart({
       withTiming(1, { duration: t.motion.duration.slow * 3, easing: Easing.out(Easing.cubic) }),
     );
   }, [dataKey, reduceMotion, progress, t.motion.duration.slow]);
-
-  const baseY = height - CHART_PAD.padBottom;
-  const sel = index != null ? index : null;
 
   return (
     <View
@@ -103,60 +203,11 @@ export function LineChart({
       >
         {width > 0 ? (
           <Canvas style={{ width, height }}>
-            {layout.ticksY.map((tick) => (
-              <Line
-                key={tick.value}
-                p1={vec(0, tick.y)}
-                p2={vec(width - CHART_PAD.padRight + 4, tick.y)}
-                color={t.colors.border}
-                strokeWidth={t.sizes.hairline}
-              >
-                <DashPathEffect intervals={[3, 4]} />
-              </Line>
-            ))}
-            {series.map((s, si) => {
-              const pts = layout.series[si] ?? [];
-              const color = t.colors[s.color];
-              if (s.dotsOnly) {
-                return (
-                  <Group key={s.label} opacity={progress}>
-                    {pts.map((p, i) => (
-                      <Circle key={i} cx={p.x} cy={p.y} r={2.5} color={color} />
-                    ))}
-                  </Group>
-                );
-              }
-              return (
-                <Group key={s.label}>
-                  {s.area && pts.length > 1 ? (
-                    <Path path={svg(areaPath(pts, baseY))} color={color} opacity={0.1} />
-                  ) : null}
-                  {pts.length > 1 ? (
-                    <Path
-                      path={svg(linePath(pts))}
-                      color={color}
-                      style="stroke"
-                      strokeWidth={s.strokeWidth ?? 2.5}
-                      strokeCap="round"
-                      strokeJoin="round"
-                      end={progress}
-                    />
-                  ) : null}
-                  {pts.length > 0 ? (
-                    <Circle
-                      cx={pts[pts.length - 1]!.x}
-                      cy={pts[pts.length - 1]!.y}
-                      r={4}
-                      color={color}
-                    />
-                  ) : null}
-                </Group>
-              );
-            })}
+            <LinePlot drawn={drawn} ticksY={layout.ticksY} width={width} progress={progress} />
             {sel != null ? (
               <Line
-                p1={vec(xs(sel), CHART_PAD.padTop)}
-                p2={vec(xs(sel), baseY)}
+                p1={vec(xs[sel] ?? 0, CHART_PAD.padTop)}
+                p2={vec(xs[sel] ?? 0, baseY)}
                 color={t.colors.textTertiary}
                 strokeWidth={t.sizes.hairline}
               />
@@ -171,7 +222,10 @@ export function LineChart({
             style={{
               position: 'absolute',
               top: 0,
-              left: Math.min(Math.max(0, xs(sel) - 60), Math.max(0, width - 160)),
+              left: Math.min(
+                Math.max(0, (xs[sel] ?? 0) - c.calloutHalf),
+                Math.max(0, width - c.calloutHalf * 2.6),
+              ),
               backgroundColor: t.colors.inverse,
               borderRadius: t.radius.button,
               paddingHorizontal: t.spacing.xs,

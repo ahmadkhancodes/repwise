@@ -36,17 +36,45 @@ beforeEach(async () => {
 });
 
 describe.each(SCHEMES)(`ExerciseDetailScreen (%s, ${Platform.OS})`, (scheme) => {
-  it('shows media placeholder, tags, muscle map, steps, cues, mistakes and alternatives', async () => {
+  it('shows the muscle-map hero, tags, muscles, steps, cues, mistakes and alternatives', async () => {
     await renderThemed(<ExerciseDetailScreen id="barbell-back-squat" />, scheme);
     expect(screen.getByTestId('screen-exercise-title').props.children).toBe('Barbell back squat');
-    expect(screen.getByTestId('exercise-media-placeholder')).toBeTruthy();
-    expect(screen.getByText('Demo coming soon')).toBeTruthy();
-    expect(screen.getByText('Intermediate')).toBeTruthy();
-    expect(screen.getByText('Barbell')).toBeTruthy();
+    // No media configured: a designed muscle map, never a grey "coming soon" box.
+    expect(screen.queryByText('Demo coming soon')).toBeNull();
     expect(
-      screen.getByRole('image', { name: /Main: Quads, Glutes\. Also: Inner thighs/ }),
+      screen.queryByTestId('exercise-media-frames', { includeHiddenElements: true }),
+    ).toBeNull();
+    expect(
+      screen.getByRole('image', {
+        name: 'Barbell back squat. Front view. Main: Quads, Glutes. Also: Inner thighs, Hamstrings, Lower back, Abs. Barbell, Squat, Intermediate.',
+      }),
     ).toBeTruthy();
-    for (const h of ['Your records', 'How to do it', 'Cues', 'Common mistakes', 'Alternatives']) {
+    await fireEvent(screen.getByTestId('exercise-media'), 'layout', {
+      nativeEvent: { layout: { width: 320, height: 240, x: 0, y: 0 } },
+    });
+    expect(
+      screen.getByTestId('exercise-media-level', { includeHiddenElements: true }),
+    ).toHaveTextContent('Intermediate');
+    expect(
+      screen.getByTestId('exercise-media-glyph', { includeHiddenElements: true }),
+    ).toBeTruthy();
+    expect(screen.getByText('Squat', { includeHiddenElements: true })).toBeTruthy();
+    expect(
+      screen.getAllByText('Barbell', { includeHiddenElements: true }).length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(screen.getByTestId('exercise-tags')).toHaveTextContent(/Squat rack/);
+    expect(screen.getByTestId('body-map').props.accessibilityLabel).toMatch(
+      /^Muscles worked\. Main: Quads, Glutes\. Also: Inner thighs/,
+    );
+    expect(screen.getByTestId('exercise-steps')).toBeTruthy();
+    for (const h of [
+      'Muscles',
+      'Your records',
+      'How to do it',
+      'Cues',
+      'Common mistakes',
+      'Alternatives',
+    ]) {
       expect(screen.getByRole('header', { name: h })).toBeTruthy();
     }
     expect(screen.getByText('Letting the heels lift off the floor.')).toBeTruthy();
@@ -62,11 +90,27 @@ describe('ExerciseDetailScreen', () => {
     expect(useLibraryPrefs.getState().viewed[0]?.id).toBe('barbell-back-squat');
   });
 
-  it('loads Cloudinary media when a cloud is configured', async () => {
+  it('turns the figure to the other side with the flip button', async () => {
+    await renderThemed(<ExerciseDetailScreen id="barbell-back-squat" />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Show back view' }));
+    expect(screen.getByRole('image', { name: /^Barbell back squat\. Back view\./ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Show front view' })).toBeTruthy();
+  });
+
+  it('picks the side that shows the main muscles (back-only exercise opens on the back)', async () => {
+    await renderThemed(<ExerciseDetailScreen id="lat-pulldown" />);
+    expect(screen.getByRole('image', { name: /Back view\. Main: Lats/ })).toBeTruthy();
+  });
+
+  it('crossfades the demo frames over the muscle map when a cloud is configured', async () => {
     process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME = 'demo';
     await renderThemed(<ExerciseDetailScreen id="barbell-back-squat" />);
     expect(screen.getByTestId('exercise-media')).toBeTruthy();
-    expect(screen.queryByTestId('exercise-media-placeholder')).toBeNull();
+    expect(
+      screen.getByTestId('exercise-media-frames', { includeHiddenElements: true }),
+    ).toBeTruthy();
+    // The muscle map stays underneath as the placeholder until the frames load.
+    expect(screen.getByTestId('exercise-media-map')).toBeTruthy();
   });
 
   it('shows live records from logged sets in the user unit', async () => {
@@ -106,12 +150,19 @@ describe('ExerciseDetailScreen', () => {
     await fireEvent.press(await screen.findByTestId(`add-to-${s.id}`));
     expect(exercisesForSession(s.id).map((e) => e.exerciseId)).toEqual(['push-up']);
     expect(useToastStore.getState().current?.message).toBe('Push-up added to Push day');
+    // Not a core action: one buzz at most (the row), the toast stays silent.
+    expect(useToastStore.getState().current?.silent).toBe(true);
   });
 
-  it('explains when there is no workout to add to', async () => {
+  it('with nothing planned, starts a workout with this exercise', async () => {
     await renderThemed(<ExerciseDetailScreen id="push-up" />);
     await fireEvent.press(screen.getByTestId('exercise-add'));
     expect(await screen.findByTestId('add-sheet-empty')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('add-sheet-empty-action'));
+    const today = sessionsRepo.list().filter((x) => x.date === localISODate());
+    expect(today).toHaveLength(1);
+    expect(exercisesForSession(today[0]!.id).map((e) => e.exerciseId)).toEqual(['push-up']);
+    expect(router.push).toHaveBeenCalledWith(`/train?sessionId=${today[0]!.id}&start=1`);
   });
 
   it('custom exercises show their data and an edit button', async () => {

@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -17,6 +18,7 @@ export function MonthCalendar({
   onPrev,
   onNext,
   canNext,
+  locked,
   testID = 'progress-calendar',
 }: {
   month: MonthKey;
@@ -24,6 +26,8 @@ export function MonthCalendar({
   onPrev: () => void;
   onNext: () => void;
   canNext: boolean;
+  /** Shown instead of the grid for a month the user can't open (free plan). */
+  locked?: ReactNode;
   testID?: string;
 }) {
   const t = useTheme();
@@ -58,31 +62,38 @@ export function MonthCalendar({
           </Text>
         ))}
       </View>
-      <Animated.View
-        key={title}
-        entering={FadeIn.duration(t.motion.duration.base)}
-        style={{ gap: t.spacing.xxs }}
-      >
-        {rows.map((row, ri) => (
-          <View key={ri} style={{ flexDirection: 'row' }}>
-            {row.map((cell, ci) => (
-              <View
-                key={ci}
-                style={{ flex: 1, alignItems: 'center', paddingVertical: t.spacing.xxs }}
-              >
-                {cell ? <DayCell day={cell} /> : null}
-              </View>
-            ))}
-          </View>
-        ))}
-      </Animated.View>
+      {locked ? (
+        <Animated.View key={`${title}-locked`} entering={FadeIn.duration(t.motion.duration.base)}>
+          {locked}
+        </Animated.View>
+      ) : (
+        <Animated.View
+          key={title}
+          entering={FadeIn.duration(t.motion.duration.base)}
+          style={{ gap: t.spacing.xxs }}
+        >
+          {rows.map((row, ri) => (
+            <View key={ri} style={{ flexDirection: 'row' }}>
+              {row.map((cell, ci) => (
+                <View
+                  key={ci}
+                  style={{ flex: 1, alignItems: 'center', paddingVertical: t.spacing.xxs }}
+                >
+                  {cell ? <DayCell day={cell} /> : null}
+                </View>
+              ))}
+            </View>
+          ))}
+        </Animated.View>
+      )}
     </View>
   );
 }
 
 function DayCell({ day }: { day: CalendarDay }) {
   const t = useTheme();
-  const size = 34;
+  // 7 columns fit a 360 dp screen at 130% text.
+  const size = t.sizes.touch - t.spacing.sm;
   const parts = [
     day.workout ? 'workout done' : null,
     day.logged ? 'food logged' : null,
@@ -93,7 +104,7 @@ function DayCell({ day }: { day: CalendarDay }) {
       accessible
       accessibilityLabel={`${day.day}${parts.length ? `, ${parts.join(', ')}` : ''}`}
       testID={`cal-${day.date}`}
-      style={{ alignItems: 'center', gap: 2 }}
+      style={{ alignItems: 'center', gap: t.sizes.borderThick }}
     >
       <View
         style={{
@@ -103,7 +114,7 @@ function DayCell({ day }: { day: CalendarDay }) {
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: day.workout ? t.colors.accent : 'transparent',
-          borderWidth: day.isToday ? 1.5 : 0,
+          borderWidth: day.isToday ? t.sizes.borderThick : 0,
           borderColor: t.colors.textPrimary,
         }}
       >
@@ -118,9 +129,9 @@ function DayCell({ day }: { day: CalendarDay }) {
       </View>
       <View
         style={{
-          width: 4,
-          height: 4,
-          borderRadius: 2,
+          width: t.spacing.xxs,
+          height: t.spacing.xxs,
+          borderRadius: t.radius.pill,
           backgroundColor: day.logged ? t.colors.textSecondary : 'transparent',
         }}
       />

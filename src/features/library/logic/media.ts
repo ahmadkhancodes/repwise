@@ -54,7 +54,9 @@ export function isSafePublicId(id: string): boolean {
 
 /** Default check: `repwise/exercises/<id>` has a licensed demo. */
 export function isExerciseMediaLive(mediaId: string): boolean {
-  return mediaId.startsWith(EXERCISE_PREFIX) && exerciseHasMedia(mediaId.slice(EXERCISE_PREFIX.length));
+  return (
+    mediaId.startsWith(EXERCISE_PREFIX) && exerciseHasMedia(mediaId.slice(EXERCISE_PREFIX.length))
+  );
 }
 
 export function exerciseMediaUrls(
@@ -77,6 +79,14 @@ export function exerciseMediaUrls(
 /** Timing of the 2-frame demo loop: slower than UI motion so it reads as movement, not a flicker. */
 export const CROSSFADE = { holdMs: 900, fadeMs: 600 } as const;
 
+/** One full start → end → start loop in ms. */
+export function crossfadeCycleMs({
+  holdMs,
+  fadeMs,
+}: { holdMs: number; fadeMs: number } = CROSSFADE): number {
+  return 2 * (holdMs + fadeMs);
+}
+
 /**
  * Opacity (0–1) of the END frame layered over the start frame, `elapsedMs` into the loop:
  * hold start → fade in end → hold end → fade back to start, repeating.
@@ -86,6 +96,7 @@ export function crossfadeOpacity(
   elapsedMs: number,
   { holdMs, fadeMs }: { holdMs: number; fadeMs: number } = CROSSFADE,
 ): number {
+  'worklet';
   const cycle = 2 * (holdMs + fadeMs);
   if (!Number.isFinite(elapsedMs) || cycle <= 0) return 0;
   const t = ((elapsedMs % cycle) + cycle) % cycle;

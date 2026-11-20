@@ -25,6 +25,11 @@ tags:
 - assertVisible: Weight saved
 - assertVisible:
     id: screen-progress
+# The weight tile sits under the calendar.
+- scrollUntilVisible:
+    element:
+      id: nav-body
+    direction: DOWN
 - tapOn:
     id: nav-body
 - assertVisible:

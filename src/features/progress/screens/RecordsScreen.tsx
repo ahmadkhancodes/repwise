@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { EmptyState, IconButton, ListRow, Screen, Segmented } from '@/ui';
 import { useTheme } from '@/theme';
 
-import { ProgressSkeleton } from '../components/Skeleton';
+import { RowsSkeleton } from '../components/Skeletons';
 import { Stagger } from '../components/bits';
 import { useTraining, useUnits } from '../hooks/useProgress';
 import { shortDate } from '../logic/dates';
@@ -45,7 +45,7 @@ export function RecordsScreen() {
         onChange={setTab}
       />
       {training.loading ? (
-        <ProgressSkeleton />
+        <RowsSkeleton />
       ) : training.error ? (
         <EmptyState
           icon={CircleAlert}

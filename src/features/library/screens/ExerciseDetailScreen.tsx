@@ -1,19 +1,30 @@
 import { router } from 'expo-router';
-import { ChevronLeft, Heart, Pencil, SearchX } from 'lucide-react-native';
-import { useEffect, useState, type ReactNode } from 'react';
+import { ChevronLeft, CircleAlert, Heart, Pencil, SearchX } from 'lucide-react-native';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { Button, Card, EmptyState, IconButton, PressableScale, Screen, Text } from '@/ui';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  IconButton,
+  PressableScale,
+  Screen,
+  Skeleton,
+  SkeletonGroup,
+  SkeletonText,
+  Text,
+} from '@/ui';
 
 import { AddToWorkoutSheet } from '../components/AddToWorkoutSheet';
-import { BodyMap } from '../components/BodyMap';
+import { MuscleLegend } from '../components/BodyMap';
 import { ExerciseHero } from '../components/ExerciseMedia';
 import { ExerciseRecords } from '../components/ExerciseRecords';
 import { ExerciseRow } from '../components/ExerciseRow';
-import { SkeletonRows } from '../components/SkeletonRows';
 import { resolveItem, useCatalogState, useCustomItems } from '../hooks/useLibrary';
-import { EQUIPMENT_LABEL, LEVEL_LABEL, PATTERN_LABEL } from '../logic/labels';
+import { bodyPalette } from '../logic/bodyPalette';
+import { EQUIPMENT_LABEL, MUSCLE_LABEL } from '../logic/labels';
 import type { LibraryItem } from '../logic/libraryItem';
 import { useIsFavourite, useLibraryPrefs } from '../prefs';
 
@@ -34,15 +45,61 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Lines({ items, numbered }: { items: string[]; numbered?: boolean }) {
+/** Steps get a numbered disc (glanceable mid-set); cues and mistakes a quiet dot. */
+function Lines({
+  items,
+  numbered,
+  testID,
+}: {
+  items: string[];
+  numbered?: boolean;
+  testID?: string;
+}) {
   const t = useTheme();
+  const disc = t.spacing.xl;
   return (
-    <View style={{ gap: t.spacing.sm }}>
+    <View style={{ gap: t.spacing.md }} testID={testID}>
       {items.map((line, i) => (
-        <View key={i} style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-          <Text variant="body" color="textSecondary" tabular style={{ minWidth: t.spacing.lg }}>
-            {numbered ? `${i + 1}` : '•'}
-          </Text>
+        <View
+          key={i}
+          style={{ flexDirection: 'row', gap: t.spacing.sm }}
+          accessible
+          accessibilityLabel={numbered ? `Step ${i + 1}. ${line}` : line}
+        >
+          {numbered ? (
+            <View
+              style={{
+                width: disc,
+                height: disc,
+                borderRadius: t.radius.pill,
+                backgroundColor: t.colors.inverse,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text variant="caption" color="onInverse" tabular maxFontSizeMultiplier={1.2}>
+                {i + 1}
+              </Text>
+            </View>
+          ) : (
+            <View
+              style={{
+                width: disc,
+                height: t.typography.body.lineHeight,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <View
+                style={{
+                  width: t.spacing.xs - t.sizes.borderThick,
+                  height: t.spacing.xs - t.sizes.borderThick,
+                  borderRadius: t.radius.pill,
+                  backgroundColor: t.colors.textSecondary,
+                }}
+              />
+            </View>
+          )}
           <Text variant="body" style={{ flex: 1 }}>
             {line}
           </Text>
@@ -52,59 +109,79 @@ function Lines({ items, numbered }: { items: string[]; numbered?: boolean }) {
   );
 }
 
-function Tag({ label }: { label: string }) {
+/** Loading layout shaped like the detail page: hero, tags, a heading and steps. */
+function DetailSkeleton() {
   const t = useTheme();
   return (
-    <View
-      style={{
-        paddingHorizontal: t.spacing.sm,
-        paddingVertical: t.spacing.xxs,
-        borderRadius: t.radius.pill,
-        backgroundColor: t.colors.surface,
-      }}
-    >
-      <Text variant="callout">{label}</Text>
-    </View>
+    <SkeletonGroup label="Loading exercise" testID="exercise-loading" style={{ gap: t.spacing.lg }}>
+      <Skeleton height={t.sizes.ringHero} radius={t.radius.card} />
+      <View style={{ flexDirection: 'row', gap: t.spacing.xs }}>
+        <Skeleton height={t.spacing.xl} width={t.sizes.ring * 0.7} radius={t.radius.pill} />
+        <Skeleton height={t.spacing.xl} width={t.sizes.ring * 0.5} radius={t.radius.pill} />
+      </View>
+      <SkeletonText variant="title2" lines={1} />
+      <SkeletonText lines={4} />
+    </SkeletonGroup>
   );
 }
 
 function Detail({ item, alternatives }: { item: LibraryItem; alternatives: LibraryItem[] }) {
   const t = useTheme();
+  const palette = useMemo(() => bodyPalette(t.colors, t.scheme), [t.colors, t.scheme]);
+  // Level and pattern sit on the hero; the tags list the full kit and one-sided work.
   const tags = [
-    item.level ? LEVEL_LABEL[item.level] : null,
     ...item.equipment
       .filter((e) => e !== 'bodyweight' || item.equipment.length === 1)
       .map((e) => EQUIPMENT_LABEL[e]),
-    item.patternFamily ? PATTERN_LABEL[item.patternFamily] : null,
     item.unilateral ? 'One side at a time' : null,
   ].filter((x): x is string => Boolean(x));
 
   return (
     <>
-      <ExerciseHero mediaId={item.mediaId} name={item.name} testID="exercise-media" />
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
-        {tags.map((tag) => (
-          <Tag key={tag} label={tag} />
-        ))}
-      </View>
-      <Card>
-        <BodyMap
-          primary={item.primaryMuscles}
-          secondary={item.secondaryMuscles}
+      <ExerciseHero
+        mediaId={item.mediaId}
+        name={item.name}
+        exercise={item}
+        testID="exercise-media"
+      />
+      {tags.length ? (
+        <View
+          style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}
+          testID="exercise-tags"
+        >
+          {tags.map((tag) => (
+            <Badge key={tag} label={tag} />
+          ))}
+        </View>
+      ) : null}
+      <Section title="Muscles">
+        <View
+          style={{ gap: t.spacing.xs }}
           testID="body-map"
-        />
-      </Card>
+          accessible
+          accessibilityLabel={`Muscles worked. Main: ${item.primaryMuscles.map((m) => MUSCLE_LABEL[m]).join(', ') || 'none'}.${item.secondaryMuscles.length ? ` Also: ${item.secondaryMuscles.map((m) => MUSCLE_LABEL[m]).join(', ')}.` : ''}`}
+        >
+          <MuscleLegend color={palette.primary} title="Main" muscles={item.primaryMuscles} />
+          {item.secondaryMuscles.length ? (
+            <MuscleLegend
+              color={palette.secondary}
+              title="Also works"
+              muscles={item.secondaryMuscles}
+            />
+          ) : null}
+        </View>
+      </Section>
       <Section title="Your records">
         <ExerciseRecords exerciseId={item.id} />
       </Section>
       {item.instructions.length ? (
         <Section title="How to do it">
-          <Lines items={item.instructions} numbered />
+          <Lines items={item.instructions} numbered testID="exercise-steps" />
         </Section>
       ) : null}
       {item.cues.length ? (
         <Section title="Cues">
-          <Lines items={item.cues} />
+          <Lines items={item.cues} testID="exercise-cues" />
         </Section>
       ) : null}
       {item.commonMistakes.length ? (
@@ -154,6 +231,7 @@ export function ExerciseDetailScreen({ id }: { id: string }) {
   if (error) {
     content = (
       <EmptyState
+        icon={CircleAlert}
         title="Couldn't open this exercise"
         body="Try again in a moment."
         actionLabel="Try again"
@@ -162,7 +240,7 @@ export function ExerciseDetailScreen({ id }: { id: string }) {
       />
     );
   } else if (!catalog) {
-    content = <SkeletonRows count={4} testID="exercise-loading" />;
+    content = <DetailSkeleton />;
   } else if (!item) {
     content = (
       <EmptyState
@@ -219,8 +297,8 @@ export function ExerciseDetailScreen({ id }: { id: string }) {
               }}
             >
               <Heart
-                color={fav ? t.colors.accent : t.colors.textPrimary}
-                fill={fav ? t.colors.accent : 'transparent'}
+                color={t.colors.textPrimary}
+                fill={fav ? t.colors.textPrimary : 'transparent'}
                 size={t.sizes.icon}
                 strokeWidth={t.sizes.iconStroke}
               />

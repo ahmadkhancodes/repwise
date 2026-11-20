@@ -1,14 +1,48 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native';
 
 import { haptics } from '@/services/haptics';
 import { Text } from '@/ui';
-import { useTheme } from '@/theme';
+import { sizes, spacing, useTheme } from '@/theme';
 
-import { labelIndices, tickLabel } from '../logic/chart';
+import { labelIndices, nearestIndex, tickLabel } from '../logic/chart';
 
-/** Room on the right for y-tick labels; a little air top and bottom. */
-export const CHART_PAD = { padTop: 12, padBottom: 6, padLeft: 0, padRight: 40 } as const;
+/** Room on the right for y-tick labels; a little air top and bottom (tokens only). */
+export const CHART_PAD = {
+  padTop: spacing.sm,
+  padBottom: spacing.xs - sizes.borderThick,
+  padLeft: 0,
+  padRight: spacing.xxxl,
+} as const;
+
+/** Chart sizes derived from tokens (audit: no literals in charts). */
+export function useChartSizes() {
+  const t = useTheme();
+  return useMemo(
+    () => ({
+      /** Line chart plot height (200). */
+      lineHeight: t.sizes.ringHero - t.spacing.xxxl,
+      /** Bar chart plot height (160). */
+      barHeight: t.sizes.ring + t.spacing.xxxl,
+      /** Sparkline tile height. */
+      sparkHeight: t.sizes.touch + t.spacing.md,
+      stroke: t.sizes.iconStrokeBold,
+      /** Raw weigh-in dot radius. */
+      dot: t.sizes.iconStrokeBold,
+      /** Latest-value dot radius. */
+      endDot: t.spacing.xxs,
+      barGap: t.spacing.xs - t.sizes.borderThick,
+      barRadius: t.spacing.xxs,
+      /** Target tick across a bar. */
+      target: t.sizes.borderThick,
+      /** Grid dash pattern. */
+      dash: [t.spacing.xxs - 1, t.spacing.xxs],
+      /** Half the callout width used to centre it on the cursor. */
+      calloutHalf: t.spacing.huge + t.spacing.sm,
+    }),
+    [t],
+  );
+}
 
 export function useWidth(): [number, (e: LayoutChangeEvent) => void] {
   const [width, setWidth] = useState(0);
@@ -69,35 +103,34 @@ export function XLabels({ labels }: { labels: string[] }) {
 }
 
 /**
- * Touch-to-scrub over a chart: maps the finger's x to the nearest index (selection haptic on
- * change). Plain responder events so it works in any scroll view on iOS and Android.
+ * Touch-to-scrub over a chart: maps the finger's x to the nearest index from precomputed `xs`.
+ * State only changes when the index changes (one render per new point, not per move event), and
+ * the selection haptic fires once per change outside the state updater. Plain responder events
+ * so it works in any scroll view on iOS and Android.
  */
-export function useScrub(count: number, xs: (i: number) => number) {
+export function useScrub(xs: readonly number[]) {
   const [index, setIndex] = useState<number | null>(null);
+  const current = useRef<number | null>(null);
+  const set = useCallback((next: number | null) => {
+    if (current.current === next) return;
+    current.current = next;
+    if (next != null) haptics.selection();
+    setIndex(next);
+  }, []);
   const pick = useCallback(
-    (e: GestureResponderEvent) => {
-      if (count === 0) return;
-      const x = e.nativeEvent.locationX;
-      let best = 0;
-      let bestD = Infinity;
-      for (let i = 0; i < count; i++) {
-        const d = Math.abs(xs(i) - x);
-        if (d < bestD) [best, bestD] = [i, d];
-      }
-      setIndex((prev) => {
-        if (prev !== best) haptics.selection();
-        return best;
-      });
-    },
-    [count, xs],
+    (e: GestureResponderEvent) => set(nearestIndex(xs, e.nativeEvent.locationX)),
+    [xs, set],
   );
-  const responder = {
-    onStartShouldSetResponder: () => true,
-    onMoveShouldSetResponder: () => true,
-    onResponderGrant: pick,
-    onResponderMove: pick,
-    onResponderRelease: () => setIndex(null),
-    onResponderTerminate: () => setIndex(null),
-  };
-  return { index, responder, clear: () => setIndex(null) };
+  const responder = useMemo(
+    () => ({
+      onStartShouldSetResponder: () => true,
+      onMoveShouldSetResponder: () => true,
+      onResponderGrant: pick,
+      onResponderMove: pick,
+      onResponderRelease: () => set(null),
+      onResponderTerminate: () => set(null),
+    }),
+    [pick, set],
+  );
+  return { index, responder, clear: () => set(null) };
 }

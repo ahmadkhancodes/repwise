@@ -1,11 +1,12 @@
+import { router } from 'expo-router';
 import { CalendarPlus, Dumbbell } from 'lucide-react-native';
 import { View } from 'react-native';
 
-import { haptics } from '@/services/haptics';
+import { trainHref } from '@/features/workout/logic/deepLink';
 import { EmptyState, ListRow, Sheet, showToast } from '@/ui';
 
 import { friendlyDate, localISODate } from '../logic/dates';
-import { addExerciseToSession, useOpenSessions } from '../repo';
+import { addExerciseToSession, startWorkoutWithExercise, useOpenSessions } from '../repo';
 
 type Props = {
   open: boolean;
@@ -14,7 +15,11 @@ type Props = {
   exerciseName: string;
 };
 
-/** S19 primary action: append this exercise to today's or an upcoming session (local, instant). */
+/**
+ * S19 primary action: append this exercise to today's or an upcoming session (local, instant).
+ * With nothing planned, the empty state starts a workout with just this exercise instead of
+ * being a dead end.
+ */
 export function AddToWorkoutSheet({ open, onClose, exerciseId, exerciseName }: Props) {
   const today = localISODate();
   const sessions = useOpenSessions(today);
@@ -32,10 +37,11 @@ export function AddToWorkoutSheet({ open, onClose, exerciseId, exerciseName }: P
               testID={`add-to-${s.id}`}
               onPress={() => {
                 addExerciseToSession(s.id, exerciseId);
-                haptics.success();
+                // Not a core action: the row ticked on commit, so the toast stays silent.
                 showToast({
                   message: `${exerciseName} added to ${s.title ?? 'your workout'}`,
                   tone: 'success',
+                  silent: true,
                 });
                 onClose();
               }}
@@ -46,7 +52,13 @@ export function AddToWorkoutSheet({ open, onClose, exerciseId, exerciseName }: P
         <EmptyState
           icon={CalendarPlus}
           title="No workouts planned yet"
-          body="When your plan has a session today or later, you can add this exercise to it here."
+          body="Start one now with this exercise, or add it later from your plan."
+          actionLabel="Start a workout with this exercise"
+          onAction={() => {
+            const s = startWorkoutWithExercise(exerciseId, today);
+            onClose();
+            router.push(trainHref(s.id));
+          }}
           testID="add-sheet-empty"
         />
       )}

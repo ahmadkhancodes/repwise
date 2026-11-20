@@ -18,7 +18,9 @@ import {
   deleteCustomExercise,
   exerciseHistory,
   openSessions,
+  QUICK_WORKOUT_TITLE,
   recentlyLogged,
+  startWorkoutWithExercise,
   updateCustomExercise,
 } from '../repo';
 
@@ -106,5 +108,17 @@ describe('add to workout', () => {
       'push-up',
     ]);
     expect(addExerciseToSession(later.id, 'push-up').position).toBe(0);
+  });
+});
+
+describe('start a workout from an exercise', () => {
+  it('creates a planned session for today holding just this exercise', () => {
+    const s = startWorkoutWithExercise('push-up', '2026-11-19', 1000);
+    expect(s.title).toBe(QUICK_WORKOUT_TITLE);
+    expect(s.status).toBe('planned');
+    expect(s.date).toBe('2026-11-19');
+    const ex = exercisesForSession(s.id);
+    expect(ex.map((e) => [e.exerciseId, e.targetSets])).toEqual([['push-up', ADDED_TARGET_SETS]]);
+    expect(openSessions('2026-11-19').map((o) => o.id)).toContain(s.id);
   });
 });

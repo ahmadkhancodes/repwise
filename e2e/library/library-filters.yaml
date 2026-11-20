@@ -1,4 +1,4 @@
-# P0 (RW-27, S18): filter by muscle and equipment, then clear.
+# P0 (RW-27, S18): filter by muscle and equipment from the sheet, clear from the chip rail, then a one-tap muscle chip.
 appId: com.client.repwise
 tags:
   - library
@@ -8,7 +8,7 @@ tags:
 - tapOn:
     id: tab-library
 - tapOn:
-    id: library-filters
+    id: library-search-filters
 - assertVisible: Filters
 - tapOn:
     id: filter-muscle-chest
@@ -18,9 +18,16 @@ tags:
     id: filter-apply
 - assertVisible: Results
 - assertVisible:
-    id: active-filter-m:chest
+    id: active-filter-e:dumbbell
 - tapOn:
-    id: active-filter-m:chest
+    id: muscle-chip-chest
 - tapOn:
     id: active-filter-e:dumbbell
+- assertVisible: All exercises
+# One-tap muscle chip, then clear it.
+- tapOn:
+    id: muscle-chip-back
+- assertVisible: Results
+- tapOn:
+    id: muscle-chip-back
 - assertVisible: All exercises

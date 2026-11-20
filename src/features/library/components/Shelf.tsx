@@ -47,7 +47,12 @@ export function Shelf({
               backgroundColor: t.colors.surface,
             }}
           >
-            <ExerciseThumb mediaId={item.mediaId} name={item.name} />
+            <ExerciseThumb
+              mediaId={item.mediaId}
+              name={item.name}
+              exercise={item}
+              size={cardW - t.spacing.sm * 2}
+            />
             <Text variant="callout" numberOfLines={2}>
               {item.name}
             </Text>

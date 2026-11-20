@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { ChevronLeft, ChevronRight, Share2, Sparkles } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { ChevronLeft, ChevronRight, Gift, Share2 } from 'lucide-react-native';
 import { useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import {
   ScrollView,
@@ -8,19 +9,14 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
-import Animated, {
-  FadeInDown,
-  useAnimatedStyle,
-  useReducedMotion,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { haptics } from '@/services/haptics';
-import { Button, EmptyState, IconButton, Screen, Text, showToast } from '@/ui';
+import { Button, EmptyState, IconButton, Screen, StepProgress, Text, showToast } from '@/ui';
 import { useTheme } from '@/theme';
 
 import type { ViewRef } from '../components/CompareSlider';
-import { ProgressSkeleton } from '../components/Skeleton';
+import { WrappedSkeleton } from '../components/Skeletons';
 import { useNutrition, useToday, useTraining, useUnits } from '../hooks/useProgress';
 import { inMonth, monthName, monthOf, sameMonth, shiftMonth, type MonthKey } from '../logic/dates';
 import { muscleLabel } from '../logic/muscles';
@@ -32,7 +28,10 @@ import {
   type Wrapped,
   type WrappedCardKind,
 } from '../logic/wrapped';
+import { storyColors } from '../logic/storyColors';
 import { shareViewAsImage } from '../services/shareImage';
+
+const LOGO = require('../../../../assets/images/icon.png');
 
 /** S34 Monthly Wrapped (W8): a swipeable story of the month, every card shareable as an image. */
 export function WrappedScreen() {
@@ -73,10 +72,8 @@ export function WrappedScreen() {
   };
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const p = Math.round(e.nativeEvent.contentOffset.x / Math.max(1, cardW + t.spacing.sm));
-    if (p !== page) {
-      haptics.selection();
-      setPage(p);
-    }
+    // No haptic here: sheet 11 never buzzes on scroll.
+    if (p !== page) setPage(p);
   };
   const share = () =>
     shareViewAsImage(
@@ -128,17 +125,22 @@ export function WrappedScreen() {
         />
       </View>
       {loading ? (
-        <ProgressSkeleton />
+        <WrappedSkeleton />
       ) : empty ? (
         <EmptyState
-          icon={Sparkles}
+          icon={Gift}
           title="Nothing to wrap yet"
           body="Train or log meals this month and your story builds itself."
           testID="wrapped-empty"
         />
       ) : (
         <>
-          <StoryBar count={cards.length} index={page} />
+          <StepProgress
+            total={cards.length}
+            current={page}
+            accessibilityLabel={`Card ${page + 1} of ${cards.length}`}
+            testID="wrapped-progress"
+          />
           <ScrollView
             ref={scroller}
             horizontal
@@ -160,6 +162,7 @@ export function WrappedScreen() {
               >
                 <StoryCard
                   kind={kind}
+                  index={i}
                   wrapped={wrapped}
                   active={i === page}
                   units={units}
@@ -177,46 +180,16 @@ export function WrappedScreen() {
   );
 }
 
-function StoryBar({ count, index }: { count: number; index: number }) {
-  const t = useTheme();
-  return (
-    <View
-      style={{ flexDirection: 'row', gap: t.spacing.xxs }}
-      accessible
-      accessibilityLabel={`Card ${index + 1} of ${count}`}
-      testID="wrapped-progress"
-    >
-      {Array.from({ length: count }, (_, i) => (
-        <Segment key={i} filled={i <= index} />
-      ))}
-    </View>
-  );
-}
-
-function Segment({ filled }: { filled: boolean }) {
-  const t = useTheme();
-  const reduce = useReducedMotion();
-  const style = useAnimatedStyle(() => ({
-    opacity: reduce ? (filled ? 1 : 0.25) : withSpring(filled ? 1 : 0.25, t.motion.spring),
-  }));
-  return (
-    <Animated.View
-      style={[
-        { flex: 1, height: 3, borderRadius: t.radius.pill, backgroundColor: t.colors.textPrimary },
-        style,
-      ]}
-    />
-  );
-}
-
 function StoryCard({
   kind,
+  index,
   wrapped: w,
   active,
   units,
   exerciseName,
 }: {
   kind: WrappedCardKind;
+  index: number;
   wrapped: Wrapped;
   active: boolean;
   units: 'metric' | 'imperial';
@@ -288,6 +261,9 @@ function StoryCard({
     },
   };
   const c = content[kind];
+  const col = storyColors(t.colors, index);
+  const ink = { color: col.fg };
+  const logo = t.spacing.xl;
   return (
     <View
       testID={`wrapped-card-${kind}`}
@@ -295,41 +271,67 @@ function StoryCard({
       accessibilityLabel={[c.kicker, c.big, c.line, c.extra].filter(Boolean).join(', ')}
       style={{
         aspectRatio: 4 / 5,
-        borderRadius: t.radius.card * 2,
-        backgroundColor: t.colors.inverse,
+        borderRadius: t.radius.card + t.spacing.xs,
+        backgroundColor: col.bg,
         padding: t.spacing.xl,
         justifyContent: 'space-between',
         overflow: 'hidden',
       }}
     >
-      <Text variant="callout" color="onInverse" style={{ opacity: 0.7 }}>
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          right: -t.sizes.ring / 2,
+          top: -t.sizes.ring / 2,
+          width: t.sizes.ringHero,
+          height: t.sizes.ringHero,
+          borderRadius: t.radius.pill,
+          borderWidth: t.spacing.xxl,
+          borderColor: col.fg,
+          opacity: 0.08,
+        }}
+      />
+      <Text variant="headline" style={ink}>
         {c.kicker}
       </Text>
       <Reveal active={active}>
         <View
           style={{
             width: t.spacing.xxxl,
-            height: 4,
+            height: t.spacing.xxs,
             borderRadius: t.radius.pill,
-            backgroundColor: t.colors.accent,
+            backgroundColor: col.fg,
             marginBottom: t.spacing.md,
           }}
         />
-        <Text variant="display" color="onInverse" tabular adjustsFontSizeToFit numberOfLines={2}>
+        <Text variant="hero" style={ink} adjustsFontSizeToFit numberOfLines={2}>
           {c.big}
         </Text>
-        <Text variant="title2" color="onInverse" style={{ marginTop: t.spacing.xs }}>
+        <Text variant="title2" style={[ink, { marginTop: t.spacing.xs }]}>
           {c.line}
         </Text>
         {c.extra ? (
-          <Text variant="body" color="onInverse" style={{ marginTop: t.spacing.sm, opacity: 0.8 }}>
+          <Text variant="body" style={[ink, { marginTop: t.spacing.sm }]}>
             {c.extra}
           </Text>
         ) : null}
       </Reveal>
-      <Text variant="caption" color="onInverse" style={{ opacity: 0.6 }}>
-        repwise
-      </Text>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}
+        importantForAccessibility="no-hide-descendants"
+        accessibilityElementsHidden
+        testID={`wrapped-brand-${kind}`}
+      >
+        <Image
+          source={LOGO}
+          style={{ width: logo, height: logo, borderRadius: t.radius.button }}
+          accessible={false}
+        />
+        <Text variant="callout" style={ink}>
+          Repwise
+        </Text>
+      </View>
     </View>
   );
 }
