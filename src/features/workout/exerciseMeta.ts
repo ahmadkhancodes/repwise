@@ -11,6 +11,8 @@ export type ExerciseMeta = {
   primaryMuscles: string[];
   cues: string[];
   cardio: boolean;
+  /** Cloudinary media id for the demo (ExerciseHero), null when none. */
+  mediaId: string | null;
 };
 
 const pretty = (s: string) => s.replace(/_/g, ' ');
@@ -27,6 +29,7 @@ export function exerciseMeta(id: string, catalog: Catalog | null): ExerciseMeta 
       primaryMuscles: c.primaryMuscles.map(pretty),
       cues: c.cues,
       cardio: isCardioPattern(c.pattern),
+      mediaId: c.mediaId ?? null,
     };
   }
   let custom: ReturnType<typeof customExercisesRepo.get>;
@@ -44,8 +47,18 @@ export function exerciseMeta(id: string, catalog: Catalog | null): ExerciseMeta 
       primaryMuscles: (custom.primaryMuscles ?? []).map(pretty),
       cues: custom.tips ?? [],
       cardio: isCardioPattern(custom.pattern ?? undefined),
+      mediaId: null,
     };
   }
   const name = id.replace(/[-_]+/g, ' ').replace(/^\w/, (m) => m.toUpperCase());
-  return { id, name, pattern: undefined, equipment: [], primaryMuscles: [], cues: [], cardio: false };
+  return {
+    id,
+    name,
+    pattern: undefined,
+    equipment: [],
+    primaryMuscles: [],
+    cues: [],
+    cardio: false,
+    mediaId: null,
+  };
 }

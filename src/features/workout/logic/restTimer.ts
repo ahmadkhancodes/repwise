@@ -4,7 +4,8 @@
  * persists this object and the "rest over" notification is scheduled at `endsAt`.
  * Pause excludes time: resuming pushes `endsAt` back by the paused span.
  */
-export type RestNext = { exercise: string; setNo: number };
+/** Who is up after the rest; `detail` is the target shown big on the rest bar ("80 kg × 8"). */
+export type RestNext = { exercise: string; setNo: number; detail?: string };
 
 export type RestTimerState =
   | { status: 'idle' }
@@ -83,7 +84,12 @@ export function pauseRest(state: RestTimerState, now: number): RestTimerState {
 
 export function resumeRest(state: RestTimerState, now: number): RestTimerState {
   if (state.status !== 'paused' || state.pausedAt == null) return state;
-  return { ...state, status: 'running', endsAt: state.endsAt + (now - state.pausedAt), pausedAt: null };
+  return {
+    ...state,
+    status: 'running',
+    endsAt: state.endsAt + (now - state.pausedAt),
+    pausedAt: null,
+  };
 }
 
 /** 0 → 1 progress for rings/bars. */
@@ -97,11 +103,13 @@ export function reviveRest(raw: unknown): RestTimerState {
   if (!raw || typeof raw !== 'object') return IDLE;
   const r = raw as Record<string, unknown>;
   if (r.status !== 'running' && r.status !== 'paused') return IDLE;
-  const num = (k: string) => (typeof r[k] === 'number' && Number.isFinite(r[k]) ? (r[k] as number) : null);
+  const num = (k: string) =>
+    typeof r[k] === 'number' && Number.isFinite(r[k]) ? (r[k] as number) : null;
   const endsAt = num('endsAt');
   const startedAt = num('startedAt');
   const durationMs = num('durationMs');
-  if (endsAt == null || startedAt == null || durationMs == null || typeof r.sessionId !== 'string') return IDLE;
+  if (endsAt == null || startedAt == null || durationMs == null || typeof r.sessionId !== 'string')
+    return IDLE;
   const next =
     r.next && typeof r.next === 'object' && typeof (r.next as RestNext).exercise === 'string'
       ? (r.next as RestNext)

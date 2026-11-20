@@ -10,14 +10,20 @@ import { showToast } from '@/ui';
 
 import { exerciseMeta } from './exerciseMeta';
 import { durationBucket } from './logic/duration';
-import { bestOf, detectPR, type PR } from './logic/prs';
+import type { ItemLike } from './logic/player';
+import { nextAfter } from './logic/player';
+import { bestOf, detectPR, type Best, type PR } from './logic/prs';
 import { defaultRestSeconds, type RestNext } from './logic/restTimer';
 import { isDone, setLabels, type SetLike } from './logic/sets';
 import { buildSummary } from './logic/summary';
 import { formatWeight } from './logic/units';
 import type { WeightUnit } from './logic/engine';
+import { optimisticSets } from './optimistic';
 import {
   activeSession,
+  atomic,
+  discardWorkout,
+  type DiscardSnapshot,
   exerciseHistory,
   exercisesForSession,
   finishWorkout,
@@ -50,7 +56,11 @@ export type StartResult = { started: true } | { started: false; activeSessionId:
  * Start a planned session. Refused while another workout is active or paused (it would be
  * orphaned): the caller sends the user back to that one to finish or discard it first.
  */
-export function startWorkoutAction(sessionId: string, catalog: Catalog | null, now: number = Date.now()): StartResult {
+export function startWorkoutAction(
+  sessionId: string,
+  catalog: Catalog | null,
+  now: number = Date.now(),
+): StartResult {
   const running = activeSession();
   if (running && running.id !== sessionId) {
     showToast({ message: 'Finish or discard the workout in progress first' });
@@ -59,7 +69,10 @@ export function startWorkoutAction(sessionId: string, catalog: Catalog | null, n
   const before = getSession(sessionId);
   const s = startWorkout(sessionId, (id) => exerciseMeta(id, catalog).cardio, now);
   if (s && before?.status === 'planned') {
-    track('workout_started', { source: before.planId ? 'plan' : 'custom', exercises: exercisesForSession(sessionId).length });
+    track('workout_started', {
+      source: before.planId ? 'plan' : 'custom',
+      exercises: exercisesForSession(sessionId).length,
+    });
   }
   return { started: true };
 }
@@ -86,11 +99,7 @@ export function resumeWorkoutAction(sessionId: string, now: number = Date.now())
 }
 
 /** Who comes next after `setId` (for the rest timer + "Rest over" notification copy). */
-export function nextUp(
-  sessionId: string,
-  setId: string,
-  catalog: Catalog | null,
-): RestNext | null {
+export function nextUp(sessionId: string, setId: string, catalog: Catalog | null): RestNext | null {
   const ses = exercisesForSession(sessionId);
   const map = setsForSession(sessionId);
   let passed = false;
@@ -105,16 +114,165 @@ export function nextUp(
       }
       if (passed && !isDone(s)) {
         const n = Number(labels[i]);
-        return { exercise: exerciseMeta(se.exerciseId, catalog).name, setNo: Number.isFinite(n) ? n : i + 1 };
+        return {
+          exercise: exerciseMeta(se.exerciseId, catalog).name,
+          setNo: Number.isFinite(n) ? n : i + 1,
+        };
       }
     }
   }
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// The 1-tap log (RW-20/22/23), optimistic (A3)
+// ---------------------------------------------------------------------------
+
+type Job = { run: () => unknown; resolve: (v: unknown) => void; reject: (e: unknown) => void };
+let jobs: Job[] = [];
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
 /**
- * The 1-tap log (RW-20/22/23): mark the set done with the values shown, start the rest timer,
- * and celebrate a PR. Returns the PR, if any. Everything is local and synchronous.
+ * Run every queued set write now, in ONE transaction. Called on the next macrotask after a tap
+ * (after the green tick is painted) and synchronously before Finish/Discard so nothing is lost.
+ */
+export function flushSetWrites(): void {
+  if (flushTimer) clearTimeout(flushTimer);
+  flushTimer = null;
+  const batch = jobs;
+  jobs = [];
+  if (batch.length === 0) return;
+  const results: { job: Job; ok: boolean; value: unknown }[] = [];
+  try {
+    atomic(() => {
+      for (const job of batch) {
+        try {
+          results.push({ job, ok: true, value: job.run() });
+        } catch (e) {
+          results.push({ job, ok: false, value: e });
+        }
+      }
+    });
+  } catch (e) {
+    for (const job of batch) job.reject(e);
+    return;
+  }
+  for (const r of results) (r.ok ? r.job.resolve : r.job.reject)(r.value);
+}
+
+function enqueue<T>(run: () => T): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    jobs.push({ run, resolve: resolve as (v: unknown) => void, reject });
+    if (!flushTimer) flushTimer = setTimeout(flushSetWrites, 0);
+  });
+}
+
+/** Personal bests per exercise, read once per workout (not the full history on every tick). */
+const bestCache = new Map<string, Best>();
+function historyBest(exerciseId: string, sessionId: string): Best {
+  const key = `${sessionId}:${exerciseId}`;
+  if (!bestCache.has(key)) bestCache.set(key, bestOf(exerciseHistory(exerciseId, sessionId)));
+  return bestCache.get(key) ?? null;
+}
+
+/** Tests only. */
+export function resetSetWritesForTests(): void {
+  if (flushTimer) clearTimeout(flushTimer);
+  flushTimer = null;
+  jobs = [];
+  bestCache.clear();
+}
+
+function mergeBest(a: Best, b: Best): Best {
+  if (!a || !b) return a ?? b;
+  return { weightKg: Math.max(a.weightKg, b.weightKg), e1rm: Math.max(a.e1rm, b.e1rm) };
+}
+
+export type TickedSet = { pr: PR | null; set: WorkoutSet | null };
+
+export type TickInput = {
+  sessionId: string;
+  /** The exercise the set belongs to (in-memory rows from the live query). */
+  item: ItemLike<WorkoutSet>;
+  /** Every exercise of the workout, for "what is next" without a query. */
+  items: readonly ItemLike<WorkoutSet>[];
+  set: WorkoutSet;
+  patch?: SetPatch;
+  restS: number | null | undefined;
+  unit: WeightUnit;
+  now?: number;
+};
+
+const shownDone = (s: { id: string; doneAt: number | null }) =>
+  optimisticSets.isDone(s.id, s.doneAt != null);
+
+/**
+ * The 1-tap log, optimistic: the tick is green and the rest timer runs in the same frame (no
+ * SQLite on the tap path); the write follows in one batched transaction, then PR detection
+ * against the cached bests. Resolves with the saved set and the PR, if any.
+ */
+export function tickSet(input: TickInput): Promise<TickedSet> {
+  const { set, item, items, sessionId, unit } = input;
+  const now = input.now ?? Date.now();
+  // Already done as shown (double tap before the re-render): no second log, no second rest.
+  if (shownDone(set)) return Promise.resolve({ pr: null, set: null });
+  const patch = input.patch ?? {};
+  optimisticSets.set(set.id, { done: true, patch });
+  const next = nextAfter(items, set.id, shownDone, unit);
+  if (next)
+    restTimer.start(sessionId, defaultRestSeconds(input.restS, patch.type ?? set.type), next, now);
+
+  return enqueue(() => {
+    // Fresh state, not the render's: a stale double tap must not log twice.
+    if (setsRepo.get(set.id)?.doneAt != null) return { pr: null, set: null } as TickedSet;
+    const saved = setDone(set.id, true, patch, now) ?? null;
+    return { pr: null, set: saved } as TickedSet;
+  }).then(
+    (res) => {
+      if (!res.set) return res;
+      const sameExercise = items
+        .filter((i) => i.se.exerciseId === item.se.exerciseId)
+        .flatMap((i) => i.sets)
+        .filter((s) => s.id !== set.id && s.doneAt != null);
+      const before = historyBest(item.se.exerciseId, sessionId);
+      const pr = before ? detectPR(res.set, mergeBest(before, bestOf(sameExercise))) : null;
+      track('set_logged', { type: res.set.type, has_rpe: res.set.rpe != null, pr: pr != null });
+      return { pr, set: res.set };
+    },
+    (e: unknown) => {
+      optimisticSets.clear(set.id);
+      showToast({ message: "Couldn't save that set. Tap to try again.", tone: 'danger' });
+      throw e;
+    },
+  );
+}
+
+/** Un-tick (the set stays, its values too); the rest keeps running. Resolves with the old time. */
+export function untickSet(set: WorkoutSet, now: number = Date.now()): Promise<number | null> {
+  if (!shownDone(set)) return Promise.resolve(null);
+  optimisticSets.set(set.id, { done: false, patch: {} });
+  return enqueue(() => {
+    const prev = setsRepo.get(set.id)?.doneAt ?? null;
+    if (prev == null) return null;
+    setDone(set.id, false, {}, now);
+    return prev;
+  }).catch(() => {
+    optimisticSets.clear(set.id);
+    return null;
+  });
+}
+
+/** Undo an un-tick: the set is done again at its original time. */
+export function retickSet(setId: string, doneAt: number, now: number = Date.now()): void {
+  optimisticSets.set(setId, { done: true, patch: {} });
+  void enqueue(() => setsRepo.update(setId, { doneAt }, now)).catch(() =>
+    optimisticSets.clear(setId),
+  );
+}
+
+/**
+ * Synchronous log (notifications, tests): same rules as `tickSet`, written immediately.
+ * Returns the PR, if any.
  */
 export function logSetAction(opts: {
   sessionId: string;
@@ -148,7 +306,6 @@ export function logSetAction(opts: {
     restTimer.start(opts.sessionId, defaultRestSeconds(opts.restS, saved.type), next, now);
   }
   if (pr) {
-    haptics.success();
     showToast({
       message: `New PR · ${meta.name} ${formatWeight(pr.weightKg, opts.unit)} ${opts.unit}`,
       tone: 'success',
@@ -170,6 +327,7 @@ export function finishWorkoutAction(
   unit: WeightUnit,
   now: number = Date.now(),
 ): void {
+  flushSetWrites(); // ticks still in the queue are part of this workout
   const s = getSession(sessionId);
   if (!s) return;
   if (s.status === 'paused') resumeWorkoutAction(sessionId, now);
@@ -200,4 +358,14 @@ export function finishWorkoutAction(
     sets: summary.setsDone,
     prs: summary.prs.length,
   });
+}
+
+/** Discard (after the confirm): pending ticks land first, then everything goes in one transaction. */
+export function discardWorkoutAction(
+  sessionId: string,
+  now: number = Date.now(),
+): DiscardSnapshot | null {
+  flushSetWrites();
+  restTimer.clearFor(sessionId);
+  return discardWorkout(sessionId, now);
 }

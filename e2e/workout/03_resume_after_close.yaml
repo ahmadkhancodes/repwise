@@ -32,7 +32,7 @@ tags:
           id: "pick-search"
       - inputText: "squat"
       - tapOn:
-          id: "pick-barbell-back-squat"
+          id: "exercise-row-barbell-back-squat"
 - extendedWaitUntil:
     visible:
       id: "exercise-0-set-0-check"
@@ -40,7 +40,7 @@ tags:
 - tapOn:
     id: "exercise-0-set-0-check"
 - assertVisible:
-    id: "rest-pill"
+    id: "rest-bar"
 - stopApp
 - launchApp
 - tapOn:

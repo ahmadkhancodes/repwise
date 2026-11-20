@@ -1,23 +1,25 @@
-import { Check, Trophy } from 'lucide-react-native';
-import { useEffect } from 'react';
+import { Trophy } from 'lucide-react-native';
+import { memo, useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withSequence,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
-import { PressableScale, Text } from '@/ui';
+import { PressableScale, Text, Tick } from '@/ui';
 
-import { metresToDisplay, distanceToMetres } from '../logic/cardio';
+import { metresToDisplay } from '../logic/cardio';
 import type { WeightUnit } from '../logic/engine';
+import { prefillPatch } from '../logic/player';
 import { spokenSetName } from '../logic/sets';
-import { formatWeight, fromDisplayWeight, parseNumberInput, trimNumber } from '../logic/units';
+import { formatWeight, trimNumber } from '../logic/units';
+import { useOptimisticSet } from '../optimistic';
 import type { SetPatch, WorkoutSet } from '../repo';
-import { NumberCell } from './NumberCell';
+
+export type SetField = 'weight' | 'reps' | 'minutes' | 'distance';
 
 export type SetRowProps = {
   set: WorkoutSet;
@@ -26,85 +28,152 @@ export type SetRowProps = {
   unit: WeightUnit;
   cardio?: boolean;
   isPR?: boolean;
-  onToggle: (set: WorkoutSet, patch: SetPatch) => void;
-  onCommit: (set: WorkoutSet, patch: SetPatch) => void;
+  /** The next set to do: highlighted so the eye lands on it from standing height (B3). */
+  active?: boolean;
+  /** Tick (done = true) or un-tick; `patch` = values taken over with the tick. */
+  onToggle: (set: WorkoutSet, done: boolean, patch: SetPatch) => void;
+  /** Open the gym-size editor for this set (tap a value). */
+  onEdit: (set: WorkoutSet, field: SetField) => void;
   onOpenSet: (set: WorkoutSet) => void;
   testID?: string;
 };
 
-function previousText(p: WorkoutSet | undefined, unit: WeightUnit, cardio: boolean): string {
-  if (!p) return '—';
-  if (cardio) {
-    const min = p.durationS ? `${Math.round(p.durationS / 60)} min` : '';
-    const dist = p.distanceM ? `${trimNumber(metresToDisplay(p.distanceM, unit === 'lb' ? 'imperial' : 'metric') ?? 0)}` : '';
-    return [min, dist].filter(Boolean).join(' · ') || '—';
-  }
-  const w = formatWeight(p.weightKg, unit);
-  return w ? `${w} × ${p.reps ?? 0}` : `${p.reps ?? 0} reps`;
+function Cell({
+  value,
+  ghost,
+  unit,
+  done,
+  onPress,
+  accessibilityLabel,
+  testID,
+}: {
+  value: string;
+  ghost: string;
+  unit: string;
+  done: boolean;
+  onPress: () => void;
+  accessibilityLabel: string;
+  testID?: string;
+}) {
+  const t = useTheme();
+  const shown = value || ghost || '–';
+  return (
+    <PressableScale
+      feedback="none"
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${accessibilityLabel}, ${value ? `${value} ${unit}` : ghost ? `last time ${ghost}` : 'empty'}`}
+      accessibilityHint="Opens the editor"
+      testID={testID}
+      style={{
+        flex: 1,
+        minWidth: 0,
+        minHeight: t.sizes.hitGym,
+        borderRadius: t.radius.input,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        gap: t.spacing.xxs,
+        paddingHorizontal: t.spacing.xxs,
+        backgroundColor: done ? 'transparent' : t.colors.bg,
+        borderWidth: done ? 0 : t.sizes.hairline,
+        borderColor: t.colors.border,
+      }}
+    >
+      <Text
+        variant="title2"
+        tabular
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+        color={value ? 'textPrimary' : 'textSecondary'}
+        style={{ flexShrink: 1 }}
+      >
+        {shown}
+      </Text>
+      <Text variant="caption" color="textSecondary" numberOfLines={1}>
+        {unit}
+      </Text>
+    </PressableScale>
+  );
 }
 
 /**
- * SetRow (sheet 11): Set | Previous (ghosted) | Weight | Reps | ✓ — 56 high. Values are saved on
- * blur; the check saves the values shown and marks the set done in one tap (RW-20).
+ * SetRow (sheet 11, gym-grade): set label · weight · reps · tick, 64dp tall. Values are big
+ * buttons that open the stepper editor (no keyboard mid-set); the tick is the shared gym Tick
+ * (56dp, 64dp effective) and paints green in the same frame (optimistic, A3). An empty row takes
+ * last time's values when ticked. Done = an accent sweep across the row.
  */
-export function SetRow({
+function SetRowImpl({
   set,
   label,
   previous,
   unit,
   cardio = false,
   isPR = false,
+  active = false,
   onToggle,
-  onCommit,
+  onEdit,
   onOpenSet,
   testID,
 }: SetRowProps) {
   const t = useTheme();
   const reduce = useReducedMotion();
-  const done = set.doneAt != null;
+  const pending = useOptimisticSet(set.id);
+  const done = pending?.done ?? set.doneAt != null;
+  const v = { ...set, ...(pending?.patch ?? {}) };
   const spoken = spokenSetName(set.type, label);
   const units = unit === 'lb' ? 'imperial' : 'metric';
-  const pop = useSharedValue(1);
+
+  // Set-complete micro-interaction: an accent sweep left → right behind the row.
+  const sweep = useSharedValue(done ? 1 : 0);
   useEffect(() => {
-    if (done && !reduce) pop.set(withSequence(withSpring(1.18, t.motion.spring), withSpring(1, t.motion.spring)));
-  }, [done, reduce, pop, t.motion.spring]);
-  const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
+    const to = done ? 1 : 0;
+    sweep.set(reduce ? to : withTiming(to, { duration: t.motion.duration.slow }));
+  }, [done, reduce, sweep, t.motion.duration.slow]);
+  const sweepStyle = useAnimatedStyle(() => ({ width: `${sweep.value * 100}%` }));
 
-  const weightText = formatWeight(set.weightKg, unit);
+  const toggle = (next: boolean) => {
+    if (!next) return onToggle(set, false, {});
+    onToggle(set, true, prefillPatch(set, previous, cardio));
+  };
+
   const prevWeight = formatWeight(previous?.weightKg, unit);
-  const minutes = set.durationS != null ? trimNumber(Math.round((set.durationS / 60) * 10) / 10) : '';
-  const distance = set.distanceM != null ? trimNumber(metresToDisplay(set.distanceM, units) ?? 0) : '';
-
-  const commitWeight = (text: string) => {
-    const n = parseNumberInput(text);
-    onCommit(set, { weightKg: n == null ? null : fromDisplayWeight(n, unit) });
-  };
-  const commitReps = (text: string) => {
-    const n = parseNumberInput(text);
-    onCommit(set, { reps: n == null ? null : Math.round(n) });
-  };
-  const commitMinutes = (text: string) => {
-    const n = parseNumberInput(text);
-    onCommit(set, { durationS: n == null ? null : Math.round(n * 60) });
-  };
-  const commitDistance = (text: string) => {
-    const n = parseNumberInput(text);
-    onCommit(set, { distanceM: n == null ? null : distanceToMetres(n, units) });
-  };
-
-  /** Ticking an empty row takes the ghosted previous values, like a coach would. */
-  const toggle = () => {
-    if (done) return onToggle(set, {});
-    const patch: SetPatch = {};
-    if (!cardio) {
-      if (set.weightKg == null && previous?.weightKg != null) patch.weightKg = previous.weightKg;
-      if (set.reps == null && previous?.reps != null) patch.reps = previous.reps;
-    } else {
-      if (set.durationS == null && previous?.durationS != null) patch.durationS = previous.durationS;
-      if (set.distanceM == null && previous?.distanceM != null) patch.distanceM = previous.distanceM;
-    }
-    onToggle(set, patch);
-  };
+  const cells = cardio
+    ? [
+        {
+          field: 'minutes' as const,
+          value: v.durationS != null ? trimNumber(Math.round((v.durationS / 60) * 10) / 10) : '',
+          ghost: previous?.durationS ? trimNumber(Math.round(previous.durationS / 60)) : '',
+          unit: 'min',
+          label: `${spoken} minutes`,
+        },
+        {
+          field: 'distance' as const,
+          value: v.distanceM != null ? trimNumber(metresToDisplay(v.distanceM, units) ?? 0) : '',
+          ghost: previous?.distanceM
+            ? trimNumber(metresToDisplay(previous.distanceM, units) ?? 0)
+            : '',
+          unit: units === 'imperial' ? 'mi' : 'km',
+          label: `${spoken} distance`,
+        },
+      ]
+    : [
+        {
+          field: 'weight' as const,
+          value: formatWeight(v.weightKg, unit),
+          ghost: prevWeight,
+          unit,
+          label: `${spoken} weight`,
+        },
+        {
+          field: 'reps' as const,
+          value: v.reps != null ? String(v.reps) : '',
+          ghost: previous?.reps != null ? String(previous.reps) : '',
+          unit: 'reps',
+          label: `${spoken} reps`,
+        },
+      ];
 
   return (
     <View
@@ -112,31 +181,61 @@ export function SetRow({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        minHeight: t.sizes.row,
+        minHeight: t.sizes.hitGymLarge,
         gap: t.spacing.xs,
         paddingHorizontal: t.spacing.xxs,
+        paddingVertical: t.spacing.xxs,
         borderRadius: t.radius.button,
-        backgroundColor: done ? t.colors.accentSoft : 'transparent',
+        overflow: 'hidden',
+        backgroundColor: active && !done ? t.colors.surface2 : 'transparent',
+        borderLeftWidth: t.sizes.borderThick,
+        borderLeftColor: active && !done ? t.colors.accent : 'transparent',
       }}
     >
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            backgroundColor: t.colors.accentSoft,
+          },
+          sweepStyle,
+        ]}
+      />
       <PressableScale
         feedback="selection"
         onPress={() => onOpenSet(set)}
         accessibilityRole="button"
-        accessibilityLabel={`${spoken}${set.rpe != null ? `, RPE ${set.rpe}` : ''}`}
-        accessibilityHint="Set type and RPE"
+        accessibilityLabel={`${spoken}${set.rpe != null ? `, RPE ${set.rpe}` : ''}${isPR ? ', new personal record' : ''}`}
+        accessibilityHint="Set type, RPE or delete"
         testID={testID ? `${testID}-type` : undefined}
         style={{
           width: t.sizes.touch,
-          minHeight: t.sizes.touch,
+          minHeight: t.sizes.hitGym,
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: t.radius.button,
         }}
       >
-        <Text variant="headline" tabular color={set.type === 'working' ? 'textPrimary' : 'accentText'}>
-          {label}
-        </Text>
+        {isPR ? (
+          <Trophy
+            color={t.colors.accentText}
+            size={t.sizes.iconMedium}
+            strokeWidth={t.sizes.iconStroke}
+            testID={testID ? `${testID}-pr` : undefined}
+          />
+        ) : (
+          <Text
+            variant="headline"
+            tabular
+            color={set.type === 'working' ? 'textPrimary' : 'accentText'}
+          >
+            {label}
+          </Text>
+        )}
         {set.rpe != null ? (
           <Text variant="caption" color="textSecondary" tabular>
             @{trimNumber(set.rpe)}
@@ -144,92 +243,43 @@ export function SetRow({
         ) : null}
       </PressableScale>
 
-      <View style={{ flex: 1.3, flexDirection: 'row', alignItems: 'center', gap: t.spacing.xxs }}>
-        {isPR ? (
-          <Trophy color={t.colors.accentText} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
-        ) : null}
-        <Text
-          variant="callout"
-          color="textTertiary"
-          tabular
-          numberOfLines={1}
-          style={{ flexShrink: 1 }}
-          accessibilityLabel={`Previous ${previousText(previous, unit, cardio)}`}
-        >
-          {previousText(previous, unit, cardio)}
-        </Text>
-      </View>
+      {cells.map((c) => (
+        <Cell
+          key={c.field}
+          value={c.value}
+          ghost={c.ghost}
+          unit={c.unit}
+          done={done}
+          onPress={() => onEdit(set, c.field)}
+          accessibilityLabel={c.label}
+          testID={testID ? `${testID}-${c.field}` : undefined}
+        />
+      ))}
 
-      {cardio ? (
-        <>
-          <NumberCell
-            value={minutes}
-            placeholder={previous?.durationS ? String(Math.round(previous.durationS / 60)) : 'min'}
-            onCommit={commitMinutes}
-            accessibilityLabel={`${spoken} minutes`}
-            done={done}
-            testID={testID ? `${testID}-minutes` : undefined}
-          />
-          <NumberCell
-            value={distance}
-            placeholder={units === 'imperial' ? 'mi' : 'km'}
-            onCommit={commitDistance}
-            accessibilityLabel={`${spoken} distance in ${units === 'imperial' ? 'miles' : 'kilometres'}`}
-            done={done}
-            testID={testID ? `${testID}-distance` : undefined}
-          />
-        </>
-      ) : (
-        <>
-          <NumberCell
-            value={weightText}
-            placeholder={prevWeight || unit}
-            onCommit={commitWeight}
-            accessibilityLabel={`${spoken} weight in ${unit === 'lb' ? 'pounds' : 'kilograms'}`}
-            done={done}
-            testID={testID ? `${testID}-weight` : undefined}
-          />
-          <NumberCell
-            value={set.reps != null ? String(set.reps) : ''}
-            placeholder={previous?.reps != null ? String(previous.reps) : 'reps'}
-            onCommit={commitReps}
-            decimal={false}
-            accessibilityLabel={`${spoken} reps`}
-            done={done}
-            testID={testID ? `${testID}-reps` : undefined}
-          />
-        </>
-      )}
-
-      <PressableScale
-        feedback="light"
-        onPress={toggle}
-        accessibilityRole="checkbox"
+      <Tick
+        checked={done}
+        onChange={toggle}
+        size="gym"
         accessibilityLabel={`${spoken} done`}
-        accessibilityState={{ checked: done }}
         testID={testID ? `${testID}-check` : undefined}
-        style={{ width: t.sizes.touch, height: t.sizes.touch, alignItems: 'center', justifyContent: 'center' }}
-      >
-        <Animated.View
-          style={[
-            {
-              width: t.spacing.xxl,
-              height: t.spacing.xxl,
-              borderRadius: t.radius.pill,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: done ? t.colors.accent : t.colors.surface2,
-            },
-            popStyle,
-          ]}
-        >
-          <Check
-            color={done ? t.colors.onAccent : t.colors.textTertiary}
-            size={t.sizes.iconSmall + t.spacing.xxs}
-            strokeWidth={2.5}
-          />
-        </Animated.View>
-      </PressableScale>
+      />
     </View>
   );
 }
+
+/** Re-renders only when this row's data changes (A1): not on rest ticks or other rows' edits. */
+export const SetRow = memo(
+  SetRowImpl,
+  (a, b) =>
+    (a.set === b.set || (a.set.id === b.set.id && a.set.updatedAt === b.set.updatedAt)) &&
+    a.label === b.label &&
+    a.previous === b.previous &&
+    a.unit === b.unit &&
+    a.cardio === b.cardio &&
+    a.isPR === b.isPR &&
+    a.active === b.active &&
+    a.onToggle === b.onToggle &&
+    a.onEdit === b.onEdit &&
+    a.onOpenSet === b.onOpenSet &&
+    a.testID === b.testID,
+);
