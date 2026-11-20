@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { ensureWeekMeals } from '@/features/meals';
+import { addDays, startOfWeek } from '@/features/meals/logic/dates';
 import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { customRecipesRepo } from '@/features/meals/repo';
 import { useCatalog, type Catalog } from '@/services/catalog';
@@ -28,6 +29,9 @@ export function musclesLookup(catalog: Catalog | null): MusclesLookup {
   return (id) => catalog?.exerciseById.get(id)?.primaryMuscles ?? [];
 }
 
+/** Background planning waits this long after Today mounts, so it never competes with first taps. */
+export const PLAN_DELAY_MS = 1500;
+
 export type TodayModel = {
   status: 'loading' | 'error' | 'ready';
   view: TodayView | null;
@@ -44,30 +48,35 @@ export function useToday(nowOverride?: number): TodayModel {
   const now = useNow(60_000, nowOverride);
   const date = localDate(now);
   const tomorrow = tomorrowOf(date);
+  const weekFrom = startOfWeek(date);
+  const weekTo = addDays(weekFrom, 6);
   const { data, error, reload } = useDbSnapshot(
     TODAY_TABLES,
-    () => loadTodaySnapshot(date, tomorrow),
-    [date, tomorrow],
+    () => loadTodaySnapshot(date, tomorrow, weekFrom, weekTo),
+    [date, tomorrow, weekFrom, weekTo],
   );
   const catalog = useCatalog();
   const hour = localHour(now);
 
   // Meals are planned offline by the meals domain, the same way as on Eat: once the catalogue and
   // an onboarded profile are there, fill any missing day of this week (writes reload the snapshot).
+  // Deferred past first paint and the first taps (perf audit A4), and the meal planner (which
+  // converts every recipe) only runs when today or tomorrow actually has no meal plan.
   const profileStamp = data?.profile?.onboardedAt ? data.profile.updatedAt : null;
+  const mealsMissing = !!data && (!data.today.mealPlan || !data.tomorrow.mealPlan);
   useEffect(() => {
     if (!catalog || profileStamp == null) return;
     const id = setTimeout(() => {
       try {
-        // Training + meals for this week (no-op when planned), then any missing meal days.
+        // Training for this week (no-op when planned), then any missing meal days.
         ensurePlannedAhead(Date.now());
-        ensureWeekMeals(date, Date.now());
+        if (mealsMissing) ensureWeekMeals(date, Date.now());
       } catch {
         // planning is best effort; Today still shows what is stored
       }
-    }, 0);
+    }, PLAN_DELAY_MS);
     return () => clearTimeout(id);
-  }, [catalog, date, profileStamp]);
+  }, [catalog, date, profileStamp, mealsMissing]);
   const minutes = minutesOfDay(now);
 
   const view = useMemo(

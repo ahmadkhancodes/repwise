@@ -5,27 +5,27 @@ import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { BackButton } from '@/features/meals/components/BackButton';
-import { enterAt } from '@/features/meals/components/motion';
-import { SkeletonList } from '@/features/meals/components/SkeletonBlock';
+import { enterAt } from '@/ui/listMotion';
 import { useEatDay } from '@/features/meals/hooks/useEat';
 import { isISODate, todayISO } from '@/features/meals/logic/dates';
 import { nextSlotIndex, slotLabel } from '@/features/meals/logic/slots';
 import { logOffPlan } from '@/features/meals/service';
-import { haptics } from '@/services/haptics';
 import { searchFoods, type Food } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import {
   BigNumber,
   Button,
+  Checkbox,
   Chip,
   EmptyState,
   ListRow,
-  PressableScale,
   Screen,
+  SearchBar,
+  SkeletonCard,
+  SkeletonGroup,
   Segmented,
   Sheet,
   Text,
-  TextField,
   WheelPicker,
   showToast,
 } from '@/ui';
@@ -81,8 +81,8 @@ export function FoodLogScreen() {
     return recentNames(recentLogs).flatMap((n) => (byName.has(n) ? [byName.get(n)!] : []));
   }, [cat, recentLogs]);
 
+  // Core action: the success toast owns the one success buzz.
   const done = (rebalanced: number, what: string) => {
-    haptics.success();
     showToast({
       message: rebalanced > 0 ? `${what} logged. ${rebalanced} meal${rebalanced === 1 ? '' : 's'} adjusted.` : `${what} logged`,
       tone: 'success',
@@ -106,7 +106,6 @@ export function FoodLogScreen() {
   };
 
   const openFood = (f: Food) => {
-    haptics.light();
     const last = recentLogs.find((l) => l.name === f.name);
     // Re-use the last portion of a recent food (stored kcal ÷ per-100 g), else a typical default.
     const g = last && f.per100g.kcal > 0 ? nearestGram((last.kcal / f.per100g.kcal) * 100) : defaultGrams(f.category);
@@ -129,7 +128,7 @@ export function FoodLogScreen() {
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
         {SLOTS.map((s) => (
-          <Chip key={s} label={slotLabel(s)} selected={slot === s} onPress={() => setSlotPick(s)} testID={`log-slot-${s}`} />
+          <Chip key={s} role="radio" label={slotLabel(s)} selected={slot === s} onPress={() => setSlotPick(s)} testID={`log-slot-${s}`} />
         ))}
       </View>
       {planned ? (
@@ -153,41 +152,31 @@ export function FoodLogScreen() {
       >
         <Segmented options={MODES} value={mode} onChange={setMode} accessibilityLabel="Log type" testID="log-mode" />
         {!cat ? (
-          <SkeletonList rows={3} testID="log-loading" />
+          <SkeletonGroup testID="log-loading" style={{ gap: t.spacing.sm }}>
+          {Array.from({ length: 3 }, (_, i) => (
+            <SkeletonCard key={i} lines={2} />
+          ))}
+        </SkeletonGroup>
         ) : mode === 'out' ? (
           <>
             {slotChips}
             <Text variant="caption" color="textSecondary">
               How big was it? A rough guess is fine.
             </Text>
-            <View style={{ gap: t.spacing.sm }}>
+            <View
+              accessibilityRole="radiogroup"
+              style={{ backgroundColor: t.colors.surface, borderRadius: t.radius.card, paddingHorizontal: t.spacing.card }}
+            >
               {QUICK_ESTIMATES.map((e, i) => (
                 <Animated.View key={e.id} entering={enterAt(i, reduce)}>
-                  <PressableScale
+                  <Checkbox
+                    role="radio"
+                    checked={estimate.id === e.id}
+                    onChange={() => setEstimate(e)}
+                    label={e.label}
+                    description={e.hint}
                     testID={`estimate-${e.id}`}
-                    feedback="selection"
-                    onPress={() => setEstimate(e)}
-                    accessibilityRole="radio"
-                    accessibilityLabel={`${e.label}, ${e.hint}`}
-                    accessibilityState={{ selected: estimate.id === e.id }}
-                    style={{
-                      minHeight: t.sizes.row,
-                      borderRadius: t.radius.card,
-                      padding: t.spacing.card,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      backgroundColor: estimate.id === e.id ? t.colors.accentSoft : t.colors.surface,
-                      borderWidth: t.sizes.hairline,
-                      borderColor: estimate.id === e.id ? t.colors.accent : t.colors.surface,
-                    }}
-                  >
-                    <Text variant="headline" style={{ flex: 1 }}>
-                      {e.label}
-                    </Text>
-                    <Text variant="callout" color="textSecondary" tabular>
-                      {e.hint}
-                    </Text>
-                  </PressableScale>
+                  />
                 </Animated.View>
               ))}
             </View>
@@ -198,13 +187,11 @@ export function FoodLogScreen() {
         ) : (
           <>
             {slotChips}
-            <TextField
-              label="Search foods"
-              placeholder="Chicken, rice, banana…"
+            <SearchBar
               value={query}
               onChangeText={setQuery}
-              autoCorrect={false}
-              returnKeyType="search"
+              placeholder="Chicken, rice, banana…"
+              accessibilityLabel="Search food"
               testID="food-search"
             />
             {query.trim() ? (
@@ -234,7 +221,7 @@ export function FoodLogScreen() {
                 ))}
               </View>
             ) : (
-              <EmptyState icon={UtensilsCrossed} title="Search 275 everyday foods" body="Nutrition from USDA FoodData Central." testID="food-hint" />
+              <EmptyState icon={UtensilsCrossed} title={`Search ${cat.foods.length} everyday foods`} body="Nutrition from USDA FoodData Central." testID="food-hint" />
             )}
           </>
         )}

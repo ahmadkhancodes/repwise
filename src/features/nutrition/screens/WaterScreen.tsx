@@ -9,10 +9,21 @@ import { dayLabel, isISODate, todayISO } from '@/features/meals/logic/dates';
 import { addWater, undoLog } from '@/features/meals/service';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { BigNumber, Button, Chip, IconButton, ProgressRing, Screen, Stepper, Text } from '@/ui';
+import { BigNumber, Button, Chip, IconButton, ProgressRing, Screen, Stepper, Text, ringInnerWidth, showUndoToast } from '@/ui';
 
 import { progress } from '../logic/intake';
-import { GLASS_ML, QUICK_ADD_ML, WATER_GOAL_MAX, WATER_GOAL_MIN, formatWater, glassCount, isWaterLog, totalWaterMl, waterMl } from '../logic/water';
+import {
+  GLASS_ML,
+  QUICK_ADD_ML,
+  WATER_GOAL_MAX,
+  WATER_GOAL_MIN,
+  formatLogTime,
+  formatWater,
+  glassCount,
+  isWaterLog,
+  totalWaterMl,
+  waterMl,
+} from '../logic/water';
 import { useFoodLogs } from '../repo';
 import { getWaterGoal, setWaterGoal } from '../waterGoal';
 
@@ -31,13 +42,13 @@ function Glass({ full, index }: { full: boolean; index: number }) {
         width: t.spacing.xxxl - t.spacing.xxs,
         height: t.spacing.huge,
         borderRadius: t.radius.button,
-        borderWidth: t.sizes.hairline + 1,
-        borderColor: full ? t.colors.macroProtein : t.colors.border,
+        borderWidth: t.sizes.borderThick,
+        borderColor: full ? t.colors.accent : t.colors.borderStrong,
         overflow: 'hidden',
         justifyContent: 'flex-end',
       }}
     >
-      <Animated.View style={[{ height: '100%', backgroundColor: t.colors.macroProtein, transformOrigin: 'bottom' }, fill]} />
+      <Animated.View style={[{ height: '100%', backgroundColor: t.colors.accent, transformOrigin: 'bottom' }, fill]} />
     </View>
   );
 }
@@ -57,9 +68,17 @@ export function WaterScreen() {
   const add = (ml: number) => {
     const before = total;
     addWater(date, ml);
+    // The button / chip already gave its light tap; reaching the goal earns the success buzz.
     if (before < goal && before + ml >= goal) haptics.success();
-    else haptics.light();
   };
+
+  const remove = (id: string, ml: number) => {
+    undoLog(id);
+    showUndoToast(`${formatWater(ml)} water removed`, () => {
+      addWater(date, ml);
+    });
+  };
+  const ring = t.sizes.ring + t.spacing.huge + t.spacing.xs;
 
   return (
     <Screen
@@ -68,18 +87,19 @@ export function WaterScreen() {
       testID="screen-water"
       footer={<Button label={`Add a glass · ${GLASS_ML} ml`} onPress={() => add(GLASS_ML)} testID="water-add" />}
     >
-      <Text variant="caption" color="textSecondary">
+      <Text variant="callout" color="textSecondary">
         {dayLabel(date, today)}
       </Text>
       <View style={{ alignItems: 'center', gap: t.spacing.sm }}>
         <ProgressRing
           progress={progress(total, goal)}
-          color="macroProtein"
-          size={t.sizes.ring * 1.5}
+          color="accent"
+          size={ring}
+          strokeWidth={t.sizes.ringStroke}
           accessibilityLabel={`Water: ${formatWater(total)} of ${formatWater(goal)}`}
           testID="water-ring"
         >
-          <BigNumber value={total} unit="ml" testID="water-total" />
+          <BigNumber value={total} unit="ml" fitWidth={ringInnerWidth(ring, t.sizes.ringStroke)} center testID="water-total" />
           <Text variant="caption" color="textSecondary">
             of {formatWater(goal)}
           </Text>
@@ -92,7 +112,7 @@ export function WaterScreen() {
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
         {QUICK_ADD_ML.map((ml) => (
-          <Chip key={ml} label={`+ ${ml} ml`} onPress={() => add(ml)} testID={`water-${ml}`} />
+          <Chip key={ml} role="button" label={`+ ${ml} ml`} onPress={() => add(ml)} testID={`water-${ml}`} />
         ))}
       </View>
       <Stepper
@@ -114,9 +134,9 @@ export function WaterScreen() {
                 {formatWater(waterMl(l))}
               </Text>
               <Text variant="caption" color="textSecondary" tabular>
-                {new Date(l.createdAt).toTimeString().slice(0, 5)}
+                {formatLogTime(l.createdAt)}
               </Text>
-              <IconButton icon={Trash2} accessibilityLabel={`Remove ${formatWater(waterMl(l))}`} onPress={() => undoLog(l.id)} color="textSecondary" testID={`water-remove-${i}`} />
+              <IconButton icon={Trash2} accessibilityLabel={`Remove ${formatWater(waterMl(l))}`} onPress={() => remove(l.id, waterMl(l))} color="textSecondary" testID={`water-remove-${i}`} />
             </View>
           ))}
         </View>

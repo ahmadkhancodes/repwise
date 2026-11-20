@@ -1,120 +1,118 @@
-import { Check, Repeat2 } from 'lucide-react-native';
-import { useEffect } from 'react';
+import { memo, useMemo } from 'react';
 import { View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withSequence,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
-import { IconButton, PressableScale, Text } from '@/ui';
+import { Badge, IconButton, PressableScale, Text, Tick } from '@/ui';
+import { enterAt } from '@/ui/listMotion';
 
 import type { MealView } from '../hooks/useEat';
+import { recipeArt } from '../logic/art';
 import { formatServings } from '../logic/recipe';
 import { slotLabel } from '../logic/slots';
+import { SwapIcon } from './icons';
 import { MacroChips } from './MacroChips';
-import { enterAt, layoutSpring } from './motion';
+import { RecipeArt } from './RecipeArt';
 
 type Props = {
   meal: MealView;
   index: number;
   locked?: boolean;
-  onOpen: () => void;
-  onToggle: () => void;
-  onSwap: () => void;
+  onOpen: (meal: MealView) => void;
+  onToggle: (meal: MealView) => void;
+  onSwap: (meal: MealView) => void;
 };
 
+/** Art for a meal row: the recipe's category, in the slot it is eaten in. */
+export function mealArt(meal: Pick<MealView, 'recipe' | 'title' | 'slot'>) {
+  return recipeArt(meal.recipe ? { ...meal.recipe, slot: meal.slot } : { title: meal.title, slot: meal.slot });
+}
+
 /**
- * Sheet 11 MealTile: slot + time, dish, kcal and P/C/F, swap icon, and the 1-tap tick (core
- * action). Long-press opens the swap sheet (W4 "Swap anything").
+ * Sheet 11 MealTile: recipe art, slot + time, dish, kcal and P/C/F chips, swap icon and the 1-tap
+ * tick (core action, shared Tick with its success haptic). The body opens the recipe; the tick and
+ * swap are SIBLINGS of the body, so VoiceOver / TalkBack reach each one. Long-press swaps (W4).
  */
-export function MealTile({ meal, index, locked, onOpen, onToggle, onSwap }: Props) {
+export const MealTile = memo(function MealTile({ meal, index, locked, onOpen, onToggle, onSwap }: Props) {
   const t = useTheme();
   const reduce = useReducedMotion();
   const eaten = meal.status === 'eaten';
   const skipped = meal.status === 'skipped';
-  const pop = useSharedValue(1);
-  useEffect(() => {
-    if (eaten && !reduce) {
-      pop.set(withSequence(withSpring(1.18, t.motion.spring), withSpring(1, t.motion.spring)));
-    }
-  }, [eaten, pop, reduce, t.motion.spring]);
-  const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
+  const art = useMemo(() => mealArt(meal), [meal]);
+  const label = slotLabel(meal.slot);
 
-  const meta = [slotLabel(meal.slot), meal.time, meal.portion !== 1 ? `${formatServings(meal.portion)} servings` : null]
+  const meta = [label, meal.time, meal.portion !== 1 ? `${formatServings(meal.portion)} servings` : null]
     .filter(Boolean)
     .join(' · ');
 
   return (
-    <Animated.View entering={enterAt(index, reduce)} layout={layoutSpring(reduce)}>
-      <PressableScale
-        testID={`meal-${meal.slot}`}
-        onPress={onOpen}
-        onLongPress={locked ? undefined : onSwap}
-        accessibilityRole="button"
-        accessibilityLabel={`${slotLabel(meal.slot)}: ${meal.title}, ${meal.kcal} calories${eaten ? ', eaten' : skipped ? ', skipped' : ''}`}
-        accessibilityHint="Opens the recipe. Long-press to swap."
+    <Animated.View entering={enterAt(index, reduce)}>
+      <View
+        testID={`meal-tile-${meal.slot}`}
         style={{
           backgroundColor: t.colors.surface,
           borderRadius: t.radius.card,
-          padding: t.spacing.card,
           flexDirection: 'row',
           alignItems: 'center',
-          gap: t.spacing.sm,
-          opacity: skipped ? 0.6 : 1,
+          paddingRight: t.spacing.xs,
         }}
       >
-        <View style={{ flex: 1, gap: t.spacing.xxs }}>
-          <Text variant="caption" color="textSecondary">
-            {meta}
-            {skipped ? ' · Skipped' : ''}
-          </Text>
-          <Text variant="headline" color={eaten ? 'textSecondary' : 'textPrimary'} numberOfLines={2}>
-            {meal.title}
-          </Text>
-          <MacroChips kcal={meal.kcal} protein={meal.protein} carbs={meal.carbs} fat={meal.fat} />
-        </View>
+        <PressableScale
+          testID={`meal-${meal.slot}`}
+          onPress={() => onOpen(meal)}
+          onLongPress={locked ? undefined : () => onSwap(meal)}
+          accessibilityRole="button"
+          accessibilityLabel={`${label}: ${meal.title}, ${meal.kcal} calories${eaten ? ', eaten' : skipped ? ', skipped' : ''}`}
+          accessibilityHint={locked ? 'Opens the recipe' : 'Opens the recipe. Long-press to swap.'}
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: t.spacing.sm,
+            padding: t.spacing.card,
+            paddingRight: t.spacing.xs,
+            borderRadius: t.radius.card,
+          }}
+        >
+          <RecipeArt art={art} testID={`meal-art-${meal.slot}`} style={eaten || skipped ? { opacity: 0.55 } : undefined} />
+          <View style={{ flex: 1, minWidth: 0, gap: t.spacing.xxs }}>
+            <Text variant="caption" color="textSecondary" tabular numberOfLines={1}>
+              {meta}
+            </Text>
+            <Text
+              variant="headline"
+              color={eaten || skipped ? 'textSecondary' : 'textPrimary'}
+              numberOfLines={2}
+              style={skipped ? { textDecorationLine: 'line-through' } : undefined}
+            >
+              {meal.title}
+            </Text>
+            {skipped ? (
+              <Badge label="Skipped" testID={`meal-skipped-${meal.slot}`} />
+            ) : (
+              <MacroChips kcal={meal.kcal} protein={meal.protein} carbs={meal.carbs} fat={meal.fat} />
+            )}
+          </View>
+        </PressableScale>
         {locked ? null : (
           <View style={{ alignItems: 'center' }}>
             <IconButton
-              icon={Repeat2}
+              icon={SwapIcon}
               accessibilityLabel={`Swap ${meal.title}`}
-              onPress={onSwap}
+              onPress={() => onSwap(meal)}
               testID={`swap-${meal.slot}`}
               color="textSecondary"
             />
-            <Animated.View style={popStyle}>
-              <PressableScale
-                testID={`tick-${meal.slot}`}
-                onPress={onToggle}
-                feedback="none"
-                accessibilityRole="checkbox"
-                accessibilityLabel={eaten ? `Undo ate ${meal.title}` : `Ate ${meal.title}`}
-                accessibilityState={{ checked: eaten }}
-                style={{
-                  width: t.sizes.touch,
-                  height: t.sizes.touch,
-                  borderRadius: t.radius.pill,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: eaten ? t.colors.accent : t.colors.bg,
-                  borderWidth: eaten ? 0 : t.sizes.hairline + 1,
-                  borderColor: t.colors.border,
-                }}
-              >
-                <Check
-                  color={eaten ? t.colors.onAccent : t.colors.textTertiary}
-                  size={t.sizes.icon}
-                  strokeWidth={t.sizes.iconStroke}
-                />
-              </PressableScale>
-            </Animated.View>
+            <Tick
+              checked={eaten}
+              onChange={() => onToggle(meal)}
+              accessibilityLabel={`${meal.title} eaten`}
+              accessibilityHint={eaten ? 'Marks it as not eaten' : 'Logs it as eaten'}
+              testID={`tick-${meal.slot}`}
+            />
           </View>
         )}
-      </PressableScale>
+      </View>
     </Animated.View>
   );
-}
+});

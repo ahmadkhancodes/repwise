@@ -4,18 +4,19 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
 import { Card, Text } from '@/ui';
+import { enterAt } from '@/ui/listMotion';
 
 import type { EveningItem, TomorrowPreview } from '../logic/brief';
-
-import { enterAt } from './motion';
 
 /** Evening: today's progress and a preview of tomorrow (core loop step 5). */
 export function EveningCard({
   headline,
   items,
   tomorrow,
+  dateLabel,
   index = 0,
 }: {
+  dateLabel: string;
   headline: string;
   items: EveningItem[];
   tomorrow: TomorrowPreview | null;
@@ -27,8 +28,8 @@ export function EveningCard({
   return (
     <Animated.View entering={enterAt(index, reduceMotion)}>
       <Card testID="today-evening">
-        <Text variant="caption" color="textSecondary">
-          TODAY SO FAR
+        <Text variant="caption" color="textSecondary" testID="today-date" style={{ textTransform: 'uppercase' }}>
+          {dateLabel}
         </Text>
         <Text variant="title2" style={{ marginTop: t.spacing.xxs }} testID="evening-headline">
           {headline}
@@ -45,7 +46,7 @@ export function EveningCard({
               {i.done ? (
                 <CircleCheck color={t.colors.accentText} {...icon} />
               ) : (
-                <Circle color={t.colors.textTertiary} {...icon} />
+                <Circle color={t.colors.borderStrong} {...icon} />
               )}
               <Text variant="body" tabular>
                 {i.label}
@@ -72,8 +73,8 @@ export function EveningCard({
               <Dumbbell color={t.colors.textSecondary} {...icon} />
             )}
             <View style={{ flex: 1 }}>
-              <Text variant="caption" color="textSecondary">
-                TOMORROW
+              <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+                Tomorrow
               </Text>
               <Text variant="headline">{tomorrow.title}</Text>
               <Text variant="callout" color="textSecondary" tabular>
