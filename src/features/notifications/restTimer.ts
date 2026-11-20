@@ -114,6 +114,27 @@ async function applySurface(state: RestTimerState | null, now: number): Promise<
   }
 }
 
+/**
+ * "Delete all data": end every rest surface unconditionally (the "Rest over" alert, the Android
+ * ongoing notification, the iOS Live Activity), including ones a previous launch left behind that
+ * this process never tracked. Never throws.
+ */
+export async function stopRestSurfaces(): Promise<void> {
+  await updateRestTimerSurface(null);
+  lastAlertAt = null;
+  await Notifications.cancelScheduledNotificationAsync(REST_ALERT_ID).catch(() => undefined);
+  const mod = nativeTimer();
+  try {
+    if (mod) {
+      if (Platform.OS === 'ios') await mod.end();
+      else await mod.cancelOngoing();
+    }
+  } catch {
+    // best effort
+  }
+  showing = false;
+}
+
 /** Mirror the workout player's rest timer onto the lock screen. Returns the unsubscribe. */
 export function connectRestTimer(api: RestTimerApi): () => void {
   const off = api.subscribe((s) => {
