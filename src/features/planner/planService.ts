@@ -49,6 +49,7 @@ import {
   type Meal,
   type MealPlan,
 } from '@/features/meals/repo';
+import { neverSuggestedExercises } from '@/features/library/prefs';
 import { getProfile } from '@/features/settings/repo';
 import {
   sessionExercisesRepo,
@@ -82,14 +83,26 @@ import { plansRepo, type Plan } from './repo';
 // Inputs
 // ---------------------------------------------------------------------------
 
-let engineCatalogues: { src: unknown; cat: Catalogues } | null = null;
+let engineCatalogues: { src: unknown; never: readonly string[]; cat: Catalogues } | null = null;
 
-/** Engine catalogues via `@repwise/content`'s adapter, built once per loaded content catalogue. */
+/**
+ * Engine catalogues via `@repwise/content`'s adapter, built once per loaded content catalogue
+ * (and per "never suggest" list: exercises the user ruled out in the swap sheet never come back).
+ */
 export function getEngineCatalogues(): Catalogues {
   const c = getCatalog();
-  if (engineCatalogues?.src !== c) {
+  const never = neverSuggestedExercises();
+  if (engineCatalogues?.src !== c || engineCatalogues.never !== never) {
     const { exercises, recipes } = toEngineCatalogues(c);
-    engineCatalogues = { src: c, cat: { exercises, recipes } };
+    const ruledOut = new Set(never);
+    engineCatalogues = {
+      src: c,
+      never,
+      cat: {
+        exercises: ruledOut.size ? exercises.filter((e) => !ruledOut.has(e.id)) : exercises,
+        recipes,
+      },
+    };
   }
   return engineCatalogues.cat;
 }

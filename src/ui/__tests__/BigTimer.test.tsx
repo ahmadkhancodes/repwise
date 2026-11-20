@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 import * as RN from 'react-native';
 
-import { colors, sizes, typography } from '@/theme';
+import { colors, sizes, spacing, typography } from '@/theme';
 
 import { flat, renderThemed, SCHEMES } from '../../../test/render';
 import { BigTimer, formatCountdown, spokenCountdown } from '../BigTimer';
@@ -81,4 +81,43 @@ describe.each(SCHEMES)('BigTimer (%s)', (scheme) => {
       box,
     );
   });
+
+  it.each([1, 1.3])(
+    'controls fit a 360dp sheet at %px font: 56dp ± discs, one wide Skip',
+    async (fontScale) => {
+      jest
+        .spyOn(RN, 'useWindowDimensions')
+        .mockReturnValue({ width: 360, height: 780, scale: 3, fontScale });
+      await renderThemed(
+        <BigTimer
+          remainingMs={90_000}
+          totalMs={120_000}
+          onAdjust={jest.fn()}
+          onSkip={jest.fn()}
+          testID="bt"
+        />,
+        scheme,
+      );
+      const content = 360 - spacing.screen * 2;
+      for (const id of ['bt-minus', 'bt-plus']) {
+        const style = flat(screen.getByTestId(id).props.style);
+        expect(style.width).toBe(sizes.hitGym);
+        expect(style.height).toBe(sizes.hitGym);
+        const label = screen.getByTestId(`${id}-label`);
+        const fs = flat(label.props.style).fontSize as number;
+        expect(estimateTextWidth(String(label.props.children), fs)).toBeLessThanOrEqual(
+          sizes.hitGym - spacing.xs * 2,
+        );
+      }
+      // Skip takes the rest of the row; its one-line label + icon + compact padding must fit it.
+      const skipWidth = content - sizes.hitGym * 2 - spacing.sm * 2;
+      const skipNeeds =
+        spacing.sm * 2 +
+        sizes.icon +
+        spacing.xs +
+        estimateTextWidth('Skip', typography.headline.fontSize * fontScale);
+      expect(skipNeeds).toBeLessThanOrEqual(skipWidth);
+      expect(screen.getByTestId('bt-skip-label').props.numberOfLines).toBe(1);
+    },
+  );
 });

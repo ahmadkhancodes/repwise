@@ -13,9 +13,11 @@ export type IconButtonProps = {
   disabled?: boolean;
   testID?: string;
   feedback?: PressableScaleProps['feedback'];
+  /** 'gym' = 56dp (sweaty-thumb controls in the workout: S14 prev/next, rest). */
+  size?: 'default' | 'gym';
 };
 
-/** 48×48 icon-only button. */
+/** 48×48 icon-only button (56×56 at size 'gym'). */
 export function IconButton({
   icon: Icon,
   accessibilityLabel,
@@ -24,8 +26,10 @@ export function IconButton({
   disabled,
   testID,
   feedback,
+  size = 'default',
 }: IconButtonProps) {
   const t = useTheme();
+  const dim = size === 'gym' ? t.sizes.hitGym : t.sizes.touch;
   return (
     <PressableScale
       testID={testID}
@@ -36,8 +40,8 @@ export function IconButton({
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: Boolean(disabled) }}
       style={{
-        width: t.sizes.touch,
-        height: t.sizes.touch,
+        width: dim,
+        height: dim,
         borderRadius: t.radius.pill,
         alignItems: 'center',
         justifyContent: 'center',

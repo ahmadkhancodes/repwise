@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Dumbbell,
   Plus,
-  Repeat,
 } from 'lucide-react-native';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -24,6 +23,7 @@ import {
   Skeleton,
   Text,
   TextField,
+  SwapIcon,
 } from '@/ui';
 
 import { ExerciseCard } from '../components/ExerciseCard';
@@ -104,10 +104,13 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
     : '';
 
   const primary = pending ? (
+    // Two-line label (UI audit N6): "Log set 2" never wraps; the target sits underneath.
     <Button
-      label={`Log set ${pending.label}${target ? ` · ${target}` : ''}`}
+      label={`Log set ${pending.label}`}
+      caption={target || undefined}
       icon={Check}
       accent
+      compact
       onPress={() => p.logNext(item)}
       testID="ex-log"
       style={{ flex: 1, minHeight: t.sizes.hitGymLarge }}
@@ -116,6 +119,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
     <Button
       label={next ? `Next: ${next.meta.name}` : 'Back to workout'}
       onPress={() => (next ? go(next) : back())}
+      compact
       testID="ex-footer"
       style={{ flex: 1, minHeight: t.sizes.hitGymLarge }}
     />
@@ -135,6 +139,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
                 icon={ChevronLeft}
                 accessibilityLabel="Previous exercise"
                 disabled={!prev}
+                size="gym"
                 onPress={() => go(prev)}
                 testID="ex-prev"
               />
@@ -143,6 +148,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
                 icon={ChevronRight}
                 accessibilityLabel="Next exercise"
                 disabled={!next}
+                size="gym"
                 onPress={() => go(next)}
                 testID="ex-next"
               />
@@ -210,7 +216,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
         )}
         <Button
           label="Swap exercise"
-          icon={Repeat}
+          icon={SwapIcon}
           variant="secondary"
           onPress={() => p.handlers.onSwap(item)}
           testID="ex-swap"

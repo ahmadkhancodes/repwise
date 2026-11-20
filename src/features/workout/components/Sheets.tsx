@@ -1,18 +1,21 @@
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  Dumbbell,
-  Repeat,
-  Trash2,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { ArrowDown, ArrowUp, ArrowUpDown, Trash2, type LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { Button, Card, Chip, EmptyState, IconButton, ListRow, Sheet, Text } from '@/ui';
+import { ExerciseThumb } from '@/features/library';
+import { useLibraryPrefs } from '@/features/library/prefs';
+import {
+  Button,
+  Chip,
+  IconButton,
+  ListRow,
+  Sheet,
+  SwapChooser,
+  Text,
+  showUndoToast,
+} from '@/ui';
 
-import type { ExerciseMeta } from '../exerciseMeta';
+import { equipmentLabel, type ExerciseMeta } from '../exerciseMeta';
 import { RPE_OPTIONS, SET_TYPES, spokenSetName } from '../logic/sets';
 import { trimNumber } from '../logic/units';
 import type { SetType } from '@/db/schema';
@@ -100,7 +103,17 @@ export function SetSheet({
   );
 }
 
-/** Swap (S15, W4): three smart alternatives, one tap to pick. */
+/** "Chest · Dumbbell, Bench" — muscles then kit, title case (UI audit P2-4). Pure. */
+export function swapSubtitle(o: Pick<ExerciseMeta, 'primaryMuscles' | 'equipment'>): string {
+  return [o.primaryMuscles.slice(0, 2).join(', '), o.equipment.map(equipmentLabel).join(', ')]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+/**
+ * Swap (S15, W4): three smart alternatives, one tap to pick. The SAME sheet as the meal swap
+ * (shared SwapChooser): thumbs, title-case labels and "Never suggest" (UI audit N3).
+ */
 export function SwapSheet({
   open,
   current,
@@ -117,54 +130,39 @@ export function SwapSheet({
   onClose: () => void;
   onPick: (id: string) => void;
 }) {
-  const t = useTheme();
+  const never = () => {
+    if (!current) return;
+    const { setNeverSuggest } = useLibraryPrefs.getState();
+    setNeverSuggest(current.id, true);
+    showUndoToast(`We won’t suggest ${current.name} again`, () =>
+      setNeverSuggest(current.id, false),
+    );
+  };
   return (
-    <Sheet open={open} onClose={onClose} title="Swap exercise" testID="swap-sheet">
-      {current ? (
-        <View style={{ gap: t.spacing.sm }}>
-          <Text variant="callout" color="textSecondary">
-            Instead of {current.name} — same movement, with your equipment.
-            {locked ? ' Sets you already logged stay as they are.' : ''}
-          </Text>
-          {options.length === 0 ? (
-            <EmptyState
-              icon={Repeat}
-              title="No alternatives right now"
-              body="Nothing else fits your equipment and recent sessions. Try adding an exercise instead."
-              testID="swap-empty"
-            />
-          ) : (
-            options.map((o, i) => (
-              <Card
-                key={o.id}
-                onPress={() => onPick(o.id)}
-                accessibilityLabel={`Swap to ${o.name}`}
-                testID={`swap-option-${i}`}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-                  <Dumbbell
-                    color={t.colors.textSecondary}
-                    size={t.sizes.icon}
-                    strokeWidth={t.sizes.iconStroke}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text variant="headline">{o.name}</Text>
-                    <Text variant="caption" color="textSecondary" numberOfLines={1}>
-                      {[
-                        o.primaryMuscles.join(', '),
-                        o.equipment.map((e) => e.replace(/_/g, ' ')).join(', '),
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </Text>
-                  </View>
-                </View>
-              </Card>
-            ))
-          )}
-        </View>
-      ) : null}
-    </Sheet>
+    <SwapChooser
+      open={open && current !== null}
+      onClose={onClose}
+      title="Swap exercise"
+      intro={
+        current
+          ? `Instead of ${current.name}. Same movement, with your equipment.${locked ? ' Sets you already logged stay as they are.' : ''}`
+          : undefined
+      }
+      state="ready"
+      choices={options.map((o) => ({
+        key: o.id,
+        title: o.name,
+        subtitle: swapSubtitle(o),
+        media: <ExerciseThumb mediaId={o.mediaId} name={o.name} exercise={o.hero} />,
+        accessibilityLabel: `Swap to ${o.name}`,
+      }))}
+      onPick={onPick}
+      empty={{
+        title: 'No alternatives right now',
+        body: 'Nothing else fits your equipment and recent sessions. Try adding an exercise instead.',
+      }}
+      never={current ? { label: `Never suggest ${current.name}`, onPress: never } : undefined}
+    />
   );
 }
 

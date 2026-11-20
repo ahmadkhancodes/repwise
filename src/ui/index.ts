@@ -87,3 +87,8 @@ export {
   type WeekStripProps,
 } from './WeekStrip';
 export { SwapIcon, TargetsIcon, WaterIcon } from './icons';
+export {
+  SwapChooser,
+  type SwapChoice,
+  type SwapChooserProps,
+} from './SwapChooser';

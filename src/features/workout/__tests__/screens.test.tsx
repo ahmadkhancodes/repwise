@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 import { finishedBench, freshDb, plannedSession, TODAY } from '../../../../test/workoutFixtures';
@@ -359,6 +359,11 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       await renderThemed(<WorkoutPlayerScreen sessionId={s.id} />, scheme);
       await fireEvent.press(screen.getByTestId('exercise-0-set-0-check'));
       expect(await screen.findByTestId('rest-bar-time')).toHaveTextContent('2:00');
+      // N21: hero-size digits; N8: the drain is a transform, never a width animation.
+      expect(StyleSheet.flatten(screen.getByTestId('rest-bar-time').props.style).fontSize).toBeGreaterThan(40);
+      const fill = StyleSheet.flatten(screen.getByTestId('rest-bar-fill').props.style);
+      expect(fill.width).toBe('100%');
+      expect(fill.transform).toEqual([{ scaleX: expect.any(Number) }]);
       const before = restTimer.getState();
       await fireEvent.press(screen.getByTestId('rest-bar-plus'));
       const after = restTimer.getState();
@@ -450,9 +455,17 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       await renderThemed(<ExerciseScreen sessionId={s.id} seId={squat!.id} />, scheme);
       expect(screen.getByText('Exercise 1 of 2')).toBeTruthy();
       expect(screen.queryByTestId('ex-media') ?? screen.queryByTestId('ex-media-placeholder')).toBeTruthy();
+      // Gym footer (N6/N21): 56dp chevrons and a one-line "Log set N" with the target below.
+      for (const id of ['ex-prev', 'ex-next']) {
+        expect(StyleSheet.flatten(screen.getByTestId(id).props.style)).toMatchObject({ width: 56, height: 56 });
+      }
+      expect(screen.getByTestId('ex-log-label')).toHaveTextContent('Log set 1');
+      expect(screen.getByTestId('ex-log-label').props.numberOfLines).toBe(1);
+      expect(screen.getByTestId('ex-log-caption').props.children).toMatch(/×/);
       await fireEvent.press(screen.getByTestId('ex-set-0-check'));
       await settle();
       expect(setsFor(squat!.id)[0]?.doneAt).not.toBeNull();
+      expect(screen.getByTestId('ex-log-label')).toHaveTextContent('Log set 2');
       await fireEvent.press(screen.getByTestId('ex-log'));
       await fireEvent.press(screen.getByTestId('ex-log'));
       await settle();
