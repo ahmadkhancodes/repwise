@@ -2,7 +2,6 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { BackHandler, Platform } from 'react-native';
 
-import { haptics } from '@/services/haptics';
 
 import { deviceContext, saveQuiz, trackStep } from '../actions';
 import { QuizFrame } from '../components/QuizFrame';
@@ -67,7 +66,6 @@ export function QuizScreen({ step }: { step: StepId }) {
       return;
     }
     setError(null);
-    haptics.light();
     const to = nextStep(step, current);
     if (to) {
       go(to);

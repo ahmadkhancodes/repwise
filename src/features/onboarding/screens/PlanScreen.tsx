@@ -122,7 +122,6 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
   }, [attempt, ctx.today, clock, t.motion.listStagger]);
 
   const finish = () => {
-    haptics.light();
     completeOnboarding();
     router.replace('/today');
     if (paymentsEnabled) router.push({ pathname: '/paywall', params: { source: 'onboarding' } });
