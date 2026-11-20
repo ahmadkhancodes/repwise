@@ -98,3 +98,10 @@ Each paused slice has a WIP commit on its branch and a "Paused: next steps" list
   1. Fix round 2: one agent per area from the r2 reports.
   2. Device QA via `.github/workflows/e2e-android.yml` and `e2e-ios.yml`; the repo must be public temporarily, which is the owner's step.
   3. Final report.
+
+## Model rule (Ahmad, 20 Nov 2026), overrides anything above
+- Never use Fable.
+- Use Opus for build, fix and audit work. Use Sonnet only for docs and simple tasks.
+- Quality must not drop.
+- The paused perf/gym r2 auditor (Fable) gets relaunched fresh on Opus.
+- Paused at 11:05 PKT. The resume is scheduled for 3:35 PM PKT (10:35 UTC). The hourly auto-resume is disabled until then.
