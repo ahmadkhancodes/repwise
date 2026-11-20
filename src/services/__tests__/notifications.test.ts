@@ -7,7 +7,7 @@ import { setRowOwner } from '@/db/owner';
 import { customRecipesRepo, mealPlansRepo, mealsRepo } from '@/features/meals/repo';
 import { reloadPrefsForTests, useNotificationPrefs } from '@/features/notifications/prefsStore';
 import { saveProfile } from '@/features/settings/repo';
-import { sessionExercisesRepo, sessionsRepo } from '@/features/workout/repo';
+import { sessionExercisesRepo, sessionsRepo, setsRepo } from '@/features/workout/repo';
 import { resetAnalyticsForTests, trackedEvents } from '@/services/analytics';
 import { resetBillingState } from '@/services/billing';
 import { kv } from '@/services/storage';
@@ -16,6 +16,7 @@ import { readStoredSnapshot, resetWriterForTests } from '@/widgets/writer';
 import { __state, makeResponse } from '../../../test/mocks/expoNotifications';
 import {
   handleResponse,
+  IGNORED_WRITE_TABLES,
   rebuildSchedule,
   requestPermission,
   resetNotificationsForTests,
@@ -246,6 +247,25 @@ describe('lifecycle', () => {
     mealsRepo.update(lunchId, { status: 'skipped' });
     await jest.advanceTimersByTimeAsync(2_000);
     expect(__state.scheduled.has(`rw:meal:${DATE}:lunch`)).toBe(false);
+  });
+
+  it('a logged set does not rebuild the schedule; a session write does (perf A10)', async () => {
+    jest.useFakeTimers({ now: NOW });
+    startNotifications(deps);
+    await jest.advanceTimersByTimeAsync(2_000);
+    const calls = () => N.getAllScheduledNotificationsAsync.mock.calls.length;
+    const before = calls();
+    const s = sessionsRepo.insert({ date: DATE, title: 'Push', status: 'active' });
+    await jest.advanceTimersByTimeAsync(2_000);
+    const afterSession = calls();
+    expect(afterSession).toBeGreaterThan(before);
+    for (let i = 0; i < 3; i++) setsRepo.insert({ sessionExerciseId: 'se', idx: i, reps: 5 });
+    await jest.advanceTimersByTimeAsync(2_000);
+    expect(calls()).toBe(afterSession);
+    sessionsRepo.update(s.id, { status: 'done' });
+    await jest.advanceTimersByTimeAsync(2_000);
+    expect(calls()).toBeGreaterThan(afterSession);
+    expect(IGNORED_WRITE_TABLES.has('sets')).toBe(true);
   });
 
   it('requestPermission asks once, tracks the result, then sends the user to Settings', async () => {

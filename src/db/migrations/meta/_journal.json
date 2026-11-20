@@ -15,6 +15,13 @@
       "when": 1795086465078,
       "tag": "0001_food_log_meal_id",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795114517868,
+      "tag": "0002_perf_indexes",
+      "breakpoints": true
     }
   ]
 }

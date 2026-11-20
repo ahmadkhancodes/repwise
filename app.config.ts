@@ -189,7 +189,23 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: { favicon: './assets/images/favicon.png' },
   plugins: [
     'expo-router',
-    'expo-font',
+    // Inter is embedded at build time on Android (assets/fonts/<file>.ttf → fontFamily = file name,
+    // matching src/theme/tokens.ts), so the first render never waits on runtime font loading
+    // (perf audit A7). iOS registers fonts by PostScript name ("Inter-Regular"), not the token
+    // names, so iOS keeps the runtime load in app/_layout.tsx (a few ms, behind the splash).
+    [
+      'expo-font',
+      {
+        android: {
+          fonts: [
+            `${INTER}/400Regular/Inter_400Regular.ttf`,
+            `${INTER}/500Medium/Inter_500Medium.ttf`,
+            `${INTER}/600SemiBold/Inter_600SemiBold.ttf`,
+            `${INTER}/700Bold/Inter_700Bold.ttf`,
+          ],
+        },
+      },
+    ],
     'expo-updates',
     'expo-sqlite',
     'expo-secure-store',
