@@ -24,6 +24,8 @@ struct SnapshotWorkout: Codable {
 }
 
 struct SnapshotMeal: Codable {
+  /// Planned meal id; enables the one-tap "Ate it" link (optional for older writers).
+  var id: String?
   var slot: String
   var label: String
   var name: String
@@ -48,8 +50,9 @@ struct WidgetSnapshot: Codable {
   var macros: SnapshotMacros
   var streakWeeks: Int
 
+  /// No snapshot yet (widget added before the app ran): fail closed, like `forDate` in JS.
   static let empty = WidgetSnapshot(
-    v: 1, updatedAt: 0, date: "", pro: true, workout: nil, nextMeal: nil,
+    v: 1, updatedAt: 0, date: "", pro: false, workout: nil, nextMeal: nil,
     kcal: MacroPair(eaten: 0, target: 0),
     macros: SnapshotMacros(
       p: MacroPair(eaten: 0, target: 0), c: MacroPair(eaten: 0, target: 0),
@@ -59,7 +62,7 @@ struct WidgetSnapshot: Codable {
   static let preview = WidgetSnapshot(
     v: 1, updatedAt: 0, date: "", pro: true,
     workout: SnapshotWorkout(sessionId: "", title: "Push day", exercises: 6, minutes: 52, status: "planned"),
-    nextMeal: SnapshotMeal(slot: "lunch", label: "Lunch", name: "Chicken karahi bowl", kcal: 610, time: "13:00"),
+    nextMeal: SnapshotMeal(id: nil, slot: "lunch", label: "Lunch", name: "Chicken karahi bowl", kcal: 610, time: "13:00"),
     kcal: MacroPair(eaten: 1240, target: 2350),
     macros: SnapshotMacros(
       p: MacroPair(eaten: 96, target: 160), c: MacroPair(eaten: 130, target: 250),
@@ -99,11 +102,59 @@ enum Links {
   static let eat = URL(string: "repwise://eat")!
   static let quickLog = URL(string: "repwise://eat?log=1")!
   static let progress = URL(string: "repwise://progress")!
+  static let train = URL(string: "repwise://train")!
+
+  /// Query-value encoding (also escapes & = + ? so an id can never break the query).
+  private static func encode(_ s: String) -> String? {
+    var allowed = CharacterSet.urlQueryAllowed
+    allowed.remove(charactersIn: "&=+?#")
+    return s.addingPercentEncoding(withAllowedCharacters: allowed)
+  }
+
   static func workout(_ id: String?, start: Bool = false) -> URL {
-    guard let id, !id.isEmpty,
-      let encoded = id.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-    else { return URL(string: "repwise://train")! }
-    return URL(string: "repwise://train?sessionId=\(encoded)\(start ? "&start=1" : "")")!
+    guard let id, !id.isEmpty, let encoded = encode(id),
+      let url = URL(string: "repwise://train?sessionId=\(encoded)\(start ? "&start=1" : "")")
+    else { return train }
+    return url
+  }
+
+  /// "Ate it" (same as WIDGET_LINKS.tickMeal in JS); without an id, opens Eat.
+  static func tickMeal(_ id: String?) -> URL {
+    guard let id, !id.isEmpty, let encoded = encode(id),
+      let url = URL(string: "repwise://eat?mealId=\(encoded)&tick=1")
+    else { return eat }
+    return url
+  }
+}
+
+/// Start a planned session, Resume a running one (same rule as `workoutCta` in JS).
+struct WorkoutCta {
+  let label: String
+  let url: URL
+
+  init?(_ w: SnapshotWorkout?) {
+    guard let w, !w.sessionId.isEmpty else { return nil }
+    switch w.status {
+    case "planned": label = "Start"
+    case "active", "paused": label = "Resume"
+    default: return nil
+    }
+    url = Links.workout(w.sessionId, start: true)
+  }
+}
+
+/// Headline + meta line (same as `workoutLines` in JS).
+func workoutLines(_ w: SnapshotWorkout?) -> (title: String, meta: String) {
+  guard let w else { return ("Rest day", "Recover and eat well") }
+  switch w.status {
+  case "done": return (w.title, "Done today")
+  case "skipped": return (w.title, "Skipped")
+  case "active", "paused": return (w.title, "In progress")
+  default:
+    var parts: [String] = []
+    if w.exercises > 0 { parts.append("\(w.exercises) exercise\(w.exercises == 1 ? "" : "s")") }
+    if w.minutes > 0 { parts.append("\(w.minutes) min") }
+    return (w.title, parts.joined(separator: " · "))
   }
 }
 
@@ -117,6 +168,8 @@ enum RW {
   static let accent = Color("rwAccent")
   static let accentText = Color("rwAccentText")
   static let onAccent = Color("rwOnAccent")
+  static let inverse = Color("rwInverse")
+  static let onInverse = Color("rwOnInverse")
   static let protein = Color("rwProtein")
   static let carb = Color("rwCarb")
   static let fat = Color("rwFat")
