@@ -166,10 +166,10 @@ describe('meal actions', () => {
     const [breakfast, lunch, dinner] = todays();
     const before = dinner!.portion;
     const res = logOffPlan(
-      { date: TODAY, slot: 'lunch', name: 'Big meal out', kcal: 1100, p: 45, c: 110, f: 50, source: 'quick', replaceMealId: lunch!.id },
+      { date: TODAY, slot: 'lunch', name: 'Big meal out', kcal: 2400, p: 90, c: 260, f: 110, source: 'quick', replaceMealId: lunch!.id },
       NOW,
     );
-    expect(res.log).toMatchObject({ source: 'quick', slot: 'lunch', kcal: 1100 });
+    expect(res.log).toMatchObject({ source: 'quick', slot: 'lunch', kcal: 2400 });
     const after = todays();
     expect(after.find((m) => m.id === lunch!.id)!.status).toBe('skipped');
     expect(res.rebalanced).toBeGreaterThan(0);
