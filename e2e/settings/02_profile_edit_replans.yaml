@@ -20,12 +20,14 @@ tags:
     element:
       id: location-home
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: location-home
 - scrollUntilVisible:
     element:
       id: profile-save
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: profile-save
 - extendedWaitUntil:

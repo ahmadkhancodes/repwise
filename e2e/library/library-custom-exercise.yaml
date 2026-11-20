@@ -29,6 +29,7 @@ tags:
     element:
       id: custom-equipment-landmine
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: custom-equipment-landmine
 - tapOn:
@@ -49,6 +50,7 @@ tags:
     element:
       id: custom-delete
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: custom-delete
 - tapOn:

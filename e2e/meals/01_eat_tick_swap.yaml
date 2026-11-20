@@ -15,6 +15,7 @@ appId: com.client.repwise
     element:
       id: "tick-lunch"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "tick-lunch"
 - assertVisible: ".*logged"
@@ -23,6 +24,7 @@ appId: com.client.repwise
     element:
       id: "swap-dinner"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "swap-dinner"
 - extendedWaitUntil:
@@ -36,6 +38,7 @@ appId: com.client.repwise
     element:
       text: "Week"
     direction: UP
+    centerElement: true
 - tapOn: "Week"
 - assertVisible:
     id: "week-days"

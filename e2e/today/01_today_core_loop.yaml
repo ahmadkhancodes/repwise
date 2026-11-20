@@ -23,6 +23,7 @@ tags:
           element:
             id: "today-tick-lunch"
           direction: DOWN
+          centerElement: true
       - tapOn:
           id: "today-tick-lunch"
       - assertVisible: ".* logged"
@@ -31,6 +32,7 @@ tags:
     element:
       id: "add-water"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "add-water"
 - assertVisible: "250 ml water added"
@@ -39,6 +41,7 @@ tags:
     element:
       id: "today-date"
     direction: UP
+    centerElement: true
 - runFlow:
     when:
       visible:

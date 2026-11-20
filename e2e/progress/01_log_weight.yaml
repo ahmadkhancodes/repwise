@@ -35,6 +35,7 @@ tags:
     element:
       id: nav-body
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: nav-body
 - assertVisible:

@@ -11,6 +11,7 @@ tags:
     element:
       id: nav-wrapped
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: nav-wrapped
 - assertVisible:

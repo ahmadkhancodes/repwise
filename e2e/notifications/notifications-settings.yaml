@@ -29,6 +29,7 @@ tags:
     element:
       id: time-workout
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: time-workout
 - assertVisible:
@@ -39,6 +40,7 @@ tags:
     element:
       id: time-quiet-start
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: toggle-quiet
 - assertNotVisible:

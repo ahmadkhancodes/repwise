@@ -13,6 +13,7 @@ appId: com.client.repwise
     element:
       id: "open-log"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "open-log"
 - tapOn:
@@ -26,6 +27,7 @@ appId: com.client.repwise
     element:
       id: "open-water"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "open-water"
 - tapOn:
@@ -38,9 +40,11 @@ appId: com.client.repwise
     element:
       id: "eat-rings"
     direction: UP
+    centerElement: true
 - tapOn:
     id: "eat-rings"
 - scrollUntilVisible:
     element:
       id: "day-log-items"
     direction: DOWN
+    centerElement: true

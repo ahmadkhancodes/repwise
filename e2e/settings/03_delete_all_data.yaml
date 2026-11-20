@@ -12,6 +12,7 @@ tags:
     element:
       id: delete-data
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: delete-data
 - assertVisible: "Delete all data?"

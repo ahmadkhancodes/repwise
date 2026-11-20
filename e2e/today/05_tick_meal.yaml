@@ -17,6 +17,7 @@ tags:
     element:
       id: "today-meals"
     direction: DOWN
+    centerElement: true
 - extendedWaitUntil:
     visible:
       id: "today-meal-lunch"
@@ -28,6 +29,7 @@ tags:
     element:
       id: "today-tick-lunch"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "today-tick-lunch"
 - assertVisible: ".* logged"

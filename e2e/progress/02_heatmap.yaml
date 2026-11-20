@@ -11,6 +11,7 @@ tags:
     element:
       id: nav-heatmap
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: nav-heatmap
 - assertVisible:
