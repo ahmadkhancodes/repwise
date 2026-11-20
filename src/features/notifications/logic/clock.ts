@@ -49,3 +49,15 @@ export function relativeDay(date: string, today: string, tomorrow: string, weekd
   if (date === tomorrow) return 'Tomorrow';
   return WEEKDAYS[weekday]?.slice(0, 3) ?? date;
 }
+
+/** 24-hour hour → 12-hour wheel parts: 0 → 12 AM, 13 → 1 PM. Pure. */
+export function to12h(hour: number): { hour12: number; pm: boolean } {
+  const h = ((Math.floor(hour) % 24) + 24) % 24;
+  return { hour12: h % 12 === 0 ? 12 : h % 12, pm: h >= 12 };
+}
+
+/** 12-hour wheel parts → 24-hour hour: 12 AM → 0, 12 PM → 12, 1 PM → 13. Pure. */
+export function from12h(hour12: number, pm: boolean): number {
+  const h = hour12 % 12;
+  return pm ? h + 12 : h;
+}

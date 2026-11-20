@@ -48,7 +48,7 @@ export const QUESTIONS: Record<StepId, { title: string; subtitle?: string }> = {
   diet: { title: 'How do you eat?' },
   avoid: {
     title: 'Anything to avoid?',
-    subtitle: 'Allergies are never in your plan. Dislikes neither.',
+    subtitle: 'We leave out recipes with these allergens. Always check labels. Dislikes too.',
   },
   cuisines: { title: 'Cuisines you love', subtitle: 'Optional. We still rotate for variety.' },
   kitchen: { title: 'Your kitchen', subtitle: 'Budget per meal and time to cook.' },

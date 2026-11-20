@@ -46,7 +46,6 @@ export function SubscriptionScreen() {
           ) : (
             <Button
               label="See plans"
-              accent
               onPress={() => router.push('/paywall?source=settings')}
               testID="subscription-see-plans"
             />

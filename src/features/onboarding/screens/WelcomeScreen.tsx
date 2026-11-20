@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
-import { Dumbbell, Repeat, Utensils, type LucideIcon } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
 import {
+  Image,
   ScrollView,
   View,
   useWindowDimensions,
@@ -20,25 +20,23 @@ import { useTheme } from '@/theme';
 import { Button, Text } from '@/ui';
 
 import { isOnboarded, trackStep } from '../actions';
+import { WelcomeArt } from '../components/WelcomeArt';
 import { useOnboarding } from '../store';
 
-type Slide = { icon: LucideIcon; eyebrow: string; title: string; body: string };
+type Slide = { eyebrow: string; title: string; body: string };
 
 export const SLIDES: Slide[] = [
   {
-    icon: Dumbbell,
     eyebrow: 'TRAIN',
     title: 'Your workouts and meals, planned daily',
     body: 'One plan for the gym and the kitchen, built around your goal, kit and schedule.',
   },
   {
-    icon: Utensils,
     eyebrow: 'EAT',
     title: 'Meals that hit your numbers',
     body: 'Real recipes for your diet, allergies and budget, portioned to your calories and protein.',
   },
   {
-    icon: Repeat,
     eyebrow: 'PROGRESS',
     title: 'Never the same week twice',
     body: 'Fresh sessions and menus every week that adapt as you get stronger.',
@@ -46,6 +44,8 @@ export const SLIDES: Slide[] = [
 ];
 
 const AUTO_MS = 4000;
+
+const LOGO = require('../../../../assets/images/adaptive-icon-monochrome.png') as number;
 
 function Dot({ active }: { active: boolean }) {
   const t = useTheme();
@@ -122,13 +122,31 @@ export function WelcomeScreen() {
       testID="screen-welcome"
       style={{ flex: 1, backgroundColor: t.colors.bg, paddingTop: insets.top + t.spacing.lg }}
     >
-      <Text
-        variant="headline"
-        style={{ paddingHorizontal: t.spacing.screen }}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: t.spacing.xs,
+          paddingHorizontal: t.spacing.screen,
+        }}
+        accessible
         accessibilityRole="header"
+        accessibilityLabel="Repwise"
       >
-        Repwise
-      </Text>
+        <Image
+          source={LOGO}
+          // The mark fills the middle ~half of the adaptive-icon canvas: 48dp box → ~22dp mark.
+          style={{
+            width: t.sizes.touch,
+            height: t.sizes.touch,
+            marginLeft: -t.spacing.sm,
+            marginRight: -t.spacing.sm,
+            tintColor: t.colors.textPrimary,
+          }}
+          resizeMode="contain"
+        />
+        <Text variant="title2">Repwise</Text>
+      </View>
       <ScrollView
         ref={scroller}
         horizontal
@@ -142,7 +160,6 @@ export function WelcomeScreen() {
         style={{ flex: 1 }}
       >
         {SLIDES.map((s, i) => {
-          const Icon = s.icon;
           return (
             <View
               key={s.eyebrow}
@@ -160,26 +177,16 @@ export function WelcomeScreen() {
                 entering={FadeInDown.springify()
                   .damping(t.motion.spring.damping)
                   .stiffness(t.motion.spring.stiffness)}
-                style={{
-                  width: t.sizes.ring,
-                  height: t.sizes.ring,
-                  borderRadius: t.radius.pill,
-                  backgroundColor: i === 0 ? t.colors.accent : t.colors.inverse,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
               >
-                <Icon
-                  size={t.sizes.icon * 2}
-                  strokeWidth={t.sizes.iconStroke}
-                  color={i === 0 ? t.colors.onAccent : t.colors.onInverse}
-                />
+                <WelcomeArt slide={i} />
               </Animated.View>
               <View style={{ gap: t.spacing.sm }}>
                 <Text variant="caption" color="accentText">
                   {s.eyebrow}
                 </Text>
-                <Text variant="display">{s.title}</Text>
+                <Text variant="title1" numberOfLines={3}>
+                  {s.title}
+                </Text>
                 <Text variant="body" color="textSecondary">
                   {s.body}
                 </Text>

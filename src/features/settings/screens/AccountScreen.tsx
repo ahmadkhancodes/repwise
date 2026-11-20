@@ -23,6 +23,7 @@ import { syncNow, useSyncStatus } from '@/sync';
 import { useTheme } from '@/theme';
 import { Button, Card, IconButton, Screen, Sheet, Text, TextField, showToast } from '@/ui';
 
+import { GoogleButton } from '../components/GoogleButton';
 import { backupLabel, errorMessage, providerLabel } from '../logic/account';
 
 type Busy = null | 'apple' | 'google' | 'email' | 'code' | 'sync' | 'signout' | 'delete';
@@ -71,7 +72,7 @@ function SignIn({ loading }: { loading: boolean }) {
       const r = await fn();
       if (r && r.ok) {
         haptics.success();
-        showToast({ message: 'Signed in. Backing up your data.', tone: 'success' });
+        showToast({ message: 'Signed in. Backing up your data.', tone: 'success', silent: true });
       }
     } catch (e) {
       setError(errorMessage(e));
@@ -107,9 +108,7 @@ function SignIn({ loading }: { loading: boolean }) {
             />
           ) : null}
           {isGoogleSignInConfigured() ? (
-            <Button
-              label="Continue with Google"
-              variant={appleAvailable ? 'secondary' : 'primary'}
+            <GoogleButton
               loading={busy === 'google'}
               disabled={disabled}
               onPress={() => void run('google', signInWithGoogle)}
@@ -241,7 +240,7 @@ function SignedIn() {
     setBusy('sync');
     const r = await syncNow({ pull: true });
     setBusy(null);
-    if (r.status === 'ok') showToast({ message: 'Backup up to date.', tone: 'success' });
+    if (r.status === 'ok') showToast({ message: 'Backup up to date.', tone: 'success', silent: true });
     else if (r.status === 'error') {
       showToast({
         message: r.offline

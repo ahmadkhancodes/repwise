@@ -251,6 +251,11 @@ async function rebuildOnce({ now = Date.now(), timeZone = deviceTimeZone() }: Re
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 /** Debounced rebuild (local writes come in bursts, e.g. logging several sets). */
+/** Local writes that never change the schedule or the widget snapshot. */
+export const REBUILD_IGNORED_TABLES: ReadonlySet<string> = new Set(['sets']);
+/** Delay of the launch rebuild (ms). */
+export const FIRST_REBUILD_DELAY_MS = 2500;
+
 export function requestRebuild(delayMs = 1500): void {
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => {
@@ -395,7 +400,13 @@ export function startNotifications(deps: ResponseDeps = defaultDeps): () => void
     // not available on this platform
   }
 
-  stops.push(onLocalWrite(() => requestRebuild()));
+  // Logged sets change nothing a reminder or widget shows (perf audit A10): skip them so a rest
+  // never pays for a rebuild. Session status/finish writes still rebuild.
+  stops.push(
+    onLocalWrite((table) => {
+      if (!REBUILD_IGNORED_TABLES.has(table)) requestRebuild();
+    }),
+  );
   stops.push(useNotificationPrefs.subscribe(() => requestRebuild(300)));
   stops.push(
     useBillingStore.subscribe((s, prev) => {
@@ -409,7 +420,9 @@ export function startNotifications(deps: ResponseDeps = defaultDeps): () => void
   stops.push(() => app.remove());
 
   void ensureChannels().catch(() => undefined);
-  requestRebuild(800);
+  // Not in the first seconds after launch: the rebuild reads recipes (catalogue parse), which
+  // must not compete with Today's first paint (perf audit A4).
+  requestRebuild(FIRST_REBUILD_DELAY_MS);
   return stopNotifications;
 }
 

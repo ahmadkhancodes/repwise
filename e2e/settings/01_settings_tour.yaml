@@ -1,0 +1,59 @@
+# S38 Settings (P0): grouped, every row live. Profile card, units, theme, workout switches,
+# privacy switch (useShareUsageData), Help & legal, version. iOS + Android (testIDs only).
+appId: com.client.repwise
+tags:
+  - settings
+  - p0
+---
+- runFlow: ../onboarding/01_f1_happy_path.yaml
+- tapOn:
+    id: open-settings
+- extendedWaitUntil:
+    visible:
+      id: screen-settings
+    timeout: 5000
+- assertVisible:
+    id: open-profile
+- assertVisible:
+    id: units
+- assertVisible:
+    id: theme
+- tapOn: "Dark"
+- tapOn: "System"
+- scrollUntilVisible:
+    element:
+      id: toggle-keep-awake
+    direction: DOWN
+- tapOn:
+    id: toggle-keep-awake
+- tapOn:
+    id: toggle-keep-awake
+- scrollUntilVisible:
+    element:
+      id: toggle-share-usage
+    direction: DOWN
+- tapOn:
+    id: toggle-share-usage
+- tapOn:
+    id: toggle-share-usage
+- scrollUntilVisible:
+    element:
+      id: export-data
+    direction: DOWN
+- assertVisible:
+    id: delete-data
+- scrollUntilVisible:
+    element:
+      id: app-version
+    direction: DOWN
+- tapOn:
+    id: open-help
+- assertVisible:
+    id: screen-help
+- assertVisible:
+    id: help-terms
+- assertVisible:
+    id: help-privacy
+- tapOn: "Back"
+- assertVisible:
+    id: screen-settings

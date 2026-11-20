@@ -58,7 +58,7 @@ describe('app shell routes', () => {
     expect(
       screen.getByText('7 days free, then $59.99/year ($1.15/week). Cancel anytime.'),
     ).toBeTruthy();
-    expect(screen.getByRole('button', { name: /^Yearly/ })).toBeSelected();
+    expect(screen.getByRole('radio', { name: /^Yearly/ })).toBeSelected();
     useBillingStore.setState({ paymentsEnabled: false });
   });
 

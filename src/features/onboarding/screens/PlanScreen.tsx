@@ -2,7 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { CalendarCheck, TriangleAlert } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { useBillingStore } from '@/services/billing';
 import { track } from '@/services/analytics';
@@ -13,7 +13,18 @@ import { generateInitialPlan } from '@/features/planner/planService';
 import { planForWeek } from '@/features/planner/repo';
 import { getProfile } from '@/features/settings/repo';
 import { useTheme } from '@/theme';
-import { Button, Card, EmptyState, Screen, Text } from '@/ui';
+import {
+  BigNumber,
+  Button,
+  Card,
+  EmptyState,
+  ringInnerWidth,
+  Screen,
+  Skeleton,
+  SkeletonCard,
+  SkeletonGroup,
+  Text,
+} from '@/ui';
 
 import { completeOnboarding, deviceContext, trackStep } from '../actions';
 import {
@@ -27,9 +38,11 @@ import {
 import { usePlanPreview } from '../hooks/usePlanPreview';
 import { GOAL_OPTIONS, labelOf } from '../logic/options';
 import {
+  BUILD_POLL_UNITS,
   BUILD_STEPS,
   formatDay,
   macroShares,
+  revealDelay,
   revealReady,
   shortTitle,
   ticksAt,
@@ -78,13 +91,16 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
           setStatus('ready');
         }
       }
-    }, 120);
+    }, t.motion.listStagger * BUILD_POLL_UNITS);
 
     (async () => {
       try {
         const existing = planForWeek('training', startOfWeek(ctx.today));
         if (!existing) {
-          await generateInitialPlan();
+          // The days the user picked in S04 (not a spread from today).
+          await generateInitialPlan({
+            trainingWeekdays: useOnboarding.getState().answers.trainingWeekdays,
+          });
           const p = getProfile();
           track('plan_generated', {
             goal: p?.goal ?? null,
@@ -103,7 +119,7 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [attempt, ctx.today, clock]);
+  }, [attempt, ctx.today, clock, t.motion.listStagger]);
 
   const finish = () => {
     haptics.light();
@@ -137,14 +153,16 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
       <Screen testID="screen-plan-building" scroll={false}>
         <View style={{ flex: 1, justifyContent: 'center', gap: t.spacing.xxl }}>
           <BuildRing progress={progress}>
-            <Text
-              variant="display"
-              tabular
-              accessibilityElementsHidden
-              importantForAccessibility="no"
-            >
-              {Math.round(progress * 100)}%
-            </Text>
+            <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <BigNumber
+                value={Math.round(progress * 100)}
+                unit="%"
+                variant="hero"
+                fitWidth={ringInnerWidth(t.sizes.ringHero, t.sizes.ringStroke)}
+                center
+                testID="build-percent"
+              />
+            </View>
           </BuildRing>
           <View style={{ gap: t.spacing.xs }}>
             <Text variant="title1" align="center" accessibilityRole="header">
@@ -189,7 +207,12 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
     <Screen
       testID="screen-plan"
       footer={
-        <Animated.View entering={FadeIn.delay(1800).duration(t.motion.duration.slow)}>
+        <Animated.View
+          entering={FadeInDown.delay(revealDelay(t.motion, 'cta'))
+            .springify()
+            .damping(t.motion.spring.damping)
+            .stiffness(t.motion.spring.stiffness)}
+        >
           <Button label="Start my plan" onPress={finish} testID="plan-continue" />
         </Animated.View>
       }
@@ -214,11 +237,13 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
       </Animated.View>
 
       {!preview.ready ? (
-        <Card testID="reveal-loading">
-          <Text variant="body" color="textSecondary">
-            Loading your plan…
-          </Text>
-        </Card>
+        <SkeletonGroup label="Loading your plan" testID="reveal-loading">
+          <Skeleton height={t.sizes.ringHero + t.spacing.xxxl * 2} radius={t.radius.card} />
+          <Skeleton height={t.sizes.touch + t.spacing.xl} radius={t.radius.card} />
+          <SkeletonCard lines={3} />
+          <Skeleton height={t.sizes.row} radius={t.radius.card} />
+          <Skeleton height={t.sizes.row} radius={t.radius.card} />
+        </SkeletonGroup>
       ) : (
         <>
           <TargetsHero
@@ -238,7 +263,7 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
           <View style={{ gap: t.spacing.sm }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
               <CalendarCheck
-                size={t.sizes.iconSmall + 2}
+                size={t.sizes.iconMedium}
                 strokeWidth={t.sizes.iconStroke}
                 color={t.colors.textPrimary}
               />

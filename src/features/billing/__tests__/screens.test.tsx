@@ -63,7 +63,7 @@ describe(`paywall (${Platform.OS})`, () => {
       );
 
       expect(screen.getByRole('button', { name: 'Close' })).toBeTruthy();
-      expect(screen.getByRole('button', { name: /^Yearly/ })).toBeSelected();
+      expect(screen.getByRole('radio', { name: /^Yearly/ })).toBeSelected();
       for (const id of ['quarterly', 'monthly', 'weekly']) {
         expect(screen.getByTestId(`plan-${id}`)).not.toBeSelected();
       }
@@ -76,6 +76,11 @@ describe(`paywall (${Platform.OS})`, () => {
         '7 days free, then £45.99/year (£0.88/week). Cancel anytime.',
       );
       expect(screen.getByRole('button', { name: 'Start free trial' })).toBeTruthy();
+      // Honest trial timeline: today → day 5 reminder → day 7 billed at the store price.
+      expect(screen.getByTestId('paywall-timeline')).toBeTruthy();
+      expect(screen.getByText('Day 5'.toUpperCase())).toBeTruthy();
+      expect(screen.getByText('Billed £45.99/year')).toBeTruthy();
+      expect(screen.getAllByRole('radio')).toHaveLength(4);
       expect(screen.getByTestId('paywall-cancel')).toHaveTextContent(
         os() === 'ios' ? /Subscriptions on your iPhone/ : /Google Play/,
       );
@@ -88,6 +93,8 @@ describe(`paywall (${Platform.OS})`, () => {
     await fireEvent.press(await screen.findByTestId('plan-monthly'));
     expect(screen.getByTestId('plan-monthly')).toBeSelected();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
+    // No trial on monthly: no timeline.
+    expect(screen.queryByTestId('paywall-timeline')).toBeNull();
     expect(screen.getByTestId('paywall-price-line')).toHaveTextContent(
       '£9.99/month (£2.31/week), renews automatically. Cancel anytime.',
     );
@@ -141,7 +148,7 @@ describe(`paywall (${Platform.OS})`, () => {
   it('Restore is always there', async () => {
     await start();
     await renderRouter(routes, { initialUrl: '/paywall' });
-    await fireEvent.press(await screen.findByRole('button', { name: 'Restore' }));
+    await fireEvent.press(await screen.findByRole('button', { name: 'Restore purchases' }));
     expect(store.getAvailablePurchases).toHaveBeenCalledWith({ sync: true });
   });
 

@@ -1,0 +1,42 @@
+# S38/S42 Delete all data (P0): two confirmations, a 5 s undo, then a fresh start on Welcome.
+# First pass undoes (nothing deleted), second pass lets it run.
+appId: com.client.repwise
+tags:
+  - settings
+  - p0
+---
+- runFlow: ../onboarding/01_f1_happy_path.yaml
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: delete-data
+    direction: DOWN
+- tapOn:
+    id: delete-data
+- assertVisible: "Delete all data?"
+- tapOn:
+    id: delete-data-continue
+- assertVisible: "This cannot be undone"
+- tapOn:
+    id: delete-data-confirm
+- tapOn: "Undo"
+- assertVisible: "Nothing was deleted."
+- assertVisible:
+    id: screen-settings
+- tapOn:
+    id: delete-data
+- tapOn:
+    id: delete-data-continue
+- tapOn:
+    id: delete-data-confirm
+- extendedWaitUntil:
+    visible:
+      id: screen-welcome
+    timeout: 15000
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: screen-welcome
+    timeout: 10000

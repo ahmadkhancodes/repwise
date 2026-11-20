@@ -12,6 +12,8 @@ import { requireOptionalNativeModule } from 'expo';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import { getAppPrefs } from '@/features/settings/prefs';
+
 import {
   planRestSurface,
   REST_ALERT_ID,
@@ -50,7 +52,8 @@ async function setAlert(at: number | null, title: string, body: string, sessionI
     content: {
       title,
       body,
-      sound: 'default',
+      // Settings > Workout > Rest timer sound (iOS honours it per alert; Android uses the channel).
+      sound: getAppPrefs().restSound ? 'default' : false,
       data: { kind: 'rest', url: '/train', ...(sessionId ? { sessionId } : {}) },
       interruptionLevel: 'timeSensitive',
     },

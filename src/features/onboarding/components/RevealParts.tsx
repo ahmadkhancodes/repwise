@@ -1,4 +1,4 @@
-import { Check, Dumbbell, Moon } from 'lucide-react-native';
+import { Check } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -15,19 +15,36 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useTheme, type ColorToken } from '@/theme';
-import { BigNumber, Card, ProgressRing, Text } from '@/ui';
+import {
+  BigNumber,
+  Card,
+  ProgressRing,
+  ringInnerWidth,
+  Text,
+  WeekStrip as SharedWeekStrip,
+} from '@/ui';
 
 import type { PreviewMeal } from '../hooks/usePlanPreview';
-import { SLOT_LABEL, type StripDay } from '../logic/reveal';
+import {
+  BUILD_TICK_MS,
+  revealDelay,
+  SLOT_LABEL,
+  type RevealPart,
+  type StripDay,
+} from '../logic/reveal';
 
+/** Spring entrance at the reveal choreography's delay for `part` / `index`. */
 const useSpringIn = () => {
   const t = useTheme();
-  return (delay: number) =>
-    FadeInDown.delay(delay)
+  return (part: RevealPart, index = 0) =>
+    FadeInDown.delay(revealDelay(t.motion, part, index))
       .springify()
       .damping(t.motion.spring.damping)
       .stiffness(t.motion.spring.stiffness);
 };
+
+/** Small macro ring size: one gym hit box plus a spacing step (three fit 320dp). */
+const macroRing = (t: ReturnType<typeof useTheme>) => t.sizes.hitGymLarge + t.spacing.md;
 
 /** One line of the build sequence: a pulsing dot while working, a check when done. */
 export function BuildLine({
@@ -46,7 +63,10 @@ export function BuildLine({
     if (state === 'active' && !reduceMotion) {
       pulse.set(
         withRepeat(
-          withSequence(withTiming(0.35, { duration: 420 }), withTiming(1, { duration: 420 })),
+          withSequence(
+            withTiming(0.35, { duration: BUILD_TICK_MS }),
+            withTiming(1, { duration: BUILD_TICK_MS }),
+          ),
           -1,
         ),
       );
@@ -89,7 +109,7 @@ export function BuildLine({
           <Animated.View entering={FadeIn.duration(t.motion.duration.fast)}>
             <Check
               size={t.sizes.iconSmall}
-              strokeWidth={t.sizes.iconStroke + 1}
+              strokeWidth={t.sizes.iconStrokeBold}
               color={t.colors.onAccent}
             />
           </Animated.View>
@@ -106,7 +126,7 @@ export function BuildLine({
   );
 }
 
-/** Hero: today's calories in a big ring with P/C/F rings that fill one after another. */
+/** Hero: today's calories as one huge number in the hero ring, P/C/F rings spring in after. */
 export function TargetsHero({
   kcal,
   macros,
@@ -120,15 +140,17 @@ export function TargetsHero({
 }) {
   const t = useTheme();
   const springIn = useSpringIn();
-  const ring = t.sizes.ring * 1.5;
-  const small = t.sizes.ring / 2;
+  const ring = t.sizes.ringHero;
+  const stroke = t.sizes.ringStroke;
+  const small = macroRing(t);
+  const smallStroke = t.spacing.xs;
   const rows: { key: 'protein' | 'carbs' | 'fat'; label: string; color: ColorToken }[] = [
     { key: 'protein', label: 'Protein', color: 'macroProtein' },
     { key: 'carbs', label: 'Carbs', color: 'macroCarb' },
     { key: 'fat', label: 'Fat', color: 'macroFat' },
   ];
   return (
-    <Animated.View entering={springIn(0)}>
+    <Animated.View entering={springIn('hero')}>
       <Card
         testID="reveal-targets"
         style={{ alignItems: 'center', gap: t.spacing.lg, paddingVertical: t.spacing.xl }}
@@ -136,12 +158,18 @@ export function TargetsHero({
         <ProgressRing
           progress={1}
           size={ring}
-          strokeWidth={t.sizes.ringStroke + 4}
+          strokeWidth={stroke}
           accessibilityLabel={`Calories today, ${kcal} kcal`}
         >
-          <BigNumber value={kcal} testID="reveal-kcal" />
-          <Text variant="caption" color="textSecondary">
-            kcal · {dayType === 'training' ? 'training day' : 'rest day'}
+          <BigNumber
+            value={kcal}
+            variant="hero"
+            fitWidth={ringInnerWidth(ring, stroke)}
+            center
+            testID="reveal-kcal"
+          />
+          <Text variant="caption" color="textSecondary" align="center">
+            {`kcal · ${dayType === 'training' ? 'training day' : 'rest day'}`}
           </Text>
         </ProgressRing>
         <View
@@ -150,19 +178,22 @@ export function TargetsHero({
           {rows.map((r, i) => (
             <Animated.View
               key={r.key}
-              entering={springIn(300 + i * 140)}
+              entering={springIn('macro', i)}
               style={{ alignItems: 'center', gap: t.spacing.xs }}
             >
               <ProgressRing
                 progress={shares[r.key]}
                 size={small}
-                strokeWidth={t.sizes.ringStroke - 2}
+                strokeWidth={smallStroke}
                 color={r.color}
                 accessibilityLabel={`${r.label}, ${Math.round(macros[r.key])} grams`}
               >
-                <Text variant="headline" tabular>
-                  {Math.round(macros[r.key])}
-                </Text>
+                <BigNumber
+                  value={Math.round(macros[r.key])}
+                  variant="title2"
+                  fitWidth={ringInnerWidth(small, smallStroke)}
+                  center
+                />
               </ProgressRing>
               <Text variant="caption" color="textSecondary">
                 {r.label} g
@@ -175,63 +206,39 @@ export function TargetsHero({
   );
 }
 
-/** Week strip: the seven days drop in one after another; training days are filled. */
+/**
+ * The week on the shared WeekStrip (display only): training days ringed, rest days plain, today
+ * bold. A line under it names the training days.
+ */
 export function WeekStrip({ days }: { days: StripDay[] }) {
   const t = useTheme();
   const springIn = useSpringIn();
+  const today = days.find((d) => d.isToday)?.date;
+  const training = days.filter((d) => d.training);
   return (
-    <View style={{ flexDirection: 'row', gap: t.spacing.xxs }} testID="reveal-week">
-      {days.map((d, i) => (
-        <Animated.View
-          key={d.date}
-          entering={springIn(500 + i * 70)}
-          style={{ flex: 1 }}
-          accessible
-          accessibilityLabel={`${d.label} ${d.dayOfMonth}${d.isToday ? ', today' : ''}: ${d.training ? d.title || 'training' : 'rest'}`}
-          testID={`reveal-day-${i}`}
-        >
-          <View
-            style={{
-              alignItems: 'center',
-              gap: t.spacing.xxs,
-              paddingVertical: t.spacing.sm,
-              borderRadius: t.radius.card,
-              backgroundColor: d.training ? t.colors.inverse : t.colors.surface,
-              borderWidth: t.sizes.hairline * 2,
-              borderColor: d.isToday ? t.colors.accent : 'transparent',
-              opacity: d.isPast ? 0.4 : 1,
-            }}
-          >
-            <Text
-              variant="caption"
-              style={{ color: d.training ? t.colors.onInverse : t.colors.textSecondary }}
-            >
-              {d.label.slice(0, 1)}
-            </Text>
-            <Text
-              variant="headline"
-              tabular
-              style={{ color: d.training ? t.colors.onInverse : t.colors.textPrimary }}
-            >
-              {d.dayOfMonth}
-            </Text>
-            {d.training ? (
-              <Dumbbell
-                size={t.sizes.iconSmall}
-                strokeWidth={t.sizes.iconStroke}
-                color={t.colors.onInverse}
-              />
-            ) : (
-              <Moon
-                size={t.sizes.iconSmall}
-                strokeWidth={t.sizes.iconStroke}
-                color={t.colors.textTertiary}
-              />
-            )}
-          </View>
-        </Animated.View>
-      ))}
-    </View>
+    <Animated.View entering={springIn('week')} style={{ gap: t.spacing.xs }} testID="reveal-week">
+      <SharedWeekStrip
+        days={days.map((d) => ({
+          key: d.date,
+          weekday: d.label,
+          day: d.dayOfMonth,
+          status: d.training ? (d.isPast ? 'none' : 'planned') : 'rest',
+          accessibilityLabel: `${d.label} ${d.dayOfMonth}${d.isToday ? ', today' : ''}: ${
+            d.training ? d.title || 'training' : 'rest'
+          }`,
+        }))}
+        selectedKey={null}
+        todayKey={today}
+        onSelect={() => undefined}
+      />
+      <Text variant="callout" color="textSecondary" testID="reveal-week-line">
+        {training.length
+          ? `${training.length} training ${training.length === 1 ? 'day' : 'days'} · ${training
+              .map((d) => d.label)
+              .join(', ')}`
+          : 'Your first sessions start next week.'}
+      </Text>
+    </Animated.View>
   );
 }
 
@@ -252,7 +259,7 @@ export function WorkoutCard({
   const t = useTheme();
   const springIn = useSpringIn();
   return (
-    <Animated.View entering={springIn(1000)}>
+    <Animated.View entering={springIn('workout')}>
       <Card testID="reveal-workout" style={{ gap: t.spacing.sm }}>
         <Text variant="caption" color="accentText">
           {rest ? 'TODAY · REST DAY' : 'TODAY'}
@@ -272,7 +279,7 @@ export function WorkoutCard({
               {names.slice(0, 4).map((n, i) => (
                 <Animated.View
                   key={`${n}-${i}`}
-                  entering={springIn(1150 + i * 80)}
+                  entering={springIn('workout', i + 1)}
                   style={{ flexDirection: 'row', gap: t.spacing.xs }}
                 >
                   <Text variant="callout" color="textTertiary" tabular>
@@ -304,7 +311,7 @@ export function MealsList({ meals }: { meals: PreviewMeal[] }) {
       {meals.map((m, i) => (
         <Animated.View
           key={m.id}
-          entering={FadeInUp.delay(1400 + i * 110)
+          entering={FadeInUp.delay(revealDelay(t.motion, 'meals', i))
             .springify()
             .damping(t.motion.spring.damping)
             .stiffness(t.motion.spring.stiffness)}
@@ -360,8 +367,8 @@ export function BuildRing({
     <Animated.View style={[{ alignItems: 'center' }, style]}>
       <ProgressRing
         progress={progress}
-        size={t.sizes.ring * 1.5}
-        strokeWidth={t.sizes.ringStroke + 4}
+        size={t.sizes.ringHero}
+        strokeWidth={t.sizes.ringStroke}
         accessibilityLabel="Building your plan"
       >
         {children}

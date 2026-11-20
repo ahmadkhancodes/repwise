@@ -1,0 +1,27 @@
+# S38 → Profile & plan (P0): change training days and equipment, save → the plan is rebuilt
+# from today and we land back on Settings with the new summary.
+appId: com.client.repwise
+tags:
+  - settings
+  - p0
+---
+- runFlow: ../onboarding/01_f1_happy_path.yaml
+- tapOn:
+    id: open-settings
+- tapOn:
+    id: open-profile
+- assertVisible:
+    id: screen-profile
+- assertVisible: "No changes"
+- tapOn: "4"
+- tapOn:
+    id: length-60
+- tapOn:
+    id: location-home
+- tapOn:
+    id: profile-save
+- extendedWaitUntil:
+    visible:
+      id: screen-settings
+    timeout: 15000
+- assertVisible: ".*4 days · 60 min · Home.*"

@@ -58,6 +58,9 @@ tags:
     timeout: 5000
 - assertVisible:
     id: "weekday"
+# Seven flex day cells fit 360dp: Sunday is on screen, not clipped.
+- assertVisible:
+    id: "weekday-6"
 - tapOn:
     id: "quiz-next"
 - assertVisible:
@@ -126,7 +129,7 @@ tags:
 - assertVisible:
     id: "reveal-week"
 - assertVisible:
-    id: "reveal-day-0"
+    id: "reveal-week-line"
 - assertVisible: "Start my plan"
 - tapOn:
     id: "plan-continue"

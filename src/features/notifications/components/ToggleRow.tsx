@@ -1,17 +1,8 @@
-import type { LucideIcon } from 'lucide-react-native';
-import { useEffect } from 'react';
+import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
-import Animated, {
-  interpolateColor,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
-import { PressableScale, Text } from '@/ui';
+import { Badge, PressableScale, Switch, SwitchTrack, Text } from '@/ui';
 
 export type ToggleRowProps = {
   title: string;
@@ -23,18 +14,25 @@ export type ToggleRowProps = {
   /** Trailing badge instead of the switch, e.g. "Pro" (row then calls onLockedPress). */
   locked?: string;
   onLockedPress?: () => void;
+  /**
+   * Makes the text part its own button (e.g. "change the time") next to a standalone switch.
+   * Without it the whole row is the switch.
+   */
+  onPressDetail?: () => void;
+  /** Spoken hint for the detail button, e.g. "Changes the time". */
+  detailHint?: string;
+  /** testID of the detail button (default `<testID>-detail`). */
+  detailTestID?: string;
   divider?: boolean;
   testID?: string;
 };
 
-const TRACK_W = 52;
-const TRACK_H = 32;
-const THUMB = 26;
-const INSET = (TRACK_H - THUMB) / 2;
-
 /**
- * Settings row with an animated switch (spring thumb, colour cross-fade). The whole row is the
- * 48dp+ target; role "switch" with its checked state for screen readers. Selection haptic.
+ * Settings row with an on/off switch (shared SwitchTrack / Switch: borderStrong off-state, spring
+ * thumb). Three shapes, never nested pressables:
+ * - default: the whole 56dp row is one switch (role "switch", checked state);
+ * - `onPressDetail`: text = button (opens a time picker), switch = its own 48dp control;
+ * - `locked`: the row is a button with a Pro badge that opens the paywall.
  */
 export function ToggleRow({
   title,
@@ -45,29 +43,79 @@ export function ToggleRow({
   disabled,
   locked,
   onLockedPress,
+  onPressDetail,
+  detailHint,
+  detailTestID,
   divider = false,
   testID,
 }: ToggleRowProps) {
   const t = useTheme();
-  const reduceMotion = useReducedMotion();
-  const on = useSharedValue(value ? 1 : 0);
-
-  useEffect(() => {
-    const target = value ? 1 : 0;
-    on.set(reduceMotion ? withTiming(target, { duration: 0 }) : withSpring(target, t.motion.spring));
-  }, [value, on, reduceMotion, t.motion.spring]);
-
-  const off = t.colors.surface2;
-  const onColor = t.colors.accent;
-  const trackStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(on.value, [0, 1], [off, onColor]),
-  }));
-  const thumbStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: on.value * (TRACK_W - THUMB - INSET * 2) }],
-  }));
-
-  const label = [title, subtitle, locked].filter(Boolean).join(', ');
   const isLocked = Boolean(locked);
+  const label = [title, subtitle, locked].filter(Boolean).join(', ');
+
+  const rowStyle = {
+    minHeight: t.sizes.row,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: t.spacing.sm,
+    paddingVertical: t.spacing.sm,
+    borderBottomWidth: divider ? t.sizes.hairline : 0,
+    borderBottomColor: t.colors.border,
+    opacity: disabled ? 0.4 : 1,
+  };
+
+  const texts = (
+    <>
+      {Icon ? (
+        <Icon color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
+      ) : null}
+      <View style={{ flex: 1, gap: t.spacing.xxs }}>
+        <Text variant="body">{title}</Text>
+        {subtitle ? (
+          <Text variant="callout" color="textSecondary" tabular>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+    </>
+  );
+
+  if (onPressDetail && !isLocked) {
+    return (
+      <View style={rowStyle}>
+        <PressableScale
+          testID={detailTestID ?? (testID ? `${testID}-detail` : undefined)}
+          feedback="selection"
+          disabled={disabled}
+          onPress={onPressDetail}
+          accessibilityRole="button"
+          accessibilityLabel={[title, subtitle].filter(Boolean).join(', ')}
+          accessibilityHint={detailHint}
+          style={{
+            flex: 1,
+            minHeight: t.sizes.touch,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: t.spacing.sm,
+          }}
+        >
+          {texts}
+          <ChevronRight
+            color={t.colors.textTertiary}
+            size={t.sizes.iconMedium}
+            strokeWidth={t.sizes.iconStroke}
+          />
+        </PressableScale>
+        <Switch
+          value={value}
+          onValueChange={onChange}
+          disabled={disabled}
+          accessibilityLabel={title}
+          testID={testID}
+        />
+      </View>
+    );
+  }
 
   return (
     <PressableScale
@@ -77,59 +125,16 @@ export function ToggleRow({
       onPress={() => (isLocked ? onLockedPress?.() : onChange(!value))}
       accessibilityRole={isLocked ? 'button' : 'switch'}
       accessibilityLabel={label}
-      accessibilityState={isLocked ? { disabled: Boolean(disabled) } : { checked: value, disabled: Boolean(disabled) }}
-      style={{
-        minHeight: t.sizes.row,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: t.spacing.sm,
-        paddingVertical: t.spacing.sm,
-        borderBottomWidth: divider ? t.sizes.hairline : 0,
-        borderBottomColor: t.colors.border,
-        opacity: disabled ? 0.4 : 1,
-      }}
+      accessibilityState={
+        isLocked ? { disabled: Boolean(disabled) } : { checked: value, disabled: Boolean(disabled) }
+      }
+      style={rowStyle}
     >
-      {Icon ? <Icon color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} /> : null}
-      <View style={{ flex: 1, gap: t.spacing.xxs }}>
-        <Text variant="body">{title}</Text>
-        {subtitle ? (
-          <Text variant="callout" color="textSecondary" tabular>
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
+      {texts}
       {isLocked ? (
-        <View
-          style={{
-            backgroundColor: t.colors.accentSoft,
-            borderRadius: t.radius.pill,
-            paddingHorizontal: t.spacing.xs,
-            paddingVertical: t.spacing.xxs,
-          }}
-        >
-          <Text variant="caption" color="accentText">
-            {locked}
-          </Text>
-        </View>
+        <Badge label={locked!} tone="accent" />
       ) : (
-        <Animated.View
-          testID={testID ? `${testID}-track` : undefined}
-          style={[{ width: TRACK_W, height: TRACK_H, borderRadius: t.radius.pill, padding: INSET }, trackStyle]}
-        >
-          <Animated.View
-            style={[
-              {
-                width: THUMB,
-                height: THUMB,
-                borderRadius: t.radius.pill,
-                backgroundColor: t.colors.bg,
-                borderWidth: t.sizes.hairline,
-                borderColor: t.colors.border,
-              },
-              thumbStyle,
-            ]}
-          />
-        </Animated.View>
+        <SwitchTrack value={value} testID={testID ? `${testID}-track` : undefined} />
       )}
     </PressableScale>
   );
