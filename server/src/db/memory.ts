@@ -75,6 +75,16 @@ export class MemoryDb implements Db {
     }
     return { status: 'missing' };
   }
+  async markRefreshTokenRecovered(tokenHash: string, now: number) {
+    // No await between the check and the write: atomic, like findOneAndUpdate.
+    for (const t of this.refreshTokens.values()) {
+      if (t.tokenHash !== tokenHash) continue;
+      if (t.rotatedAt || t.recoveredAt || t.expiresAt <= now) return false;
+      t.recoveredAt = now;
+      return true;
+    }
+    return false;
+  }
   async getRefreshToken(tokenHash: string) {
     for (const t of this.refreshTokens.values()) if (t.tokenHash === tokenHash) return clone(t);
     return null;

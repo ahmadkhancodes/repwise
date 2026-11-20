@@ -8,7 +8,8 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { zustandStorage } from '@/services/storage';
 
-import { EMPTY_ANSWERS, type Answers } from './logic/answers';
+import type { Answers } from './logic/answers';
+import { EMPTY_ANSWERS } from './logic/emptyAnswers';
 import type { Phase } from './logic/flow';
 import type { StepId } from './logic/steps';
 

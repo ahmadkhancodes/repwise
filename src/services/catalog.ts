@@ -12,7 +12,8 @@
  *   single block holds the JS thread for the whole ~1 MB. The warm-up then builds the search indexes,
  *   again one part per idle slice, so the first keystroke in a search is instant.
  * - `useCatalogFor('exercises')` lets a screen render as soon as the parts it reads are in.
- * Only types come from the package entry, so zod never reaches the app bundle.
+ * Only types come from the package entry (an ESLint rule enforces it, perf r2 N1), so neither zod
+ * nor the content schemas are evaluated in the app; the JSON is `require`d per part on demand.
  */
 import type { Exercise, Food, Recipe } from '@repwise/content';
 import { useEffect, useSyncExternalStore } from 'react';
@@ -274,6 +275,14 @@ function subscribe(l: () => void): () => void {
 }
 
 /**
+ * Parts a screen cannot render without (names in the workout player): when a mounted screen asks
+ * for one, it loads on the next macrotask (about 10–30 ms for exercises), not in an idle slice that
+ * a busy startup can push back by up to 2 s (perf audit r2 N19: a notification tap into the
+ * player showed a skeleton). Recipes and foods (the large parts) stay idle-sliced.
+ */
+export const URGENT_PARTS: readonly CatalogPart[] = ['exercises'];
+
+/**
  * Catalogue for screens that read only some parts: null until those parts are loaded (show a
  * skeleton), then the catalogue. E.g. the player: `useCatalogFor('exercises')`.
  */
@@ -283,7 +292,22 @@ export function useCatalogFor(...want: CatalogPart[]): Catalog | null {
   const c = useSyncExternalStore(subscribe, snap, snap);
   useEffect(() => {
     const ps = key.split(',') as CatalogPart[];
-    if (!peekCatalogFor(ps)) loadCatalogParts(ps).catch(() => undefined);
+    if (peekCatalogFor(ps)) return;
+    const urgent = ps.filter((p) => URGENT_PARTS.includes(p) && parts[p] == null);
+    const timer =
+      urgent.length > 0
+        ? setTimeout(() => {
+            try {
+              for (const p of urgent) part(p);
+            } catch {
+              // the idle load below retries and reports
+            }
+          }, 0)
+        : null;
+    loadCatalogParts(ps).catch(() => undefined);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [key]);
   return c;
 }

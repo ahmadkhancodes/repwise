@@ -21,6 +21,10 @@
  *   value (D28, closed by D33); the content schema now requires one.
  *
  * Only type imports from the engine: this module has no runtime dependency on it.
+ *
+ * Data-free and zod-free on purpose (perf audit r2 N1): the app imports it as
+ * `@repwise/content/toEngine` on its startup path, so it must not evaluate the catalogue JSON or the
+ * zod schemas. The bundled-JSON helpers (`engineCatalogues`) live in `./bundled`.
  */
 import type {
   Allergen as EngineAllergen,
@@ -32,20 +36,19 @@ import type {
   ProteinSource as EngineProteinSource,
   Recipe as EngineRecipe,
 } from '@repwise/engine';
-import { exercises as allExercises, foods as allFoods, recipes as allRecipes } from './data';
 import { indexFoods, type FoodIndex } from './compute';
-import {
-  PATTERNS,
-  type Allergen,
-  type Cuisine,
-  type DietTag,
-  type Equipment,
-  type Exercise,
-  type Food,
-  type Level,
-  type PatternFamily,
-  type ProteinSource,
-  type Recipe,
+import { PATTERNS } from './enums';
+import type {
+  Allergen,
+  Cuisine,
+  DietTag,
+  Equipment,
+  Exercise,
+  Food,
+  Level,
+  PatternFamily,
+  ProteinSource,
+  Recipe,
 } from './schemas';
 
 export type { EngineExercise, EngineRecipe };
@@ -274,14 +277,12 @@ export interface EngineCatalogues {
 
 const isExclusion = (x: EngineExercise | Exclusion): x is Exclusion => 'reason' in x;
 
-/** The whole catalogue in engine shape. Defaults to the bundled JSON. */
-export function toEngineCatalogues(
-  src: { exercises: readonly Exercise[]; recipes: readonly Recipe[]; foods: readonly Food[] } = {
-    exercises: allExercises,
-    recipes: allRecipes,
-    foods: allFoods,
-  },
-): EngineCatalogues {
+/** The whole catalogue in engine shape (pass the catalogues; `engineCatalogues()` uses the bundled JSON). */
+export function toEngineCatalogues(src: {
+  exercises: readonly Exercise[];
+  recipes: readonly Recipe[];
+  foods: readonly Food[];
+}): EngineCatalogues {
   const index = indexFoods(src.foods);
   const out: EngineCatalogues = { exercises: [], recipes: [], excluded: [] };
   for (const e of src.exercises) {
@@ -291,12 +292,4 @@ export function toEngineCatalogues(
   }
   for (const r of src.recipes) out.recipes.push(recipeToEngine(r, index));
   return out;
-}
-
-let cached: EngineCatalogues | undefined;
-
-/** Memoised `toEngineCatalogues()` of the bundled JSON (one conversion per process / Worker isolate). */
-export function engineCatalogues(): EngineCatalogues {
-  cached ??= toEngineCatalogues();
-  return cached;
 }

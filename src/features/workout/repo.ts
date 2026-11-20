@@ -1,6 +1,6 @@
 import { and, asc, between, desc, eq, inArray, isNotNull, isNull, ne, or, sql } from 'drizzle-orm';
 
-import { getDb } from '@/db/client';
+import { getDb, getRawDb } from '@/db/client';
 import { notifyLocalWrite } from '@/db/events';
 import { withTransaction } from '@/db/transaction';
 import { createRepo, DIRTY, type NewRow, type Row } from '@/db/repo';
@@ -226,11 +226,42 @@ function historyRows(exerciseId: string, excludeSessionId: string | null): Histo
     .all();
 }
 
-/** Last finished session's sets for an exercise (the ghosted "Previous" column, RW-22). */
+/**
+ * Last finished session's sets for an exercise (the ghosted "Previous" column, RW-22).
+ *
+ * Two indexed lookups, flat however long the history is (perf audit r2 N11): the newest finished
+ * session that has a done set of this exercise, then only that session's sets. It used to read every
+ * done set ever logged for the exercise and keep the newest session's.
+ */
 export function previousSets(exerciseId: string, excludeSessionId: string | null): WorkoutSet[] {
-  const rows = historyRows(exerciseId, excludeSessionId);
-  const first = rows[0]?.sessionId;
-  return rows.filter((r) => r.sessionId === first).map((r) => r.set);
+  const raw = getRawDb();
+  const latest = raw.getFirstSync(
+    `SELECT s.id AS id FROM session_exercises se
+       JOIN sessions s ON s.id = se.session_id
+      WHERE se.exercise_id = ? AND se.deleted_at IS NULL
+        AND s.status = 'done' AND s.deleted_at IS NULL AND s.id IS NOT ?
+        AND EXISTS (SELECT 1 FROM sets st WHERE st.session_exercise_id = se.id
+                      AND st.deleted_at IS NULL AND st.done_at IS NOT NULL)
+      ORDER BY s.ended_at DESC LIMIT 1`,
+    [exerciseId, excludeSessionId],
+  ) as { id: string } | null;
+  if (!latest) return [];
+  return getDb()
+    .select({ set: sets })
+    .from(sets)
+    .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+    .where(
+      and(
+        eq(sessionExercises.sessionId, latest.id),
+        eq(sessionExercises.exerciseId, exerciseId),
+        isNull(sets.deletedAt),
+        isNull(sessionExercises.deletedAt),
+        isNotNull(sets.doneAt),
+      ),
+    )
+    .orderBy(asc(sets.idx))
+    .all()
+    .map((r) => r.set);
 }
 
 /** Every earlier done set of an exercise (PR detection). */
@@ -252,20 +283,18 @@ export function recentSessionExercises(
     }));
 }
 
+/** One multi-row INSERT for the pre-filled sets (perf audit A6 residual), not one per row. */
 function insertPrefilled(seId: string, rows: Prefill[], startIdx: number, now: number): void {
-  withTransaction(() =>
-    rows.forEach((p, i) =>
-      setsRepo.insert(
-        {
-          sessionExerciseId: seId,
-          idx: startIdx + i,
-          type: p.type,
-          weightKg: p.weightKg,
-          reps: p.reps,
-        },
-        now,
-      ),
-    ),
+  if (rows.length === 0) return;
+  setsRepo.insertMany(
+    rows.map((p, i) => ({
+      sessionExerciseId: seId,
+      idx: startIdx + i,
+      type: p.type,
+      weightKg: p.weightKg,
+      reps: p.reps,
+    })),
+    now,
   );
 }
 

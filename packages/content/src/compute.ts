@@ -2,16 +2,16 @@
  * Pure, deterministic derivations for recipes. Nutrition, allergens, diet tags and
  * the main protein source are ALWAYS computed from foods.json — never typed by hand.
  */
-import {
-  ALLERGENS,
-  type Allergen,
-  type DietTag,
-  type Food,
-  type FoodOrigin,
-  type Macros,
-  type MealSlot,
-  type ProteinSource,
-  type RecipeIngredient,
+import { ALLERGENS } from './enums';
+import type {
+  Allergen,
+  DietTag,
+  Food,
+  FoodOrigin,
+  Macros,
+  MealSlot,
+  ProteinSource,
+  RecipeIngredient,
 } from './schemas';
 
 export interface RecipeInput {

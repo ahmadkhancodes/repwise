@@ -173,7 +173,7 @@ export function WorkoutPlayerScreen({ sessionId }: { sessionId: string }) {
   const { session, items, catalog } = p;
   const status = session?.status ?? null;
   const [sheet, setSheet] = useState<'finish' | 'menu' | 'discard' | null>(null);
-  useWorkoutKeepAwake(status === 'active');
+  useWorkoutKeepAwake(sessionId, status === 'active');
   useOptimisticVersion();
 
   useEffect(() => {

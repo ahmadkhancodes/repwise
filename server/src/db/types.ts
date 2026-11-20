@@ -23,6 +23,8 @@ export interface RefreshTokenDoc {
   createdAt: number;
   expiresAt: number;
   rotatedAt?: number | null;
+  /** Set when this token was handed out a second time by a late lost-response recovery. */
+  recoveredAt?: number | null;
 }
 
 export type ConsumeRefreshResult =
@@ -136,6 +138,11 @@ export interface Db {
    * ago reports `grace` (the caller may hand back the same successor) instead of `reused`.
    */
   consumeRefreshToken(tokenHash: string, now: number, graceMs?: number): Promise<ConsumeRefreshResult>;
+  /**
+   * Atomically mark a never-rotated, never-recovered token as recovered (late lost-response
+   * recovery). False when it was already rotated or recovered: the caller must treat that as theft.
+   */
+  markRefreshTokenRecovered(tokenHash: string, now: number): Promise<boolean>;
   getRefreshToken(tokenHash: string): Promise<RefreshTokenDoc | null>;
   revokeRefreshFamily(familyId: string): Promise<void>;
   // email codes

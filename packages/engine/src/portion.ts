@@ -71,35 +71,42 @@ export function solvePortions(items: readonly PortionItem[], target: PortionTarg
   const sumK = items.reduce((a, it) => a + it.perServing.kcal, 0);
   const s: number[] = items.map((_, i) => clamp(sumK > 0 ? target.kcal / sumK : 1, i));
 
-  const cost = (sv: number[]): number => {
-    let k = 0;
-    let p = 0;
-    let reg = 0;
-    items.forEach((it, i) => {
-      const x = sv[i] as number;
-      k += it.perServing.kcal * x;
-      p += it.perServing.protein * x;
-      reg += (x - 1) * (x - 1);
-    });
+  const kc = items.map((it) => it.perServing.kcal);
+  const pc = items.map((it) => it.perServing.protein);
+  // Hinge-style emphasis outside tolerance + small regularisation toward 1 serving.
+  const costOf = (k: number, p: number, reg: number): number => {
     const ke = (k - target.kcal) / kTol;
     const pe = (p - target.protein) / pTol;
-    // Hinge-style emphasis outside tolerance + small regularisation toward 1 serving.
     return ke * ke + pe * pe + Math.max(0, Math.abs(ke) - 0.8) * 10 + Math.max(0, Math.abs(pe) - 0.8) * 10 + 0.01 * reg;
   };
-
-  let current = cost(s);
+  // Running totals: each candidate move is scored in O(1) instead of re-summing every item
+  // (ENGINE_QA bug 1: the solver was the planner's hottest function on infeasible days).
+  let K = 0;
+  let P = 0;
+  let R = 0;
+  const resum = () => {
+    K = 0;
+    P = 0;
+    R = 0;
+    for (let i = 0; i < s.length; i++) {
+      const x = s[i] as number;
+      K += (kc[i] as number) * x;
+      P += (pc[i] as number) * x;
+      R += (x - 1) * (x - 1);
+    }
+  };
+  resum();
+  let current = costOf(K, P, R);
   const deltas = [step, -step, 2 * step, -2 * step];
   for (let iter = 0; iter < 400; iter++) {
     let bestCost = current;
     let bestMove: [number, number, number, number] | undefined; // i, di, j, dj
     for (let i = 0; i < s.length; i++) {
+      const x = s[i] as number;
       for (const d of deltas) {
-        const v = (s[i] as number) + d;
+        const v = x + d;
         if (v < (lo[i] as number) - 1e-9 || v > (hi[i] as number) + 1e-9) continue;
-        const prev = s[i] as number;
-        s[i] = v;
-        const c = cost(s);
-        s[i] = prev;
+        const c = costOf(K + (kc[i] as number) * d, P + (pc[i] as number) * d, R - (x - 1) * (x - 1) + (v - 1) * (v - 1));
         if (c < bestCost - 1e-12) {
           bestCost = c;
           bestMove = [i, d, -1, 0];
@@ -108,18 +115,19 @@ export function solvePortions(items: readonly PortionItem[], target: PortionTarg
     }
     // Paired moves trade kcal for protein between two meals.
     for (let i = 0; i < s.length; i++) {
+      const xi = s[i] as number;
+      const vi = xi + step;
+      if (vi > (hi[i] as number) + 1e-9) continue;
       for (let j = 0; j < s.length; j++) {
         if (i === j) continue;
-        const vi = (s[i] as number) + step;
-        const vj = (s[j] as number) - step;
-        if (vi > (hi[i] as number) + 1e-9 || vj < (lo[j] as number) - 1e-9) continue;
-        const pi = s[i] as number;
-        const pj = s[j] as number;
-        s[i] = vi;
-        s[j] = vj;
-        const c = cost(s);
-        s[i] = pi;
-        s[j] = pj;
+        const xj = s[j] as number;
+        const vj = xj - step;
+        if (vj < (lo[j] as number) - 1e-9) continue;
+        const c = costOf(
+          K + ((kc[i] as number) - (kc[j] as number)) * step,
+          P + ((pc[i] as number) - (pc[j] as number)) * step,
+          R - (xi - 1) * (xi - 1) + (vi - 1) * (vi - 1) - (xj - 1) * (xj - 1) + (vj - 1) * (vj - 1),
+        );
         if (c < bestCost - 1e-12) {
           bestCost = c;
           bestMove = [i, step, j, -step];
@@ -130,7 +138,8 @@ export function solvePortions(items: readonly PortionItem[], target: PortionTarg
     const [i, di, j, dj] = bestMove;
     s[i] = round3((s[i] as number) + di);
     if (j >= 0) s[j] = round3((s[j] as number) + dj);
-    current = bestCost;
+    resum(); // exact totals after each accepted move (no drift)
+    current = costOf(K, P, R);
   }
   const totals = totalsFor(items, s);
   return {

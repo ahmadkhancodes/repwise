@@ -180,11 +180,55 @@ describe('refresh tokens', () => {
     const t = await setup();
     const s = await signInEmail(t, 'reuse@example.com');
     const r1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
-    t.clock.now += 61_000; // past the lost-response grace window
+    const r2 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: r1.body.refreshToken } });
+    expect(r2.status).toBe(200);
+    t.clock.now += 61_000; // past the lost-response grace window, and the successor was used
     const replay = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
     expect(replay.status).toBe(401);
     expect(replay.body.error).toBe('token_reused');
-    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: r1.body.refreshToken } })).status).toBe(401);
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: r2.body.refreshToken } })).status).toBe(401);
+  });
+
+  it('a late retry (app suspended > 60 s after rotation) recovers once instead of signing out (R2-5)', async () => {
+    const t = await setup();
+    const s = await signInEmail(t, 'suspended@example.com');
+    const r1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    t.clock.now += 5 * 60_000; // the reply was lost; the app resumes 5 minutes later
+    const late = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    expect(late.status).toBe(200);
+    expect(late.body.refreshToken).toBe(r1.body.refreshToken);
+    // The family keeps rotating normally.
+    const r2 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: late.body.refreshToken } });
+    expect(r2.status).toBe(200);
+  });
+
+  it('late recovery is single-use: a second holder of the old token or of the recovered one is refused', async () => {
+    const t = await setup();
+    const s = await signInEmail(t, 'twice@example.com');
+    await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    t.clock.now += 5 * 60_000;
+    const first = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    expect(first.status).toBe(200);
+    t.clock.now += 5 * 60_000;
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } })).body.error).toBe('token_reused');
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: first.body.refreshToken } })).status).toBe(401);
+
+    // A recovered token replayed late (after its own rotation) is never recovered again.
+    const u = await signInEmail(t, 'chain@example.com');
+    await call(t, 'POST', '/auth/refresh', { body: { refreshToken: u.refreshToken } });
+    t.clock.now += 5 * 60_000;
+    const u1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: u.refreshToken } });
+    await call(t, 'POST', '/auth/refresh', { body: { refreshToken: u1.body.refreshToken } });
+    t.clock.now += 5 * 60_000;
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: u1.body.refreshToken } })).body.error).toBe('token_reused');
+  });
+
+  it('a retry more than 24 h after rotation still revokes', async () => {
+    const t = await setup();
+    const s = await signInEmail(t, 'old@example.com');
+    await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } });
+    t.clock.now += 25 * 60 * 60_000;
+    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: s.refreshToken } })).body.error).toBe('token_reused');
   });
 
   it('a retry within the grace window (lost response) gets the same successor, not a revoked family', async () => {
@@ -202,14 +246,8 @@ describe('refresh tokens', () => {
     expect(r2.status).toBe(200);
   });
 
-  it('reuse after the grace window, or after the successor was used, still revokes the family', async () => {
+  it('reuse after the successor was used still revokes the family', async () => {
     const t = await setup();
-    const a = await signInEmail(t, 'late@example.com');
-    const a1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: a.refreshToken } });
-    t.clock.now += 61_000;
-    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: a.refreshToken } })).body.error).toBe('token_reused');
-    expect((await call(t, 'POST', '/auth/refresh', { body: { refreshToken: a1.body.refreshToken } })).status).toBe(401);
-
     const b = await signInEmail(t, 'stolen@example.com');
     const b1 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: b.refreshToken } });
     const b2 = await call(t, 'POST', '/auth/refresh', { body: { refreshToken: b1.body.refreshToken } });

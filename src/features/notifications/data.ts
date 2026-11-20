@@ -125,7 +125,7 @@ export function loadSnapshot(
   }));
   const next = pickNextMeal(meals, formatHm(clock.minute));
   if (next) {
-    snap.nextMeal = { slot: next.slot, label: slotLabel(next.slot), name: next.name, kcal: next.kcal, time: next.time };
+    snap.nextMeal = { id: next.id, slot: next.slot, label: slotLabel(next.slot), name: next.name, kcal: next.kcal, time: next.time };
   }
 
   const logs = logsForDate(date).map((l) => ({

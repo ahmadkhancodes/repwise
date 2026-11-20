@@ -18,6 +18,9 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // Backstop for the live-query focus gate (perf audit r2 A2/N4): a tab in the background
+        // does not render at all until it is focused again.
+        freezeOnBlur: true,
         tabBarActiveTintColor: t.colors.textPrimary,
         tabBarInactiveTintColor: t.colors.textSecondary,
         tabBarStyle: {

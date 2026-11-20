@@ -4,12 +4,15 @@
  */
 import { weekdayMon0 } from '@/features/planner/engine';
 import { localToday } from '@/features/planner/planService';
-import { getProfile, saveProfile } from '@/features/settings/repo';
+import { saveProfile } from '@/features/settings/repo';
 import { track } from '@/services/analytics';
 
 import { answersToProfile, type Answers } from './logic/answers';
 import { durationSeconds } from './logic/flow';
 import { useOnboarding } from './store';
+
+// Re-exported for existing callers; the launch route imports it from './status' (light module).
+export { isOnboarded } from './status';
 
 export type DeviceContext = {
   today: string;
@@ -49,16 +52,6 @@ export function completeOnboarding(now: number = Date.now()): void {
   saveProfile({ onboardedAt: now });
   s.complete(now);
   track('onboarding_complete', { duration_s: durationSeconds(s.startedAt, now) });
-}
-
-/** True once onboarding finished on this phone, or a restored profile says it was done before. */
-export function isOnboarded(): boolean {
-  if (useOnboarding.getState().phase === 'done') return true;
-  try {
-    return getProfile()?.onboardedAt != null;
-  } catch {
-    return false;
-  }
 }
 
 /** `onboarding_step` (sheet 23): step name + position, no answers. */

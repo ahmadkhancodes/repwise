@@ -108,6 +108,13 @@ export function calorieFloor(bmr: number, sex: Sex): number {
   return Math.ceil(Math.round(raw * 1000) / 10000) * 10; // round first: 1800 × 1.1 = 1980.0000000000002
 }
 
+/**
+ * Daily kcal ceiling. Mifflin-St Jeor on actual weight overshoots at very high body weights and a
+ * run of upward weekly check-ins is otherwise unbounded, so targets never exceed this (unless the
+ * floor itself is higher, which the profile bounds make impossible: max floor ≈ 4,900).
+ */
+export const KCAL_CEILING = 5000;
+
 export const GOAL_RANGES: Record<Goal, { min: number; max: number }> = {
   fat_loss: { min: -0.2, max: -0.15 },
   muscle_gain: { min: 0.08, max: 0.12 },
@@ -131,6 +138,8 @@ export interface GoalCalories {
   floor: number;
   floorApplied: boolean;
   adjustment: number;
+  /** True when KCAL_CEILING cut the goal kcal. */
+  ceilingApplied?: boolean;
 }
 
 /** Fat loss −15–20%, muscle gain +8–12%, recomposition/maintain ±0. Rounded to 10 kcal, floor enforced. */
@@ -143,7 +152,8 @@ export function goalCalories(input: GoalCaloriesInput): GoalCalories {
   else adj = 0;
   const floor = calorieFloor(input.bmr, input.sex);
   const raw = Math.round((input.tdee * (1 + adj)) / 10) * 10;
-  return { kcal: Math.max(raw, floor), floor, floorApplied: raw < floor, adjustment: adj };
+  const ceiling = Math.max(KCAL_CEILING, floor);
+  return { kcal: Math.min(ceiling, Math.max(raw, floor)), floor, floorApplied: raw < floor, adjustment: adj, ceilingApplied: raw > ceiling };
 }
 
 // ---------------------------------------------------------------------------
@@ -216,10 +226,16 @@ export function macroTargets(input: MacroInput): MacroSet {
 
 export type DayType = 'training' | 'rest';
 
-/** Training days +15% carbs, rest days −15% carbs; kcal follow the carbs. Rest days never drop below `floor`. */
-export function dayTypeMacros(base: MacroSet, dayType: DayType, floor = 0): MacroSet {
+/**
+ * Training days +15% carbs, rest days −15% carbs; kcal follow the carbs. Rest days never drop below
+ * `floor`; training days never rise above `ceiling` (when the base is already under it).
+ */
+export function dayTypeMacros(base: MacroSet, dayType: DayType, floor = 0, ceiling = Infinity): MacroSet {
   if (dayType === 'training') {
-    const carbs = Math.round(base.carbs * 1.15);
+    let carbs = Math.round(base.carbs * 1.15);
+    if (base.kcal + 4 * (carbs - base.carbs) > ceiling && base.kcal <= ceiling) {
+      carbs = base.carbs + Math.floor((ceiling - base.kcal) / 4);
+    }
     return { ...base, carbs, kcal: base.kcal + 4 * (carbs - base.carbs) };
   }
   let carbs = Math.round(base.carbs * 0.85);
@@ -321,7 +337,7 @@ export function weightTrend(weights: WeighIn[]): { date: ISODate; avgKg: number 
 // Safety + full targets
 // ---------------------------------------------------------------------------
 
-export type SafetyFlag = 'under_16' | 'underweight_fat_loss' | 'pregnancy' | 'floor_applied';
+export type SafetyFlag = 'under_16' | 'underweight_fat_loss' | 'pregnancy' | 'floor_applied' | 'ceiling_applied';
 
 export interface SafetyAssessment {
   effectiveGoal: Goal;
@@ -376,9 +392,13 @@ export function computeTargets(profile: Profile, onDate: ISODate, opts: TargetOp
     bmi: bmi(profile.weightKg, profile.heightCm),
     ...(opts.goalAdjustment !== undefined ? { adjustment: opts.goalAdjustment } : {}),
   });
-  const kcal = Math.max(gc.floor, gc.kcal + (opts.adjustmentKcal ?? 0));
+  // A non-finite check-in delta (corrupt storage, NaN maths upstream) is ignored, never propagated.
+  const adjustmentKcal = Number.isFinite(opts.adjustmentKcal) ? (opts.adjustmentKcal as number) : 0;
+  const ceiling = Math.max(KCAL_CEILING, gc.floor);
+  const kcal = Math.min(ceiling, Math.max(gc.floor, gc.kcal + adjustmentKcal));
   const flags = [...safety.flags];
   if (gc.floorApplied) flags.push('floor_applied');
+  if (gc.ceilingApplied || gc.kcal + adjustmentKcal > ceiling) flags.push('ceiling_applied');
   const base = macroTargets({
     kcal,
     weightKg: profile.weightKg,
@@ -395,7 +415,7 @@ export function computeTargets(profile: Profile, onDate: ISODate, opts: TargetOp
     floor: gc.floor,
     goal: safety.effectiveGoal,
     base,
-    training: dayTypeMacros(base, 'training', gc.floor),
+    training: dayTypeMacros(base, 'training', gc.floor, ceiling),
     rest: dayTypeMacros(base, 'rest', gc.floor),
     flags,
     consultProfessional: safety.consultProfessional,

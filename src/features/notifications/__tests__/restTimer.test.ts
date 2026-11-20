@@ -3,7 +3,14 @@ import { Platform } from 'react-native';
 
 import { __state } from '../../../../test/mocks/expoNotifications';
 import { REST_ALERT_ID, type RestTimerState } from '../logic/restSurface';
-import { connectRestTimer, resetRestTimerForTests, updateRestTimerSurface } from '../restTimer';
+import {
+  connectRestTimer,
+  drainRestActions,
+  resetRestTimerForTests,
+  subscribeRestActions,
+  toRestAction,
+  updateRestTimerSurface,
+} from '../restTimer';
 
 jest.mock('expo-notifications', () => require('../../../../test/mocks/expoNotifications'));
 
@@ -117,5 +124,36 @@ describe('rest timer surfaces', () => {
     await new Promise((r) => setTimeout(r, 0));
     expect(off).toHaveBeenCalled();
     expect(__state.scheduled.has(REST_ALERT_ID)).toBe(false);
+  });
+});
+
+describe(`lock-screen rest actions (N7, ${Platform.OS})`, () => {
+  it('validates native events and drains / listens through the native module', () => {
+    expect(toRestAction({ id: 'a', action: 'skip', at: 5, sessionId: 's1' })).toEqual({ id: 'a', action: 'skip', at: 5, sessionId: 's1' });
+    expect(toRestAction({ id: 'a', action: 'add15', at: 5, endsAt: 9 })).toEqual({ id: 'a', action: 'add15', at: 5, endsAt: 9 });
+    expect(toRestAction({ id: 'a', action: 'boom' })).toBeNull();
+    expect(toRestAction(null)).toBeNull();
+    resetRestTimerForTests(null);
+    expect(drainRestActions()).toEqual([]);
+    expect(() => subscribeRestActions(() => undefined)()).not.toThrow();
+    let emit: ((e: unknown) => void) | null = null;
+    const remove = jest.fn();
+    const mod = {
+      addListener: jest.fn((_e: string, fn: (e: unknown) => void) => {
+        emit = fn;
+        return { remove };
+      }),
+      consumeRestActions: jest.fn(() => [{ id: 'q', action: 'skip', at: 1 }, { junk: true }]),
+    };
+    resetRestTimerForTests(mod as unknown as Parameters<typeof resetRestTimerForTests>[0]);
+    expect(drainRestActions()).toEqual([{ id: 'q', action: 'skip', at: 1 }]);
+    const got: unknown[] = [];
+    const off = subscribeRestActions((a) => got.push(a));
+    expect(mod.addListener).toHaveBeenCalledWith('onRestAction', expect.any(Function));
+    emit!({ id: 'l', action: 'add15', at: 2 });
+    emit!({ nope: 1 });
+    expect(got).toEqual([{ id: 'l', action: 'add15', at: 2 }]);
+    off();
+    expect(remove).toHaveBeenCalled();
   });
 });

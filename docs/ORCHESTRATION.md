@@ -105,3 +105,18 @@ Each paused slice has a WIP commit on its branch and a "Paused: next steps" list
 - Quality must not drop.
 - The paused perf/gym r2 auditor (Fable) gets relaunched fresh on Opus.
 - Paused at 11:05 PKT. The resume is scheduled for 3:35 PM PKT (10:35 UTC). The hourly auto-resume is disabled until then.
+
+## Paused 20 Nov 2026, about 16:07 PKT; resume 20:35 PKT (15:35 UTC, scheduled)
+- **Round-2 fix lanes**, WIP pushed:
+  - `feat/r2-ui`: agent aab70c661baf2e36c;
+  - `feat/r2-bug`: agent a06d7fc68ba94f84d;
+  - `feat/r2-perf`: agent a40e5c39fb2ebdcb7.
+- **Merged on main:**
+  - x-engine;
+  - all round-2 audit reports;
+  - CI golden-fixture fix (655d5a2).
+- **Device QA:**
+  - Android E2E failed at the Gradle release build: run 44720986872. Fix it in worktree `feat/r2-native`.
+  - iOS E2E run 44720991776 was still building at the pause.
+- **Repo:** PUBLIC for QA. Set it private after the E2E runs are green.
+- **Auto-resume:** the hourly task is disabled during the pause. The resume task re-enables it.

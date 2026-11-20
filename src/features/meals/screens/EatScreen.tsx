@@ -26,8 +26,9 @@ import {
 } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
 
-import { quickAddWater, toggleMeal } from '../actions';
 import { ListGroup, TargetsIcon } from '@/ui';
+
+import { quickAddWater, tickMealFromLink, toggleMeal } from '../actions';
 import { openMeal } from '../navigation';
 import { MealTile } from '../components/MealTile';
 import { SwapSheet } from '../components/SwapSheet';
@@ -46,8 +47,17 @@ export function EatScreen() {
   const today = todayISO();
   const [date, setDate] = useState(today);
   const t = useTheme();
-  // Deep links: widget quick log `/eat?log=1`; meal notification `/eat?mealId=…[&swap=1]`.
-  const params = useLocalSearchParams<{ log?: string; mealId?: string; swap?: string }>();
+  // Deep links: widget quick log `/eat?log=1`; meal notification `/eat?mealId=…[&swap=1]`;
+  // widget "Ate it" `/eat?mealId=…&tick=1`.
+  const params = useLocalSearchParams<{ log?: string; mealId?: string; swap?: string; tick?: string }>();
+  const tickMealId = params.tick === '1' && params.mealId ? params.mealId : null;
+  const handledTick = useRef<string | null>(null);
+  useEffect(() => {
+    if (!tickMealId || handledTick.current === tickMealId) return;
+    handledTick.current = tickMealId;
+    tickMealFromLink(tickMealId); // the widget's next meal is today's: the Day view already shows it
+    router.setParams({ tick: undefined, mealId: undefined });
+  }, [tickMealId]);
   const logKey = params.log === '1' ? 'log' : null;
   const handledLog = useRef<string | null>(null);
   useEffect(() => {

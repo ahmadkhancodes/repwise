@@ -70,7 +70,10 @@ describe('profile + history schemas', () => {
     expect(p).toMatchObject({ dietType: 'omnivore', mealsPerDay: 3, budget: 2, cookMin: 30, lifestyle: 'light', units: 'metric', equipment: [], pregnant: false });
   });
   test('bounds', () => {
-    expect(ProfileSchema.safeParse({ ...base, daysPerWeek: 7 }).success).toBe(false);
+    expect(ProfileSchema.safeParse({ ...base, daysPerWeek: 8 }).success).toBe(false);
+    expect(ProfileSchema.safeParse({ ...base, daysPerWeek: 0 }).success).toBe(false);
+    expect(ProfileSchema.safeParse({ ...base, daysPerWeek: 7 }).success).toBe(true);
+    expect(ProfileSchema.safeParse({ ...base, daysPerWeek: 1 }).success).toBe(true);
     expect(ProfileSchema.safeParse({ ...base, weightKg: 20 }).success).toBe(false);
     expect(ProfileSchema.safeParse({ ...base, heightCm: 250 }).success).toBe(false);
     expect(ProfileSchema.safeParse({ ...base, mealsPerDay: 1 }).success).toBe(false);

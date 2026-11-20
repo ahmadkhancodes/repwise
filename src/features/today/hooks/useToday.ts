@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react';
 
 import { ensureWeekMeals } from '@/features/meals';
 import { addDays, startOfWeek } from '@/features/meals/logic/dates';
-import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { customRecipesRepo } from '@/features/meals/repo';
 import { useCatalogFor, type Catalog } from '@/services/catalog';
 
@@ -71,15 +70,20 @@ export function useToday(nowOverride?: number): TodayModel {
     if (!catalog || profileStamp == null) return;
     const id = setTimeout(() => {
       try {
-        // Training for this week (no-op when planned), then any missing meal days.
-        ensurePlannedAhead(Date.now());
-        if (mealsMissing) ensureWeekMeals(date, Date.now());
+        // Training for this week (no-op when planned), then any missing meal days. The planner
+        // service is required here, not imported: Today is on the first-frame path (perf r2 N1).
+        // The screen's clock (nowOverride in screenshots/Maestro/tests), not the real one (R2-7).
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { ensurePlannedAhead } = require('@/features/planner/bridge') as typeof import('@/features/planner/bridge');
+        const at = nowOverride ?? Date.now();
+        ensurePlannedAhead(at);
+        if (mealsMissing) ensureWeekMeals(date, at);
       } catch {
         // planning is best effort; Today still shows what is stored
       }
     }, PLAN_DELAY_MS);
     return () => clearTimeout(id);
-  }, [catalog, date, profileStamp, mealsMissing]);
+  }, [catalog, date, profileStamp, mealsMissing, nowOverride]);
   const minutes = minutesOfDay(now);
 
   const view = useMemo(

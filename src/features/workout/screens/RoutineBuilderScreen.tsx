@@ -22,13 +22,12 @@ import {
   showUndoToast,
 } from '@/ui';
 
-import { startWorkoutAction } from '../actions';
+import { startRoutineAction } from '../actions';
 import { exerciseMeta } from '../exerciseMeta';
 import { useLiveValue } from '../hooks/useLiveValue';
 import { localDate } from '../logic/dates';
 import { moveItem } from '../logic/order';
 import { parseRoutineItems, routineSetCount, type RoutineItem } from '../logic/routines';
-import { createSession } from '../repo';
 
 const REPS = ['5', '6-8', '8-12', '10-15', '15-20'];
 const RESTS = [60, 90, 120, 180];
@@ -81,18 +80,21 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
   const editItem = editing !== null ? items[editing] : undefined;
 
   const start = () => {
-    const s = createSession({
-      date: localDate(),
-      title: routine.name,
-      exercises: items.map((it) => ({
-        exerciseId: it.exerciseId,
-        targetSets: it.sets,
-        targetReps: it.reps,
-        restS: it.restS,
-      })),
-    });
-    startWorkoutAction(s.id, catalog);
-    router.replace(`/workout/${s.id}`);
+    const res = startRoutineAction(
+      {
+        date: localDate(),
+        name: routine.name,
+        exercises: items.map((it) => ({
+          exerciseId: it.exerciseId,
+          targetSets: it.sets,
+          targetReps: it.reps,
+          restS: it.restS,
+        })),
+      },
+      catalog,
+    );
+    // A workout already running: open it (resume / finish) instead of an orphan copy (R2-3).
+    router.replace(`/workout/${res.started ? res.sessionId : res.activeSessionId}`);
   };
   // Soft delete + 5 s undo (N1): the confirm sheet guards the tap, the toast guards the regret.
   const remove = () => {

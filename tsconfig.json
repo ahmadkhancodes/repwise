@@ -8,7 +8,11 @@
     "paths": {
       "@/*": ["./src/*"],
       "@repwise/engine": ["./packages/engine/src/index.ts"],
-      "@repwise/content": ["./packages/content/src/index.ts"]
+      "@repwise/content": ["./packages/content/src/index.ts"],
+      "@repwise/content/toEngine": ["./packages/content/src/toEngine.ts"],
+      "@repwise/content/media": ["./packages/content/src/media.ts"],
+      "@repwise/content/enums": ["./packages/content/src/enums.ts"],
+      "@repwise/content/*": ["./packages/content/*"]
     },
     "types": ["jest"]
   },

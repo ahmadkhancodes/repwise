@@ -49,31 +49,8 @@ export type Answers = {
   mealTimes: string[];
 };
 
-export const EMPTY_ANSWERS: Answers = {
-  goal: null,
-  sex: null,
-  birthYear: null,
-  units: 'metric',
-  heightCm: null,
-  weightKg: null,
-  targetKg: null,
-  experience: null,
-  daysPerWeek: null,
-  trainingWeekdays: [],
-  sessionMin: null,
-  location: null,
-  equipment: [],
-  injuries: [],
-  lifestyle: null,
-  dietType: null,
-  allergies: [],
-  dislikes: [],
-  cuisines: [],
-  budget: null,
-  cookMin: null,
-  mealsPerDay: null,
-  mealTimes: [],
-};
+// Lives in a light module so the onboarding store (evaluated at launch) skips the engine (perf r2 N1).
+export { EMPTY_ANSWERS } from './emptyAnswers';
 
 /** Countries that weigh in pounds and measure in feet (plus the UK mostly uses stone/lb). */
 const IMPERIAL_REGIONS = new Set(['US', 'LR', 'MM']);

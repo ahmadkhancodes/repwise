@@ -2,7 +2,9 @@ import { logsForDate } from '@/features/nutrition/repo';
 import * as review from '@/services/review';
 import { useToastStore } from '@/ui';
 
-import { completesDay, quickAddWater, toggleMeal } from '../actions';
+import { haptics } from '@/services/haptics';
+
+import { completesDay, quickAddWater, tickMealFromLink, toggleMeal } from '../actions';
 import { todayISO } from '../logic/dates';
 import { mealPlanForDate, mealsForPlan } from '../repo';
 import { ensureWeekMeals } from '../service';
@@ -24,6 +26,30 @@ describe('completesDay (pure)', () => {
     expect(completesDay('b', day)).toBe(true);
     expect(completesDay('a', [...day, { id: 'd', status: 'planned' }])).toBe(false);
     expect(completesDay('x', day)).toBe(false);
+  });
+});
+
+describe('tickMealFromLink (widget "Ate it", R2-1)', () => {
+  it('ticks an open meal once with a success haptic and undo; repeat is a no-op', () => {
+    const buzz = jest.spyOn(haptics, 'success').mockImplementation(() => undefined);
+    onboard();
+    const today = todayISO();
+    ensureWeekMeals(today);
+    const lunch = mealsForPlan(mealPlanForDate(today)!.id).find((m) => m.slot === 'lunch')!;
+    const res = tickMealFromLink(lunch.id);
+    expect(res).toMatchObject({ status: 'ticked', date: today, previous: 'planned' });
+    expect(buzz).toHaveBeenCalledTimes(1);
+    expect(logsForDate(today).filter((l) => l.mealId === lunch.id)).toHaveLength(1);
+    const toast = useToastStore.getState().current!;
+    expect(toast).toMatchObject({ actionLabel: 'Undo', silent: true });
+    expect(tickMealFromLink(lunch.id).status).toBe('already');
+    expect(buzz).toHaveBeenCalledTimes(1);
+    expect(logsForDate(today).filter((l) => l.mealId === lunch.id)).toHaveLength(1);
+    toast.onAction?.();
+    expect(mealsForPlan(mealPlanForDate(today)!.id).find((m) => m.id === lunch.id)!.status).toBe('planned');
+    expect(logsForDate(today).filter((l) => l.mealId === lunch.id)).toHaveLength(0);
+    expect(tickMealFromLink('missing').status).toBe('missing');
+    buzz.mockRestore();
   });
 });
 

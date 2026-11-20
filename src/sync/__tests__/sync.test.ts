@@ -4,6 +4,7 @@ import { createFakeFetch, tokenResponse } from '../../../test/fakeFetch';
 import { eq } from 'drizzle-orm';
 
 import { getDb, resetDbForTests } from '@/db/client';
+import { subscribeTables } from '@/db/events';
 import { migrateDb } from '@/db/migrate';
 import { SYNC_TABLE_NAMES, sessions } from '@/db/schema';
 import { getProfile, saveProfile } from '@/features/settings/repo';
@@ -19,6 +20,7 @@ import {
   chunkRows,
   getPullSince,
   mergeRemoteRows,
+  onPullMerged,
   resetSyncForTests,
   syncNow,
   useSyncStatus,
@@ -213,6 +215,68 @@ describe('syncNow against a fake Worker', () => {
     });
     await saveSession({ ...tokenResponse(0), accessExpiresAt: Date.now() + 600_000 } as never);
     useAuth.setState({ status: 'signedIn', user: { id: 'user-1', email: null, anonymous: false } });
+  });
+
+  it('a restore refreshes a watching screen once, not once per row (perf r2 N4)', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const sqlite = require('expo-sqlite') as { __setChangeEventMode: (m: string) => void };
+    sqlite.__setChangeEventMode('rowAsync');
+    const refresh = jest.fn();
+    const off = subscribeTables(['sessions'], refresh);
+    const page = (from: number) =>
+      Array.from({ length: 200 }, (_, i) => ({
+        id: `r${from + i}`,
+        created_at: 1,
+        updated_at: 2,
+        deleted_at: null,
+        title: `Cloud ${from + i}`,
+      }));
+    // Pages arrive over a slow network: the first page's row events land while the next is in flight.
+    fake.on('GET /sync/pull', async (c) => {
+      await new Promise((r) => setTimeout(r, 150));
+      return {
+        status: 200,
+        body: c.query.includes('cursor')
+          ? { changes: { sessions: page(200) }, nextCursor: null, nextSince: 9, serverTime: 9 }
+          : { changes: { sessions: page(0) }, nextCursor: 'C1', nextSince: 0, serverTime: 9 },
+      };
+    });
+    try {
+      const res = await syncNow();
+      expect(res).toMatchObject({ status: 'ok', pulled: 400 });
+      await new Promise((r) => setTimeout(r, 200));
+      expect(refresh).toHaveBeenCalledTimes(1);
+    } finally {
+      off();
+      sqlite.__setChangeEventMode('statement');
+    }
+  });
+
+  it('tells pull listeners once, after the whole pull, which tables changed (R2-6)', async () => {
+    const seen: string[][] = [];
+    const off = onPullMerged((t) => seen.push([...t]));
+    let page = 0;
+    fake.on('GET /sync/pull', () => {
+      page++;
+      expect(seen).toHaveLength(0); // never mid-pull
+      return page === 1
+        ? {
+            status: 200,
+            body: {
+              changes: { sessions: [{ id: 'p1', created_at: 1, updated_at: 2, deleted_at: null, title: 'Cloud' }], food_logs: [] },
+              nextCursor: 'C',
+              nextSince: 0,
+              serverTime: 9,
+            },
+          }
+        : { status: 200, body: { changes: {}, nextCursor: null, nextSince: 10, serverTime: 9 } };
+    });
+    await syncNow();
+    expect(seen).toEqual([['sessions']]);
+    // Nothing changed: no call.
+    await syncNow();
+    expect(seen).toHaveLength(1);
+    off();
   });
 
   it('skips when signed out or anonymous (no network)', async () => {

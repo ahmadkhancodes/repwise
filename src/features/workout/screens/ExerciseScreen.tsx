@@ -49,7 +49,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
   const index = p.items.findIndex((i) => i.se.id === seId);
   const item = index >= 0 ? p.items[index] : undefined;
   const [notes, setNotes] = useState<string | null>(null);
-  useWorkoutKeepAwake(p.session?.status === 'active');
+  useWorkoutKeepAwake(sessionId, p.session?.status === 'active');
 
   const back = () => (router.canGoBack() ? router.back() : router.replace(`/workout/${sessionId}`));
   const backButton = (
@@ -173,7 +173,13 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
           ))}
         </View>
 
-        <ExerciseHero mediaId={item.meta.mediaId} name={item.meta.name} testID="ex-media" />
+        <ExerciseHero
+          mediaId={item.meta.mediaId}
+          name={item.meta.name}
+          exercise={p.catalog.exerciseById.get(item.se.exerciseId) ?? null}
+          exerciseId={item.se.exerciseId}
+          testID="ex-media"
+        />
 
         {item.meta.cues.length ? (
           <View style={{ gap: t.spacing.xxs }} testID="ex-cues">

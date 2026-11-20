@@ -1,11 +1,11 @@
 import { and, eq, inArray, isNotNull, isNull, sql, type SQL } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
 
 import { uuidv7 } from '@/lib/ids';
 
 import { getDb } from './client';
 import { notifyLocalWrite } from './events';
+import { useLiveRows } from './live';
 import { getRowOwner } from './owner';
 import { cards, type SyncTable, type SyncTableName } from './schema';
 import { withTransaction } from './transaction';
@@ -178,17 +178,24 @@ export function createRepo<T extends SyncTable>(table: T, name: SyncTableName) {
   }
 
   /**
-   * Live list for screens: re-runs when this table changes (expo-sqlite change listener).
-   * Pass `deps` for any value used in `where` so the query is rebuilt when it changes.
+   * Live list for screens: rows on the first render, then re-run (once per frame) when this table
+   * changes, and only while the screen is focused (perf audit r2 N3/N4; a blurred screen refreshes
+   * once on focus). Pass `deps` for any value used in `where` so the query is rebuilt when it changes.
    */
   function useLive(
     where?: SQL,
     orderBy?: SQL | SQLiteColumn,
     deps: unknown[] = [],
   ): { data: R[]; error?: Error } {
-    const q = getDb().select().from(t).where(notDeleted(where));
-    const res = useLiveQuery(orderBy ? q.orderBy(orderBy) : q, deps);
-    return { data: res.data as R[], error: res.error };
+    const res = useLiveRows(
+      () => {
+        const q = getDb().select().from(t).where(notDeleted(where));
+        return (orderBy ? q.orderBy(orderBy) : q) as unknown as { all: () => R[] };
+      },
+      [name],
+      deps,
+    );
+    return { data: res.data, error: res.error };
   }
 
   return {

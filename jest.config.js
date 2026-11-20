@@ -13,6 +13,9 @@ const shared = {
     '^@/(.*)$': '<rootDir>/src/$1',
     // Workspace packages from THIS checkout (the shared node_modules symlinks point at main's).
     '^@repwise/(engine|content)$': '<rootDir>/packages/$1/src/index.ts',
+    // Data-free subpaths (package.json `exports`) and the catalogue JSON, from this checkout too.
+    '^@repwise/content/(toEngine|media|enums)$': '<rootDir>/packages/content/src/$1.ts',
+    '^@repwise/content/(.+\\.json)$': '<rootDir>/packages/content/$1',
     // lucide ships ESM as .mjs for RN; use its CommonJS build under Jest.
     '^lucide-react-native$':
       '<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js',

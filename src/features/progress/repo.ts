@@ -1,8 +1,8 @@
-import { and, asc, desc, eq, isNotNull, isNull, type SQL } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { and, asc, desc, eq, isNotNull, isNull, ne, or, type SQL } from 'drizzle-orm';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
 
 import { getDb } from '@/db/client';
+import { useLiveRows as useLiveQueryRows } from '@/db/live';
 import { createRepo, type Row, type RowPatch } from '@/db/repo';
 import {
   bodyMetrics,
@@ -16,6 +16,8 @@ import {
   sets,
   type SyncTable,
 } from '@/db/schema';
+
+import type { LoggedSetRow } from './logic/workouts';
 
 export const bodyMetricsRepo = createRepo(bodyMetrics, 'body_metrics');
 export const photosRepo = createRepo(photos, 'photos');
@@ -87,29 +89,74 @@ type Live<R> = { data: R[]; loading: boolean; error?: Error };
 
 function useLiveRows<T extends SyncTable>(
   table: T,
+  name: string,
   where?: SQL,
   orderBy?: SQL | SQLiteColumn,
   deps: unknown[] = [],
 ): Live<Row<T>> {
-  const t = table as unknown as typeof photos;
-  const base = and(isNull(t.deletedAt), where);
-  const q = getDb().select().from(t).where(base);
-  const res = useLiveQuery(orderBy ? q.orderBy(orderBy) : q, deps);
-  return {
-    data: res.data as Row<T>[],
-    loading: res.updatedAt === undefined && !res.error,
-    error: res.error,
-  };
+  // Synchronous first read, one refresh per frame, none while the screen is blurred (perf r2 N4).
+  const res = useLiveQueryRows(
+    () => {
+      const t = table as unknown as typeof photos;
+      const q = getDb().select().from(t).where(and(isNull(t.deletedAt), where));
+      return (orderBy ? q.orderBy(orderBy) : q) as unknown as { all: () => Row<T>[] };
+    },
+    [name],
+    deps,
+  );
+  return { data: res.data, loading: !res.loaded, error: res.error };
 }
 
-export const useLiveBody = () => useLiveRows(bodyMetrics, undefined, asc(bodyMetrics.date));
-export const useLivePhotos = () => useLiveRows(photos, undefined, desc(photos.date));
-export const useLiveSessions = () => useLiveRows(sessions, undefined, asc(sessions.date));
-export const useLiveSessionExercises = () => useLiveRows(sessionExercises);
-/** Only ticked sets matter for progress. */
-export const useLiveDoneSets = () => useLiveRows(sets, isNotNull(sets.doneAt), asc(sets.doneAt));
-export const useLiveFoodLogs = () => useLiveRows(foodLogs, undefined, asc(foodLogs.date));
-export const useLiveMealPlans = () => useLiveRows(mealPlans, undefined, asc(mealPlans.date));
-export const useLiveMeals = () => useLiveRows(meals);
+/** The tables a logged set is joined from; a write to any of them refreshes `useLiveLoggedSets`. */
+export const LOGGED_SET_TABLES = ['sets', 'session_exercises', 'sessions'];
+
+/**
+ * Every ticked set joined to its exercise and session, in ONE indexed query (`sets_done_at_idx`),
+ * with only the columns Progress reads. Replaces three whole-table live queries (sessions,
+ * session_exercises, every set row) joined in JS (perf audit r2 N4). Skipped sessions are excluded,
+ * as `flattenSets` did.
+ */
+export function loggedSetRows(): LoggedSetRow[] {
+  return getDb()
+    .select({
+      id: sets.id,
+      sessionId: sessionExercises.sessionId,
+      exerciseId: sessionExercises.exerciseId,
+      sessionDate: sessions.date,
+      doneAt: sets.doneAt,
+      type: sets.type,
+      weightKg: sets.weightKg,
+      reps: sets.reps,
+    })
+    .from(sets)
+    .innerJoin(sessionExercises, eq(sets.sessionExerciseId, sessionExercises.id))
+    .innerJoin(sessions, eq(sessionExercises.sessionId, sessions.id))
+    .where(
+      and(
+        isNotNull(sets.doneAt),
+        isNull(sets.deletedAt),
+        isNull(sessionExercises.deletedAt),
+        isNull(sessions.deletedAt),
+        or(isNull(sessions.status), ne(sessions.status, 'skipped')),
+      ),
+    )
+    .orderBy(asc(sets.doneAt))
+    .all() as LoggedSetRow[];
+}
+
+export function useLiveLoggedSets(): Live<LoggedSetRow> {
+  const res = useLiveQueryRows(() => ({ all: loggedSetRows }), LOGGED_SET_TABLES, []);
+  return { data: res.data, loading: !res.loaded, error: res.error };
+}
+
+export const useLiveBody = () =>
+  useLiveRows(bodyMetrics, 'body_metrics', undefined, asc(bodyMetrics.date));
+export const useLivePhotos = () => useLiveRows(photos, 'photos', undefined, desc(photos.date));
+export const useLiveSessions = () => useLiveRows(sessions, 'sessions', undefined, asc(sessions.date));
+export const useLiveFoodLogs = () =>
+  useLiveRows(foodLogs, 'food_logs', undefined, asc(foodLogs.date));
+export const useLiveMealPlans = () =>
+  useLiveRows(mealPlans, 'meal_plans', undefined, asc(mealPlans.date));
+export const useLiveMeals = () => useLiveRows(meals, 'meals');
 /** User-created exercises (the catalogue is @repwise/content). */
-export const useLiveCustomExercises = () => useLiveRows(exercises);
+export const useLiveCustomExercises = () => useLiveRows(exercises, 'exercises');

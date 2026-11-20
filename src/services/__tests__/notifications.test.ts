@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { Linking, Platform } from 'react-native';
+import { AppState, Linking, Platform } from 'react-native';
 
 import { resetDbForTests } from '@/db/client';
 import { migrateDb } from '@/db/migrate';
@@ -15,6 +15,7 @@ import { readStoredSnapshot, resetWriterForTests } from '@/widgets/writer';
 
 import { __state, makeResponse } from '../../../test/mocks/expoNotifications';
 import {
+  foregroundBehavior,
   handleResponse,
   IGNORED_WRITE_TABLES,
   rebuildSchedule,
@@ -177,8 +178,10 @@ describe('rebuildSchedule', () => {
   it(`creates channels only on Android and action categories on both (${Platform.OS})`, async () => {
     await rebuildSchedule({ now: NOW, timeZone: TZ });
     if (Platform.OS === 'android') {
-      expect([...__state.channels.keys()].sort()).toEqual(['account', 'brief', 'checkin', 'meals', 'timer', 'training']);
-      expect(__state.channels.get('timer')).toMatchObject({ importance: 7 });
+      expect([...__state.channels.keys()].sort()).toEqual(['account', 'brief', 'checkin', 'meals', 'timer', 'timer-silent', 'training']);
+      expect(__state.channels.get('timer')).toMatchObject({ importance: 7, sound: 'default' });
+      // N6: "Rest timer sound" off uses a channel without sound (Android fixes sound per channel).
+      expect(__state.channels.get('timer-silent')).toMatchObject({ importance: 7, sound: null });
     } else {
       expect(__state.channels.size).toBe(0);
     }
@@ -186,6 +189,36 @@ describe('rebuildSchedule', () => {
     const meal = __state.categories.get('meal') as { identifier: string; options: { opensAppToForeground: boolean } }[];
     expect(meal.map((a) => a.identifier)).toEqual(['ate', 'swap', 'snooze']);
     expect(meal.every((a) => a.options.opensAppToForeground)).toBe(true);
+  });
+});
+
+describe('foreground "Rest over" (N5)', () => {
+  it('only the in-app cue shows and sounds while the app is open', () => {
+    const quiet = { shouldShowBanner: false, shouldShowList: false, shouldPlaySound: false, shouldSetBadge: false };
+    const loud = { shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false };
+    expect(foregroundBehavior({ kind: 'rest', url: '/train' }, true)).toEqual(quiet);
+    expect(foregroundBehavior({ kind: 'rest', url: '/train', inApp: true }, true)).toEqual(loud);
+    expect(foregroundBehavior({ kind: 'rest' }, false)).toEqual(loud); // background: the alert is the cue
+    expect(foregroundBehavior({ kind: 'meal' }, true)).toEqual(loud);
+    expect(foregroundBehavior(null, true)).toEqual(loud);
+  });
+
+  it('the installed handler applies it (app in the foreground)', async () => {
+    const appState = AppState as unknown as { currentState: string };
+    const before = appState.currentState;
+    appState.currentState = 'active';
+    try {
+      const stop = startNotifications(deps);
+      const h = (N.setNotificationHandler as jest.Mock).mock.calls.at(-1)?.[0] as {
+        handleNotification: (n: unknown) => Promise<{ shouldPlaySound: boolean }>;
+      };
+      const rest = (data: object) => ({ request: { content: { data } } });
+      expect((await h.handleNotification(rest({ kind: 'rest' }))).shouldPlaySound).toBe(false);
+      expect((await h.handleNotification(rest({ kind: 'rest', inApp: true }))).shouldPlaySound).toBe(true);
+      stop();
+    } finally {
+      appState.currentState = before;
+    }
   });
 });
 
