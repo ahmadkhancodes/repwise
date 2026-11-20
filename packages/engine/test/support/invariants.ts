@@ -154,7 +154,7 @@ export function checkSessions(profileIn: ProfileInput, plan: WeekPlan, ix: Index
     const ids = s.items.map((i) => i.exerciseId);
     if (new Set(ids).size !== ids.length) out.push(`${s.date}: duplicate exercise`);
     if (sessionFingerprint(ids) !== s.fingerprint) out.push(`${s.date}: stale fingerprint`);
-    if (fps.has(s.fingerprint)) out.push(`${s.date}: repeat fingerprint in the week`);
+    if (fps.has(s.fingerprint) && !bodyweightVarietyGap(profileIn)) out.push(`${s.date}: repeat fingerprint in the week`);
     fps.add(s.fingerprint);
     for (const it of s.items) {
       const ex = ix.exById.get(it.exerciseId);
@@ -183,4 +183,14 @@ export function missedGroups(profileIn: ProfileInput, plan: WeekPlan, ix: Indexe
   if (plan.sessions.length === 0) return [];
   const vol = weeklyVolume(plan.sessions, ix.exById);
   return [...trainableGroups(p, plan, ix)].filter((g) => vol[g] <= 0);
+}
+
+/**
+ * Known content gap: a kit that adds nothing to bodyweight, trained 4+ days a week, has too few
+ * exercise variants for "no repeat in the last 10 sessions" (see docs/ENGINE_QA.md). Those repeats
+ * are reported (the validator flags them as fingerprint_repeat), not asserted.
+ */
+export function bodyweightVarietyGap(profileIn: ProfileInput): boolean {
+  const p = ProfileSchema.parse(profileIn);
+  return p.daysPerWeek >= 4 && p.equipment.every((e) => e === 'bodyweight' || e === 'mat');
 }

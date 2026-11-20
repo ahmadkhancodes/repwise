@@ -271,6 +271,7 @@ export function planSessions(ctx: PlanningContext, warnings: PlanWarning[]): Pla
   allocateSets(sessions, ctx.exById, ctx.allocationRange, setsPerSession(ctx.profile.sessionMin));
   dropOverVolume(ctx, sessions);
   repairConsecutiveVariants(ctx, sessions, rng.fork('repair'));
+  repairFingerprints(ctx, sessions, rng.fork('fingerprints'));
   if (ctx.deload) for (const s of sessions) for (const it of s.items) it.sets = deloadSets(it.sets);
 
   // What could not be reached becomes the enforced range (with a warning), so the rules plan is the feasible best.
@@ -286,6 +287,54 @@ export function planSessions(ctx: PlanningContext, warnings: PlanWarning[]): Pla
     }
   }
   return sessions;
+}
+
+/**
+ * The post-passes (coverage, over-volume drops, variant repairs) change items after the freshness
+ * search, and tiny pools (bodyweight, 7 days) can exhaust it: two sessions could end up identical
+ * (ENGINE_QA bug 5). Order is part of the fingerprint, so re-order the non-main tail until fresh.
+ */
+function repairFingerprints(ctx: PlanningContext, sessions: PlannedSession[], rng: Rng): void {
+  const fps = [...ctx.pastFingerprints];
+  const records = pastSessionRecords(ctx);
+  const fpOf = (s: PlannedSession) => sessionFingerprint(s.items.map((it) => it.exerciseId));
+  sessions.forEach((s, si) => {
+    let fp = fpOf(s);
+    // Later sessions were built against this one: a swap must not hand them a repeated variant.
+    const next = new Set(sessions.slice(si + 1).flatMap((x) => x.items.map((y) => y.exerciseId)));
+    const head = s.items.filter((it) => it.role === 'main');
+    const tail = s.items.filter((it) => it.role !== 'main');
+    for (let attempt = 0; !fingerprintIsFresh(fp, fps) && tail.length > 1 && attempt < 30; attempt++) {
+      s.items = [...head, ...rng.fork(`${s.date}/${attempt}`).shuffle(tail)];
+      fp = fpOf(s);
+    }
+    // Every order already used (frequent full-body templates rotate few accessories): swap one
+    // non-main item for another candidate of its slot that keeps the consecutive-variant rule.
+    if (!fingerprintIsFresh(fp, fps)) {
+      const prev = lastVariantsByPattern(records);
+      swap: for (let idx = s.items.length - 1; idx >= 0; idx--) {
+        const it = s.items[idx] as PlannedExercise;
+        if (it.role === 'main' || ctx.mainLiftIds.has(it.exerciseId)) continue;
+        const slot = slotDef(s.templateKey, it.slotKey);
+        if (!slot) continue;
+        const used = new Set(s.items.map((x) => x.exerciseId));
+        const cands = slotCandidates(ctx.exercisePool, slot).filter(
+          (e) => !used.has(e.id) && !next.has(e.id) && !ctx.mainLiftIds.has(e.id) && !(prev.get(exercisePatternKey(e))?.has(e.id) ?? false),
+        );
+        for (const e of rng.fork(`${s.date}/swap/${idx}`).shuffle(cands)) {
+          const before = s.items[idx] as PlannedExercise;
+          s.items[idx] = { ...prescribe(ctx, e, it.slotKey, it.role), sets: it.sets };
+          fp = fpOf(s);
+          if (fingerprintIsFresh(fp, fps)) break swap;
+          s.items[idx] = before;
+          fp = fpOf(s);
+        }
+      }
+    }
+    s.fingerprint = fp;
+    fps.push(fp);
+    records.push(sessionRecord(ctx, s));
+  });
 }
 
 /**
@@ -305,8 +354,11 @@ function coverGroups(ctx: PlanningContext, sessions: PlannedSession[], rng: Rng)
       if (!template) continue;
       const usedSlots = new Set(s.items.map((it) => it.slotKey));
       const used = new Set(s.items.map((it) => it.exerciseId));
-      for (const slot of template.slots) {
-        if (usedSlots.has(slot.key)) continue;
+      // Unused slots first; then a second exercise for a used slot (e.g. the squat main lift is
+      // glute-dominant and the template has no other quad slot).
+      const order = [...template.slots.filter((x) => !usedSlots.has(x.key)), ...template.slots.filter((x) => usedSlots.has(x.key))];
+      for (const tslot of order) {
+        const slot = tslot.role === 'main' && usedSlots.has(tslot.key) ? { ...tslot, role: 'secondary' as const } : tslot;
         const cands = slotCandidates(ctx.exercisePool, slot).filter((e) => !used.has(e.id) && !ctx.mainLiftIds.has(e.id) && groupContribution(e)[g] === 1);
         const pick = rng.fork(`${s.date}/${g}`).weighted(cands, (e) => exerciseWeight(e, { moreLike: ctx.moreLike }));
         if (!pick) continue;
