@@ -5,8 +5,8 @@ Validated content catalogues for the Repwise planner, exercise library and meal 
 | File | Records | What it is |
 |---|---|---|
 | `exercises.json` | 283 | Exercise library. Original text, placeholder Cloudinary media ids. Cardio carries Compendium MET values. |
-| `recipes.json` | 325 | Recipes across 13 cuisines. Nutrition, allergens, diet tags and main protein are **computed**. |
-| `foods.json` | 282 | Ingredients with per-100 g nutrients from USDA FoodData Central (public domain). |
+| `recipes.json` | 611 | Recipes across 13 cuisines. Nutrition, allergens, diet tags and main protein are **computed**. |
+| `foods.json` | 294 | Ingredients with per-100 g nutrients from USDA FoodData Central (public domain). |
 
 The JSON files are the source of truth. `src/schemas.ts` holds the zod schemas and enums, `src/compute.ts` holds the pure derivation logic, and `src/index.ts` re-exports both plus the typed data.
 
@@ -93,6 +93,8 @@ Computed by `scripts/build.ts` (never hand-edited):
 ## Content QA (tests)
 
 `test/toEngine.test.ts` parses every item with the engine schemas. `test/content.test.ts` checks: schema validity; size targets; no duplicate ids; ingredient and alternative references; 6–20 variants per pattern; every bible pattern family present; a home-friendly variant for each strength pattern; ≥ 10 recipes per diet tag and cuisine; ≥ 30 per slot; stored computed fields equal recomputed ones; kcal within 8 % of 4P + 4C + 9F; per-serving kcal sane for each slot; allergens propagate; diet tags never contradict ingredient origins; no empty steps; no banned medical wording (cure, treat, diagnose, prescribe).
+
+`test/qa.test.ts` (added with the 600-recipe expansion, see `docs/CONTENT_QA.md`) checks: every allergen has a keyword rule and every food whose name or USDA description matches a keyword carries that allergen; every allergen flag is explained by a keyword or a documented composite flag; plant-origin foods have no animal words; food kcal ≈ 4P + 4C + 9F; fibre ≤ carbohydrate; no shared FDC record; no orphan foods; no duplicate titles or ingredient lists; ≤ 3 g salt per serving; ≥ 600 recipes with the sheet 29 balance (Pakistani/Indian, Arab, Mediterranean, breakfast, snack, budget, quick, meal prep, vegetarian, high protein).
 
 ## Known limits
 
