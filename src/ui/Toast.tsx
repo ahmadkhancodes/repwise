@@ -151,8 +151,10 @@ export function Toast({
           accessibilityLabel={actionLabel}
           onPress={() => {
             haptics.light();
-            onAction?.();
+            // Dismiss first: an action may show its own toast ("Nothing was deleted."), which
+            // dismissing afterwards would hide at once.
             onDismiss?.();
+            onAction?.();
           }}
           hitSlop={t.spacing.xxs}
           style={{

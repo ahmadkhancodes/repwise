@@ -107,6 +107,15 @@ describe.each(SCHEMES)('Toast (%s)', (scheme) => {
     expect(UNDO_TOAST_MS).toBe(5000);
   });
 
+  it('a toast shown by the Undo action stays up (it is not dismissed with the undo toast)', async () => {
+    await renderThemed(<ToastHost />, scheme);
+    await act(() =>
+      showUndoToast('Deleting your data…', () => showToast({ message: 'Nothing was deleted.' })),
+    );
+    await fireEvent.press(screen.getByRole('button', { name: 'Undo' }));
+    expect(screen.getByText('Nothing was deleted.')).toBeTruthy();
+  });
+
   it('ToastHost shows, announces and auto-hides', async () => {
     const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
     await renderThemed(<ToastHost />, scheme);
