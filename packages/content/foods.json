@@ -12,7 +12,8 @@
       "fibre": 1.6
     },
     "allergens": [
-      "gluten"
+      "gluten",
+      "sesame"
     ],
     "source": {
       "dataset": "USDA FoodData Central — SR Legacy (April 2018)",

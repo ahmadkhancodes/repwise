@@ -9162,7 +9162,8 @@
     },
     "allergens": [
       "celery",
-      "gluten"
+      "gluten",
+      "sesame"
     ],
     "dietTags": [
       "vegetarian",
@@ -9904,7 +9905,8 @@
     "allergens": [
       "gluten",
       "fish",
-      "milk"
+      "milk",
+      "sesame"
     ],
     "dietTags": [
       "pescatarian",
@@ -32045,6 +32047,72 @@
     "mainProtein": "legumes"
   },
   {
+    "id": "guava-yogurt-chaat",
+    "title": "Guava and pomegranate yogurt chaat",
+    "cuisine": "pakistani",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "yogurt",
+        "grams": 200
+      },
+      {
+        "foodId": "guava",
+        "grams": 120
+      },
+      {
+        "foodId": "pomegranate",
+        "grams": 30
+      },
+      {
+        "foodId": "cumin",
+        "grams": 0.5
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.3
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Cut the guava into bite-sized wedges.",
+      "Whisk the yogurt with the cumin, pepper and salt.",
+      "Fold in the guava and top with the pomegranate seeds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 231,
+      "protein": 10.8,
+      "carbs": 32.6,
+      "fat": 8.3,
+      "fibre": 7.8
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
     "id": "adai-lentil-crepes",
     "title": "Adai (mixed lentil crepes) with coconut chutney",
     "cuisine": "indian",
@@ -35251,7 +35319,7 @@
   },
   {
     "id": "peanut-chickpea-chaat",
-    "title": "Peanut and chickpea chaat",
+    "title": "Peanut, chickpea and mango chaat",
     "cuisine": "indian",
     "slots": [
       "snack"
@@ -35274,11 +35342,7 @@
         "grams": 80
       },
       {
-        "foodId": "cucumber",
-        "grams": 60
-      },
-      {
-        "foodId": "tomato",
+        "foodId": "mango",
         "grams": 60
       },
       {
@@ -35286,12 +35350,12 @@
         "grams": 15
       },
       {
-        "foodId": "lemon-juice",
-        "grams": 8
+        "foodId": "mint",
+        "grams": 3
       },
       {
-        "foodId": "coriander-leaves",
-        "grams": 3
+        "foodId": "lemon-juice",
+        "grams": 8
       },
       {
         "foodId": "chilli-powder",
@@ -35308,17 +35372,17 @@
     ],
     "steps": [
       "Drain and rinse the chickpeas.",
-      "Finely chop the cucumber, tomato and onion.",
+      "Dice the mango and finely chop the onion and mint.",
       "Toss with the peanuts, lemon, spices and salt.",
-      "Finish with coriander."
+      "Eat straight away."
     ],
     "source": "repwise-original",
     "licence": "proprietary",
     "perServing": {
-      "kcal": 282,
-      "protein": 13.4,
-      "carbs": 29.2,
-      "fat": 14.6,
+      "kcal": 299,
+      "protein": 12.9,
+      "carbs": 33.8,
+      "fat": 14.7,
       "fibre": 8.7
     },
     "allergens": [
@@ -49892,5 +49956,1435 @@
       "dairy_free"
     ],
     "mainProtein": "shellfish"
+  },
+  {
+    "id": "cherry-almond-overnight-oats",
+    "title": "Cherry and almond overnight oats",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "oats",
+        "grams": 50
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 150
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 80
+      },
+      {
+        "foodId": "cherries",
+        "grams": 100
+      },
+      {
+        "foodId": "almonds",
+        "grams": 10
+      },
+      {
+        "foodId": "chia-seeds",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Stir the oats, milk, yogurt and chia seeds together in a jar.",
+      "Stone and halve the cherries and add them on top.",
+      "Chill overnight.",
+      "Scatter with the chopped almonds before eating."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 462,
+      "protein": 25.6,
+      "carbs": 63.5,
+      "fat": 13.5,
+      "fibre": 10.4
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "chocolate-hazelnut-protein-oats",
+    "title": "Chocolate hazelnut protein oats",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 6,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "oats",
+        "grams": 50
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 200
+      },
+      {
+        "foodId": "whey-protein",
+        "grams": 20
+      },
+      {
+        "foodId": "cocoa",
+        "grams": 5
+      },
+      {
+        "foodId": "hazelnuts",
+        "grams": 12
+      },
+      {
+        "foodId": "banana",
+        "grams": 60
+      }
+    ],
+    "steps": [
+      "Simmer the oats with the milk and cocoa for 5 minutes, stirring, until creamy.",
+      "Take off the heat and stir in the whey with a splash of water.",
+      "Top with the sliced banana and chopped hazelnuts."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 506,
+      "protein": 30.1,
+      "carbs": 67.1,
+      "fat": 15.9,
+      "fibre": 9.9
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "berry-almond-milk-smoothie",
+    "title": "Berry and almond milk protein smoothie",
+    "cuisine": "global",
+    "slots": [
+      "snack",
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "almond-milk",
+        "grams": 300
+      },
+      {
+        "foodId": "whey-protein",
+        "grams": 30
+      },
+      {
+        "foodId": "mixed-berries",
+        "grams": 120
+      },
+      {
+        "foodId": "almond-butter",
+        "grams": 10
+      },
+      {
+        "foodId": "oats",
+        "grams": 20
+      }
+    ],
+    "steps": [
+      "Put everything in a blender.",
+      "Blend for a minute until completely smooth.",
+      "Serve straight away."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 334,
+      "protein": 24.6,
+      "carbs": 38.7,
+      "fat": 10.4,
+      "fibre": 6.3
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "tropical-seed-yogurt-bowl",
+    "title": "Tropical fruit and seed yogurt bowl",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 250
+      },
+      {
+        "foodId": "kiwi",
+        "grams": 80
+      },
+      {
+        "foodId": "papaya",
+        "grams": 80
+      },
+      {
+        "foodId": "melon",
+        "grams": 80
+      },
+      {
+        "foodId": "sunflower-seeds",
+        "grams": 15
+      },
+      {
+        "foodId": "honey",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Peel and dice the kiwi, papaya and melon.",
+      "Spoon the yogurt into a bowl and top with the fruit.",
+      "Scatter with the sunflower seeds and drizzle with honey."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 361,
+      "protein": 30.6,
+      "carbs": 43.1,
+      "fat": 9.5,
+      "fibre": 5.8
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "millet-banana-porridge",
+    "title": "Millet porridge with banana and peanut butter",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "millet",
+        "grams": 55
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 250
+      },
+      {
+        "foodId": "banana",
+        "grams": 80
+      },
+      {
+        "foodId": "peanut-butter",
+        "grams": 12
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Rinse the millet and simmer it with the milk, cinnamon and 100 ml of water for 18 to 20 minutes, stirring now and then, until soft and creamy.",
+      "Slice the banana over the top.",
+      "Add the peanut butter and let it melt in."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 477,
+      "protein": 17.9,
+      "carbs": 73.4,
+      "fat": 13.7,
+      "fibre": 7.6
+    },
+    "allergens": [
+      "milk",
+      "peanuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "tuna-egg-potato-jars",
+    "title": "Tuna, egg and potato salad jars (meal prep)",
+    "cuisine": "global",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "potato",
+        "grams": 600
+      },
+      {
+        "foodId": "tuna-canned",
+        "grams": 320
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "green-beans",
+        "grams": 300
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 120
+      },
+      {
+        "foodId": "mustard",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 30
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Boil the cubed potatoes for 12 minutes, adding the beans for the last 4 minutes; drain and cool.",
+      "Boil the eggs for 9 minutes, peel and quarter.",
+      "Whisk the yogurt, mustard, lemon, oil and salt.",
+      "Toss the potatoes, beans and spring onion with the dressing and divide between 4 jars.",
+      "Top with the drained tuna and eggs; keeps for 3 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 336,
+      "protein": 29.7,
+      "carbs": 34,
+      "fat": 9.9,
+      "fibre": 5.5
+    },
+    "allergens": [
+      "eggs",
+      "fish",
+      "milk",
+      "mustard"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "chicken-chickpea-traybake-prep",
+    "title": "Chicken, chickpea and vegetable traybake (meal prep)",
+    "cuisine": "global",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 700
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 480
+      },
+      {
+        "foodId": "courgette",
+        "grams": 300
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "paprika",
+        "grams": 4
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "salt",
+        "grams": 7
+      }
+    ],
+    "steps": [
+      "Toss the chicken, drained chickpeas and chunky vegetables with the paprika, cumin, oil and salt on a large tray.",
+      "Roast at 210 °C for 30 to 35 minutes, turning once, until the chicken is cooked through and the vegetables are charred at the edges.",
+      "Squeeze over the lemon.",
+      "Divide between 4 containers; keeps for 3 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 476,
+      "protein": 45.2,
+      "carbs": 39,
+      "fat": 16,
+      "fibre": 11
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "baked-oats-banana-pb",
+    "title": "Banana and peanut butter baked oats (meal prep)",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "oats",
+        "grams": 200
+      },
+      {
+        "foodId": "banana",
+        "grams": 250
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 300
+      },
+      {
+        "foodId": "peanut-butter",
+        "grams": 40
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 2
+      },
+      {
+        "foodId": "whey-protein",
+        "grams": 40
+      }
+    ],
+    "steps": [
+      "Mash the bananas and whisk in the eggs, milk, peanut butter, cinnamon and whey.",
+      "Stir in the oats and pour into a lined baking dish.",
+      "Bake at 180 °C for 28 to 30 minutes until set and golden.",
+      "Cut into 4 squares; keeps for 4 days chilled and reheats in a minute."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 420,
+      "protein": 22.8,
+      "carbs": 56.7,
+      "fat": 12.8,
+      "fibre": 7.7
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk",
+      "peanuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "salmon-fish-cakes",
+    "title": "Canned salmon fish cakes with salad",
+    "cuisine": "global",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "salmon-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "breadcrumbs",
+        "grams": 30
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "dill",
+        "grams": 4
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "rocket",
+        "grams": 60
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the potatoes for 15 minutes, drain well and mash.",
+      "Fold in the flaked salmon, spring onion, dill, lemon and salt and shape into 4 cakes.",
+      "Dip in the beaten egg, coat in the breadcrumbs and pan-fry in the oil for 3 to 4 minutes each side until golden.",
+      "Serve with the rocket and yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 448,
+      "protein": 41.9,
+      "carbs": 40.6,
+      "fat": 13.7,
+      "fibre": 4.6
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "fish",
+      "milk"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "salmon-avocado-rice-bowl",
+    "title": "Canned salmon and avocado rice bowl",
+    "cuisine": "global",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "salmon-canned",
+        "grams": 120
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 70
+      },
+      {
+        "foodId": "avocado",
+        "grams": 50
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 8
+      },
+      {
+        "foodId": "sesame-seeds",
+        "grams": 3
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender.",
+      "Flake the drained salmon over the rice.",
+      "Add the sliced avocado, cucumber and spring onion.",
+      "Dress with the soy sauce and sprinkle with sesame seeds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 535,
+      "protein": 37.4,
+      "carbs": 65,
+      "fat": 14.5,
+      "fibre": 5.3
+    },
+    "allergens": [
+      "gluten",
+      "fish",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "lentil-sweet-potato-stew-prep",
+    "title": "Lentil, sweet potato and spinach stew (meal prep)",
+    "cuisine": "global",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lentils",
+        "grams": 250
+      },
+      {
+        "foodId": "sweet-potato",
+        "grams": 500
+      },
+      {
+        "foodId": "spinach",
+        "grams": 200
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 800
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Soften the onion and garlic in the oil with the cumin and paprika.",
+      "Add the lentils, cubed sweet potato, tomatoes, stock and salt.",
+      "Simmer for 25 to 30 minutes until the lentils and sweet potato are tender.",
+      "Stir in the spinach until wilted.",
+      "Portion into 4 containers; keeps for 4 days chilled or 3 months frozen."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 423,
+      "protein": 20.9,
+      "carbs": 77.1,
+      "fat": 5.6,
+      "fibre": 14.5
+    },
+    "allergens": [
+      "celery"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "protein-oat-balls",
+    "title": "No-bake protein oat balls",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "oats",
+        "grams": 60
+      },
+      {
+        "foodId": "peanut-butter",
+        "grams": 40
+      },
+      {
+        "foodId": "whey-protein",
+        "grams": 30
+      },
+      {
+        "foodId": "honey",
+        "grams": 20
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 20
+      },
+      {
+        "foodId": "flaxseed",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Mix everything in a bowl until it comes together into a stiff dough.",
+      "Roll into 8 balls with damp hands.",
+      "Chill for 30 minutes to firm up; keeps for a week in the fridge."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 176,
+      "protein": 9.8,
+      "carbs": 19.4,
+      "fat": 7.4,
+      "fibre": 2.8
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "peanuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "apple-cheddar-snack",
+    "title": "Apple and cheddar",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "apple",
+        "grams": 150
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 30
+      }
+    ],
+    "steps": [
+      "Core and slice the apple.",
+      "Slice the cheddar.",
+      "Eat them together."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 199,
+      "protein": 7.3,
+      "carbs": 21.7,
+      "fat": 10.3,
+      "fibre": 3.6
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "yogurt-herb-dip-veg",
+    "title": "Herby yogurt dip with crunchy vegetables",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic-powder",
+        "grams": 0.5
+      },
+      {
+        "foodId": "dill",
+        "grams": 3
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "celery",
+        "grams": 60
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 80
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 4
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Stir the garlic powder, chopped dill, lemon, oil and salt into the yogurt.",
+      "Cut the carrot, celery and pepper into sticks.",
+      "Serve the vegetables with the dip."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 198,
+      "protein": 17.6,
+      "carbs": 22.5,
+      "fat": 5.2,
+      "fibre": 5.6
+    },
+    "allergens": [
+      "celery",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "chocolate-milk-recovery-shake",
+    "title": "Chocolate milk recovery shake",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "milk-semi",
+        "grams": 350
+      },
+      {
+        "foodId": "cocoa",
+        "grams": 8
+      },
+      {
+        "foodId": "honey",
+        "grams": 10
+      },
+      {
+        "foodId": "whey-protein",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Put the milk, cocoa, honey and whey in a shaker or blender.",
+      "Shake or blend until smooth.",
+      "Drink cold."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 277,
+      "protein": 21.9,
+      "carbs": 34,
+      "fat": 8.3,
+      "fibre": 3
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "cheese-crispbread-grapes",
+    "title": "Cheddar, crispbread and grapes",
+    "cuisine": "global",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "oatcakes",
+        "grams": 30
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 30
+      },
+      {
+        "foodId": "grapes",
+        "grams": 60
+      }
+    ],
+    "steps": [
+      "Slice the cheddar.",
+      "Arrange it on the crispbreads.",
+      "Serve with the grapes."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 263,
+      "protein": 10.2,
+      "carbs": 36,
+      "fat": 10.4,
+      "fibre": 7.4
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "quinoa-black-bean-salad-prep",
+    "title": "Quinoa, black bean and corn salad (meal prep)",
+    "cuisine": "global",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "quinoa",
+        "grams": 200
+      },
+      {
+        "foodId": "black-beans",
+        "grams": 400
+      },
+      {
+        "foodId": "sweetcorn",
+        "grams": 200
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 200
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 40
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 40
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "avocado",
+        "grams": 150
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Simmer the quinoa for 12 to 15 minutes, drain and cool.",
+      "Toss with the drained beans, sweetcorn, diced pepper and spring onion.",
+      "Dress with the lime, oil, cumin, salt and coriander.",
+      "Divide between 4 containers; add the avocado just before eating. Keeps for 4 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 445,
+      "protein": 16.2,
+      "carbs": 67.2,
+      "fat": 14.6,
+      "fibre": 15.5
+    },
+    "allergens": [],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "turkey-hummus-wrap",
+    "title": "Turkey and hummus wrap",
+    "cuisine": "global",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tortilla-flour",
+        "grams": 70
+      },
+      {
+        "foodId": "turkey-slices",
+        "grams": 80
+      },
+      {
+        "foodId": "hummus",
+        "grams": 40
+      },
+      {
+        "foodId": "spinach",
+        "grams": 30
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 50
+      },
+      {
+        "foodId": "tomato",
+        "grams": 50
+      }
+    ],
+    "steps": [
+      "Spread the hummus over the tortilla.",
+      "Layer on the turkey, spinach, cucumber and tomato.",
+      "Roll up tightly and cut in half."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 420,
+      "protein": 22.2,
+      "carbs": 47.1,
+      "fat": 15.8,
+      "fibre": 6.1
+    },
+    "allergens": [
+      "gluten",
+      "sesame"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "savoury-cottage-cheese-bowl",
+    "title": "Savoury cottage cheese bowl with egg and seeds",
+    "cuisine": "global",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 9,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "cottage-cheese",
+        "grams": 200
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "pumpkin-seeds",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 4
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.3
+      }
+    ],
+    "steps": [
+      "Boil the eggs for 9 minutes, cool, peel and halve.",
+      "Spoon the cottage cheese into a bowl.",
+      "Add the chopped tomato and cucumber and the eggs.",
+      "Finish with the pumpkin seeds, oil and pepper."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 427,
+      "protein": 38.1,
+      "carbs": 18.3,
+      "fat": 23.3,
+      "fibre": 2.3
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "low_carb",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "sardine-spinach-rice-bowl",
+    "title": "Sardine, spinach and lemon rice bowl",
+    "cuisine": "global",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "sardines-canned",
+        "grams": 120
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 70
+      },
+      {
+        "foodId": "spinach",
+        "grams": 80
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 3
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.3
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender and stir the spinach through it to wilt.",
+      "Flake the drained sardines over the top.",
+      "Dress with the lemon, oil and chilli."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 553,
+      "protein": 36.9,
+      "carbs": 59.7,
+      "fat": 17.7,
+      "fibre": 2.8
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
   }
 ]
