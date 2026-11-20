@@ -206,6 +206,9 @@ export function peekCatalogFor(want: readonly CatalogPart[]): Catalog | null {
   return allLoaded(want) ? facade : null;
 }
 
+/** Bumped by resetCatalogForTests; idle-slice chains started before a reset stop. */
+let generation = 0;
+
 /** Run when the JS thread is idle (RN 0.88 removed InteractionManager), else on the next tick. */
 function afterIdle(fn: () => void): void {
   const ric = (
@@ -217,10 +220,13 @@ function afterIdle(fn: () => void): void {
 
 /** Run `steps` one per idle slice, so the JS thread can paint and handle taps in between. */
 function inSlices(steps: (() => void)[]): Promise<void> {
+  const gen = generation;
   return new Promise<void>((resolve, reject) => {
     const next = (i: number) => {
       if (i >= steps.length) return resolve();
       afterIdle(() => {
+        // A reset (tests) drops chains started before it, so they cannot load into the new state.
+        if (gen !== generation) return resolve();
         try {
           steps[i]!();
         } catch (e) {
@@ -245,9 +251,10 @@ export function loadCatalogParts(want: readonly CatalogPart[]): Promise<Catalog>
 export function loadCatalog(): Promise<Catalog> {
   if (peekCatalog()) return Promise.resolve(facade);
   if (!loading) {
-    loading = loadCatalogParts(CATALOG_PARTS).finally(() => {
-      loading = null;
+    const p: Promise<Catalog> = loadCatalogParts(CATALOG_PARTS).finally(() => {
+      if (loading === p) loading = null;
     });
+    loading = p;
   }
   return loading;
 }
@@ -388,6 +395,7 @@ export function catalogStatsForTests(): {
 
 /** Tests only. */
 export function resetCatalogForTests(): void {
+  generation += 1;
   parts = {};
   loading = null;
   warming = false;
