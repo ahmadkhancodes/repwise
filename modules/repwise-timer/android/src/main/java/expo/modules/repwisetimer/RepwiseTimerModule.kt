@@ -89,7 +89,8 @@ class RepwiseTimerModule : Module() {
 
     /** Taps queued while JS was not listening (oldest first); clears the queue. */
     Function("consumeRestActions") {
-      appContext.reactContext?.let { RestTimerStore.drain(it) } ?: emptyList()
+      val ctx = appContext.reactContext ?: return@Function emptyList<Map<String, Any?>>()
+      RestTimerStore.drain(ctx)
     }
   }
 

@@ -2,7 +2,9 @@ import AppIntents
 import Foundation
 
 #if canImport(RepwiseTimer)
-  import RepwiseTimer
+  // `internal` matches the generated ExpoModulesProvider.swift (`internal import RepwiseTimer`);
+  // Swift 6 rejects mixing implicit and explicit access levels for one module in a target.
+  internal import RepwiseTimer
 #endif
 
 // Rest-timer Live Activity buttons (W5). @bacons/apple-targets compiles `_shared/` into BOTH the

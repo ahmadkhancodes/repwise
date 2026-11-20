@@ -18,5 +18,22 @@ dependencies {
   implementation 'androidx.core:core-ktx:1.13.1'
   // The "Rest over" alert is an expo-notifications request; the timer service delivers it on
   // time and the +15 s action moves it (ExpoRestAlert.kt).
-  implementation project(':expo-notifications')
+  // SDK 58 autolinking consumes expo-notifications as a prebuilt AAR from its local-maven-repo
+  // (no ':expo-notifications' Gradle project). Use the project only when it is built from source.
+  def expoNotificationsProject = findProject(':expo-notifications')
+  if (expoNotificationsProject != null) {
+    implementation expoNotificationsProject
+  } else {
+    implementation "host.exp.exponent:expo.modules.notifications:${expoNotificationsVersion()}"
+  }
+}
+
+// Version of the installed expo-notifications package; autolinking only exposes this exact
+// version from the package's local-maven-repo.
+def expoNotificationsVersion() {
+  def pkgJson = providers.exec {
+    workingDir(projectDir)
+    commandLine('node', '--print', "require.resolve('expo-notifications/package.json')")
+  }.standardOutput.asText.get().trim()
+  return new groovy.json.JsonSlurper().parse(new File(pkgJson)).version
 }
