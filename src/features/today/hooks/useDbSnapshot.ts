@@ -1,6 +1,7 @@
 import * as ExpoRouter from 'expo-router';
-import { addDatabaseChangeListener } from 'expo-sqlite';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { subscribeTables } from '@/db/events';
 
 /**
  * Focus of the current screen. Tests (and any render outside a navigator) have no focus hook, so
@@ -16,8 +17,9 @@ const useFocused: () => boolean =
  * the first render already has data (no empty flash), so Today renders straight from cache.
  *
  * Cheap on purpose (perf audit A2/A6/A13):
- *  - a burst of writes (a multi-row insert, a tick that writes a log and a status) reloads ONCE
- *    (coalesced to a microtask);
+ *  - a burst of writes (a multi-row insert, a tick that writes a log and a status, a sync page)
+ *    reloads ONCE: `subscribeTables` coalesces the per-row change events to one flush per frame
+ *    (perf audit r2 N3);
  *  - while the screen is blurred (the player is pushed on top) changes only mark it dirty, and it
  *    reloads once when it is focused again;
  *  - `deps` (dates, ids) are keyed with a plain join, not JSON.stringify per render.
@@ -38,25 +40,18 @@ export function useDbSnapshot<T>(
   }, [focused]);
 
   useEffect(() => {
-    const watched = new Set(key.split(','));
-    let queued = false;
     let live = true;
-    const sub = addDatabaseChangeListener(({ tableName }) => {
-      if (!watched.has(tableName)) return;
+    const off = subscribeTables(key.split(','), () => {
+      if (!live) return;
       if (!focusedRef.current) {
         dirty.current = true;
         return;
       }
-      if (queued) return;
-      queued = true;
-      queueMicrotask(() => {
-        queued = false;
-        if (live) reload();
-      });
+      reload();
     });
     return () => {
       live = false;
-      sub.remove();
+      off();
     };
   }, [key, reload]);
 

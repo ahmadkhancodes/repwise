@@ -153,6 +153,11 @@ export const sets = sqliteTable(
   (t) => [
     // (session_exercise_id, idx): sets of an exercise in order, no sort step.
     index('sets_session_exercise_idx_idx').on(t.sessionExerciseId, t.idx),
+    // Logged sets in time order (Progress, Library "recent", history): partial, so it only holds
+    // ticked, live rows (perf audit r2 N4).
+    index('sets_done_at_idx')
+      .on(t.doneAt)
+      .where(sql`${t.doneAt} IS NOT NULL AND ${t.deletedAt} IS NULL`),
     dirtyIdx('sets', t),
   ],
 );

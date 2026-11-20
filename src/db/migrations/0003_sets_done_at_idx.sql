@@ -1,0 +1,1 @@
+CREATE INDEX `sets_done_at_idx` ON `sets` (`done_at`) WHERE "sets"."done_at" IS NOT NULL AND "sets"."deleted_at" IS NULL;

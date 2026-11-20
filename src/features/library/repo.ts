@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, max } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 
 import { getDb } from '@/db/client';
+import { useLiveRows } from '@/db/live';
 import { createRepo, type Row } from '@/db/repo';
 import { exercises, routines, sessionExercises, sessions, sets } from '@/db/schema';
 import {
@@ -58,17 +59,23 @@ export function useCustomExercise(id: string): {
   row: CustomExercise | undefined;
   loaded: boolean;
 } {
-  const q = getDb()
-    .select()
-    .from(exercises)
-    .where(and(eq(exercises.id, id), isNull(exercises.deletedAt)));
-  const res = useLiveQuery(q, [id]);
-  return { row: res.data[0] as CustomExercise | undefined, loaded: res.updatedAt != null };
+  const res = useLiveRows(
+    () =>
+      getDb()
+        .select()
+        .from(exercises)
+        .where(and(eq(exercises.id, id), isNull(exercises.deletedAt))),
+    ['exercises'],
+    [id],
+  );
+  return { row: res.data[0] as CustomExercise | undefined, loaded: res.loaded };
 }
 
 // ---------------------------------------------------------------------------
 // History, records and recently used (from logged sets)
 // ---------------------------------------------------------------------------
+
+const HISTORY_TABLES = ['sets', 'session_exercises', 'sessions'];
 
 function historyQuery(exerciseId: string) {
   return getDb()
@@ -104,8 +111,8 @@ export function useExerciseHistory(exerciseId: string): {
   loaded: boolean;
   error?: Error;
 } {
-  const res = useLiveQuery(historyQuery(exerciseId), [exerciseId]);
-  return { sets: res.data, loaded: res.updatedAt != null || res.error != null, error: res.error };
+  const res = useLiveRows(() => historyQuery(exerciseId), HISTORY_TABLES, [exerciseId]);
+  return { sets: res.data, loaded: res.loaded, error: res.error };
 }
 
 function recentQuery(limit: number) {
@@ -126,9 +133,13 @@ export function recentlyLogged(limit = 20): RecentEntry[] {
     .map((r) => ({ id: r.id, at: r.at ?? 0 }));
 }
 
+/**
+ * Live, but only while the Library is focused (perf audit r2 N4): the GROUP BY over every done set
+ * used to re-run on each set tick while the Library tab sat in the background.
+ */
 export function useRecentlyLogged(limit = 20): RecentEntry[] {
-  const res = useLiveQuery(recentQuery(limit), [limit]);
-  return res.data.map((r) => ({ id: r.id, at: r.at ?? 0 }));
+  const res = useLiveRows(() => recentQuery(limit), ['sets', 'session_exercises'], [limit]);
+  return useMemo(() => res.data.map((r) => ({ id: r.id, at: r.at ?? 0 })), [res.data]);
 }
 
 // ---------------------------------------------------------------------------
@@ -158,7 +169,8 @@ export function openSessions(today: string, limit = 6): Session[] {
 }
 
 export function useOpenSessions(today: string, limit = 6): Session[] {
-  return useLiveQuery(openSessionsQuery(today, limit), [today, limit]).data as Session[];
+  return useLiveRows(() => openSessionsQuery(today, limit), ['sessions'], [today, limit])
+    .data as Session[];
 }
 
 /** Default target for an exercise added by hand; the player lets the user change it. */
