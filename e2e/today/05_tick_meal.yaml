@@ -18,9 +18,11 @@ tags:
       id: "today-meals"
     direction: DOWN
     centerElement: true
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: "today-meal-lunch"
+    direction: DOWN
+    centerElement: true
     timeout: 15000
 - assertVisible:
     id: "meals-count"

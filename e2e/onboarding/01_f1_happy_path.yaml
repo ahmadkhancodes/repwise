@@ -6,10 +6,24 @@ tags:
   - onboarding
   - p0
 ---
-- launchApp:
-    clearState: true
-    permissions:
-      notifications: deny
+# Android: the raw permission name, so Maestro revokes POST_NOTIFICATIONS itself (with only
+# `notifications: deny` the app still read "granted" later, see notifications-permission-off).
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            android.permission.POST_NOTIFICATIONS: deny
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            notifications: deny
 # S02 Welcome
 - extendedWaitUntil:
     visible:
