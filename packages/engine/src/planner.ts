@@ -508,7 +508,14 @@ function pickDay(
   return chosen.filter((_, i) => chosenSlots[i] !== 'snack').length > 0 ? { recipes: chosen, slots: chosenSlots } : null;
 }
 
-function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResult {
+/** Failures count of a meal plan that was abandoned because it could no longer beat the best one. */
+const PRUNED = 1e9;
+
+/**
+ * `bound`: stop as soon as this run has more failures than `bound` (it can no longer win), so the
+ * window / protein-step search does not plan whole weeks it will throw away (ENGINE_QA bug 1).
+ */
+function planMealsWithWindow(ctx: PlanningContext, window: number, bound = Infinity): MealPlanResult {
   const rng = createRng(`${ctx.seed}/meals/w${window}`);
   const planned: PastMeal[] = [];
   const ingredientUse = new Map<string, number>();
@@ -553,6 +560,7 @@ function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResu
       failures += 1;
       for (const main of ctx.mealSlots) if (main !== 'snack') skippedMeals.push({ date, slot: main });
       days.push({ date, dayType, targets: target, meals: [], totals: { kcal: 0, protein: 0, carbs: 0, fat: 0 } });
+      if (failures + skippedMeals.length > bound) return { days, failures: PRUNED, extraSnacks, skippedMeals, relaxed };
       continue;
     }
     if (!best.ok) failures += 1;
@@ -565,6 +573,7 @@ function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResu
       for (const ing of r.ingredients) if (!isStaple(ing.id)) ingredientUse.set(ing.id, (ingredientUse.get(ing.id) ?? 0) + 1);
     }
     prevCuisine = best.recipes[best.recipes.length - 1]?.cuisine;
+    if (failures + skippedMeals.length > bound) return { days, failures: PRUNED, extraSnacks, skippedMeals, relaxed };
   }
   return { days, failures: failures + skippedMeals.length, extraSnacks, skippedMeals, relaxed };
 }
@@ -573,12 +582,12 @@ function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResu
 export const MEAL_ATTEMPTS = 30;
 export const EXTRA_SNACK_ATTEMPTS = 10;
 
-function planMealsBestWindow(ctx: PlanningContext): { res: MealPlanResult; window: number } {
+function planMealsBestWindow(ctx: PlanningContext, bound = Infinity): { res: MealPlanResult; window: number } {
   const requested = ctx.noRepeatDays;
   const windows = [...new Set([requested, Math.max(7, Math.ceil((requested + 7) / 2)), 7])].sort((a, b) => b - a);
   let chosen: { res: MealPlanResult; window: number } | undefined;
   for (const w of windows) {
-    const res = planMealsWithWindow(ctx, w);
+    const res = planMealsWithWindow(ctx, w, Math.min(bound, chosen ? chosen.res.failures - 1 : Infinity));
     if (!chosen || res.failures < chosen.res.failures) chosen = { res, window: w };
     if (res.failures === 0) break;
   }
@@ -616,7 +625,7 @@ export function planMeals(ctx: PlanningContext, warnings: PlanWarning[]): DayMea
         proteinGPerKg: perKg,
         ...(ctx.adjustmentKcal !== undefined ? { adjustmentKcal: ctx.adjustmentKcal } : {}),
       });
-      const attempt = planMealsBestWindow(ctx);
+      const attempt = planMealsBestWindow(ctx, best.res.failures - 1);
       if (attempt.res.failures < best.res.failures) best = { ...attempt, nutrition: ctx.nutrition, perKg };
     }
     ctx.nutrition = best.nutrition;
