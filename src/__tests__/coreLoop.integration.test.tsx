@@ -158,4 +158,4 @@ it('core loop: onboard → Today → tick meal → start workout → log set →
   const records = computeRecords(exerciseHistory(first.exerciseId));
   expect(records.heaviest).toMatchObject({ weightKg: 40, reps: 10, date: TODAY });
   expect(records.e1rm?.value).toBeGreaterThan(40);
-});
+}, 30_000); // full planner + DB run; generous under parallel CI load

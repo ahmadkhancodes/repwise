@@ -24,6 +24,20 @@ export interface PlannerContext {
   constraints: JsonObject;
   /** IDs used recently (no-repeat rules); the LLM is told to avoid them. */
   recent?: string[];
+  /** Which static catalogue describes the candidate IDs (sent as a cached system block). */
+  catalogue?: CatalogueKey;
+}
+
+export type CatalogueKey = 'exercises' | 'recipes';
+
+/**
+ * A static, byte-stable description of every ID the LLM could be offered (one compact line each).
+ * It never changes between requests, so it is sent as a cached system block, and its ID list becomes
+ * the `enum` of the structured-output schema (the model cannot emit an ID outside the catalogue).
+ */
+export interface Catalogue {
+  text: string;
+  ids: string[];
 }
 
 export type FinalizeResult = { ok: true; plan: JsonValue } | { ok: false; reason: string };
@@ -42,6 +56,8 @@ export interface Planner {
    * Any failure returns { ok: false } and the rules-only plan ships instead.
    */
   finalize(req: PlanRequest, ctx: PlannerContext, llmOutput: JsonObject): FinalizeResult | Promise<FinalizeResult>;
+  /** The static catalogue for `key` (memoised by the implementation). Optional. */
+  catalogue?(key: CatalogueKey): Catalogue | null;
 }
 
 /**

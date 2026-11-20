@@ -38,7 +38,8 @@
     "cues": [
       "Big breath in and brace before every rep.",
       "Knees travel in the same direction as your toes.",
-      "Chest stays proud as you rise."
+      "Chest stays proud as you rise.",
+      "Set the safety arms just below the bottom of your squat."
     ],
     "commonMistakes": [
       "Letting the heels lift off the floor.",
@@ -930,7 +931,7 @@
     "equipment": [
       "barbell"
     ],
-    "level": "advanced",
+    "level": "intermediate",
     "unilateral": false,
     "mechanics": "compound",
     "contraindications": [
@@ -2207,7 +2208,8 @@
     ],
     "cues": [
       "Shoulder blades pinned to the bench.",
-      "Bend the bar to keep the elbows under the wrists."
+      "Bend the bar to keep the elbows under the wrists.",
+      "Wrap your thumbs around the bar and use a spotter or safety arms on heavy sets."
     ],
     "commonMistakes": [
       "Bouncing the bar off the chest.",
@@ -2254,7 +2256,8 @@
     ],
     "cues": [
       "Low incline, not a shoulder press.",
-      "Touch high on the chest."
+      "Touch high on the chest.",
+      "Wrap your thumbs around the bar and use a spotter or safety arms on heavy sets."
     ],
     "commonMistakes": [
       "Setting the incline too steep.",
@@ -2626,7 +2629,8 @@
     ],
     "cues": [
       "Elbows close to the ribs.",
-      "Hands no narrower than shoulder-width."
+      "Hands no narrower than shoulder-width.",
+      "Use a spotter or safety arms on heavy sets."
     ],
     "commonMistakes": [
       "Gripping so narrow the wrists bend.",
@@ -2933,8 +2937,8 @@
     ],
     "secondaryMuscles": [
       "triceps",
-      "upper_back",
-      "abs"
+      "abs",
+      "traps"
     ],
     "equipment": [
       "barbell",
@@ -3167,7 +3171,8 @@
     "secondaryMuscles": [
       "quads",
       "glutes",
-      "abs"
+      "abs",
+      "traps"
     ],
     "equipment": [
       "barbell",
@@ -3215,7 +3220,7 @@
     ],
     "secondaryMuscles": [
       "side_delts",
-      "upper_back"
+      "traps"
     ],
     "equipment": [
       "bodyweight"
@@ -3261,8 +3266,8 @@
     ],
     "secondaryMuscles": [
       "triceps",
-      "upper_back",
-      "abs"
+      "abs",
+      "traps"
     ],
     "equipment": [
       "landmine",
@@ -3402,7 +3407,7 @@
     ],
     "secondaryMuscles": [
       "abs",
-      "upper_back"
+      "traps"
     ],
     "equipment": [
       "barbell",
@@ -3517,7 +3522,8 @@
     ],
     "cues": [
       "Form a triangle between hands and head.",
-      "Squeeze your legs together."
+      "Squeeze your legs together.",
+      "Only try this once you can hold a wall handstand for 30 seconds."
     ],
     "commonMistakes": [
       "Dropping too fast onto the head.",
@@ -4868,7 +4874,8 @@
     "secondaryMuscles": [
       "traps",
       "triceps",
-      "obliques"
+      "obliques",
+      "front_delts"
     ],
     "equipment": [
       "dumbbell"
@@ -5420,7 +5427,7 @@
       "cable"
     ],
     "level": "beginner",
-    "unilateral": false,
+    "unilateral": true,
     "mechanics": "compound",
     "contraindications": [],
     "instructions": [
@@ -5463,7 +5470,7 @@
       "band"
     ],
     "level": "beginner",
-    "unilateral": false,
+    "unilateral": true,
     "mechanics": "compound",
     "contraindications": [],
     "instructions": [
@@ -5735,7 +5742,7 @@
       "cable"
     ],
     "level": "beginner",
-    "unilateral": false,
+    "unilateral": true,
     "mechanics": "compound",
     "contraindications": [
       "lower_back"
@@ -7597,7 +7604,8 @@
     ],
     "cues": [
       "Upper arms stay still.",
-      "Slow lowering."
+      "Slow lowering.",
+      "Keep a firm, full grip on the bar throughout."
     ],
     "commonMistakes": [
       "Flaring the elbows.",
@@ -7630,7 +7638,7 @@
     ],
     "level": "beginner",
     "unilateral": false,
-    "mechanics": "isolation",
+    "mechanics": "compound",
     "contraindications": [
       "shoulder",
       "wrist"
@@ -7762,7 +7770,7 @@
     ],
     "level": "beginner",
     "unilateral": false,
-    "mechanics": "isolation",
+    "mechanics": "compound",
     "contraindications": [
       "shoulder"
     ],
@@ -10316,7 +10324,7 @@
     "patternFamily": "mobility",
     "primaryMuscles": [
       "adductors",
-      "hip_flexors"
+      "glutes"
     ],
     "secondaryMuscles": [
       "calves",
@@ -12661,7 +12669,7 @@
     "secondaryMuscles": [
       "triceps",
       "side_delts",
-      "upper_back"
+      "traps"
     ],
     "equipment": [
       "bodyweight",
@@ -12817,7 +12825,7 @@
     ],
     "level": "beginner",
     "unilateral": false,
-    "mechanics": "isolation",
+    "mechanics": "compound",
     "contraindications": [
       "shoulder",
       "wrist"

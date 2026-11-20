@@ -1,10 +1,23 @@
 # Repwise API (Cloudflare Worker). No secrets in this file: use `wrangler secret put <NAME>`.
-# See server/README.md for the full list of variables and secrets.
+# Full deploy runbook (secrets list, commands, indexes, smoke test): docs/DEPLOY_SERVER.md.
 name = "repwise-api"
 main = "src/index.ts"
 compatibility_date = "2025-09-01"
-compatibility_flags = ["nodejs_compat"]
+compatibility_flags = ["nodejs_compat"]   # MongoDB driver sockets + node:crypto
 workers_dev = true
+upload_source_maps = true                 # readable stack traces in Workers Logs (no source in responses)
+
+# The engine needs ~30–500 ms CPU per week plan (the AI path runs it twice). Workers Paid (Standard)
+# allows up to 5 min; 30 s is a safe ceiling that still stops a runaway request.
+[limits]
+cpu_ms = 30000
+
+# Custom domain (uncomment after the zone is on Cloudflare):
+# routes = [{ pattern = "api.repwise.app", custom_domain = true }]
+
+[observability]
+enabled = true
+head_sampling_rate = 1   # every request's structured JSON log line (lower if volume grows)
 
 [vars]
 ENVIRONMENT = "production"
@@ -18,7 +31,47 @@ AI_PROVIDER = "anthropic"
 AI_MODEL = "claude-haiku-5-5"
 AI_MONTHLY_BUDGET_USD = "50"
 AI_TIMEOUT_MS = "8000"
-MAIL_PROVIDER = "console"
+AI_CACHE_TTL = "1h"
+AI_CATALOGUE = "on"
+MAIL_PROVIDER = "resend"
+MAIL_FROM = "Repwise <login@repwise.app>"
+LOG_LEVEL = "info"
+# Optional (set here or with `wrangler secret put` if you prefer them hidden):
+# CORS_ORIGINS = ""                 # production allows no browser origin by default
+# GOOGLE_IOS_CLIENT_ID = ""
+# GOOGLE_ANDROID_CLIENT_ID = ""
+# APPLE_SERVICES_ID = ""
+# PLAY_PUBSUB_AUDIENCE = ""         # preferred RTDN auth (OIDC); else PLAY_RTDN_SECRET
+# PLAY_PUBSUB_SERVICE_ACCOUNT = ""
 
-[observability]
+# Staging: `wrangler deploy --env staging` → repwise-api-staging. Vars are NOT inherited by
+# environments in wrangler, so they are repeated. Secrets are per environment too
+# (`wrangler secret put NAME --env staging`). Use a separate Atlas database.
+[env.staging]
+name = "repwise-api-staging"
+workers_dev = true
+
+[env.staging.limits]
+cpu_ms = 30000
+
+[env.staging.observability]
 enabled = true
+head_sampling_rate = 1
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+JWT_ISSUER = "repwise-api-staging"
+JWT_AUDIENCE = "repwise-app"
+MONGODB_DB = "repwise_staging"
+APPLE_BUNDLE_ID = "com.client.repwise"
+PLAY_PACKAGE_NAME = "com.client.repwise"
+PAYMENTS_ENABLED = "false"
+AI_PROVIDER = "anthropic"
+AI_MODEL = "claude-haiku-5-5"
+AI_MONTHLY_BUDGET_USD = "5"
+AI_TIMEOUT_MS = "8000"
+AI_CACHE_TTL = "1h"
+AI_CATALOGUE = "on"
+MAIL_PROVIDER = "console"
+MAIL_FROM = "Repwise Staging <login@repwise.app>"
+LOG_LEVEL = "debug"

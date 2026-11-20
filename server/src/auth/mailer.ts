@@ -1,3 +1,5 @@
+import type { Logger } from '../lib/log';
+
 export interface Mail {
   to: string;
   subject: string;
@@ -8,15 +10,21 @@ export interface Mailer {
   send(mail: Mail): Promise<void>;
 }
 
-/** Default provider: logs instead of sending. Codes are only printed outside production. */
+/**
+ * Default provider: sends nothing. Outside production it prints the message to the console so a
+ * developer can sign in with `wrangler dev` (deliberately raw: local dev only, never in production).
+ */
 export class ConsoleMailer implements Mailer {
-  constructor(private readonly environment: string) {}
+  constructor(
+    private readonly environment: string,
+    private readonly log?: Logger,
+  ) {}
   async send(mail: Mail): Promise<void> {
     if (this.environment === 'production') {
-      console.warn('mail: console provider in production, email not sent (set MAIL_PROVIDER=resend)');
+      this.log?.warn('mail_not_sent', { reason: 'console provider in production (set MAIL_PROVIDER=resend)' });
       return;
     }
-    console.log(`mail to=${mail.to} subject=${JSON.stringify(mail.subject)} text=${JSON.stringify(mail.text)}`);
+    console.log(`[dev mail] subject=${JSON.stringify(mail.subject)}`);
   }
 }
 

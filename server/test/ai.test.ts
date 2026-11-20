@@ -100,7 +100,7 @@ describe('AI planner pipeline (Anthropic, mocked fetch)', () => {
     expect(req.headers).toMatchObject({ 'x-api-key': 'sk-ant-test', 'anthropic-version': '2026-10-21' });
     expect(req.body.model).toBe('claude-haiku-5-5');
     expect(req.body.max_tokens).toBe(3000);
-    expect(req.body.system[0].cache_control).toEqual({ type: 'ephemeral' });
+    expect(req.body.system[0].cache_control).toEqual({ type: 'ephemeral', ttl: '1h' });
     expect(req.body.output_config).toMatchObject({ effort: 'low', format: { type: 'json_schema' } });
     expect(req.body.temperature).toBeUndefined();
     const user = JSON.parse(req.body.messages[0].content);
@@ -287,7 +287,7 @@ describe('AI planner pipeline (Anthropic, mocked fetch)', () => {
     const { t, mock, s } = await aiSetup(() => replies[i++]!);
     const meals = await call(t, 'POST', '/ai/meals/day', { token: s.accessToken, body: { profile: { diet: 'any' } } });
     expect(meals.body.source).toBe('ai');
-    const swap = await call(t, 'POST', '/ai/swap', { token: s.accessToken, body: { profile: {}, params: { item: 'ex_squat' } } });
+    const swap = await call(t, 'POST', '/ai/swap', { token: s.accessToken, body: { profile: {}, params: { item: 'exercise' } } });
     expect(swap.body.source).toBe('ai');
     expect(mock.requests.map((r) => r.body.max_tokens)).toEqual([1500, 600]);
     expect(Object.keys(mock.requests[1]!.body.output_config.format.schema.properties)).toEqual(['options', 'note']);

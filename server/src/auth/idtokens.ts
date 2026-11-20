@@ -27,7 +27,7 @@ export function googleVerifier(audiences: string[], jwks: JWTVerifyGetKey = crea
     if (audiences.length === 0) throw new HttpError(503, 'not_configured');
     try {
       const { payload } = await jwtVerify(token, jwks, {
-        algorithms: ['RS256'],
+        algorithms: ['RS256'], // pinned: never HS*/none, never a key the token names itself
         issuer: ['https://accounts.google.com', 'accounts.google.com'],
         audience: audiences,
         clockTolerance: 30,
@@ -51,7 +51,8 @@ export function appleVerifier(audiences: string[], jwks: JWTVerifyGetKey = creat
     if (audiences.length === 0) throw new HttpError(503, 'not_configured');
     try {
       const { payload } = await jwtVerify(token, jwks, {
-        algorithms: ['RS256', 'ES256'],
+        // Pinned: Apple signs identity tokens with RS256 only (its JWKS publishes RSA keys).
+        algorithms: ['RS256'],
         issuer: 'https://appleid.apple.com',
         audience: audiences,
         clockTolerance: 30,

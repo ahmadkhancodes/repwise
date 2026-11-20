@@ -1,4 +1,4 @@
-import { and, eq, isNull, type SQL } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
 
@@ -8,6 +8,7 @@ import { getDb } from './client';
 import { notifyLocalWrite } from './events';
 import { getRowOwner } from './owner';
 import { cards, type SyncTable, type SyncTableName } from './schema';
+import { withTransaction } from './transaction';
 
 type CommonKey = 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'dirty';
 
@@ -21,6 +22,11 @@ export type RowPatch<T extends SyncTable> = Partial<Omit<T['$inferInsert'], Comm
 type AnyTable = typeof cards;
 
 export const DIRTY = { clean: 0, pending: 1, rejected: 2 } as const;
+
+/** Rows per multi-row INSERT (15–30 columns each stays far under SQLite's bound-variable limit). */
+const INSERT_CHUNK = 200;
+/** Ids per `IN (…)` list. */
+const IN_CHUNK = 500;
 
 /**
  * Next updated_at for a row: wall clock, but always strictly after the previous value so a local
@@ -73,36 +79,80 @@ export function createRepo<T extends SyncTable>(table: T, name: SyncTableName) {
     return saved;
   }
 
+  /**
+   * Many rows in one statement per chunk, inside one transaction, one write signal (perf audit A6).
+   * Same stamping as `insert`; returns the saved rows in input order.
+   */
+  function insertMany(values: readonly NewRow<T>[], now: number = Date.now()): R[] {
+    if (values.length === 0) return [];
+    const owner = getRowOwner();
+    const rows = values.map((v) => ({
+      ...v,
+      id: v.id ?? uuidv7(now),
+      userId: owner,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+      dirty: DIRTY.pending,
+    }));
+    return withTransaction(() => {
+      const out: R[] = [];
+      for (let i = 0; i < rows.length; i += INSERT_CHUNK) {
+        const saved = getDb()
+          .insert(t)
+          .values(rows.slice(i, i + INSERT_CHUNK) as never)
+          .returning()
+          .all() as R[];
+        out.push(...saved);
+      }
+      notifyLocalWrite(name);
+      return out;
+    });
+  }
+
+  /**
+   * One UPDATE … RETURNING, no read first: updated_at = max(now, previous + 1) in SQL, so a local
+   * edit still wins last-write-wins over a row from a device whose clock runs ahead.
+   */
   function update(id: string, patch: RowPatch<T>, now: number = Date.now()): R | undefined {
-    const prev = getIncludingDeleted(id) as { updatedAt: number } | undefined;
-    if (!prev) return undefined;
     const saved = getDb()
       .update(t)
       .set({
         ...(patch as object),
-        updatedAt: nextUpdatedAt(now, prev.updatedAt),
+        updatedAt: sql`max(${now}, ${t.updatedAt} + 1)`,
         dirty: DIRTY.pending,
       } as never)
       .where(eq(t.id, id))
       .returning()
       .get() as R | undefined;
-    notifyLocalWrite(name);
+    if (saved) notifyLocalWrite(name);
     return saved;
   }
 
-  /** Soft delete so the delete syncs (sheet 13). */
+  /** Soft delete so the delete syncs (sheet 13). One statement; false if missing or already deleted. */
   function remove(id: string, now: number = Date.now()): boolean {
-    const prev = getIncludingDeleted(id) as
-      { updatedAt: number; deletedAt: number | null } | undefined;
-    if (!prev || prev.deletedAt != null) return false;
-    const at = nextUpdatedAt(now, prev.updatedAt);
-    getDb()
-      .update(t)
-      .set({ deletedAt: at, updatedAt: at, dirty: DIRTY.pending })
-      .where(eq(t.id, id))
-      .run();
-    notifyLocalWrite(name);
-    return true;
+    return removeMany([id], now) > 0;
+  }
+
+  /** Soft-delete many rows in one UPDATE … WHERE id IN (…); returns how many were deleted. */
+  function removeMany(ids: readonly string[], now: number = Date.now()): number {
+    if (ids.length === 0) return 0;
+    const at = sql`max(${now}, ${t.updatedAt} + 1)`;
+    let changed = 0;
+    const run = () => {
+      for (let i = 0; i < ids.length; i += IN_CHUNK) {
+        const res = getDb()
+          .update(t)
+          .set({ deletedAt: at, updatedAt: at, dirty: DIRTY.pending } as never)
+          .where(and(inArray(t.id, ids.slice(i, i + IN_CHUNK) as string[]), isNull(t.deletedAt)))
+          .run();
+        changed += res.changes;
+      }
+    };
+    if (ids.length > IN_CHUNK) withTransaction(run);
+    else run();
+    if (changed > 0) notifyLocalWrite(name);
+    return changed;
   }
 
   function list(where?: SQL, orderBy?: SQL | SQLiteColumn): R[] {
@@ -129,7 +179,20 @@ export function createRepo<T extends SyncTable>(table: T, name: SyncTableName) {
     return { data: res.data as R[], error: res.error };
   }
 
-  return { table, name, get, getIncludingDeleted, insert, update, remove, list, first, useLive };
+  return {
+    table,
+    name,
+    get,
+    getIncludingDeleted,
+    insert,
+    insertMany,
+    update,
+    remove,
+    removeMany,
+    list,
+    first,
+    useLive,
+  };
 }
 
 export type Repo<T extends SyncTable> = ReturnType<typeof createRepo<T>>;

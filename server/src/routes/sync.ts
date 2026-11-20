@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { b64url, b64urlDecode } from '../lib/crypto';
-import { badRequest, forbidden, readJson } from '../lib/http';
+import { badRequest, forbidden } from '../lib/http';
 import { rateLimit, requireUser } from '../lib/middleware';
+import { parseJson, parseQuery } from '../lib/validate';
+import { PullQuery, PushBody } from '../schemas';
 import { SYNC_LIMITS, TABLE_NAMES } from '../sync/tables';
 import { validateRow } from '../sync/validate';
 import type { AppEnv } from '../types';
@@ -60,11 +62,8 @@ syncRoutes.use('*', async (c, next) => {
 });
 
 syncRoutes.post('/push', async (c) => {
-  const body = await readJson(c, SYNC_LIMITS.maxPushBytes);
+  const body = await parseJson(c, PushBody, SYNC_LIMITS.maxPushBytes);
   const table = body.table;
-  if (typeof table !== 'string' || !TABLE_NAMES.includes(table)) throw badRequest('unknown_table');
-  if (!Array.isArray(body.rows)) throw badRequest('rows_must_be_array');
-  if (body.rows.length > SYNC_LIMITS.maxRowsPerPush) throw badRequest('too_many_rows');
   const deps = c.get('deps');
   const now = deps.now();
   const rejected: { id: string | null; reason: string }[] = [];
@@ -101,23 +100,18 @@ syncRoutes.post('/push', async (c) => {
 syncRoutes.get('/pull', async (c) => {
   const deps = c.get('deps');
   const now = deps.now();
-  const q = c.req.query();
+  const q = parseQuery(c, PullQuery);
   let tables = TABLE_NAMES;
   if (q.tables) {
-    tables = q.tables.split(',').map((t) => t.trim()).filter(Boolean);
-    if (tables.length === 0 || tables.some((t) => !TABLE_NAMES.includes(t))) throw badRequest('unknown_table');
-    tables = TABLE_NAMES.filter((t) => tables.includes(t)); // stable order
+    const wanted = q.tables.split(',').map((t) => t.trim()).filter(Boolean);
+    if (wanted.length === 0 || wanted.some((t) => !TABLE_NAMES.includes(t))) throw badRequest('unknown_table');
+    tables = TABLE_NAMES.filter((t) => wanted.includes(t)); // stable order
   }
-  const limit = q.limit ? Number(q.limit) : SYNC_LIMITS.maxPullPage;
-  if (!Number.isSafeInteger(limit) || limit < 1 || limit > SYNC_LIMITS.maxPullPage) throw badRequest('invalid_limit');
+  const limit = q.limit ?? SYNC_LIMITS.maxPullPage;
 
   let cur: Cursor;
   if (q.cursor) cur = decodeCursor(q.cursor);
-  else {
-    const since = q.since === undefined || q.since === '' ? 0 : Number(q.since);
-    if (!Number.isSafeInteger(since) || since < 0) throw badRequest('invalid_since');
-    cur = { since, t0: 0, ti: 0 };
-  }
+  else cur = { since: typeof q.since === 'number' ? q.since : 0, t0: 0, ti: 0 };
 
   const db = await deps.db();
   const userId = c.get('userId');

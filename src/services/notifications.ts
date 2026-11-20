@@ -62,6 +62,9 @@ const K = {
 } as const;
 
 /** Android channels (sheet 17). The ongoing rest-timer channel is created natively. */
+/** Tables whose writes cannot change the schedule or the widget snapshot. */
+export const IGNORED_WRITE_TABLES: ReadonlySet<string> = new Set(['sets']);
+
 export const CHANNELS: { id: ChannelId; name: string; description: string; importance: AndroidImportance }[] = [
   { id: 'brief', name: 'Morning brief', description: "Today's workout and meals, and tomorrow's preview", importance: AndroidImportance.DEFAULT },
   { id: 'meals', name: 'Meals', description: 'Meal-time reminders from your plan', importance: AndroidImportance.HIGH },
@@ -395,7 +398,14 @@ export function startNotifications(deps: ResponseDeps = defaultDeps): () => void
     // not available on this platform
   }
 
-  stops.push(onLocalWrite(() => requestRebuild()));
+  // A logged set changes nothing a reminder or widget shows (they read sessions, exercises and
+  // meals), so set writes never trigger a rebuild mid-rest (perf audit A10); finishing the workout
+  // writes `sessions` and rebuilds once.
+  stops.push(
+    onLocalWrite((table) => {
+      if (!IGNORED_WRITE_TABLES.has(table)) requestRebuild();
+    }),
+  );
   stops.push(useNotificationPrefs.subscribe(() => requestRebuild(300)));
   stops.push(
     useBillingStore.subscribe((s, prev) => {

@@ -1,0 +1,6 @@
+# Not part of the public site. Cloudflare Pages has no native ignore file for
+# Git builds, so the Pages build command removes these (see docs/WEB_DEPLOY.md).
+# Tools that honour ignore files (and wrangler via .assetsignore) can use this list.
+_screenshots/
+_tools/
+.cfignore
