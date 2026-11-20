@@ -13,6 +13,10 @@ on:
         description: Maestro CLI version (empty = latest)
         type: string
         default: ''
+      disable_animations:
+        description: Turn the emulator's animation scales to 0 (Android then reports reduced motion)
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -147,7 +151,7 @@ jobs:
           profile: ${{ env.EMULATOR_PROFILE }}
           force-avd-creation: false
           emulator-options: -no-snapshot-save ${{ env.EMULATOR_OPTIONS }}
-          disable-animations: true
+          disable-animations: ${{ inputs.disable_animations }}
           emulator-boot-timeout: 900
           # One line: the action runs each script line in its own shell.
           script: bash scripts/ci/maestro-run.sh android
