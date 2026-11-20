@@ -26,7 +26,7 @@
  *    so the ~100 exercises without one never trigger a 404. Any other failure (e.g. not uploaded
  *    yet) falls back to the placeholder through the component's onError.
  */
-import { exerciseHasMedia } from '@repwise/content';
+import { exerciseHasMedia } from '@repwise/content/media';
 
 export type MediaUrls = {
   thumb: string;

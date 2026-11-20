@@ -29,7 +29,7 @@ import {
   type ProfileInput,
   type WeekPlan,
 } from './engine';
-import { toEngineCatalogues } from '@repwise/content';
+import { toEngineCatalogues } from '@repwise/content/toEngine';
 import { and, asc, desc, eq, gte, inArray, lt } from 'drizzle-orm';
 
 import { getRawDb } from '@/db/client';

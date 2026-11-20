@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react';
 
 import { ensureWeekMeals } from '@/features/meals';
 import { addDays, startOfWeek } from '@/features/meals/logic/dates';
-import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { customRecipesRepo } from '@/features/meals/repo';
 import { useCatalogFor, type Catalog } from '@/services/catalog';
 
@@ -71,7 +70,10 @@ export function useToday(nowOverride?: number): TodayModel {
     if (!catalog || profileStamp == null) return;
     const id = setTimeout(() => {
       try {
-        // Training for this week (no-op when planned), then any missing meal days.
+        // Training for this week (no-op when planned), then any missing meal days. The planner
+        // service is required here, not imported: Today is on the first-frame path (perf r2 N1).
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { ensurePlannedAhead } = require('@/features/planner/bridge') as typeof import('@/features/planner/bridge');
         ensurePlannedAhead(Date.now());
         if (mealsMissing) ensureWeekMeals(date, Date.now());
       } catch {

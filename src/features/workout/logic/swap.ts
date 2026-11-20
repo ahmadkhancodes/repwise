@@ -10,7 +10,8 @@
  * The selection rules live in the engine; this file only adapts data and filters equipment
  * against the profile's own vocabulary.
  */
-import { exerciseToEngine, type Exercise as ContentExercise } from '@repwise/content';
+import type { Exercise as ContentExercise } from '@repwise/content';
+import { exerciseToEngine } from '@repwise/content/toEngine';
 import {
   EQUIPMENT,
   swapExercise,

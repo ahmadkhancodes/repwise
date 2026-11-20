@@ -12,7 +12,8 @@
  *   single block holds the JS thread for the whole ~1 MB. The warm-up then builds the search indexes,
  *   again one part per idle slice, so the first keystroke in a search is instant.
  * - `useCatalogFor('exercises')` lets a screen render as soon as the parts it reads are in.
- * Only types come from the package entry, so zod never reaches the app bundle.
+ * Only types come from the package entry (an ESLint rule enforces it, perf r2 N1), so neither zod
+ * nor the content schemas are evaluated in the app; the JSON is `require`d per part on demand.
  */
 import type { Exercise, Food, Recipe } from '@repwise/content';
 import { useEffect, useSyncExternalStore } from 'react';

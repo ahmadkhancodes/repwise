@@ -27,12 +27,16 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
-it('restores auth and the planner now; billing, sync and the catalogue after the first screen', async () => {
+it('restores auth now, the planner after the first frame, billing, sync and the catalogue after the first screen', async () => {
   startBackgroundServices();
   expect(mockInitAuth).toHaveBeenCalledTimes(1);
+  // The planner module (engine + zod) is not evaluated before the first frame (perf r2 N1).
+  expect(mockBridge).not.toHaveBeenCalled();
+  expect(mockKeeper).not.toHaveBeenCalled();
+  await jest.advanceTimersByTimeAsync(50);
   expect(mockBridge).toHaveBeenCalledTimes(1);
   expect(mockKeeper).toHaveBeenCalledTimes(1);
-  await jest.advanceTimersByTimeAsync(BACKGROUND_DELAY_MS - 1);
+  await jest.advanceTimersByTimeAsync(BACKGROUND_DELAY_MS - 51);
   expect(mockConfigure).not.toHaveBeenCalled();
   expect(mockStartSync).not.toHaveBeenCalled();
   expect(mockWarm).not.toHaveBeenCalled();
@@ -48,6 +52,15 @@ it('starts once', async () => {
   startBackgroundServices(10);
   await jest.advanceTimersByTimeAsync(20);
   expect(mockInitAuth).toHaveBeenCalledTimes(1);
+  expect(mockStartSync).toHaveBeenCalledTimes(1);
+});
+
+it('a throwing planner start never breaks the other services', async () => {
+  mockBridge.mockImplementationOnce(() => {
+    throw new Error('engine');
+  });
+  startBackgroundServices(100);
+  await jest.advanceTimersByTimeAsync(150);
   expect(mockStartSync).toHaveBeenCalledTimes(1);
 });
 

@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 
-import { isOnboarded } from '@/features/onboarding/actions';
+import { isOnboarded } from '@/features/onboarding/status';
 import { resumeHref } from '@/features/onboarding/logic/flow';
 import { useOnboarding } from '@/features/onboarding/store';
 
