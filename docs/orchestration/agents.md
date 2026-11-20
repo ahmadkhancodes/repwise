@@ -14,3 +14,5 @@
 | ad7928c89cb5ea7ca | r2 UI audit (read-only) → docs/orchestration/ui_audit_r2.md | main |
 | ab10258f06bbd5122 | r2 perf+gym audit (read-only) → perf_gym_audit_r2.md | main |
 | a5954d6d830fe1ec9 | r2 bug audit (read-only) → bug_audit_r2.md | main |
+| a2d272f393858266d | r2 perf+gym audit (Opus, replaces Fable one) | main |
+| aab70c661baf2e36c | r2-ui fix (Opus) | /home/user/repwise-r2-ui |
