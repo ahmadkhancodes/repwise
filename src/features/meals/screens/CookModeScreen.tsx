@@ -7,7 +7,7 @@ import Animated, { FadeInLeft, FadeInRight, useReducedMotion } from 'react-nativ
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { haptics } from '@/services/haptics';
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import {
   Button,
@@ -41,7 +41,7 @@ export function CookModeScreen() {
   const { height: windowHeight } = useWindowDimensions();
   const reduce = useReducedMotion();
   const params = useLocalSearchParams<{ id: string; servings?: string; mealId?: string }>();
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes', 'foods');
   const recipe = cat?.recipeById.get(String(params.id));
   const servings = Number(params.servings) > 0 ? Number(params.servings) : 1;
   const [step, setStep] = useState(0);

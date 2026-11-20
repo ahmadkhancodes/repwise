@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import { Button, EmptyState, PressableScale, Sheet, SkeletonCard, SkeletonGroup, Text, showToast } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
@@ -28,7 +28,7 @@ type Props = { meal: MealView | null; onClose: () => void };
 export function SwapSheet({ meal, onClose }: Props) {
   const t = useTheme();
   const reduce = useReducedMotion();
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes');
   const [nonce, setNonce] = useState(0);
   const [result, setResult] = useState<{ key: string; options: PlannedMeal[] | null } | null>(null);
   const key = meal ? `${meal.id}|${meal.recipeId}|${nonce}` : '';

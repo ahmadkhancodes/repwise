@@ -4,7 +4,7 @@ import { ensureWeekMeals } from '@/features/meals';
 import { addDays, startOfWeek } from '@/features/meals/logic/dates';
 import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { customRecipesRepo } from '@/features/meals/repo';
-import { useCatalog, type Catalog } from '@/services/catalog';
+import { useCatalogFor, type Catalog } from '@/services/catalog';
 
 import { localDate, localHour, minutesOfDay, tomorrowOf } from '../logic/day';
 import { buildTodayView, type MusclesLookup, type RecipeLookup, type TodayView } from '../logic/view';
@@ -55,7 +55,10 @@ export function useToday(nowOverride?: number): TodayModel {
     () => loadTodaySnapshot(date, tomorrow, weekFrom, weekTo),
     [date, tomorrow, weekFrom, weekTo],
   );
-  const catalog = useCatalog();
+  // Only the parts Today shows: recipe names first; exercise muscles fill in when parsed.
+  const recipes = useCatalogFor('recipes');
+  const exercises = useCatalogFor('exercises');
+  const catalog = recipes;
   const hour = localHour(now);
 
   // Meals are planned offline by the meals domain, the same way as on Eat: once the catalogue and
@@ -82,9 +85,9 @@ export function useToday(nowOverride?: number): TodayModel {
   const view = useMemo(
     () =>
       data
-        ? buildTodayView(data, { recipe: recipeLookup(catalog), muscles: musclesLookup(catalog) }, minutes, hour)
+        ? buildTodayView(data, { recipe: recipeLookup(recipes), muscles: musclesLookup(exercises) }, minutes, hour)
         : null,
-    [data, catalog, minutes, hour],
+    [data, recipes, exercises, minutes, hour],
   );
 
   const needsCatalog = (data?.today.meals.length ?? 0) > 0 || data?.today.session !== undefined;
@@ -92,7 +95,7 @@ export function useToday(nowOverride?: number): TodayModel {
     status: error ? 'error' : view ? 'ready' : 'loading',
     view,
     snapshot: data,
-    catalogLoading: needsCatalog && catalog === null,
+    catalogLoading: needsCatalog && recipes === null,
     error,
     reload,
     now,

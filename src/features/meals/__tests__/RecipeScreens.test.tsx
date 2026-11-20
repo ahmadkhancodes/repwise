@@ -40,6 +40,10 @@ describe.each(SCHEMES)('RecipeScreen (%s)', (scheme) => {
     expect(screen.getByTestId('recipe-ingredients')).toBeTruthy();
     expect(screen.getByTestId('recipe-allergens').props.children).toEqual(['Contains: ', 'Milk']);
     expect(screen.getByText(/^Rinse the rice/)).toBeTruthy();
+    // Designed hero art (no photo yet): spoken as an image, curry glyph, cuisine + time badges.
+    expect(screen.getByLabelText('Curry or stew: Chicken karahi')).toBeTruthy();
+    expect(screen.getByTestId('recipe-hero-glyph-pot', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByTestId('recipe-meta')).toHaveTextContent(/min prep/);
   });
 });
 
@@ -68,7 +72,7 @@ describe('RecipeScreen', () => {
     params.mockReturnValue({ id: 'nope' });
     await renderThemed(<RecipeScreen />);
     expect(screen.getByTestId('recipe-missing')).toBeTruthy();
-    const spy = jest.spyOn(catalog, 'useCatalog').mockReturnValue(null);
+    const spy = jest.spyOn(catalog, 'useCatalogFor').mockReturnValue(null);
     await renderThemed(<RecipeScreen />);
     expect(screen.getByTestId('recipe-loading')).toBeTruthy();
     spy.mockRestore();

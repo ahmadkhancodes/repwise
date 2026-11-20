@@ -123,12 +123,9 @@ export const RecipeArt = memo(function RecipeArt({
       >
         <Icon color={pal.glyph} size={echo} strokeWidth={t.sizes.iconStroke} />
       </View>
-      <Icon
-        testID={testID ? `${testID}-glyph-${art.glyph}` : undefined}
-        color={pal.glyph}
-        size={glyph}
-        strokeWidth={t.sizes.iconStroke}
-      />
+      <View testID={testID ? `${testID}-glyph-${art.glyph}` : undefined}>
+        <Icon color={pal.glyph} size={glyph} strokeWidth={t.sizes.iconStroke} />
+      </View>
       {uri ? (
         <Image
           testID={testID ? `${testID}-photo` : undefined}

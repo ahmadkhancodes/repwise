@@ -1,6 +1,7 @@
 # P0 (F-today → S13): on a training day, Start workout leaves Today for the workout player in one
 # tap (deep link /train?sessionId=<id>&start=1: Train starts the session and opens the player);
-# back returns to Today. Skips itself on a rest day.
+# the player's own close button returns (no Maestro `back`: it is a no-op on iOS), then the Today tab.
+# Skips itself on a rest day.
 # Precondition: onboarding finished with a training plan. iOS and Android.
 appId: com.client.repwise
 tags:
@@ -35,11 +36,12 @@ tags:
             id: "screen-workout"
           timeout: 10000
       - assertVisible:
-          id: "player-finish"
-      - back
+          id: "player-close"
+      - tapOn:
+          id: "player-close"
       - extendedWaitUntil:
-          visible:
-            id: "screen-train"
+          notVisible:
+            id: "screen-workout"
           timeout: 5000
       - tapOn:
           id: "tab-today"

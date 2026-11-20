@@ -12,7 +12,7 @@ import { quickAddWater, SwapSheet, toggleMeal, toMealView, type MealView as EatM
 import { getWaterGoal } from '@/features/nutrition';
 import { WaterCard } from '@/features/nutrition/components/WaterCard';
 import { trainHref } from '@/features/workout';
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { maybeAskForReview, REVIEW_DELAY_MS } from '@/services/review';
 import { useTheme } from '@/theme';
 import { Button, EmptyState, IconButton, Screen, Skeleton, SkeletonGroup, UNDO_TOAST_MS } from '@/ui';
@@ -85,7 +85,7 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
   const t = useTheme();
   const model = useToday(nowOverride);
   const { isPro } = usePro(nowOverride);
-  const catalog = useCatalog();
+  const catalog = useCatalogFor('recipes');
   const view = model.view;
   const params = useLocalSearchParams<{ card?: string; checkin?: string }>();
 

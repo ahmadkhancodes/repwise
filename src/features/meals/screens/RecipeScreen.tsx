@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import { Badge, BigNumber, Button, Card, EmptyState, Screen, SkeletonGroup, Skeleton, SkeletonText, Stepper, Text } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
@@ -37,7 +37,7 @@ export function RecipeScreen() {
   const t = useTheme();
   const reduce = useReducedMotion();
   const params = useLocalSearchParams<{ id: string; portion?: string; mealId?: string }>();
-  const cat = useCatalog();
+  const cat = useCatalogFor('recipes', 'foods');
   const recipe = cat?.recipeById.get(String(params.id));
   const [servings, setServings] = useState(() => initialServings(params.portion));
   const ingredients = useMemo(
