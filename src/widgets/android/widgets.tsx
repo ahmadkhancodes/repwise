@@ -312,7 +312,11 @@ function pickWidget(name: WidgetName, snapshot: WidgetSnapshot, scheme: ColorSch
 }
 
 /** Light + dark versions of one of our widgets (the launcher picks by system theme). */
-export function renderKnownWidget(name: WidgetName, snapshot: WidgetSnapshot, size?: WidgetSize): WidgetRepresentation {
+export function renderKnownWidget(
+  name: WidgetName,
+  snapshot: WidgetSnapshot,
+  size?: WidgetSize,
+): { light: React.JSX.Element; dark: React.JSX.Element } {
   return { light: pickWidget(name, snapshot, 'light', size), dark: pickWidget(name, snapshot, 'dark', size) };
 }
 
