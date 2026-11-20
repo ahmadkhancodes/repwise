@@ -150,12 +150,19 @@ describe('ExerciseDetailScreen', () => {
     await fireEvent.press(await screen.findByTestId(`add-to-${s.id}`));
     expect(exercisesForSession(s.id).map((e) => e.exerciseId)).toEqual(['push-up']);
     expect(useToastStore.getState().current?.message).toBe('Push-up added to Push day');
+    // Not a core action: one buzz at most (the row), the toast stays silent.
+    expect(useToastStore.getState().current?.silent).toBe(true);
   });
 
-  it('explains when there is no workout to add to', async () => {
+  it('with nothing planned, starts a workout with this exercise', async () => {
     await renderThemed(<ExerciseDetailScreen id="push-up" />);
     await fireEvent.press(screen.getByTestId('exercise-add'));
     expect(await screen.findByTestId('add-sheet-empty')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('add-sheet-empty-action'));
+    const today = sessionsRepo.list().filter((x) => x.date === localISODate());
+    expect(today).toHaveLength(1);
+    expect(exercisesForSession(today[0]!.id).map((e) => e.exerciseId)).toEqual(['push-up']);
+    expect(router.push).toHaveBeenCalledWith(`/train?sessionId=${today[0]!.id}&start=1`);
   });
 
   it('custom exercises show their data and an edit button', async () => {

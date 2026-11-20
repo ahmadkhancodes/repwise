@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
@@ -143,8 +144,15 @@ describe.each(SCHEMES)('Progress home (%s)', (scheme) => {
     expect(screen.getByLabelText('9, workout done')).toBeTruthy();
     expect(screen.getByTestId('pr-0')).toHaveTextContent(/Bench Press/);
     expect(screen.getByTestId('nav-body')).toHaveTextContent(/80\.1 kg/);
+    expect(screen.getByTestId('nav-heatmap')).toHaveTextContent(/Recovery(All fresh|\d+ muscles? worked)/);
+    expect(screen.getByTestId('nav-wrapped')).toHaveTextContent(/November Wrapped/);
+    expect(screen.getByTestId('nav-photos')).toHaveTextContent(/Progress photos/);
     await fireEvent.press(screen.getByTestId('nav-heatmap'));
     expect(mockRouter.push).toHaveBeenCalledWith('/progress/heatmap');
+    await fireEvent.press(screen.getByTestId('nav-wrapped'));
+    expect(mockRouter.push).toHaveBeenCalledWith('/progress/wrapped');
+    await fireEvent.press(screen.getByTestId('pr-0'));
+    expect(mockRouter.push).toHaveBeenCalledWith(expect.stringMatching(/^\/progress\/exercise\//));
   });
 });
 
@@ -438,6 +446,14 @@ describe.each(SCHEMES)('Wrapped (S34) (%s)', (scheme) => {
     expect(screen.getByTestId('wrapped-card-prs')).toHaveTextContent(/2 PRs/);
     expect(screen.getByTestId('wrapped-card-muscle')).toHaveTextContent(/Chest/);
     expect(screen.getByTestId('wrapped-next')).toBeDisabled();
+    // Colourful story: cards rotate backgrounds instead of one inverse slab.
+    const bg = (k: string) =>
+      StyleSheet.flatten(screen.getByTestId(`wrapped-card-${k}`).props.style).backgroundColor;
+    expect(new Set(['intro', 'workouts', 'volume', 'prs'].map(bg)).size).toBe(4);
+    expect(screen.getByTestId('wrapped-progress')).toBeTruthy();
+    expect(
+      screen.getByTestId('wrapped-brand-intro', { includeHiddenElements: true }),
+    ).toHaveTextContent('Repwise');
     await fireEvent.press(screen.getByTestId('wrapped-share'));
     await waitFor(() => expect(sharing.shareAsync).toHaveBeenCalled());
   });
