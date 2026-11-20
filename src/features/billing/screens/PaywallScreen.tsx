@@ -1,26 +1,36 @@
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { Check, X } from 'lucide-react-native';
+import {
+  Ban,
+  Bell,
+  CalendarDays,
+  Dumbbell,
+  TrendingUp,
+  Utensils,
+  X,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Linking, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { billing, type PurchaseOutcome, type RestoreOutcome } from '@/services/billing';
-import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { Button, Card, IconButton, Screen, showToast, Text } from '@/ui';
+import { Badge, Button, IconButton, PressableScale, Screen, showToast, Text, TickMark } from '@/ui';
 
 import { LEGAL_URLS } from '../config';
 import { useBilling } from '../hooks/useBilling';
 import type { PlanOffer } from '../logic/offers';
 import { cancelInstructions, storeName } from '../logic/manage';
+import { trialTimeline, type TimelineStep } from '../logic/timeline';
 import { ctaLabel, DEFAULT_PLAN, planById, priceLine, type PlanId } from '../plans';
 
-const BENEFITS = [
-  'AI workouts that adapt every week',
-  'Daily meal plan in your cuisine',
-  'Meal & workout reminders',
-  'Progress tracking',
-  'No ads',
-] as const;
+const BENEFITS: { icon: LucideIcon; text: string }[] = [
+  { icon: Dumbbell, text: 'Workouts that adapt every week' },
+  { icon: Utensils, text: 'A daily meal plan in your cuisine' },
+  { icon: Bell, text: 'Meal and workout reminders' },
+  { icon: TrendingUp, text: 'Full progress history' },
+  { icon: Ban, text: 'No ads, ever' },
+];
 
 const BADGE: Record<NonNullable<ReturnType<typeof planById>['badge']>, string> = {
   best_value: 'Best value',
@@ -72,7 +82,145 @@ export function restoreMessage(o: RestoreOutcome): {
   }
 }
 
-/** S37 Paywall (modal, sheet 05/10/16). Close is visible immediately; closing = Free mode. */
+/** One paywall plan as a radio row: radio dot, 2dp accent border when selected, badge. */
+function PlanRow({
+  offer,
+  selected,
+  onSelect,
+}: {
+  offer: PlanOffer;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const t = useTheme();
+  const plan = planById(offer.plan);
+  const sub = planSubtitle(offer);
+  return (
+    <PressableScale
+      testID={`plan-${offer.plan}`}
+      onPress={onSelect}
+      feedback="selection"
+      accessibilityRole="radio"
+      accessibilityState={{ selected, checked: selected }}
+      accessibilityLabel={[
+        `${plan.title}, ${offer.price} per ${plan.period}`,
+        sub,
+        plan.badge ? BADGE[plan.badge] : null,
+      ]
+        .filter(Boolean)
+        .join(', ')}
+      style={{
+        minHeight: t.sizes.hitGymLarge,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: t.spacing.sm,
+        paddingHorizontal: t.spacing.card,
+        paddingVertical: t.spacing.sm,
+        borderRadius: t.radius.card,
+        borderWidth: t.sizes.borderThick,
+        borderColor: selected ? t.colors.accent : t.colors.border,
+        backgroundColor: selected ? t.colors.accentSoft : t.colors.surface,
+      }}
+    >
+      <TickMark checked={selected} shape="circle" />
+      <View style={{ flex: 1, gap: t.spacing.xxs }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: t.spacing.xs,
+          }}
+        >
+          <Text variant="headline">{plan.title}</Text>
+          {plan.badge ? (
+            <Badge
+              label={BADGE[plan.badge]}
+              tone={plan.badge === 'best_value' ? 'inverse' : 'accent'}
+            />
+          ) : null}
+        </View>
+        {sub ? (
+          <Text
+            variant="callout"
+            color={offer.trialDays > 0 ? 'accentText' : 'textSecondary'}
+            tabular
+          >
+            {sub}
+          </Text>
+        ) : null}
+      </View>
+      <Text variant="headline" tabular testID={`plan-${offer.plan}-price`}>
+        {offer.price}
+      </Text>
+    </PressableScale>
+  );
+}
+
+/** Trial timeline: Today → reminder → billed, a vertical track with dots (sheet 05 honesty). */
+function TrialTimeline({ steps }: { steps: TimelineStep[] }) {
+  const t = useTheme();
+  const dot = t.spacing.md;
+  return (
+    <View
+      testID="paywall-timeline"
+      accessible
+      accessibilityLabel={steps.map((s) => `${s.day}: ${s.title}. ${s.body}`).join(' ')}
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: t.radius.card,
+        padding: t.spacing.card,
+      }}
+    >
+      {steps.map((s, i) => {
+        const last = i === steps.length - 1;
+        return (
+          <View key={s.key} style={{ flexDirection: 'row', gap: t.spacing.sm }}>
+            <View style={{ alignItems: 'center', width: dot }}>
+              <View
+                style={{
+                  width: dot,
+                  height: dot,
+                  marginTop: t.spacing.xxs,
+                  borderRadius: t.radius.pill,
+                  backgroundColor: i === 0 ? t.colors.accent : t.colors.inverse,
+                }}
+              />
+              {last ? null : (
+                <View
+                  style={{
+                    flex: 1,
+                    width: t.sizes.borderThick,
+                    backgroundColor: t.colors.borderStrong,
+                  }}
+                />
+              )}
+            </View>
+            <View
+              style={{ flex: 1, gap: t.spacing.xxs / 2, paddingBottom: last ? 0 : t.spacing.md }}
+            >
+              <Text variant="caption" color="textSecondary" tabular>
+                {s.day.toUpperCase()}
+              </Text>
+              <Text variant="headline" tabular>
+                {s.title}
+              </Text>
+              <Text variant="callout" color="textSecondary">
+                {s.body}
+              </Text>
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+/**
+ * S37 Paywall (modal, sheet 05/10/16). Close is visible immediately; closing = Free mode. The
+ * pinned footer holds only the CTA and the plain price line; restore, terms and privacy sit at
+ * the end of the scroll so the plans get the room.
+ */
 export function PaywallScreen() {
   const t = useTheme();
   const params = useLocalSearchParams<{ source?: string; name?: string }>();
@@ -91,16 +239,15 @@ export function PaywallScreen() {
     !offer.localised && (b.productsStatus === 'loading' || b.storeStatus === 'connecting');
   const busy = b.purchasing !== null || b.restoring;
   const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
+  const plan = planById(offer.plan);
+  const timeline = trialTimeline(offer.trialDays, `${offer.price}/${plan.period}`);
 
   const onBuy = async () => {
-    haptics.light();
     const out = await b.purchase(selected);
     const msg = purchaseMessage(out);
+    // The success toast is the purchase's one success buzz.
     if (msg) showToast(msg);
-    if (out.status === 'pro') {
-      haptics.success();
-      close();
-    }
+    if (out.status === 'pro') close();
   };
 
   const onRestore = async () => {
@@ -110,6 +257,11 @@ export function PaywallScreen() {
   };
 
   const header = params.name ? `Your plan is ready, ${params.name}.` : 'Your plan is ready.';
+  const springIn = (i: number) =>
+    FadeInDown.delay(i * t.motion.listStagger * 3)
+      .springify()
+      .damping(t.motion.spring.damping)
+      .stiffness(t.motion.spring.stiffness);
 
   return (
     <Screen
@@ -119,7 +271,7 @@ export function PaywallScreen() {
         <IconButton icon={X} accessibilityLabel="Close" onPress={close} testID="paywall-close" />
       }
       footer={
-        <>
+        <View style={{ gap: t.spacing.xs }}>
           <Button
             label={ctaLabel(offer.trialDays)}
             accent
@@ -129,64 +281,51 @@ export function PaywallScreen() {
             accessibilityHint={priceLine(offer)}
             testID="paywall-cta"
           />
-          <Text variant="callout" color="textPrimary" align="center" testID="paywall-price-line">
+          <Text
+            variant="callout"
+            color="textPrimary"
+            align="center"
+            tabular
+            testID="paywall-price-line"
+          >
             {priceLine(offer)}
           </Text>
-          {offer.trialDays > 0 ? (
-            <Text variant="caption" color="textSecondary" align="center">
-              {"We'll remind you 2 days before your trial ends."}
-            </Text>
-          ) : null}
-          <Text variant="caption" color="textSecondary" align="center" testID="paywall-cancel">
-            {cancelInstructions(b.platform)}
-          </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Button
-              label="Restore"
-              variant="tertiary"
-              onPress={onRestore}
-              loading={b.restoring}
-              disabled={busy}
-              testID="paywall-restore"
-            />
-            <Button
-              label="Terms"
-              variant="tertiary"
-              onPress={() => void Linking.openURL(LEGAL_URLS.terms)}
-              accessibilityHint="Opens the terms of use in your browser"
-              testID="paywall-terms"
-            />
-            <Button
-              label="Privacy"
-              variant="tertiary"
-              onPress={() => void Linking.openURL(LEGAL_URLS.privacy)}
-              accessibilityHint="Opens the privacy policy in your browser"
-              testID="paywall-privacy"
-            />
-          </View>
-        </>
+        </View>
       }
     >
-      <Text variant="title2" accessibilityRole="header">
-        {header}
-      </Text>
-      <View style={{ gap: t.spacing.xs }}>
-        {BENEFITS.map((line) => (
-          <View
-            key={line}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}
-          >
-            <Check
-              color={t.colors.accentText}
-              size={t.sizes.iconSmall}
-              strokeWidth={t.sizes.iconStroke}
-            />
-            <Text variant="body" color="textSecondary" style={{ flex: 1 }}>
-              {line}
-            </Text>
-          </View>
-        ))}
-      </View>
+      <Animated.View entering={springIn(0)} style={{ gap: t.spacing.sm }}>
+        <Text variant="title1" accessibilityRole="header">
+          {header}
+        </Text>
+        <View style={{ gap: t.spacing.xs }}>
+          {BENEFITS.map(({ icon: Icon, text }) => (
+            <View
+              key={text}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}
+            >
+              <View
+                style={{
+                  width: t.spacing.xxxl,
+                  height: t.spacing.xxxl,
+                  borderRadius: t.radius.pill,
+                  backgroundColor: t.colors.accentSoft,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Icon
+                  color={t.colors.accentText}
+                  size={t.sizes.iconSmall}
+                  strokeWidth={t.sizes.iconStrokeBold}
+                />
+              </View>
+              <Text variant="body" style={{ flex: 1 }}>
+                {text}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </Animated.View>
 
       {b.productsStatus === 'error' ? (
         <View style={{ gap: t.spacing.xs }} testID="paywall-store-error">
@@ -197,71 +336,76 @@ export function PaywallScreen() {
         </View>
       ) : null}
 
-      <View style={{ gap: t.spacing.xs }} accessibilityRole="radiogroup" accessibilityLabel="Plans">
-        {b.offers.map((o) => {
-          const plan = planById(o.plan);
-          const sub = planSubtitle(o);
-          return (
-            <Card
+      <Animated.View entering={springIn(1)}>
+        <View
+          style={{ gap: t.spacing.xs }}
+          accessibilityRole="radiogroup"
+          accessibilityLabel="Plans"
+        >
+          {b.offers.map((o) => (
+            <PlanRow
               key={o.plan}
+              offer={o}
               selected={o.plan === selected}
-              onPress={() => {
-                haptics.selection();
-                setSelected(o.plan);
-              }}
-              accessibilityLabel={[`${plan.title}, ${o.price} per ${plan.period}`, sub]
-                .filter(Boolean)
-                .join(', ')}
-              testID={`plan-${o.plan}`}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-                <View style={{ flex: 1, gap: t.spacing.xxs }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      flexWrap: 'wrap',
-                      alignItems: 'center',
-                      gap: t.spacing.xs,
-                    }}
-                  >
-                    <Text variant="headline">{plan.title}</Text>
-                    {plan.badge ? (
-                      <View
-                        style={{
-                          backgroundColor: t.colors.accentSoft,
-                          borderRadius: t.radius.pill,
-                          paddingHorizontal: t.spacing.xs,
-                          paddingVertical: t.spacing.xxs,
-                        }}
-                      >
-                        <Text variant="caption" color="accentText">
-                          {BADGE[plan.badge]}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  {sub ? (
-                    <Text
-                      variant="callout"
-                      color={o.trialDays > 0 ? 'accentText' : 'textSecondary'}
-                    >
-                      {sub}
-                    </Text>
-                  ) : null}
-                </View>
-                <Text variant="headline" tabular testID={`plan-${o.plan}-price`}>
-                  {o.price}
-                </Text>
-              </View>
-            </Card>
-          );
-        })}
-      </View>
+              onSelect={() => setSelected(o.plan)}
+            />
+          ))}
+        </View>
+      </Animated.View>
       {loading ? (
         <Text variant="caption" color="textSecondary" testID="paywall-loading">
           {`Loading prices from ${storeName(b.platform)}…`}
         </Text>
       ) : null}
+
+      {timeline.length ? (
+        <Animated.View entering={springIn(2)} style={{ gap: t.spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+            <CalendarDays
+              color={t.colors.textPrimary}
+              size={t.sizes.iconMedium}
+              strokeWidth={t.sizes.iconStroke}
+            />
+            <Text variant="headline">How your free trial works</Text>
+          </View>
+          <TrialTimeline steps={timeline} />
+        </Animated.View>
+      ) : null}
+
+      <View style={{ gap: t.spacing.xs, paddingTop: t.spacing.sm }}>
+        {offer.trialDays > 0 ? (
+          <Text variant="caption" color="textSecondary" align="center">
+            {"We'll remind you 2 days before your trial ends."}
+          </Text>
+        ) : null}
+        <Text variant="caption" color="textSecondary" align="center" testID="paywall-cancel">
+          {cancelInstructions(b.platform)}
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Button
+            label="Restore purchases"
+            variant="tertiary"
+            onPress={onRestore}
+            loading={b.restoring}
+            disabled={busy}
+            testID="paywall-restore"
+          />
+          <Button
+            label="Terms"
+            variant="tertiary"
+            onPress={() => void Linking.openURL(LEGAL_URLS.terms)}
+            accessibilityHint="Opens the terms of use in your browser"
+            testID="paywall-terms"
+          />
+          <Button
+            label="Privacy"
+            variant="tertiary"
+            onPress={() => void Linking.openURL(LEGAL_URLS.privacy)}
+            accessibilityHint="Opens the privacy policy in your browser"
+            testID="paywall-privacy"
+          />
+        </View>
+      </View>
     </Screen>
   );
 }

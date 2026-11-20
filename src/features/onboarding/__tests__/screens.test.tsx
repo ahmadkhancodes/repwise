@@ -104,7 +104,7 @@ describe.each(SCHEMES)('onboarding screens (%s)', (scheme) => {
     expect(screen.getByTestId('reveal-goal-line').props.children).toMatch(
       /^64 kg by \d+ \w{3} \d{4}/,
     );
-    expect(screen.getAllByTestId(/^reveal-day-/)).toHaveLength(7);
+    expect(screen.getAllByTestId(/^day-\d{4}-/)).toHaveLength(7);
     expect(screen.getByTestId('reveal-meals')).toBeTruthy();
   });
 });
@@ -143,11 +143,30 @@ describe('quiz steps render their controls', () => {
     expect(useOnboarding.getState().phase).toBe('notify');
   });
 
-  it('meal time steppers keep meals in order', async () => {
+  it('meal times open the wheel sheet and keep meals in order', async () => {
     useOnboarding.getState().setAnswers(fullAnswers());
     await renderThemed(<QuizScreen step="meals" />);
-    await fireEvent.press(screen.getByLabelText('Decrease Lunch time'));
-    expect(useOnboarding.getState().answers.mealTimes).toEqual(['08:00', '12:45', '19:00']);
+    await fireEvent.press(screen.getByTestId('meal-time-1'));
+    const hour = await screen.findByTestId('pick-hour');
+    await fireEvent(hour, 'accessibilityAction', { nativeEvent: { actionName: 'decrement' } });
+    await fireEvent.press(screen.getByTestId('time-save'));
+    expect(useOnboarding.getState().answers.mealTimes).toEqual(['08:00', '12:00', '19:00']);
+  });
+
+  it('a meal time can never jump past its neighbour', async () => {
+    useOnboarding.getState().setAnswers(fullAnswers());
+    await renderThemed(<QuizScreen step="meals" />);
+    await fireEvent.press(screen.getByTestId('meal-time-0'));
+    const hour = await screen.findByTestId('pick-hour');
+    for (let i = 0; i < 6; i++) {
+      await fireEvent(hour, 'accessibilityAction', { nativeEvent: { actionName: 'increment' } });
+    }
+    await fireEvent.press(screen.getByTestId('time-save'));
+    // Moved later (11:00 on a 12-hour wheel, 14:00 → clamped on 24-hour) but always at least
+    // 30 min before lunch (13:00).
+    const [breakfast, ...rest] = useOnboarding.getState().answers.mealTimes;
+    expect(rest).toEqual(['13:00', '19:00']);
+    expect(breakfast! > '08:00' && breakfast! <= '12:30').toBe(true);
   });
 });
 

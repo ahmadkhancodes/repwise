@@ -102,3 +102,33 @@ export const SLOT_LABEL: Record<string, string> = {
   dinner: 'Dinner',
   snack: 'Snack',
 };
+
+/**
+ * W1 reveal choreography in `motion.listStagger` units (20 ms), so every delay is a multiple of
+ * the token: hero ring → macro rings → week strip → workout card and its lines → meals → CTA.
+ * `start` is the first item's delay, `step` the gap between items of the same part.
+ */
+export const REVEAL_SEQUENCE = {
+  hero: { start: 0, step: 0 },
+  macro: { start: 14, step: 6 },
+  week: { start: 24, step: 3 },
+  workout: { start: 46, step: 4 },
+  meals: { start: 62, step: 5 },
+  cta: { start: 84, step: 0 },
+  banner: { start: 8, step: 8 },
+} as const;
+
+export type RevealPart = keyof typeof REVEAL_SEQUENCE;
+
+/** Delay (ms) of item `index` of a reveal part. Pure. */
+export function revealDelay(
+  motion: { listStagger: number },
+  part: RevealPart,
+  index = 0,
+): number {
+  const p = REVEAL_SEQUENCE[part];
+  return (p.start + p.step * Math.max(0, index)) * motion.listStagger;
+}
+
+/** Build-screen polling interval (ms): 6 stagger units. */
+export const BUILD_POLL_UNITS = 6;

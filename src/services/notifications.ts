@@ -64,6 +64,8 @@ const K = {
 /** Android channels (sheet 17). The ongoing rest-timer channel is created natively. */
 /** Tables whose writes cannot change the schedule or the widget snapshot. */
 export const IGNORED_WRITE_TABLES: ReadonlySet<string> = new Set(['sets']);
+/** Delay of the launch rebuild (ms): it reads recipes, which must not compete with Today's first paint (perf A4). */
+export const FIRST_REBUILD_DELAY_MS = 2500;
 
 export const CHANNELS: { id: ChannelId; name: string; description: string; importance: AndroidImportance }[] = [
   { id: 'brief', name: 'Morning brief', description: "Today's workout and meals, and tomorrow's preview", importance: AndroidImportance.DEFAULT },
@@ -419,7 +421,7 @@ export function startNotifications(deps: ResponseDeps = defaultDeps): () => void
   stops.push(() => app.remove());
 
   void ensureChannels().catch(() => undefined);
-  requestRebuild(800);
+  requestRebuild(FIRST_REBUILD_DELAY_MS);
   return stopNotifications;
 }
 

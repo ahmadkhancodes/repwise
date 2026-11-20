@@ -148,7 +148,7 @@ describe('onboarding flow (F1)', () => {
     await waitFor(() => expect(screen.getByTestId('reveal-targets')).toBeTruthy());
     expect(screen.getByTestId('reveal-week')).toBeTruthy();
     expect(screen.getByTestId('reveal-workout')).toBeTruthy();
-    expect(screen.getAllByTestId(/^reveal-day-/)).toHaveLength(7);
+    expect(screen.getAllByTestId(/^day-\d{4}-/)).toHaveLength(7);
 
     await fireEvent.press(screen.getByTestId('plan-continue'));
     expect(await screen.findByTestId('screen-today')).toBeTruthy();

@@ -5,9 +5,7 @@ import Animated, { FadeIn, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
-import { Button, IconButton, PressableScale, Text } from '@/ui';
-
-import { QuizProgress } from './QuizProgress';
+import { Button, IconButton, PressableScale, StepProgress, Text } from '@/ui';
 
 export type QuizFrameProps = {
   title: string;
@@ -88,7 +86,14 @@ export function QuizFrame({
           </PressableScale>
         ) : null}
       </View>
-      <QuizProgress total={total} index={index} testID="quiz-progress" />
+      <View style={{ paddingHorizontal: t.spacing.screen }}>
+        <StepProgress
+          total={total}
+          current={index}
+          accessibilityLabel="Quiz progress"
+          testID="quiz-progress"
+        />
+      </View>
 
       <ScrollView
         contentContainerStyle={{

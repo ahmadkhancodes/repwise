@@ -1,12 +1,15 @@
 # P0 (sheet 17): with notifications denied the screen explains and offers one primary button.
+# A cleared install opens on Welcome, so onboard first (F1 flow, which denies notifications and
+# ends on Today), then open Settings → Notifications.
 appId: com.client.repwise
 tags:
   - notifications
 ---
-- launchApp:
-    clearState: true
-    permissions:
-      notifications: deny
+- runFlow: ../onboarding/01_f1_happy_path.yaml
+- extendedWaitUntil:
+    visible:
+      id: screen-today
+    timeout: 10000
 - tapOn:
     id: open-settings
 - tapOn:

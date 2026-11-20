@@ -148,7 +148,13 @@ export function loadHistory(weekStart: string): HistoryInput {
 }
 
 /** Training weekdays: the latest plan's choice, else spread from today. */
-function currentWeekdays(profile: ProfileInput, today: string): number[] {
+function currentWeekdays(
+  profile: ProfileInput,
+  today: string,
+  picked?: readonly number[],
+): number[] {
+  const chosen = [...new Set((picked ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))];
+  if (chosen.length === profile.daysPerWeek) return chosen.sort((a, b) => a - b);
   const saved = latestTrainingPayload()?.trainingWeekdays;
   if (saved && saved.length === profile.daysPerWeek) return saved;
   return spreadWeekdays(profile.daysPerWeek, weekdayMon0(today));
@@ -365,6 +371,11 @@ export type GenerateOptions = {
   adjustmentKcal?: number;
   /** The user asked for a lighter week: the engine plans it as a deload. */
   deload?: boolean;
+  /**
+   * Training weekdays (0 = Monday) the user picked (onboarding S04, Settings → Profile & plan).
+   * Used when it has exactly `daysPerWeek` valid days; otherwise the saved/spread days apply.
+   */
+  trainingWeekdays?: readonly number[];
   now?: number;
   /** Test seam: replaces the Worker call. */
   fetchAi?: AiFetcher;
@@ -413,7 +424,7 @@ function generateSync(opts: GenerateOptions = {}): {
   const row = getProfile();
   const base = toEngineProfile(row);
   if (!base) throw new PlannerError('no_profile');
-  const weekdays = currentWeekdays(base, today);
+  const weekdays = currentWeekdays(base, today, opts.trainingWeekdays);
   let built;
   try {
     built = planFor(base, weekStart, now, weekdays, opts);

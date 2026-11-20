@@ -241,7 +241,10 @@ describe('lifecycle', () => {
   it('local writes trigger a debounced rebuild', async () => {
     jest.useFakeTimers({ now: NOW });
     startNotifications(deps);
+    // The launch rebuild waits FIRST_REBUILD_DELAY_MS (not in the first 2 s after launch).
     await jest.advanceTimersByTimeAsync(2_000);
+    expect(__state.scheduled.size).toBe(0);
+    await jest.advanceTimersByTimeAsync(1_000);
     const before = __state.scheduled.size;
     expect(before).toBeGreaterThan(0);
     mealsRepo.update(lunchId, { status: 'skipped' });

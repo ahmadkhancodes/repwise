@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { Bell, Dumbbell, Utensils, type LucideIcon } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -10,7 +10,9 @@ import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
 import { Button, Screen, Text } from '@/ui';
 
-import { trackStep } from '../actions';
+import { deviceContext, trackStep } from '../actions';
+import { formatClock } from '../logic/mealTimes';
+import { revealDelay } from '../logic/reveal';
 import { useOnboarding } from '../store';
 
 type Preview = { icon: LucideIcon; title: string; body: string; when: string };
@@ -21,7 +23,7 @@ export const PREVIEWS: Preview[] = [
     icon: Bell,
     title: 'Push day · 52 min',
     body: 'Lunch: chicken karahi bowl · 610 kcal',
-    when: '7:15',
+    when: '07:15',
   },
   {
     icon: Utensils,
@@ -32,12 +34,12 @@ export const PREVIEWS: Preview[] = [
   { icon: Dumbbell, title: 'Leg day in 30 min', body: '6 exercises · 55 min', when: '17:30' },
 ];
 
-function Banner({ p, index }: { p: Preview; index: number }) {
+function Banner({ p, index, twelveHour }: { p: Preview; index: number; twelveHour: boolean }) {
   const t = useTheme();
   const Icon = p.icon;
   return (
     <Animated.View
-      entering={FadeInDown.delay(150 + index * 160)
+      entering={FadeInDown.delay(revealDelay(t.motion, 'banner', index))
         .springify()
         .damping(t.motion.spring.damping)
         .stiffness(t.motion.spring.stiffness)}
@@ -65,7 +67,7 @@ function Banner({ p, index }: { p: Preview; index: number }) {
         }}
       >
         <Icon
-          size={t.sizes.iconSmall + 4}
+          size={t.sizes.iconMedium}
           strokeWidth={t.sizes.iconStroke}
           color={t.colors.onInverse}
         />
@@ -76,7 +78,7 @@ function Banner({ p, index }: { p: Preview; index: number }) {
             {p.title}
           </Text>
           <Text variant="caption" color="textSecondary" tabular>
-            {p.when}
+            {formatClock(p.when, twelveHour)}
           </Text>
         </View>
         <Text variant="caption" color="textSecondary" numberOfLines={2}>
@@ -91,6 +93,7 @@ function Banner({ p, index }: { p: Preview; index: number }) {
 export function NotifyScreen() {
   const t = useTheme();
   const [busy, setBusy] = useState(false);
+  const twelveHour = useMemo(() => deviceContext().twelveHour, []);
 
   const toPlan = useCallback(() => {
     useOnboarding.getState().setPhase('plan');
@@ -144,7 +147,7 @@ export function NotifyScreen() {
     >
       <View style={{ gap: t.spacing.sm, paddingTop: t.spacing.xl }}>
         {PREVIEWS.map((p, i) => (
-          <Banner key={p.title} p={p} index={i} />
+          <Banner key={p.title} p={p} index={i} twelveHour={twelveHour} />
         ))}
       </View>
       <View style={{ gap: t.spacing.sm, paddingTop: t.spacing.lg }}>
@@ -152,8 +155,7 @@ export function NotifyScreen() {
           Never miss a meal or a session
         </Text>
         <Text variant="body" color="textSecondary">
-          A morning brief, each meal at your meal times and a nudge before training. Quiet from
-          22:00 to 07:00. Change it any time in Settings.
+          {`A morning brief, each meal at your meal times and a nudge before training. Quiet from ${formatClock('22:00', twelveHour)} to ${formatClock('07:00', twelveHour)}. Change it any time in Settings.`}
         </Text>
       </View>
     </Screen>

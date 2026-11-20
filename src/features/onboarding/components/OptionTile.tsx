@@ -1,8 +1,8 @@
-import { Check, type LucideIcon } from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { PressableScale, Text } from '@/ui';
+import { PressableScale, Text, TickMark } from '@/ui';
 
 export type OptionTileProps = {
   label: string;
@@ -16,7 +16,10 @@ export type OptionTileProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-/** Big quiz answer tile (S03–S05): full width, 64+ high, selected = accentSoft + accent border. */
+/**
+ * Big quiz answer tile (S03–S05): full width, 64+ high. Selected = accentSoft + 2dp accent border
+ * + filled TickMark; unselected = borderStrong outline and an empty TickMark (≥ 3:1, WCAG 1.4.11).
+ */
 export function OptionTile({
   label,
   detail,
@@ -40,8 +43,10 @@ export function OptionTile({
         {
           minHeight: t.sizes.button + t.spacing.xs,
           borderRadius: t.radius.card,
-          borderWidth: t.sizes.hairline * 2,
-          borderColor: selected ? t.colors.accent : t.colors.border,
+          borderWidth: selected ? t.sizes.borderThick : t.sizes.hairline,
+          borderColor: selected ? t.colors.accent : t.colors.borderStrong,
+          // Keep the content still when the border thickens.
+          margin: selected ? 0 : t.sizes.borderThick - t.sizes.hairline,
           backgroundColor: selected ? t.colors.accentSoft : t.colors.surface,
           paddingHorizontal: t.spacing.md,
           paddingVertical: t.spacing.sm,
@@ -78,26 +83,7 @@ export function OptionTile({
           </Text>
         ) : null}
       </View>
-      <View
-        style={{
-          width: t.sizes.icon,
-          height: t.sizes.icon,
-          borderRadius: kind === 'radio' ? t.radius.pill : t.radius.button / 2,
-          borderWidth: selected ? 0 : t.sizes.hairline * 2,
-          borderColor: t.colors.border,
-          backgroundColor: selected ? t.colors.textPrimary : 'transparent',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {selected ? (
-          <Check
-            size={t.sizes.iconSmall}
-            strokeWidth={t.sizes.iconStroke + 1}
-            color={t.colors.bg}
-          />
-        ) : null}
-      </View>
+      <TickMark checked={selected} shape={kind === 'radio' ? 'circle' : 'square'} />
     </PressableScale>
   );
 }

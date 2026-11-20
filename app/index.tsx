@@ -6,7 +6,10 @@ import { useOnboarding } from '@/features/onboarding/store';
 
 /** Launch: Home once onboarding is done; otherwise resume onboarding where it was left (F1). */
 export default function Index() {
-  const state = useOnboarding();
+  // Only the fields resumeHref reads (perf audit A13): no re-render on every answer.
+  const phase = useOnboarding((s) => s.phase);
+  const step = useOnboarding((s) => s.step);
+  const goal = useOnboarding((s) => s.answers.goal);
   if (isOnboarded()) return <Redirect href="/today" />;
-  return <Redirect href={resumeHref(state) as never} />;
+  return <Redirect href={resumeHref({ phase, step, answers: { goal } }) as never} />;
 }

@@ -1,4 +1,4 @@
-import { displayTime, joinHm, relativeDay, shiftHm, splitHm } from '../clock';
+import { displayTime, from12h, joinHm, relativeDay, shiftHm, splitHm, to12h } from '../clock';
 import { diffSchedule, parseStored } from '../diff';
 import { DEFAULT_PREFS, parseProfileMealTimes, resolveMealTimes, sanitizePrefs } from '../prefs';
 import { planRestSurface, type RestTimerState } from '../restSurface';
@@ -53,6 +53,19 @@ describe('prefs', () => {
 });
 
 describe('clock', () => {
+  it('12-hour wheel parts round-trip every hour', () => {
+    expect(to12h(0)).toEqual({ hour12: 12, pm: false });
+    expect(to12h(12)).toEqual({ hour12: 12, pm: true });
+    expect(to12h(13)).toEqual({ hour12: 1, pm: true });
+    expect(from12h(12, false)).toBe(0);
+    expect(from12h(12, true)).toBe(12);
+    expect(from12h(1, true)).toBe(13);
+    for (let h = 0; h < 24; h++) {
+      const p = to12h(h);
+      expect(from12h(p.hour12, p.pm)).toBe(h);
+    }
+  });
+
   it('formats 12 h and 24 h times', () => {
     expect(displayTime('13:05', true)).toBe('1:05 PM');
     expect(displayTime('00:10', true)).toBe('12:10 AM');

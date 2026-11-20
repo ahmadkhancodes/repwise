@@ -13,16 +13,17 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { projectGoalDate } from '@/features/planner/logic/goalDate';
 import { useTheme } from '@/theme';
-import { Card, Segmented, Stepper, Text, WheelPicker } from '@/ui';
+import { TimeSheet, type TimeSheetTarget } from '@/features/notifications/components/TimeSheet';
+import { Card, ListRow, Segmented, Text, WheelPicker } from '@/ui';
 
 import { defaultTarget, presetFor, type Answers } from '../logic/answers';
 import {
-  fromMinutes,
   mealLabels,
   shiftMealTime,
   toMinutes,
@@ -94,6 +95,58 @@ function Section({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
+/**
+ * Meal times as tappable rows that open the shared wheel sheet (12-hour wheel with AM/PM on
+ * 12-hour phones), instead of a 15-minute stepper that took up to 40 taps (ui audit O).
+ */
+function MealTimes({
+  times,
+  labels,
+  twelveHour,
+  onChange,
+}: {
+  times: string[];
+  labels: string[];
+  twelveHour: boolean;
+  onChange: (next: string[]) => void;
+}) {
+  const t = useTheme();
+  const [sheet, setSheet] = useState<TimeSheetTarget | null>(null);
+  return (
+    <>
+      <View
+        style={{
+          backgroundColor: t.colors.surface,
+          borderRadius: t.radius.card,
+          paddingHorizontal: t.spacing.card,
+        }}
+      >
+        {times.map((time, i) => (
+          <ListRow
+            key={`${times.length}-${i}`}
+            title={labels[i] ?? `Meal ${i + 1}`}
+            value={formatClock(time, twelveHour)}
+            divider={i < times.length - 1}
+            onPress={() =>
+              setSheet({
+                type: 'time',
+                title: `${labels[i] ?? 'Meal'} time`,
+                value: time,
+                onSave: (hm) => onChange(shiftMealTime(times, i, toMinutes(hm) - toMinutes(time))),
+              })
+            }
+            testID={`meal-time-${i}`}
+          />
+        ))}
+      </View>
+      <Text variant="caption" color="textSecondary">
+        Meals stay at least 30 minutes apart.
+      </Text>
+      <TimeSheet target={sheet} onClose={() => setSheet(null)} twelveHour={twelveHour} />
+    </>
+  );
+}
+
 /** The controls for one quiz step. Every value is read from and written to the onboarding store. */
 export function StepContent({
   step,
@@ -146,9 +199,6 @@ export function StepContent({
               />
             ))}
           </View>
-          <Text variant="caption" color="textSecondary">
-            Used for your calorie maths only.
-          </Text>
           <Section label="Year of birth">
             <WheelPicker
               items={birthYearItems(year)}
@@ -489,23 +539,12 @@ export function StepContent({
             accessibilityLabel="Meals per day"
             testID="meals-count"
           />
-          {times.map((time, i) => (
-            <View key={`${n}-${i}`} style={{ gap: t.spacing.xxs }}>
-              <Text variant="caption" color="textSecondary">
-                {labels[i]}
-              </Text>
-              <Stepper
-                label={`${labels[i]} time`}
-                value={toMinutes(time)}
-                step={15}
-                min={0}
-                max={1439}
-                format={(m) => formatClock(fromMinutes(m), twelveHour)}
-                onChange={(v) => set({ mealTimes: shiftMealTime(times, i, v - toMinutes(time)) })}
-                testID={`meal-time-${i}`}
-              />
-            </View>
-          ))}
+          <MealTimes
+            times={times}
+            labels={labels}
+            twelveHour={twelveHour}
+            onChange={(next) => set({ mealTimes: next })}
+          />
         </>
       );
     }

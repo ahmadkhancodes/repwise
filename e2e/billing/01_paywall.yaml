@@ -1,0 +1,41 @@
+# S37 Paywall (CLAUDE.md non-negotiables): visible close, yearly pre-selected, price after the
+# trial stated, trial timeline, restore, terms and privacy. Runs only when payments are on
+# (otherwise /paywall redirects home and the flow just checks that).
+appId: com.client.repwise
+tags:
+  - billing
+---
+- runFlow: ../onboarding/01_f1_happy_path.yaml
+- openLink: repwise://paywall?source=e2e
+- runFlow:
+    when:
+      visible:
+        id: screen-paywall
+    commands:
+      - assertVisible:
+          id: paywall-close
+      - assertVisible:
+          id: plan-yearly
+      - assertVisible:
+          id: paywall-price-line
+      - assertVisible: ".*then .*/year.*Cancel anytime.*"
+      - assertVisible:
+          id: paywall-timeline
+      - scrollUntilVisible:
+          element:
+            id: paywall-restore
+          direction: DOWN
+      - assertVisible:
+          id: paywall-terms
+      - assertVisible:
+          id: paywall-privacy
+      - tapOn:
+          id: plan-monthly
+      - assertNotVisible:
+          id: paywall-timeline
+      - tapOn:
+          id: paywall-close
+- extendedWaitUntil:
+    visible:
+      id: screen-today
+    timeout: 10000
