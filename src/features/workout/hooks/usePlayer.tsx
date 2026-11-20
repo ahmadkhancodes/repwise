@@ -4,7 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { getProfile } from '@/features/settings/repo';
 import { haptics } from '@/services/haptics';
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { showToast, showUndoToast } from '@/ui';
 
 import {
@@ -56,7 +56,7 @@ import { useWorkout, type PlayerItem } from './useWorkout';
  * The rest countdown is NOT here: only the rest bar / sheet leaves tick.
  */
 export function usePlayer(sessionId: string) {
-  const catalog = useCatalog();
+  const catalog = useCatalogFor('exercises');
   const { unit } = useUnits();
   const live = useWorkout(sessionId, catalog);
   const items = useMemo(() => live.data?.items ?? [], [live.data]);

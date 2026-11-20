@@ -15,7 +15,7 @@ import { View } from 'react-native';
 import { usePro } from '@/features/billing';
 import { routinesRepo, useRoutines } from '@/features/library/repo';
 import { ensurePlannedAhead } from '@/features/planner/bridge';
-import { loadCatalog, useCatalog } from '@/services/catalog';
+import { loadCatalogParts, useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import {
   Button,
@@ -178,7 +178,7 @@ function useTrainDeepLink() {
       open();
     } else if (action.run === 'start') {
       // The catalogue is bundled; wait for it so cardio sets are pre-created correctly.
-      loadCatalog()
+      loadCatalogParts(['exercises'])
         .catch(() => null)
         .then((c) => {
           startWorkoutAction(action.sessionId, c);
@@ -257,7 +257,7 @@ export function TrainScreen() {
     return () => clearTimeout(id);
   }, []);
   const t = useTheme();
-  const catalog = useCatalog();
+  const catalog = useCatalogFor('exercises');
   const { isPro } = usePro();
   const focused = useScreenFocused();
   const [retry, setRetry] = useState(0);

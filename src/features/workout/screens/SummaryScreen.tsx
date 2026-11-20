@@ -5,7 +5,7 @@ import { Share, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { haptics } from '@/services/haptics';
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import { shareViewAsImage } from '@/features/progress/services/shareImage';
 import {
@@ -33,7 +33,7 @@ import { formatWeight, toDisplayWeight } from '../logic/units';
 /** S35 Workout summary: one huge number, PRs (W3 wow moment), next-time suggestions, share. */
 export function SummaryScreen({ sessionId }: { sessionId: string }) {
   const t = useTheme();
-  const catalog = useCatalog();
+  const catalog = useCatalogFor('exercises');
   const { unit } = useUnits();
   const { data, loaded, error } = useSummary(sessionId, catalog, unit);
   const celebrated = useRef(false);

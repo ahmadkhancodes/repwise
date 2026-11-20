@@ -7,7 +7,7 @@ import { ExerciseRow } from '@/features/library/components/ExerciseRow';
 import { fromCatalog, type LibraryItem } from '@/features/library';
 import { routinesRepo } from '@/features/library/repo';
 import { haptics } from '@/services/haptics';
-import { searchExercises, useCatalog } from '@/services/catalog';
+import { searchExercises, useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import {
   EmptyState,
@@ -32,7 +32,7 @@ export function ExercisePickerScreen({
   routineId?: string;
 }) {
   const t = useTheme();
-  const catalog = useCatalog();
+  const catalog = useCatalogFor('exercises');
   const [query, setQuery] = useState('');
   const close = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/train'));
   const results = useMemo(

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 import { routinesRepo } from '@/features/library/repo';
-import { useCatalog } from '@/services/catalog';
+import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import {
   Button,
@@ -36,7 +36,7 @@ const RESTS = [60, 90, 120, 180];
 /** S16 Routine builder: name, exercises with sets/reps/rest, reorder, start. Saves as you go. */
 export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
   const t = useTheme();
-  const catalog = useCatalog();
+  const catalog = useCatalogFor('exercises');
   const { data: routine, loaded } = useLiveValue(
     () => routinesRepo.get(routineId) ?? null,
     ['routines'],

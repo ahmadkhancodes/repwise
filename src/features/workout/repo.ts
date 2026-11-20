@@ -2,6 +2,7 @@ import { and, asc, between, desc, eq, inArray, isNotNull, isNull, ne, or, sql } 
 
 import { getDb } from '@/db/client';
 import { notifyLocalWrite } from '@/db/events';
+import { withTransaction } from '@/db/transaction';
 import { createRepo, DIRTY, type NewRow, type Row } from '@/db/repo';
 import { sessionExercises, sessions, sets, type SetType, type SyncTableName } from '@/db/schema';
 
@@ -14,26 +15,11 @@ export type Session = Row<typeof sessions>;
 export type SessionExercise = Row<typeof sessionExercises>;
 export type WorkoutSet = Row<typeof sets>;
 
-let txDepth = 0;
-
 /**
- * Run several writes as ONE SQLite transaction (A6): atomic (a kill never leaves a half-started
- * or half-discarded workout) and one WAL commit instead of one per row. Nested calls join the
- * outer transaction.
+ * Several writes as ONE SQLite transaction (A6): atomic and one WAL commit. Shared
+ * `withTransaction` (synchronous; nested calls become savepoints).
  */
-export function atomic<T>(fn: () => T): T {
-  if (txDepth > 0) return fn();
-  txDepth++;
-  try {
-    return getDb().transaction(() => fn());
-  } catch (e) {
-    // Called inside someone else's transaction: just run in it.
-    if (e instanceof Error && /within a transaction/i.test(e.message)) return fn();
-    throw e;
-  } finally {
-    txDepth--;
-  }
-}
+export const atomic = withTransaction;
 
 type SoftTable = typeof sets | typeof sessionExercises | typeof sessions;
 
@@ -267,7 +253,7 @@ export function recentSessionExercises(
 }
 
 function insertPrefilled(seId: string, rows: Prefill[], startIdx: number, now: number): void {
-  atomic(() =>
+  withTransaction(() =>
     rows.forEach((p, i) =>
       setsRepo.insert(
         {
@@ -309,7 +295,7 @@ export function startWorkout(
   isCardio: (exerciseId: string) => boolean = () => false,
   now: number = Date.now(),
 ): Session | undefined {
-  return atomic(() => {
+  return withTransaction(() => {
     const s = getSession(sessionId);
     if (!s) return undefined;
     for (const se of exercisesForSession(sessionId)) {
@@ -341,7 +327,7 @@ export function resumeWorkout(
 
 /** Finish: done + end time; sets never ticked are removed so history only holds real work. */
 export function finishWorkout(sessionId: string, now: number = Date.now()): Session | undefined {
-  return atomic(() => {
+  return withTransaction(() => {
     const open = [...setsForSession(sessionId).values()].flat().filter((s) => s.doneAt == null);
     softDeleteMany(
       sets,
@@ -358,7 +344,7 @@ export function finishWorkout(sessionId: string, now: number = Date.now()): Sess
  * set done but not ticked is never lost. Returns how many were marked.
  */
 export function markRemainingDone(sessionId: string, now: number = Date.now()): number {
-  return atomic(() => {
+  return withTransaction(() => {
     const open = [...setsForSession(sessionId).values()]
       .flat()
       .filter(
@@ -382,7 +368,7 @@ export function discardWorkout(
   sessionId: string,
   now: number = Date.now(),
 ): DiscardSnapshot | null {
-  return atomic(() => {
+  return withTransaction(() => {
     const s = getSession(sessionId);
     if (!s) return null;
     const setIds = [...setsForSession(sessionId).values()].flat().map((st) => st.id);
@@ -407,7 +393,7 @@ export function discardWorkout(
  * started meanwhile this one comes back paused, so two never run at once.
  */
 export function undoDiscard(snap: DiscardSnapshot, now: number = Date.now()): void {
-  atomic(() => {
+  withTransaction(() => {
     if (snap.sessionDeleted) restoreMany(sessions, 'sessions', [snap.session.id], now);
     restoreMany(sessionExercises, 'session_exercises', snap.sessionExerciseIds, now);
     restoreMany(sets, 'sets', snap.setIds, now);
@@ -439,7 +425,7 @@ export function createSession(
   values: { date: string; title: string; exercises?: NewExercise[] },
   now: number = Date.now(),
 ): Session {
-  return atomic(() => {
+  return withTransaction(() => {
     const s = sessionsRepo.insert(
       { date: values.date, title: values.title, status: 'planned' },
       now,
@@ -480,7 +466,7 @@ export type RemovedExercise = { sessionExerciseId: string; setIds: string[] };
 
 /** Remove an exercise and its sets (soft, one transaction); returns what to restore on Undo. */
 export function removeExercise(seId: string, now: number = Date.now()): RemovedExercise {
-  return atomic(() => {
+  return withTransaction(() => {
     const setIds = setsFor(seId).map((s) => s.id);
     softDeleteMany(sets, 'sets', setIds, now);
     sessionExercisesRepo.remove(seId, now);
@@ -489,7 +475,7 @@ export function removeExercise(seId: string, now: number = Date.now()): RemovedE
 }
 
 export function restoreExercise(r: RemovedExercise, now: number = Date.now()): void {
-  atomic(() => {
+  withTransaction(() => {
     restoreMany(sessionExercises, 'session_exercises', [r.sessionExerciseId], now);
     restoreMany(sets, 'sets', r.setIds, now);
   });
@@ -502,7 +488,7 @@ export function swapExerciseRow(
   opts: { cardio?: boolean } = {},
   now: number = Date.now(),
 ): SessionExercise | undefined {
-  return atomic(() => {
+  return withTransaction(() => {
     const se = sessionExercisesRepo.get(seId);
     if (!se) return undefined;
     const existing = setsFor(seId);
@@ -529,7 +515,7 @@ export function reorderExercises(
   orderedIds: string[],
   now: number = Date.now(),
 ): void {
-  atomic(() => {
+  withTransaction(() => {
     const current = new Map(exercisesForSession(sessionId).map((e) => [e.id, e.position]));
     orderedIds.forEach((id, position) => {
       if (current.has(id) && current.get(id) !== position)
