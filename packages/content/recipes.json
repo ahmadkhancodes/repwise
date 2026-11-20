@@ -44594,5 +44594,5303 @@
       "dairy_free"
     ],
     "mainProtein": "fish"
+  },
+  {
+    "id": "turkey-wild-rice-soup",
+    "title": "Turkey and wild rice soup",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 50,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-breast",
+        "grams": 300
+      },
+      {
+        "foodId": "rice-wild",
+        "grams": 100
+      },
+      {
+        "foodId": "carrot",
+        "grams": 120
+      },
+      {
+        "foodId": "celery",
+        "grams": 80
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 150
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 800
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 100
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion, carrot, celery and mushrooms in the oil.",
+      "Add the stock, wild rice, thyme and 400 ml of water and simmer for 30 minutes.",
+      "Add the diced turkey and cook for 12 to 15 minutes until the rice has split and the turkey is cooked through.",
+      "Stir in the milk and salt and warm through without boiling."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 415,
+      "protein": 38.9,
+      "carbs": 45.6,
+      "fat": 8.7,
+      "fibre": 4.8
+    },
+    "allergens": [
+      "celery",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "turkey-sauerkraut-rye-melt",
+    "title": "Turkey, Swiss and sauerkraut rye melt",
+    "cuisine": "american",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 6,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "rye-bread",
+        "grams": 80
+      },
+      {
+        "foodId": "turkey-slices",
+        "grams": 80
+      },
+      {
+        "foodId": "swiss-cheese",
+        "grams": 30
+      },
+      {
+        "foodId": "sauerkraut",
+        "grams": 60
+      },
+      {
+        "foodId": "mustard",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Spread the bread with the mustard.",
+      "Layer on the turkey, well-drained sauerkraut and cheese and close the sandwich.",
+      "Toast in a dry pan over medium heat for 3 minutes each side, pressing down, until the cheese melts."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 426,
+      "protein": 27.6,
+      "carbs": 43.9,
+      "fat": 15.3,
+      "fibre": 6.7
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "mustard"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "pbj-toast-milk",
+    "title": "Peanut butter and jam toast with milk",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 2,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "bread-wholemeal",
+        "grams": 70
+      },
+      {
+        "foodId": "peanut-butter",
+        "grams": 20
+      },
+      {
+        "foodId": "jam",
+        "grams": 15
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 200
+      }
+    ],
+    "steps": [
+      "Toast the bread.",
+      "Spread with the peanut butter, then the jam.",
+      "Serve with the glass of milk."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 438,
+      "protein": 19.9,
+      "carbs": 54.3,
+      "fat": 16.7,
+      "fibre": 5.4
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "peanuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "turkey-burgers-sweet-potato",
+    "title": "Turkey burgers in lettuce with sweet potato wedges",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-mince",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "garlic-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "sweet-potato",
+        "grams": 500
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "romaine",
+        "grams": 80
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "mustard",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Cut the sweet potatoes into wedges, toss with most of the oil, the paprika and half the salt and roast at 220 °C for 25 to 30 minutes.",
+      "Mix the mince with the grated onion, garlic powder and remaining salt and shape into 4 patties.",
+      "Pan-fry in the remaining oil for 5 minutes each side until cooked through.",
+      "Serve the burgers in lettuce leaves with tomato and mustard, with the wedges alongside."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 601,
+      "protein": 43,
+      "carbs": 56.9,
+      "fat": 23.4,
+      "fibre": 9.9
+    },
+    "allergens": [
+      "mustard"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "beef-bean-chilli-mac",
+    "title": "Beef and bean chilli mac (meal prep)",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 400
+      },
+      {
+        "foodId": "kidney-beans",
+        "grams": 240
+      },
+      {
+        "foodId": "pasta",
+        "grams": 200
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 120
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 4
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 60
+      },
+      {
+        "foodId": "beef-stock",
+        "grams": 300
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Brown the mince with the onion in a large pot.",
+      "Stir in the spices, then add the tomatoes, stock, salt and 400 ml of water and bring to the boil.",
+      "Add the pasta and beans and simmer for 12 to 14 minutes, stirring often, until the pasta is tender and the sauce is thick.",
+      "Stir in the cheese until melted.",
+      "Portion into 4 containers; keeps for 3 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 542,
+      "protein": 37.7,
+      "carbs": 59.2,
+      "fat": 17.2,
+      "fibre": 8
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "cajun-chicken-rice-skillet",
+    "title": "Cajun chicken and rice skillet",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 120
+      },
+      {
+        "foodId": "green-pepper",
+        "grams": 120
+      },
+      {
+        "foodId": "celery",
+        "grams": 60
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 200
+      },
+      {
+        "foodId": "paprika",
+        "grams": 4
+      },
+      {
+        "foodId": "cayenne",
+        "grams": 1
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "oregano",
+        "grams": 1
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Toss the chicken with the paprika, cayenne, thyme, oregano and half the salt and brown it in the oil.",
+      "Add the onion, peppers, celery and garlic and cook for 5 minutes.",
+      "Stir in the rice, tomatoes, remaining salt and 250 ml of water.",
+      "Cover and cook on low heat for 18 minutes until the rice is tender and the chicken is cooked through."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 607,
+      "protein": 47.4,
+      "carbs": 70.8,
+      "fat": 14.8,
+      "fibre": 7.7
+    },
+    "allergens": [
+      "celery"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "honey-mustard-chicken-veg",
+    "title": "Honey mustard chicken with roasted vegetables",
+    "cuisine": "american",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 350
+      },
+      {
+        "foodId": "honey",
+        "grams": 15
+      },
+      {
+        "foodId": "mustard",
+        "grams": 20
+      },
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "broccoli",
+        "grams": 200
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Toss the cubed potato and carrot with the oil and half the salt and roast at 210 °C for 12 minutes.",
+      "Coat the chicken with the honey, mustard and remaining salt.",
+      "Add the chicken and broccoli to the tray and roast for 16 to 18 minutes until the chicken is cooked through.",
+      "Spoon the pan juices over to serve."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 463,
+      "protein": 46.4,
+      "carbs": 46.8,
+      "fat": 10.6,
+      "fibre": 8.3
+    },
+    "allergens": [
+      "mustard"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "yogurt-chicken-salad-sandwich",
+    "title": "Yogurt chicken salad sandwich with grapes",
+    "cuisine": "american",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 250
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 80
+      },
+      {
+        "foodId": "celery",
+        "grams": 50
+      },
+      {
+        "foodId": "grapes",
+        "grams": 80
+      },
+      {
+        "foodId": "walnuts",
+        "grams": 15
+      },
+      {
+        "foodId": "mustard",
+        "grams": 5
+      },
+      {
+        "foodId": "bread-wholemeal",
+        "grams": 100
+      },
+      {
+        "foodId": "romaine",
+        "grams": 40
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Poach the chicken in simmering water for 15 minutes, then cool and dice.",
+      "Mix with the yogurt, mustard, chopped celery, halved grapes, walnuts and salt.",
+      "Pile onto the bread with the lettuce."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 385,
+      "protein": 40.4,
+      "carbs": 32.6,
+      "fat": 10.3,
+      "fibre": 4.8
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "milk",
+      "mustard",
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "turkey-potato-breakfast-skillet",
+    "title": "Turkey, potato and egg breakfast skillet",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-mince",
+        "grams": 250
+      },
+      {
+        "foodId": "potato",
+        "grams": 400
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 120
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Fry the diced potato in the oil for 10 minutes until golden.",
+      "Add the mince, onion, pepper, paprika and salt and cook for 6 minutes until the turkey is browned.",
+      "Make 4 wells, crack in the eggs, cover and cook for 3 to 4 minutes until the whites are set."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 563,
+      "protein": 41.4,
+      "carbs": 43.6,
+      "fat": 25.4,
+      "fibre": 6.5
+    },
+    "allergens": [
+      "eggs"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "cottage-cheese-pancakes",
+    "title": "Cottage cheese pancakes with strawberries",
+    "cuisine": "american",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "cottage-cheese",
+        "grams": 120
+      },
+      {
+        "foodId": "oats",
+        "grams": 50
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "strawberries",
+        "grams": 100
+      },
+      {
+        "foodId": "honey",
+        "grams": 8
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Blend the cottage cheese, oats and eggs to a smooth batter.",
+      "Cook 3 or 4 small pancakes in the lightly oiled pan for 2 minutes each side until golden.",
+      "Top with the sliced strawberries and honey."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 518,
+      "protein": 34.4,
+      "carbs": 53.9,
+      "fat": 19,
+      "fibre": 7.3
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "loaded-sweet-potato-beans",
+    "title": "Loaded sweet potato with black beans and yogurt",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 45,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "sweet-potato",
+        "grams": 300
+      },
+      {
+        "foodId": "black-beans",
+        "grams": 150
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 80
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 20
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 10
+      },
+      {
+        "foodId": "salsa",
+        "grams": 40
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Prick the sweet potato and bake at 200 °C for 45 minutes, or microwave for 8 to 10 minutes, until soft.",
+      "Warm the drained beans with the salsa.",
+      "Split the potato and fill with the beans.",
+      "Top with the yogurt, cheese, spring onion and lime."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 538,
+      "protein": 27.3,
+      "carbs": 92.6,
+      "fat": 7.8,
+      "fibre": 20.4
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "lemon-pepper-cod-prep",
+    "title": "Lemon pepper cod with rice and broccoli (meal prep)",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "cod",
+        "grams": 600
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 240
+      },
+      {
+        "foodId": "broccoli",
+        "grams": 500
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 40
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 3
+      },
+      {
+        "foodId": "garlic-powder",
+        "grams": 3
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "salt",
+        "grams": 7
+      }
+    ],
+    "steps": [
+      "Cook the rice in salted water until tender.",
+      "Lay the cod and broccoli on a lined tray, drizzle with the oil and lemon and season with the pepper, garlic powder and salt.",
+      "Bake at 200 °C for 12 to 14 minutes until the fish flakes.",
+      "Divide the rice, fish and broccoli between 4 containers; keeps for 2 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 435,
+      "protein": 34.7,
+      "carbs": 58,
+      "fat": 7,
+      "fibre": 4.3
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "chicken-noodle-soup",
+    "title": "Chicken noodle soup",
+    "cuisine": "american",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 300
+      },
+      {
+        "foodId": "egg-noodles",
+        "grams": 100
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "celery",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 900
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion, carrot and celery in the oil.",
+      "Add the stock, thyme, 300 ml of water and the whole chicken breasts and simmer for 15 minutes.",
+      "Lift out the chicken and shred it; add the noodles to the pot and cook for 5 minutes.",
+      "Return the chicken, season with the salt and finish with parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 411,
+      "protein": 35.9,
+      "carbs": 43.5,
+      "fat": 9.6,
+      "fibre": 3.8
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "eggs"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "prawns-cheesy-grits",
+    "title": "Prawns with cheesy cornmeal grits",
+    "cuisine": "american",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 300
+      },
+      {
+        "foodId": "cornmeal",
+        "grams": 100
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 300
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 40
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "butter",
+        "grams": 8
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Whisk the cornmeal into the simmering milk with 300 ml of water and most of the salt and cook, stirring often, for 15 minutes until thick.",
+      "Stir in the cheese.",
+      "Toss the prawns with the paprika and remaining salt and fry in the butter with the garlic for 2 minutes each side.",
+      "Spoon the prawns over the grits and finish with lemon and spring onion."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 506,
+      "protein": 44.4,
+      "carbs": 49.3,
+      "fat": 15.6,
+      "fibre": 4.4
+    },
+    "allergens": [
+      "crustaceans",
+      "milk"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "paprika-popcorn-almonds",
+    "title": "Paprika popcorn with almonds",
+    "cuisine": "american",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 4,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "popcorn",
+        "grams": 30
+      },
+      {
+        "foodId": "almonds",
+        "grams": 15
+      },
+      {
+        "foodId": "paprika",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 3
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Air-pop the corn, or warm ready-popped plain popcorn.",
+      "Toss with the oil, paprika and salt while warm.",
+      "Mix in the almonds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 232,
+      "protein": 7.2,
+      "carbs": 27.1,
+      "fat": 12,
+      "fibre": 6.6
+    },
+    "allergens": [
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "chocolate-protein-mug-cake",
+    "title": "Chocolate protein mug cake",
+    "cuisine": "american",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 2,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "whey-protein",
+        "grams": 25
+      },
+      {
+        "foodId": "oats",
+        "grams": 20
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "cocoa",
+        "grams": 5
+      },
+      {
+        "foodId": "banana",
+        "grams": 50
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 30
+      }
+    ],
+    "steps": [
+      "Mash the banana in a large mug and beat in the egg and milk.",
+      "Stir in the whey, oats and cocoa until smooth.",
+      "Microwave on high for 70 to 90 seconds until risen and just set.",
+      "Rest for a minute before eating."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 310,
+      "protein": 26.7,
+      "carbs": 36.6,
+      "fat": 7.9,
+      "fibre": 5.3
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "turkey-hummus-snack-box",
+    "title": "Turkey and hummus snack box",
+    "cuisine": "american",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-slices",
+        "grams": 60
+      },
+      {
+        "foodId": "hummus",
+        "grams": 40
+      },
+      {
+        "foodId": "carrot",
+        "grams": 80
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "rice-cakes",
+        "grams": 18
+      }
+    ],
+    "steps": [
+      "Cut the carrot and cucumber into sticks.",
+      "Roll up the turkey slices.",
+      "Pack everything into a box with the hummus and rice cakes."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 275,
+      "protein": 14.6,
+      "carbs": 32.5,
+      "fat": 9.9,
+      "fibre": 5.6
+    },
+    "allergens": [
+      "sesame"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "tuna-avocado-rice-cakes",
+    "title": "Tuna and avocado rice cakes",
+    "cuisine": "american",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "rice-cakes",
+        "grams": 27
+      },
+      {
+        "foodId": "tuna-canned",
+        "grams": 80
+      },
+      {
+        "foodId": "avocado",
+        "grams": 40
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.3
+      }
+    ],
+    "steps": [
+      "Mash the avocado with the lemon and pepper.",
+      "Spread it over the rice cakes.",
+      "Top with the drained tuna."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 239,
+      "protein": 18.6,
+      "carbs": 25.9,
+      "fat": 7.5,
+      "fibre": 3.9
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "mulligatawny-chicken",
+    "title": "Mulligatawny soup with chicken",
+    "cuisine": "british",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 250
+      },
+      {
+        "foodId": "red-lentils",
+        "grams": 80
+      },
+      {
+        "foodId": "apple",
+        "grams": 100
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "curry-powder",
+        "grams": 6
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 700
+      },
+      {
+        "foodId": "coconut-milk",
+        "grams": 60
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 60
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion, carrot and diced apple in the oil, then stir in the curry powder.",
+      "Add the stock, lentils, rice, 300 ml of water and the whole chicken breast and simmer for 20 minutes.",
+      "Lift out the chicken and shred it.",
+      "Stir in the coconut milk and salt, return the chicken and simmer for 3 minutes."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 466,
+      "protein": 33.8,
+      "carbs": 53.6,
+      "fat": 13.1,
+      "fibre": 6.5
+    },
+    "allergens": [
+      "celery",
+      "mustard"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "chicken-sprouts-traybake",
+    "title": "Roast chicken thighs with Brussels sprouts and potatoes",
+    "cuisine": "british",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 40,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "brussels-sprouts",
+        "grams": 300
+      },
+      {
+        "foodId": "potato",
+        "grams": 400
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "mustard",
+        "grams": 10
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Toss the cubed potatoes with half the oil and half the salt and roast at 210 °C for 15 minutes.",
+      "Coat the chicken with the mustard, thyme, garlic and remaining salt.",
+      "Add the chicken and halved sprouts to the tray with the remaining oil.",
+      "Roast for 22 to 25 minutes until the chicken is cooked through and the sprouts are browned."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 524,
+      "protein": 49.2,
+      "carbs": 50.4,
+      "fat": 15.1,
+      "fibre": 10.4
+    },
+    "allergens": [
+      "mustard"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "cod-wraps-red-cabbage",
+    "title": "Crispy baked cod wraps with red cabbage slaw",
+    "cuisine": "british",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "cod",
+        "grams": 300
+      },
+      {
+        "foodId": "breadcrumbs",
+        "grams": 40
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "tortilla-flour",
+        "grams": 140
+      },
+      {
+        "foodId": "red-cabbage",
+        "grams": 150
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 60
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "paprika",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Cut the cod into fingers, dip in the beaten egg and coat in the breadcrumbs mixed with the paprika and half the salt.",
+      "Place on an oiled tray, drizzle with the oil and bake at 220 °C for 12 to 14 minutes until crisp.",
+      "Toss the finely shredded cabbage with the yogurt, lime and remaining salt.",
+      "Warm the tortillas and fill with the slaw and fish."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 532,
+      "protein": 42.5,
+      "carbs": 56.7,
+      "fat": 14.4,
+      "fibre": 5.1
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "fish",
+      "milk"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "egg-watercress-sandwich",
+    "title": "Egg and watercress sandwich",
+    "cuisine": "british",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 9,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "bread-wholemeal",
+        "grams": 80
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "watercress",
+        "grams": 30
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 30
+      },
+      {
+        "foodId": "mustard",
+        "grams": 3
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.3
+      },
+      {
+        "foodId": "salt",
+        "grams": 0.5
+      }
+    ],
+    "steps": [
+      "Boil the eggs for 9 minutes, cool and peel.",
+      "Mash with the yogurt, mustard, pepper and salt.",
+      "Spread over one slice of bread, top with the watercress and close the sandwich."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 368,
+      "protein": 26.5,
+      "carbs": 36.7,
+      "fat": 12.6,
+      "fibre": 5.1
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk",
+      "mustard"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "pumpkin-red-lentil-soup",
+    "title": "Spiced pumpkin and red lentil soup",
+    "cuisine": "british",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "pumpkin",
+        "grams": 500
+      },
+      {
+        "foodId": "red-lentils",
+        "grams": 120
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 600
+      },
+      {
+        "foodId": "coconut-milk",
+        "grams": 60
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "pumpkin-seeds",
+        "grams": 15
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion, garlic and ginger in the oil with the cumin.",
+      "Add the cubed pumpkin, lentils, stock and 200 ml of water and simmer for 22 minutes until soft.",
+      "Blend until smooth and stir in the coconut milk and salt.",
+      "Top with the toasted pumpkin seeds and serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 546,
+      "protein": 24.6,
+      "carbs": 81.2,
+      "fat": 17,
+      "fibre": 10
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "blackberry-flax-porridge",
+    "title": "Blackberry and flaxseed porridge",
+    "cuisine": "british",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 6,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "oats",
+        "grams": 60
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 250
+      },
+      {
+        "foodId": "blackberries",
+        "grams": 80
+      },
+      {
+        "foodId": "flaxseed",
+        "grams": 10
+      },
+      {
+        "foodId": "honey",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Simmer the oats with the milk for 5 minutes, stirring, until creamy.",
+      "Stir in the ground flaxseed.",
+      "Top with the blackberries and honey."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 461,
+      "protein": 21.4,
+      "carbs": 66.5,
+      "fat": 13.8,
+      "fibre": 13.3
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "cottage-cheese-grapes-rye",
+    "title": "Cottage cheese with grapes and walnuts on rye",
+    "cuisine": "british",
+    "slots": [
+      "snack",
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 4,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "cottage-cheese",
+        "grams": 150
+      },
+      {
+        "foodId": "grapes",
+        "grams": 80
+      },
+      {
+        "foodId": "walnuts",
+        "grams": 10
+      },
+      {
+        "foodId": "rye-bread",
+        "grams": 40
+      }
+    ],
+    "steps": [
+      "Toast the rye bread if you like.",
+      "Spoon over the cottage cheese.",
+      "Top with the halved grapes and chopped walnuts."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 346,
+      "protein": 21.2,
+      "carbs": 42.4,
+      "fat": 11.5,
+      "fibre": 3.7
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "liver-onions-mash",
+    "title": "Liver and onions with mash and peas",
+    "cuisine": "british",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-liver",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 200
+      },
+      {
+        "foodId": "potato",
+        "grams": 500
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 60
+      },
+      {
+        "foodId": "butter",
+        "grams": 10
+      },
+      {
+        "foodId": "peas",
+        "grams": 160
+      },
+      {
+        "foodId": "flour-plain",
+        "grams": 10
+      },
+      {
+        "foodId": "beef-stock",
+        "grams": 200
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Boil the potatoes for 18 minutes, drain and mash with the milk, butter and half the salt.",
+      "Cook the sliced onions in half the oil for 12 minutes until soft and golden, then remove.",
+      "Dust the sliced liver with the flour and remaining salt and fry in the rest of the oil for 2 minutes each side.",
+      "Return the onions, pour in the stock and bubble for 3 minutes to make a gravy.",
+      "Boil the peas and serve everything together."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 614,
+      "protein": 44.7,
+      "carbs": 76.2,
+      "fat": 14.9,
+      "fibre": 10.7
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "chicken-tikka-naan-pizza",
+    "title": "Chicken tikka naan pizza",
+    "cuisine": "british",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 12,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "naan",
+        "grams": 160
+      },
+      {
+        "foodId": "chicken-breast",
+        "grams": 200
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 40
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 30
+      },
+      {
+        "foodId": "mozzarella",
+        "grams": 60
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Dice the chicken small and toss with the yogurt, paprika, cumin and salt.",
+      "Fry in a hot non-stick pan for 5 minutes until cooked through.",
+      "Spread the naans with the tomato paste and top with the chicken, sliced onion and cheese.",
+      "Bake at 220 °C for 6 to 7 minutes until the cheese bubbles, then scatter with coriander."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 483,
+      "protein": 40.5,
+      "carbs": 47.5,
+      "fat": 14.2,
+      "fibre": 5.6
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "chicken-leek-barley-stew",
+    "title": "Chicken, leek and barley stew",
+    "cuisine": "british",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 10,
+    "cookMin": 50,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "barley",
+        "grams": 100
+      },
+      {
+        "foodId": "leek",
+        "grams": 200
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "celery",
+        "grams": 60
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 700
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "bay-leaf",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Brown the chicken in the oil and set aside.",
+      "Soften the leek, carrot and celery in the same pot.",
+      "Add the barley, stock, thyme, bay, salt, 300 ml of water and the chicken.",
+      "Cover and simmer for 40 minutes until the barley is tender.",
+      "Finish with parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 453,
+      "protein": 37.1,
+      "carbs": 49.6,
+      "fat": 11.7,
+      "fibre": 8.4
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "tuna-sweetcorn-pasta-bake",
+    "title": "Tuna and sweetcorn pasta bake",
+    "cuisine": "british",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "pasta",
+        "grams": 200
+      },
+      {
+        "foodId": "tuna-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "sweetcorn",
+        "grams": 150
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 300
+      },
+      {
+        "foodId": "cornflour",
+        "grams": 15
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 60
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "mustard",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the pasta until just tender and drain.",
+      "Whisk the cornflour into the cold milk, bring to a simmer, stirring, until thickened, then add the mustard, salt and half the cheese.",
+      "Fold in the pasta, drained tuna, sweetcorn and spring onion and tip into a baking dish.",
+      "Top with the remaining cheese and bake at 200 °C for 15 minutes until golden."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 513,
+      "protein": 33.8,
+      "carbs": 70.8,
+      "fat": 10.9,
+      "fibre": 3.5
+    },
+    "allergens": [
+      "gluten",
+      "fish",
+      "milk",
+      "mustard"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "bubble-squeak-eggs",
+    "title": "Bubble and squeak with poached eggs",
+    "cuisine": "british",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "cabbage",
+        "grams": 150
+      },
+      {
+        "foodId": "brussels-sprouts",
+        "grams": 100
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "butter",
+        "grams": 8
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the potatoes for 15 minutes, adding the shredded cabbage and sprouts for the last 4 minutes; drain well and roughly mash with the salt.",
+      "Mix in the spring onion.",
+      "Fry the mixture in the butter and oil, pressing it flat, for 4 to 5 minutes each side until crusty.",
+      "Poach the eggs for 3 minutes and serve on top."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 353,
+      "protein": 18.6,
+      "carbs": 36.5,
+      "fat": 15.6,
+      "fibre": 7.2
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "coronation-chicken-salad",
+    "title": "Coronation-style chicken salad on wholemeal",
+    "cuisine": "british",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 250
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 80
+      },
+      {
+        "foodId": "curry-powder",
+        "grams": 3
+      },
+      {
+        "foodId": "mango",
+        "grams": 60
+      },
+      {
+        "foodId": "raisins",
+        "grams": 15
+      },
+      {
+        "foodId": "almonds",
+        "grams": 10
+      },
+      {
+        "foodId": "romaine",
+        "grams": 80
+      },
+      {
+        "foodId": "bread-wholemeal",
+        "grams": 80
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Poach the chicken in simmering water for 15 minutes, cool and shred.",
+      "Mix the yogurt with the curry powder, salt and finely diced mango.",
+      "Fold in the chicken and raisins.",
+      "Serve on the bread with the lettuce, scattered with the almonds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 355,
+      "protein": 39.4,
+      "carbs": 32.2,
+      "fat": 7.8,
+      "fibre": 5.5
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "mustard",
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "beef-root-veg-stew",
+    "title": "Beef and root vegetable stew",
+    "cuisine": "british",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 120,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-stewing",
+        "grams": 500
+      },
+      {
+        "foodId": "potato",
+        "grams": 400
+      },
+      {
+        "foodId": "carrot",
+        "grams": 250
+      },
+      {
+        "foodId": "turnip",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "celery",
+        "grams": 60
+      },
+      {
+        "foodId": "beef-stock",
+        "grams": 600
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "worcestershire",
+        "grams": 10
+      },
+      {
+        "foodId": "flour-plain",
+        "grams": 15
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "bay-leaf",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Toss the beef in the flour and brown it in the oil.",
+      "Add the onion and celery and soften, then stir in the tomato paste.",
+      "Pour in the stock and Worcestershire sauce with the thyme, bay and salt, cover and simmer for 75 minutes.",
+      "Add the potato, carrot and turnip and cook for 35 to 40 minutes more until everything is tender."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 475,
+      "protein": 46,
+      "carbs": 49.8,
+      "fat": 11.6,
+      "fibre": 8.1
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "fish"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "chicken-tinga-tostadas",
+    "title": "Chicken tinga tostadas",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 350
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "oregano",
+        "grams": 1
+      },
+      {
+        "foodId": "tortilla-corn",
+        "grams": 120
+      },
+      {
+        "foodId": "iceberg",
+        "grams": 80
+      },
+      {
+        "foodId": "avocado",
+        "grams": 60
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 40
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Poach the chicken in simmering water for 15 minutes and shred it.",
+      "Soften the onion and garlic in a dry non-stick pan, add the tomatoes, paprika, chilli, oregano and salt and simmer for 8 minutes.",
+      "Stir in the chicken and cook until the sauce clings.",
+      "Bake the tortillas at 200 °C for 6 to 8 minutes until crisp.",
+      "Top the tostadas with the chicken, lettuce, avocado and yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 465,
+      "protein": 48.2,
+      "carbs": 44.1,
+      "fat": 11.7,
+      "fibre": 11.1
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "black-bean-soup-lime",
+    "title": "Black bean soup with lime and yogurt",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "black-beans",
+        "grams": 480
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 500
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 80
+      },
+      {
+        "foodId": "tortilla-corn",
+        "grams": 60
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion and garlic in the oil with the cumin and chilli.",
+      "Add the beans with their liquid, the stock and salt and simmer for 12 minutes.",
+      "Blend half the soup and stir it back in.",
+      "Toast the tortillas and cut into strips.",
+      "Stir in the lime and serve topped with the yogurt, coriander and tortilla strips."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 392,
+      "protein": 22,
+      "carbs": 64.8,
+      "fat": 6.5,
+      "fibre": 19.9
+    },
+    "allergens": [
+      "celery",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "chilaquiles-eggs",
+    "title": "Baked chilaquiles with eggs and black beans",
+    "cuisine": "mexican",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tortilla-corn",
+        "grams": 100
+      },
+      {
+        "foodId": "salsa",
+        "grams": 200
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "feta",
+        "grams": 30
+      },
+      {
+        "foodId": "onion",
+        "grams": 20
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 6
+      },
+      {
+        "foodId": "black-beans",
+        "grams": 120
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Cut the tortillas into wedges, toss with the oil and bake at 200 °C for 8 minutes until crisp.",
+      "Warm the salsa with the drained beans in a wide pan.",
+      "Fold in the tortilla chips so they are just coated.",
+      "Fry or poach the eggs and place on top.",
+      "Finish with the crumbled cheese, onion and coriander."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 402,
+      "protein": 22.9,
+      "carbs": 41.2,
+      "fat": 17.1,
+      "fibre": 9.4
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "prawn-mango-avocado-salad",
+    "title": "Prawn, mango and avocado salad",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 6,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 300
+      },
+      {
+        "foodId": "mango",
+        "grams": 150
+      },
+      {
+        "foodId": "avocado",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 30
+      },
+      {
+        "foodId": "jalapeno",
+        "grams": 8
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "romaine",
+        "grams": 100
+      },
+      {
+        "foodId": "tortilla-corn",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Poach the prawns in simmering water for 2 to 3 minutes until pink, then drain and cool.",
+      "Dice the mango, avocado, cucumber, onion and jalapeño.",
+      "Toss with the prawns, lime, coriander and salt.",
+      "Serve on the lettuce with the toasted tortillas."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 349,
+      "protein": 34.9,
+      "carbs": 36.3,
+      "fat": 9.6,
+      "fibre": 8.4
+    },
+    "allergens": [
+      "crustaceans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "pollo-asado-rice-beans",
+    "title": "Pollo asado with rice and beans (meal prep)",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 700
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 40
+      },
+      {
+        "foodId": "orange",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 4
+      },
+      {
+        "foodId": "oregano",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 4
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 240
+      },
+      {
+        "foodId": "black-beans",
+        "grams": 400
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "salt",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Squeeze the orange and mix the juice with the lime, garlic, cumin, oregano, paprika, oil and most of the salt; coat the chicken and rest for 15 minutes.",
+      "Roast at 220 °C for 22 to 25 minutes until charred at the edges and cooked through, then slice.",
+      "Cook the rice in salted water until tender.",
+      "Warm the beans with a pinch of cumin.",
+      "Divide the rice, beans and chicken between 4 containers; keeps for 3 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 583,
+      "protein": 45.6,
+      "carbs": 71,
+      "fat": 12.1,
+      "fibre": 9.1
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "albondigas-soup",
+    "title": "Albondigas (Mexican meatball soup)",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 20,
+    "cookMin": 30,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 350
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 40
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "mint",
+        "grams": 4
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "courgette",
+        "grams": 150
+      },
+      {
+        "foodId": "potato",
+        "grams": 200
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 800
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Mix the mince with the raw rice, egg, chopped mint, cumin and half the salt and roll into small meatballs.",
+      "Bring the stock, tomatoes, onion, remaining salt and 300 ml of water to a simmer.",
+      "Add the meatballs, carrot and potato and cook for 15 minutes.",
+      "Add the courgette and cook for 8 minutes more until the rice inside the meatballs is tender."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 484,
+      "protein": 36.8,
+      "carbs": 44.5,
+      "fat": 17.3,
+      "fibre": 6
+    },
+    "allergens": [
+      "celery",
+      "eggs"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "bean-cheese-molletes",
+    "title": "Bean and cheese molletes with pico de gallo",
+    "cuisine": "mexican",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "sourdough",
+        "grams": 160
+      },
+      {
+        "foodId": "pinto-beans",
+        "grams": 300
+      },
+      {
+        "foodId": "mozzarella",
+        "grams": 80
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 30
+      },
+      {
+        "foodId": "jalapeno",
+        "grams": 8
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 6
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Mash the drained beans with the cumin and half the salt and spread over the bread.",
+      "Top with the cheese and grill for 5 to 6 minutes until bubbling.",
+      "Mix the diced tomato, onion, jalapeño, coriander, lime and remaining salt.",
+      "Spoon the pico de gallo over the molletes."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 519,
+      "protein": 29.9,
+      "carbs": 79.2,
+      "fat": 10.1,
+      "fibre": 3.2
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "steak-fajita-salad",
+    "title": "Steak fajita salad",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 10,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-sirloin",
+        "grams": 300
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "green-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "romaine",
+        "grams": 150
+      },
+      {
+        "foodId": "avocado",
+        "grams": 80
+      },
+      {
+        "foodId": "salsa",
+        "grams": 80
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Rub the steak with the cumin, paprika and most of the salt and sear for 2 to 3 minutes each side; rest for 5 minutes.",
+      "Stir-fry the sliced peppers and onion in the oil for 5 minutes until charred at the edges.",
+      "Slice the steak thinly across the grain.",
+      "Pile the lettuce with the vegetables, steak, avocado and salsa and squeeze over the lime."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 398,
+      "protein": 37.5,
+      "carbs": 22.7,
+      "fat": 18.9,
+      "fibre": 9.2
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "mexican-rice-beans-egg",
+    "title": "Mexican rice and beans with fried eggs",
+    "cuisine": "mexican",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "rice-white",
+        "grams": 120
+      },
+      {
+        "foodId": "black-beans",
+        "grams": 240
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "salsa",
+        "grams": 60
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion and garlic in half the oil, add the rice, tomato paste and cumin and stir for a minute.",
+      "Add 260 ml of water and the salt, cover and cook on low heat for 15 minutes.",
+      "Fold in the drained beans and warm through.",
+      "Fry the eggs in the remaining oil.",
+      "Serve the rice topped with the eggs and salsa."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 553,
+      "protein": 25.6,
+      "carbs": 76.7,
+      "fat": 15.7,
+      "fibre": 10.7
+    },
+    "allergens": [
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "cottage-cheese-salsa-dip",
+    "title": "Cottage cheese and salsa dip with baked tortilla chips",
+    "cuisine": "mexican",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "cottage-cheese",
+        "grams": 150
+      },
+      {
+        "foodId": "salsa",
+        "grams": 60
+      },
+      {
+        "foodId": "tortilla-corn",
+        "grams": 40
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Cut the tortillas into wedges and bake at 200 °C for 6 to 8 minutes until crisp.",
+      "Stir the salsa and lime into the cottage cheese.",
+      "Serve the dip with the chips."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 227,
+      "protein": 19,
+      "carbs": 29.4,
+      "fat": 4.7,
+      "fibre": 3.7
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "sriracha-honey-chicken-bowl",
+    "title": "Sriracha honey chicken rice bowl",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "sriracha",
+        "grams": 20
+      },
+      {
+        "foodId": "honey",
+        "grams": 12
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "broccoli",
+        "grams": 200
+      },
+      {
+        "foodId": "sesame-seeds",
+        "grams": 4
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender and steam the broccoli for 4 minutes.",
+      "Brown the diced chicken in the oil for 8 minutes until cooked through.",
+      "Add the garlic, sriracha, honey and soy sauce and bubble for 2 minutes until sticky.",
+      "Serve over the rice with the broccoli and sesame seeds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 598,
+      "protein": 48.2,
+      "carbs": 67.6,
+      "fat": 14.2,
+      "fibre": 4.1
+    },
+    "allergens": [
+      "gluten",
+      "sesame",
+      "soybeans",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "kung-pao-chicken",
+    "title": "Kung pao-style chicken with peanuts",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 12,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 350
+      },
+      {
+        "foodId": "peanuts",
+        "grams": 30
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 30
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 20
+      },
+      {
+        "foodId": "vinegar-cider",
+        "grams": 10
+      },
+      {
+        "foodId": "sugar",
+        "grams": 5
+      },
+      {
+        "foodId": "cornflour",
+        "grams": 8
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 120
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender.",
+      "Toss the diced chicken with the cornflour and half the soy sauce.",
+      "Stir-fry the chicken in the hot oil for 5 minutes, then add the garlic, ginger, chilli and pepper for 2 minutes.",
+      "Add the remaining soy sauce, the vinegar and sugar and toss until glossy.",
+      "Stir in the peanuts and spring onion and serve with the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 624,
+      "protein": 49.7,
+      "carbs": 65,
+      "fat": 17.8,
+      "fibre": 4.5
+    },
+    "allergens": [
+      "gluten",
+      "peanuts",
+      "soybeans",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "steamed-fish-ginger",
+    "title": "Steamed sea bass with ginger and spring onion",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "sea-bass",
+        "grams": 350
+      },
+      {
+        "foodId": "ginger",
+        "grams": 20
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 40
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 20
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "pak-choi",
+        "grams": 250
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender.",
+      "Lay the fish on a plate, scatter with half the ginger and steam over simmering water for 8 to 10 minutes until it flakes.",
+      "Steam the pak choi alongside for the last 3 minutes.",
+      "Top the fish with the remaining ginger and the spring onion, pour over the soy sauce and the sesame oil heated until just smoking.",
+      "Serve with the rice and greens."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 469,
+      "protein": 40,
+      "carbs": 58.5,
+      "fat": 7.4,
+      "fibre": 2.9
+    },
+    "allergens": [
+      "gluten",
+      "fish",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "teriyaki-chicken-noodles",
+    "title": "Teriyaki chicken noodles",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 12,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg-noodles",
+        "grams": 140
+      },
+      {
+        "foodId": "chicken-thigh",
+        "grams": 300
+      },
+      {
+        "foodId": "cabbage",
+        "grams": 200
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "teriyaki",
+        "grams": 40
+      },
+      {
+        "foodId": "worcestershire",
+        "grams": 10
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Boil the noodles until just tender and drain.",
+      "Stir-fry the sliced chicken in the oil for 5 minutes.",
+      "Add the onion, carrot and cabbage and cook for 3 minutes.",
+      "Add the noodles, teriyaki and Worcestershire sauce and toss over high heat for 2 minutes."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 578,
+      "protein": 42.9,
+      "carbs": 68.3,
+      "fat": 14.5,
+      "fibre": 6.9
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "fish",
+      "soybeans"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "bibimbap-style-bowl",
+    "title": "Bibimbap-style beef and vegetable rice bowl",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 250
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "spinach",
+        "grams": 150
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "bean-sprouts",
+        "grams": 100
+      },
+      {
+        "foodId": "courgette",
+        "grams": 100
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 20
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "sriracha",
+        "grams": 10
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender.",
+      "Brown the mince with the garlic and half the soy sauce.",
+      "Quickly stir-fry the carrot, courgette, bean sprouts and spinach one after another in a little of the sesame oil, keeping them in separate piles.",
+      "Fry the eggs.",
+      "Top the rice with the beef, vegetables and an egg and dress with the remaining soy sauce, sesame oil and the sriracha."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 640,
+      "protein": 41.7,
+      "carbs": 66.8,
+      "fat": 22.5,
+      "fibre": 5.5
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "sesame",
+      "soybeans",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "chicken-ginger-congee",
+    "title": "Chicken and ginger congee",
+    "cuisine": "east_asian",
+    "slots": [
+      "breakfast",
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 50,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "rice-white",
+        "grams": 100
+      },
+      {
+        "foodId": "chicken-breast",
+        "grams": 250
+      },
+      {
+        "foodId": "ginger",
+        "grams": 20
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 900
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 10
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 4
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Simmer the rinsed rice with the stock, ginger and 500 ml of water for 40 minutes, stirring now and then, until it breaks down into a porridge.",
+      "Add the whole chicken breast for the last 15 minutes, then lift it out and shred it.",
+      "Soft-boil the eggs for 6 minutes and peel.",
+      "Serve the congee topped with the chicken, egg, spring onion, soy sauce and sesame oil."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 598,
+      "protein": 50,
+      "carbs": 58.9,
+      "fat": 15.9,
+      "fibre": 1.2
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "eggs",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "tamagoyaki-rice-edamame",
+    "title": "Rolled omelette with rice and edamame",
+    "cuisine": "east_asian",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 5
+      },
+      {
+        "foodId": "sugar",
+        "grams": 3
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 60
+      },
+      {
+        "foodId": "edamame",
+        "grams": 60
+      },
+      {
+        "foodId": "nori",
+        "grams": 2
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender and boil the edamame for 3 minutes.",
+      "Beat the eggs with the soy sauce and sugar.",
+      "Pour a third into the oiled pan, roll it up when just set, push it to one side and repeat twice more, rolling each layer around the last.",
+      "Slice the omelette and serve with the rice, edamame and torn nori."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 549,
+      "protein": 30.4,
+      "carbs": 57,
+      "fat": 21.5,
+      "fibre": 3.7
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "turkey-green-beans-stir-fry",
+    "title": "Sichuan-style green beans with turkey mince",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 12,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-mince",
+        "grams": 300
+      },
+      {
+        "foodId": "green-beans",
+        "grams": 300
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "ginger",
+        "grams": 10
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 20
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 4
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 120
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender.",
+      "Fry the trimmed beans in the hot oil for 5 to 6 minutes until blistered, then remove.",
+      "Brown the mince in the same pan with the garlic, ginger and chilli.",
+      "Return the beans with the soy sauce and sesame oil and toss for a minute.",
+      "Serve with the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 563,
+      "protein": 36.4,
+      "carbs": 62.1,
+      "fat": 19.4,
+      "fibre": 5.3
+    },
+    "allergens": [
+      "gluten",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "prawn-vegetable-fried-rice",
+    "title": "Prawn and vegetable fried rice",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 250
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 140
+      },
+      {
+        "foodId": "mixed-veg",
+        "grams": 200
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 20
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cook the rice, spread it on a tray and cool it; day-old rice works best.",
+      "Scramble the eggs in half the oil and set aside.",
+      "Stir-fry the prawns and garlic in the remaining oil for 2 minutes, then add the mixed vegetables for 3 minutes.",
+      "Add the rice and fry over high heat for 3 minutes.",
+      "Stir in the eggs, soy sauce, sesame oil and spring onion."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 585,
+      "protein": 40.9,
+      "carbs": 72.1,
+      "fat": 14,
+      "fibre": 5.3
+    },
+    "allergens": [
+      "gluten",
+      "crustaceans",
+      "eggs",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "dak-galbi-style-chicken",
+    "title": "Korean-style spicy chicken with cabbage and sweet potato",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "cabbage",
+        "grams": 250
+      },
+      {
+        "foodId": "sweet-potato",
+        "grams": 250
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "sriracha",
+        "grams": 25
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 20
+      },
+      {
+        "foodId": "honey",
+        "grams": 8
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "sesame-seeds",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Mix the sriracha, soy sauce, honey, garlic and ginger and coat the diced chicken.",
+      "Stir-fry the thinly sliced sweet potato in the sesame oil for 5 minutes.",
+      "Add the chicken and onion and cook for 8 minutes.",
+      "Add the cabbage and cook for 4 to 5 minutes until everything is tender and glazed.",
+      "Scatter with sesame seeds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 469,
+      "protein": 45.2,
+      "carbs": 44.8,
+      "fat": 12.2,
+      "fibre": 8.3
+    },
+    "allergens": [
+      "gluten",
+      "sesame",
+      "soybeans",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "miso-cod-soba",
+    "title": "Miso-glazed cod with soba and greens",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "cod",
+        "grams": 350
+      },
+      {
+        "foodId": "miso",
+        "grams": 30
+      },
+      {
+        "foodId": "honey",
+        "grams": 8
+      },
+      {
+        "foodId": "soba",
+        "grams": 120
+      },
+      {
+        "foodId": "pak-choi",
+        "grams": 200
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "ginger",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Mix the miso and honey and spread over the cod.",
+      "Grill for 8 to 10 minutes until caramelised and the fish flakes.",
+      "Boil the soba for 4 to 5 minutes, adding the pak choi for the last minute, then drain.",
+      "Toss the noodles and greens with the sesame oil, ginger and spring onion and top with the cod."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 428,
+      "protein": 43.5,
+      "carbs": 55.3,
+      "fat": 5.3,
+      "fibre": 2.1
+    },
+    "allergens": [
+      "gluten",
+      "fish",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "teriyaki-tofu-rice-bowl",
+    "title": "Teriyaki tofu rice bowl",
+    "cuisine": "east_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 350
+      },
+      {
+        "foodId": "teriyaki",
+        "grams": 40
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 120
+      },
+      {
+        "foodId": "broccoli",
+        "grams": 200
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "sesame-seeds",
+        "grams": 5
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender and steam the broccoli and sliced carrot for 4 minutes.",
+      "Press the tofu dry, cube it and pan-fry in the oil for 8 minutes until golden on all sides.",
+      "Add the teriyaki sauce and toss for a minute until glazed.",
+      "Serve over the rice with the vegetables, sesame seeds and spring onion."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 595,
+      "protein": 39.5,
+      "carbs": 68.6,
+      "fat": 21.4,
+      "fibre": 9.3
+    },
+    "allergens": [
+      "gluten",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "tuna-nori-rice-balls",
+    "title": "Tuna and nori rice balls",
+    "cuisine": "east_asian",
+    "slots": [
+      "snack",
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "rice-white",
+        "grams": 70
+      },
+      {
+        "foodId": "tuna-canned",
+        "grams": 60
+      },
+      {
+        "foodId": "mayonnaise",
+        "grams": 6
+      },
+      {
+        "foodId": "nori",
+        "grams": 3
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 3
+      },
+      {
+        "foodId": "sesame-seeds",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cook the rice until soft and sticky and let it cool until you can handle it.",
+      "Mix the drained tuna with the mayonnaise and soy sauce.",
+      "With wet hands, press half the rice flat, add half the tuna and shape the rice around it; repeat.",
+      "Wrap each ball in a strip of nori and sprinkle with sesame seeds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 362,
+      "protein": 17.4,
+      "carbs": 56.8,
+      "fat": 6.6,
+      "fibre": 1.2
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "fish",
+      "mustard",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "chicken-adobo",
+    "title": "Chicken adobo with rice",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 450
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 40
+      },
+      {
+        "foodId": "vinegar-cider",
+        "grams": 40
+      },
+      {
+        "foodId": "garlic",
+        "grams": 20
+      },
+      {
+        "foodId": "bay-leaf",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 2
+      },
+      {
+        "foodId": "sugar",
+        "grams": 4
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "pak-choi",
+        "grams": 150
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Brown the chicken in the oil.",
+      "Add the soy sauce, vinegar, crushed garlic, bay, pepper, sugar and 150 ml of water.",
+      "Cover and simmer for 20 minutes, then uncover and reduce for 8 minutes until the sauce is glossy.",
+      "Cook the rice and steam the pak choi.",
+      "Serve the chicken and sauce over the rice with the greens."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 583,
+      "protein": 52.5,
+      "carbs": 61.1,
+      "fat": 12.6,
+      "fibre": 2.3
+    },
+    "allergens": [
+      "gluten",
+      "soybeans",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "beef-rendang-style",
+    "title": "Rendang-style beef and coconut curry",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 120,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-stewing",
+        "grams": 450
+      },
+      {
+        "foodId": "coconut-milk",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "ginger",
+        "grams": 15
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 4
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 3
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "coconut-desiccated",
+        "grams": 15
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 180
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Blend the onion, garlic, ginger and ground spices to a paste and fry it in a dry heavy pot for 3 minutes.",
+      "Add the beef and turn to coat, then pour in the coconut milk, 250 ml of water and the salt.",
+      "Simmer uncovered on low heat for about 2 hours, stirring more often towards the end, until the sauce is dark and almost dry.",
+      "Toast the coconut and stir it in with the lime.",
+      "Cook the rice and serve with the curry."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 611,
+      "protein": 39.8,
+      "carbs": 59.1,
+      "fat": 25.2,
+      "fibre": 3.6
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "ca-kho-caramel-fish",
+    "title": "Vietnamese caramel fish with rice",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tilapia",
+        "grams": 400
+      },
+      {
+        "foodId": "fish-sauce",
+        "grams": 20
+      },
+      {
+        "foodId": "brown-sugar",
+        "grams": 12
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "shallot",
+        "grams": 40
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender.",
+      "Melt the sugar in the oil over medium heat until it turns amber, then add the shallot, garlic and ginger.",
+      "Add the fish sauce, pepper and 100 ml of water, then slide in the fish pieces.",
+      "Simmer for 10 minutes, turning once, until the sauce is syrupy.",
+      "Serve with the rice and sliced cucumber."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 527,
+      "protein": 46.7,
+      "carbs": 66.7,
+      "fat": 8,
+      "fibre": 2.2
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "gado-gado",
+    "title": "Gado-gado with tofu, egg and peanut sauce",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 20,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tofu",
+        "grams": 200
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "potato",
+        "grams": 200
+      },
+      {
+        "foodId": "green-beans",
+        "grams": 150
+      },
+      {
+        "foodId": "cabbage",
+        "grams": 150
+      },
+      {
+        "foodId": "bean-sprouts",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 100
+      },
+      {
+        "foodId": "peanut-butter",
+        "grams": 40
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 10
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "brown-sugar",
+        "grams": 5
+      },
+      {
+        "foodId": "garlic",
+        "grams": 4
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Boil the potatoes for 15 minutes and the eggs for 9 minutes; blanch the beans, cabbage and bean sprouts for 2 minutes.",
+      "Pan-fry the cubed tofu in the oil until golden.",
+      "Whisk the peanut butter with the soy sauce, lime, sugar, garlic and enough warm water to make a pourable sauce.",
+      "Arrange the vegetables, tofu, cucumber and halved eggs on plates and pour over the sauce."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 516,
+      "protein": 34.9,
+      "carbs": 43.4,
+      "fat": 26.8,
+      "fibre": 10.6
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "peanuts",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "thai-beef-salad",
+    "title": "Thai beef salad with rice noodles",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 8,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-sirloin",
+        "grams": 300
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 200
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "shallot",
+        "grams": 40
+      },
+      {
+        "foodId": "mint",
+        "grams": 8
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "fish-sauce",
+        "grams": 15
+      },
+      {
+        "foodId": "sugar",
+        "grams": 4
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.5
+      },
+      {
+        "foodId": "romaine",
+        "grams": 100
+      },
+      {
+        "foodId": "rice-noodles",
+        "grams": 80
+      }
+    ],
+    "steps": [
+      "Soak the noodles in boiling water for 5 minutes, drain and rinse.",
+      "Sear the steak for 2 to 3 minutes each side, rest for 5 minutes and slice thinly.",
+      "Whisk the lime, fish sauce, sugar and chilli.",
+      "Toss the noodles, sliced vegetables and herbs with the dressing and top with the beef."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 417,
+      "protein": 38.4,
+      "carbs": 47.8,
+      "fat": 7.7,
+      "fibre": 4.3
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "singapore-noodles-prawn",
+    "title": "Singapore-style noodles with prawns and egg",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "rice-noodles",
+        "grams": 120
+      },
+      {
+        "foodId": "prawns",
+        "grams": 200
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 100
+      },
+      {
+        "foodId": "bean-sprouts",
+        "grams": 100
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 30
+      },
+      {
+        "foodId": "curry-powder",
+        "grams": 5
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Soak the noodles in boiling water for 4 minutes and drain.",
+      "Scramble the eggs in half the oil and set aside.",
+      "Stir-fry the prawns, garlic and pepper in the remaining oil for 3 minutes, then stir in the curry powder.",
+      "Add the noodles, bean sprouts and soy sauce and toss over high heat for 2 minutes.",
+      "Fold in the egg and spring onion."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 468,
+      "protein": 33.4,
+      "carbs": 58.3,
+      "fat": 11.3,
+      "fibre": 4.8
+    },
+    "allergens": [
+      "gluten",
+      "crustaceans",
+      "eggs",
+      "mustard",
+      "soybeans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "hainanese-chicken-rice",
+    "title": "Hainanese-style chicken rice",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      },
+      {
+        "foodId": "ginger",
+        "grams": 20
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 300
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "sesame-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Poach the chicken with half the ginger in the stock and 300 ml of water for 18 minutes; keep the broth.",
+      "Fry the garlic and the rest of the ginger in the sesame oil, stir in the rinsed rice, then add 320 ml of the broth and the salt.",
+      "Cover and cook on low heat for 15 minutes.",
+      "Slice the chicken and serve on the rice with the cucumber, spring onion, soy sauce and a small bowl of the remaining broth."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 624,
+      "protein": 50.1,
+      "carbs": 72.4,
+      "fat": 13.3,
+      "fibre": 2
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "sesame",
+      "soybeans"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "tempeh-sambal-rice",
+    "title": "Crispy tempeh with tomato sambal and rice",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tempeh",
+        "grams": 240
+      },
+      {
+        "foodId": "soy-sauce",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "shallot",
+        "grams": 30
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 120
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 100
+      },
+      {
+        "foodId": "green-beans",
+        "grams": 150
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender and steam the beans for 4 minutes.",
+      "Slice the tempeh and pan-fry in most of the oil for 3 minutes each side until crisp, then splash with the soy sauce.",
+      "Soften the shallot and garlic in the remaining oil, add the chopped tomato and chilli and cook for 6 minutes to a chunky sambal, then add the lime.",
+      "Serve the tempeh on the rice with the sambal, beans and cucumber."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 561,
+      "protein": 32.3,
+      "carbs": 72,
+      "fat": 18.9,
+      "fibre": 4.8
+    },
+    "allergens": [
+      "gluten",
+      "soybeans"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "soy"
+  },
+  {
+    "id": "thai-omelette-rice",
+    "title": "Thai-style omelette over rice",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "fish-sauce",
+        "grams": 5
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 70
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "sriracha",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Cook the rice until tender.",
+      "Beat the eggs hard with the fish sauce and spring onion until frothy.",
+      "Pour into the very hot oil and cook for 1 to 2 minutes each side until puffed and golden at the edges.",
+      "Slide over the rice and serve with the cucumber and sriracha."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 567,
+      "protein": 25.1,
+      "carbs": 62.7,
+      "fat": 22.9,
+      "fibre": 1.9
+    },
+    "allergens": [
+      "eggs",
+      "fish",
+      "sulphites"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "summer-roll-bowl",
+    "title": "Prawn summer roll bowl with peanut-lime dressing",
+    "cuisine": "southeast_asian",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 5,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "rice-noodles",
+        "grams": 100
+      },
+      {
+        "foodId": "prawns",
+        "grams": 250
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "romaine",
+        "grams": 100
+      },
+      {
+        "foodId": "mint",
+        "grams": 8
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "peanut-butter",
+        "grams": 25
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "fish-sauce",
+        "grams": 10
+      },
+      {
+        "foodId": "honey",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Soak the noodles in boiling water for 4 minutes, drain and rinse under cold water.",
+      "Poach the prawns for 2 to 3 minutes until pink and drain.",
+      "Whisk the peanut butter with the lime, fish sauce, honey and a little warm water.",
+      "Divide the noodles, shredded vegetables, herbs and prawns between bowls and pour over the dressing."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 418,
+      "protein": 33,
+      "carbs": 55.6,
+      "fat": 7.7,
+      "fibre": 4.7
+    },
+    "allergens": [
+      "crustaceans",
+      "fish",
+      "peanuts"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
   }
 ]
