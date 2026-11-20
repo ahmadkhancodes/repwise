@@ -83,6 +83,23 @@ jobs:
       - name: Prebuild Android (never committed)
         run: npx expo prebuild -p android --no-install --clean
 
+      - name: Use Google's Maven Central mirror (Maven Central rate-limits CI with HTTP 429)
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/maven-central-mirror.gradle <<'EOF'
+          def MIRROR = 'https://maven-central.storage-download.googleapis.com/maven2/'
+          def useMirror = { RepositoryHandler repos ->
+            repos.configureEach { r ->
+              if (r instanceof MavenArtifactRepository && r.url.toString().startsWith('https://repo.maven.apache.org')) r.url = MIRROR
+            }
+          }
+          beforeSettings { s ->
+            useMirror(s.pluginManagement.repositories)
+            useMirror(s.dependencyResolutionManagement.repositories)
+            s.gradle.beforeProject { p -> useMirror(p.buildscript.repositories); useMirror(p.repositories) }
+          }
+          EOF
+
       - name: Build release APK (debug key, x86_64 only)
         working-directory: android
         run: |
