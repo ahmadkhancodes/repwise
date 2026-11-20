@@ -104,14 +104,14 @@ struct RestProgress: View {
   }
 }
 
-/// +15 s and Skip (iOS 17 interactive Live Activity). Hidden until the app opts in, and once
-/// the rest is over.
+/// +15 s and Skip (iOS 17 interactive Live Activity; the extension's deployment target is 17.0).
+/// Hidden until the app opts in, and once the rest is over.
 struct RestButtons: View {
   let state: RestTimerAttributes.ContentState
   var isStale = false
 
   var body: some View {
-    if #available(iOS 17.0, *), state.actions == true, !isStale {
+    if state.actions == true, !isStale {
       HStack(spacing: 8) {
         Button(intent: RestTimerAddIntent()) {
           Text("+15 s")
