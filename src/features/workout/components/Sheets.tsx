@@ -1,4 +1,12 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, Dumbbell, Repeat, Trash2, type LucideIcon } from 'lucide-react-native';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Dumbbell,
+  Repeat,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
@@ -30,7 +38,12 @@ export function SetSheet({
 }) {
   const t = useTheme();
   return (
-    <Sheet open={set !== null} onClose={onClose} title={set ? spokenSetName(set.type, label) : 'Set'} testID="set-sheet">
+    <Sheet
+      open={set !== null}
+      onClose={onClose}
+      title={set ? spokenSetName(set.type, label) : 'Set'}
+      testID="set-sheet"
+    >
       {set ? (
         <View style={{ gap: t.spacing.md }}>
           {cardio ? null : (
@@ -43,6 +56,7 @@ export function SetSheet({
                   <Chip
                     key={st.value}
                     label={st.label}
+                    role="radio"
                     selected={set.type === st.value}
                     onPress={() => onType(st.value)}
                     testID={`set-type-${st.value}`}
@@ -53,11 +67,18 @@ export function SetSheet({
                 RPE (how hard, 10 = nothing left)
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
-                <Chip label="None" selected={set.rpe == null} onPress={() => onRpe(null)} testID="rpe-none" />
+                <Chip
+                  label="None"
+                  role="radio"
+                  selected={set.rpe == null}
+                  onPress={() => onRpe(null)}
+                  testID="rpe-none"
+                />
                 {RPE_OPTIONS.map((r) => (
                   <Chip
                     key={r}
                     label={trimNumber(r)}
+                    role="radio"
                     selected={set.rpe === r}
                     onPress={() => onRpe(r)}
                     testID={`rpe-${r}`}
@@ -66,7 +87,13 @@ export function SetSheet({
               </View>
             </>
           )}
-          <Button label="Delete set" icon={Trash2} variant="destructive" onPress={onDelete} testID="set-delete" />
+          <Button
+            label="Delete set"
+            icon={Trash2}
+            variant="destructive"
+            onPress={onDelete}
+            testID="set-delete"
+          />
         </View>
       ) : null}
     </Sheet>
@@ -115,11 +142,18 @@ export function SwapSheet({
                 testID={`swap-option-${i}`}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-                  <Dumbbell color={t.colors.textSecondary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
+                  <Dumbbell
+                    color={t.colors.textSecondary}
+                    size={t.sizes.icon}
+                    strokeWidth={t.sizes.iconStroke}
+                  />
                   <View style={{ flex: 1 }}>
                     <Text variant="headline">{o.name}</Text>
                     <Text variant="caption" color="textSecondary" numberOfLines={1}>
-                      {[o.primaryMuscles.join(', '), o.equipment.map((e) => e.replace(/_/g, ' ')).join(', ')]
+                      {[
+                        o.primaryMuscles.join(', '),
+                        o.equipment.map((e) => e.replace(/_/g, ' ')).join(', '),
+                      ]
                         .filter(Boolean)
                         .join(' · ')}
                     </Text>
@@ -134,22 +168,32 @@ export function SwapSheet({
   );
 }
 
-type MenuAction = { key: string; label: string; icon: LucideIcon; destructive?: boolean; onPress: () => void };
+type MenuAction = {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  destructive?: boolean;
+  onPress: () => void;
+};
 
-/** The "…" menu of an exercise card. */
+export type { MenuAction };
+
+/** The "…" menu of an exercise card, and the workout's overflow menu. */
 export function ExerciseMenuSheet({
   open,
   title,
   actions,
   onClose,
+  testID = 'exercise-menu',
 }: {
   open: boolean;
   title: string;
   actions: MenuAction[];
   onClose: () => void;
+  testID?: string;
 }) {
   return (
-    <Sheet open={open} onClose={onClose} title={title} testID="exercise-menu">
+    <Sheet open={open} onClose={onClose} title={title} testID={testID}>
       {open ? (
         <View>
           {actions.map((a, i) => (
@@ -208,7 +252,11 @@ export function ReorderSheet({
                 borderBottomColor: t.colors.border,
               }}
             >
-              <ArrowUpDown color={t.colors.textTertiary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
+              <ArrowUpDown
+                color={t.colors.textTertiary}
+                size={t.sizes.iconSmall}
+                strokeWidth={t.sizes.iconStroke}
+              />
               <Text variant="body" style={{ flex: 1 }} numberOfLines={2}>
                 {it.name}
               </Text>
@@ -230,7 +278,12 @@ export function ReorderSheet({
               />
             </View>
           ))}
-          <Button label="Done" onPress={onClose} testID="reorder-done" style={{ marginTop: t.spacing.xs }} />
+          <Button
+            label="Done"
+            onPress={onClose}
+            testID="reorder-done"
+            style={{ marginTop: t.spacing.xs }}
+          />
         </View>
       ) : null}
     </Sheet>

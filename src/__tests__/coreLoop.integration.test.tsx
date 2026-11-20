@@ -80,6 +80,9 @@ beforeEach(async () => {
   jest.clearAllMocks();
 });
 
+// A long end-to-end flow: give it room on a loaded CI machine.
+jest.setTimeout(30_000);
+
 it('core loop: onboard → Today → tick meal → start workout → log set → finish → progress', async () => {
   // 1. Onboarding: the quiz is saved, the real planner builds the week, onboarding completes.
   saveQuiz(fullAnswers(), deviceContext(NOW));
@@ -130,13 +133,15 @@ it('core loop: onboard → Today → tick meal → start workout → log set →
   );
   expect(await screen.findByTestId('screen-workout')).toBeTruthy();
   const first = exercisesForSession(session.id)[0]!;
-  const weight = screen.getByTestId('exercise-0-set-0-weight');
-  await fireEvent.changeText(weight, '40');
-  await fireEvent(weight, 'endEditing');
-  const reps = screen.getByTestId('exercise-0-set-0-reps');
-  await fireEvent.changeText(reps, '10');
-  await fireEvent(reps, 'endEditing');
-  await fireEvent.press(screen.getByTestId('exercise-0-set-0-check'));
+  // Values go through the gym set editor (steppers, tap the number to type), then one tap logs.
+  await fireEvent.press(screen.getByTestId('exercise-0-set-0-weight'));
+  await fireEvent.press(screen.getByTestId('set-editor-weight-value'));
+  await fireEvent.changeText(screen.getByTestId('set-editor-weight-input'), '40');
+  await fireEvent(screen.getByTestId('set-editor-weight-input'), 'submitEditing');
+  await fireEvent.press(screen.getByTestId('set-editor-reps-value'));
+  await fireEvent.changeText(screen.getByTestId('set-editor-reps-input'), '10');
+  await fireEvent(screen.getByTestId('set-editor-reps-input'), 'submitEditing');
+  await fireEvent.press(screen.getByTestId('set-editor-log'));
   await waitFor(() => expect(setsFor(first.id)[0]?.doneAt).not.toBeNull());
 
   await fireEvent.press(screen.getByTestId('player-finish'));

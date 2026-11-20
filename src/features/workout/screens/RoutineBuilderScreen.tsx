@@ -6,10 +6,23 @@ import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { routinesRepo } from '@/features/library/repo';
 import { useCatalog } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { Button, Card, Chip, EmptyState, IconButton, Screen, Sheet, Stepper, Text, TextField, showToast } from '@/ui';
+import {
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  IconButton,
+  Screen,
+  Sheet,
+  SkeletonCard,
+  SkeletonGroup,
+  Stepper,
+  Text,
+  TextField,
+  showToast,
+} from '@/ui';
 
 import { startWorkoutAction } from '../actions';
-import { SkeletonList } from '../components/Skeleton';
 import { exerciseMeta } from '../exerciseMeta';
 import { useLiveValue } from '../hooks/useLiveValue';
 import { localDate } from '../logic/dates';
@@ -24,23 +37,39 @@ const RESTS = [60, 90, 120, 180];
 export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
   const t = useTheme();
   const catalog = useCatalog();
-  const { data: routine, loaded } = useLiveValue(() => routinesRepo.get(routineId) ?? null, ['routines'], [routineId]);
+  const { data: routine, loaded } = useLiveValue(
+    () => routinesRepo.get(routineId) ?? null,
+    ['routines'],
+    [routineId],
+  );
   const [name, setName] = useState<string | null>(null);
   const [editing, setEditing] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const back = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/train'));
-  const backButton = <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={back} testID="routine-back" />;
+  const backButton = (
+    <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={back} testID="routine-back" />
+  );
 
   if (!loaded || !catalog) {
     return (
       <Screen headerLeft={backButton} testID="screen-routine">
-        <SkeletonList testID="routine-loading" />
+        <SkeletonGroup label="Loading routine" testID="routine-loading">
+          <SkeletonCard lines={1} />
+          <SkeletonCard lines={2} />
+        </SkeletonGroup>
       </Screen>
     );
   }
   if (!routine) {
     return (
       <Screen headerLeft={backButton} testID="screen-routine">
-        <EmptyState icon={ListPlus} title="Routine not found" actionLabel="Back" onAction={back} testID="routine-missing" />
+        <EmptyState
+          icon={ListPlus}
+          title="Routine not found"
+          actionLabel="Back"
+          onAction={back}
+          testID="routine-missing"
+        />
       </Screen>
     );
   }
@@ -55,24 +84,48 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
     const s = createSession({
       date: localDate(),
       title: routine.name,
-      exercises: items.map((it) => ({ exerciseId: it.exerciseId, targetSets: it.sets, targetReps: it.reps, restS: it.restS })),
+      exercises: items.map((it) => ({
+        exerciseId: it.exerciseId,
+        targetSets: it.sets,
+        targetReps: it.reps,
+        restS: it.restS,
+      })),
     });
     startWorkoutAction(s.id, catalog);
     router.replace(`/workout/${s.id}`);
   };
   const remove = () => {
+    setConfirmDelete(false);
     routinesRepo.remove(routineId);
     showToast({ message: 'Routine deleted' });
     back();
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <Screen
         title={routine.name}
         headerLeft={backButton}
-        headerRight={<IconButton icon={Trash2} accessibilityLabel="Delete routine" onPress={remove} testID="routine-delete" />}
-        footer={<Button label="Start workout" accent onPress={start} disabled={items.length === 0} testID="routine-start" />}
+        headerRight={
+          <IconButton
+            icon={Trash2}
+            accessibilityLabel="Delete routine"
+            onPress={remove}
+            testID="routine-delete"
+          />
+        }
+        footer={
+          <Button
+            label="Start workout"
+            accent
+            onPress={start}
+            disabled={items.length === 0}
+            testID="routine-start"
+          />
+        }
         testID="screen-routine"
       >
         <TextField
@@ -90,12 +143,22 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
           {items.length} exercises · {routineSetCount(items)} sets
         </Text>
         {items.length === 0 ? (
-          <EmptyState icon={ListPlus} title="Add your first exercise" body="Build the session you like and start it in one tap." testID="routine-empty" />
+          <EmptyState
+            icon={ListPlus}
+            title="Add your first exercise"
+            body="Build the session you like and start it in one tap."
+            testID="routine-empty"
+          />
         ) : (
           items.map((it, i) => {
             const meta = exerciseMeta(it.exerciseId, catalog);
             return (
-              <Card key={`${it.exerciseId}-${i}`} onPress={() => setEditing(i)} accessibilityLabel={`${meta.name}, ${it.sets} sets of ${it.reps}. Edit`} testID={`routine-item-${i}`}>
+              <Card
+                key={`${it.exerciseId}-${i}`}
+                onPress={() => setEditing(i)}
+                accessibilityLabel={`${meta.name}, ${it.sets} sets of ${it.reps}. Edit`}
+                testID={`routine-item-${i}`}
+              >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
                   <View style={{ flex: 1 }}>
                     <Text variant="headline">{meta.name}</Text>
@@ -103,25 +166,64 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
                       {it.sets} × {it.reps} · {it.restS} s rest
                     </Text>
                   </View>
-                  <IconButton icon={ArrowUp} accessibilityLabel={`Move ${meta.name} up`} disabled={i === 0} feedback="selection" onPress={() => save(moveItem(items, i, i - 1))} testID={`routine-up-${i}`} />
-                  <IconButton icon={ArrowDown} accessibilityLabel={`Move ${meta.name} down`} disabled={i === items.length - 1} feedback="selection" onPress={() => save(moveItem(items, i, i + 1))} testID={`routine-down-${i}`} />
+                  <IconButton
+                    icon={ArrowUp}
+                    accessibilityLabel={`Move ${meta.name} up`}
+                    disabled={i === 0}
+                    feedback="selection"
+                    onPress={() => save(moveItem(items, i, i - 1))}
+                    testID={`routine-up-${i}`}
+                  />
+                  <IconButton
+                    icon={ArrowDown}
+                    accessibilityLabel={`Move ${meta.name} down`}
+                    disabled={i === items.length - 1}
+                    feedback="selection"
+                    onPress={() => save(moveItem(items, i, i + 1))}
+                    testID={`routine-down-${i}`}
+                  />
                 </View>
               </Card>
             );
           })
         )}
-        <Button label="Add exercise" icon={Plus} variant="secondary" onPress={() => router.push(`/workout/pick?routine=${routineId}`)} testID="routine-add" />
+        <Button
+          label="Add exercise"
+          icon={Plus}
+          variant="secondary"
+          onPress={() => router.push(`/workout/pick?routine=${routineId}`)}
+          testID="routine-add"
+        />
       </Screen>
-      <Sheet open={editItem !== undefined} onClose={() => setEditing(null)} title={editItem ? exerciseMeta(editItem.exerciseId, catalog).name : ''} testID="routine-item-sheet">
+      <Sheet
+        open={editItem !== undefined}
+        onClose={() => setEditing(null)}
+        title={editItem ? exerciseMeta(editItem.exerciseId, catalog).name : ''}
+        testID="routine-item-sheet"
+      >
         {editItem && editing !== null ? (
           <View style={{ gap: t.spacing.md }}>
-            <Stepper label="Sets" value={editItem.sets} onChange={(sets) => patchItem(editing, { sets })} min={1} max={10} unit="sets" testID="routine-sets" />
+            <Stepper
+              label="Sets"
+              value={editItem.sets}
+              onChange={(sets) => patchItem(editing, { sets })}
+              min={1}
+              max={10}
+              unit="sets"
+              testID="routine-sets"
+            />
             <Text variant="callout" color="textSecondary">
               Reps
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
               {REPS.map((r) => (
-                <Chip key={r} label={r} selected={editItem.reps === r} onPress={() => patchItem(editing, { reps: r })} testID={`routine-reps-${r}`} />
+                <Chip
+                  key={r}
+                  label={r}
+                  selected={editItem.reps === r}
+                  onPress={() => patchItem(editing, { reps: r })}
+                  testID={`routine-reps-${r}`}
+                />
               ))}
             </View>
             <Text variant="callout" color="textSecondary">
@@ -129,7 +231,13 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
               {RESTS.map((r) => (
-                <Chip key={r} label={`${r} s`} selected={editItem.restS === r} onPress={() => patchItem(editing, { restS: r })} testID={`routine-rest-${r}`} />
+                <Chip
+                  key={r}
+                  label={`${r} s`}
+                  selected={editItem.restS === r}
+                  onPress={() => patchItem(editing, { restS: r })}
+                  testID={`routine-rest-${r}`}
+                />
               ))}
             </View>
             <Button
@@ -141,6 +249,33 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
                 setEditing(null);
               }}
               testID="routine-remove-item"
+            />
+          </View>
+        ) : null}
+      </Sheet>
+      <Sheet
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title="Delete this routine?"
+        testID="routine-delete-sheet"
+      >
+        {confirmDelete ? (
+          <View style={{ gap: t.spacing.sm }}>
+            <Text variant="body" color="textSecondary">
+              Workouts you already did from it stay in your history.
+            </Text>
+            <Button
+              label="Delete routine"
+              variant="destructive"
+              icon={Trash2}
+              onPress={remove}
+              testID="routine-delete-confirm"
+            />
+            <Button
+              label="Keep routine"
+              variant="secondary"
+              onPress={() => setConfirmDelete(false)}
+              testID="routine-delete-cancel"
             />
           </View>
         ) : null}

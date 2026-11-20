@@ -1,14 +1,29 @@
-import { MoreHorizontal, Plus } from 'lucide-react-native';
+import { CircleCheck, MoreHorizontal, Plus } from 'lucide-react-native';
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
-import { Button, IconButton, PressableScale, Text } from '@/ui';
+import { Badge, Button, IconButton, PressableScale, Text } from '@/ui';
 
 import type { PlayerItem } from '../hooks/useWorkout';
 import type { WeightUnit } from '../logic/engine';
+import { setTarget } from '../logic/player';
+import { useOptimisticVersion, optimisticSets } from '../optimistic';
 import type { SetPatch, WorkoutSet } from '../repo';
-import { SetRow } from './SetRow';
+import { SetRow, type SetField } from './SetRow';
+
+/** Long press on a card name opens the swap sheet (W4). */
+export const LONG_PRESS_MS = 350;
+
+export type ExerciseCardHandlers = {
+  onOpen: (item: PlayerItem) => void;
+  onMenu: (item: PlayerItem) => void;
+  onSwap: (item: PlayerItem) => void;
+  onToggle: (item: PlayerItem, set: WorkoutSet, done: boolean, patch: SetPatch) => void;
+  onEdit: (item: PlayerItem, set: WorkoutSet, field: SetField) => void;
+  onOpenSet: (item: PlayerItem, set: WorkoutSet) => void;
+  onAddSet: (item: PlayerItem) => void;
+};
 
 export type ExerciseCardProps = {
   item: PlayerItem;
@@ -17,122 +32,139 @@ export type ExerciseCardProps = {
   prSetIds: ReadonlySet<string>;
   /** Pre-start overview: show targets, no set rows. */
   overview?: boolean;
-  onOpen: (item: PlayerItem) => void;
-  onMenu: (item: PlayerItem) => void;
-  onSwap: (item: PlayerItem) => void;
-  onToggle: (item: PlayerItem, set: WorkoutSet, patch: SetPatch) => void;
-  onCommit: (set: WorkoutSet, patch: SetPatch) => void;
-  onOpenSet: (item: PlayerItem, set: WorkoutSet) => void;
-  onAddSet: (item: PlayerItem) => void;
+  /** Id of the next set to do anywhere in the workout (highlighted row). */
+  activeSetId?: string | null;
+  handlers: ExerciseCardHandlers;
+  /** Set rows only (S14, where the screen title already names the exercise). */
+  bare?: boolean;
+  /** testID prefix (default `exercise-<index>`). */
+  testID?: string;
 };
 
-function Columns({ cardio, unit }: { cardio: boolean; unit: WeightUnit }) {
-  const t = useTheme();
-  const cols = cardio ? ['Min', unit === 'lb' ? 'mi' : 'km'] : [unit, 'Reps'];
-  return (
-    <View
-      importantForAccessibility="no-hide-descendants"
-      accessibilityElementsHidden
-      style={{ flexDirection: 'row', gap: t.spacing.xs, paddingHorizontal: t.spacing.xxs }}
-    >
-      <Text variant="caption" color="textTertiary" style={{ width: t.sizes.touch, textAlign: 'center' }}>
-        Set
-      </Text>
-      <Text variant="caption" color="textTertiary" style={{ flex: 1.3 }}>
-        Previous
-      </Text>
-      {cols.map((c) => (
-        <Text key={c} variant="caption" color="textTertiary" align="center" style={{ flex: 1, minWidth: t.sizes.touch }}>
-          {c}
-        </Text>
-      ))}
-      <View style={{ width: t.sizes.touch }} />
-    </View>
-  );
+/** Best set of a finished exercise for the collapsed summary ("80 kg × 8"). */
+function bestLine(sets: WorkoutSet[], unit: WeightUnit, cardio: boolean): string {
+  const done = sets.filter((s) => s.doneAt != null);
+  if (cardio) return done[0] ? setTarget(done[0], unit, true) : '';
+  const top = [...done].sort(
+    (a, b) => (b.weightKg ?? 0) - (a.weightKg ?? 0) || (b.reps ?? 0) - (a.reps ?? 0),
+  )[0];
+  return top ? setTarget(top, unit) : '';
 }
 
-/** One exercise in the player (S13): name, ghosted previous, set rows, add set. Long-press = swap (W4). */
-export function ExerciseCard({
+/**
+ * One exercise in the player (S13): name, set rows, add set. A finished exercise collapses to a
+ * one-line summary so the next set is always near the top (B7). Long-press the name = swap (W4).
+ */
+function ExerciseCardImpl({
   item,
   index,
   unit,
   prSetIds,
   overview = false,
-  onOpen,
-  onMenu,
-  onSwap,
-  onToggle,
-  onCommit,
-  onOpenSet,
-  onAddSet,
+  activeSetId,
+  handlers,
+  bare = false,
+  testID: testIDProp,
 }: ExerciseCardProps) {
   const t = useTheme();
+  useOptimisticVersion(); // done counts follow pending ticks
   const { se, meta, sets, labels, previous } = item;
-  const doneCount = sets.filter((s) => s.doneAt != null).length;
+  const doneCount = sets.filter((s) => optimisticSets.isDone(s.id, s.doneAt != null)).length;
+  const complete = !overview && sets.length > 0 && doneCount === sets.length;
+  const [expanded, setExpanded] = useState(false);
+  const collapsed = complete && !expanded && !bare;
   const target = se.targetSets ?? 3;
   const meta2 = overview
     ? meta.cardio
       ? `${target} ${target === 1 ? 'entry' : 'entries'}`
       : `${target} × ${se.targetReps ?? '8-12'}`
-    : `${doneCount}/${sets.length || target} sets`;
-  const testID = `exercise-${index}`;
-  return (
-    <Animated.View
-      entering={FadeIn.duration(t.motion.duration.base).delay(index * t.motion.listStagger)}
-      layout={LinearTransition.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness)}
-      testID={testID}
-      style={{
-        backgroundColor: t.colors.surface,
-        borderRadius: t.radius.card,
-        padding: t.spacing.sm,
-        gap: t.spacing.xs,
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
-        <PressableScale
-          onPress={() => onOpen(item)}
-          onLongPress={() => onSwap(item)}
-          delayLongPress={350}
-          accessibilityRole="button"
-          accessibilityLabel={`${meta.name}, ${meta2}`}
-          accessibilityHint="Opens the exercise. Long press to swap it."
-          accessibilityActions={[{ name: 'longpress', label: 'Swap exercise' }]}
-          onAccessibilityAction={(e) => {
-            if (e.nativeEvent.actionName === 'longpress') onSwap(item);
-          }}
-          testID={`${testID}-open`}
-          style={{ flex: 1, minHeight: t.sizes.touch, justifyContent: 'center', paddingHorizontal: t.spacing.xxs }}
-        >
-          <Text variant="headline" numberOfLines={2}>
-            {meta.name}
-          </Text>
-          <Text variant="caption" color="textSecondary" numberOfLines={1}>
-            {[meta2, meta.primaryMuscles.slice(0, 2).join(', ')].filter(Boolean).join(' · ')}
-          </Text>
-        </PressableScale>
-        <IconButton
-          icon={MoreHorizontal}
-          accessibilityLabel={`More for ${meta.name}`}
-          onPress={() => onMenu(item)}
-          testID={`${testID}-menu`}
-        />
-      </View>
+    : `${doneCount} of ${sets.length || target} sets`;
+  const testID = testIDProp ?? `exercise-${index}`;
+  const hasPR = sets.some((s) => prSetIds.has(s.id));
 
-      {overview ? null : (
+  return (
+    <View
+      testID={testID}
+      style={
+        bare
+          ? { gap: t.spacing.xs }
+          : {
+              backgroundColor: t.colors.surface,
+              borderRadius: t.radius.card,
+              padding: t.spacing.card,
+              gap: t.spacing.xs,
+            }
+      }
+    >
+      {bare ? null : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+          <PressableScale
+            onPress={() => (complete ? setExpanded((e) => !e) : handlers.onOpen(item))}
+            onLongPress={() => handlers.onSwap(item)}
+            delayLongPress={LONG_PRESS_MS}
+            accessibilityRole="button"
+            accessibilityLabel={`${meta.name}, ${meta2}`}
+            accessibilityHint={
+              complete
+                ? collapsed
+                  ? 'Shows the sets'
+                  : 'Hides the sets'
+                : 'Opens the exercise. Long press to swap it.'
+            }
+            accessibilityState={complete ? { expanded: !collapsed } : undefined}
+            accessibilityActions={[{ name: 'longpress', label: 'Swap exercise' }]}
+            onAccessibilityAction={(e) => {
+              if (e.nativeEvent.actionName === 'longpress') handlers.onSwap(item);
+            }}
+            testID={`${testID}-open`}
+            style={{
+              flex: 1,
+              minHeight: t.sizes.touch,
+              justifyContent: 'center',
+              gap: t.spacing.xxs,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+              {complete ? (
+                <CircleCheck
+                  color={t.colors.accentText}
+                  size={t.sizes.iconMedium}
+                  strokeWidth={t.sizes.iconStroke}
+                />
+              ) : null}
+              <Text variant="headline" numberOfLines={2} style={{ flexShrink: 1 }}>
+                {meta.name}
+              </Text>
+              {hasPR ? <Badge label="PR" tone="accent" testID={`${testID}-pr`} /> : null}
+            </View>
+            <Text variant="callout" color="textSecondary" numberOfLines={1} tabular>
+              {collapsed
+                ? [meta2, bestLine(sets, unit, meta.cardio)].filter(Boolean).join(' · ')
+                : [meta2, meta.primaryMuscles.slice(0, 2).join(', ')].filter(Boolean).join(' · ')}
+            </Text>
+          </PressableScale>
+          <IconButton
+            icon={MoreHorizontal}
+            accessibilityLabel={`More for ${meta.name}`}
+            onPress={() => handlers.onMenu(item)}
+            testID={`${testID}-menu`}
+          />
+        </View>
+      )}
+
+      {overview || collapsed ? null : (
         <>
-          <Columns cardio={meta.cardio} unit={unit} />
           {sets.map((s, i) => (
-            <SetRow
+            <SetRowFor
               key={s.id}
+              item={item}
               set={s}
               label={labels[i] ?? String(i + 1)}
               previous={previous[i]}
               unit={unit}
-              cardio={meta.cardio}
               isPR={prSetIds.has(s.id)}
-              onToggle={(set, patch) => onToggle(item, set, patch)}
-              onCommit={onCommit}
-              onOpenSet={(set) => onOpenSet(item, set)}
+              active={s.id === activeSetId}
+              handlers={handlers}
               testID={`${testID}-set-${i}`}
             />
           ))}
@@ -140,11 +172,72 @@ export function ExerciseCard({
             label="Add set"
             icon={Plus}
             variant="tertiary"
-            onPress={() => onAddSet(item)}
+            onPress={() => handlers.onAddSet(item)}
             testID={`${testID}-add-set`}
           />
         </>
       )}
-    </Animated.View>
+    </View>
   );
 }
+
+/** Binds the card's item to stable row callbacks, so SetRow's memo holds. */
+const SetRowFor = memo(function SetRowFor({
+  item,
+  set,
+  label,
+  previous,
+  unit,
+  isPR,
+  active,
+  handlers,
+  testID,
+}: {
+  item: PlayerItem;
+  set: WorkoutSet;
+  label: string;
+  previous?: WorkoutSet;
+  unit: WeightUnit;
+  isPR: boolean;
+  active: boolean;
+  handlers: ExerciseCardHandlers;
+  testID: string;
+}) {
+  const itemRef = useRef(item);
+  const handlersRef = useRef(handlers);
+  useLayoutEffect(() => {
+    itemRef.current = item;
+    handlersRef.current = handlers;
+  });
+  const onToggle = useCallback(
+    (s: WorkoutSet, done: boolean, patch: SetPatch) =>
+      handlersRef.current.onToggle(itemRef.current, s, done, patch),
+    [],
+  );
+  const onEdit = useCallback(
+    (s: WorkoutSet, field: SetField) => handlersRef.current.onEdit(itemRef.current, s, field),
+    [],
+  );
+  const onOpenSet = useCallback(
+    (s: WorkoutSet) => handlersRef.current.onOpenSet(itemRef.current, s),
+    [],
+  );
+  return (
+    <SetRow
+      set={set}
+      label={label}
+      previous={previous}
+      unit={unit}
+      cardio={item.meta.cardio}
+      isPR={isPR}
+      active={active}
+      onToggle={onToggle}
+      onEdit={onEdit}
+      onOpenSet={onOpenSet}
+      testID={testID}
+    />
+  );
+});
+
+/** Memoised (A1): a card re-renders only when its own rows, PRs or the active set change. */
+export const ExerciseCard = memo(ExerciseCardImpl);

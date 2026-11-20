@@ -1,8 +1,9 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull, ne, or } from 'drizzle-orm';
+import { and, asc, between, desc, eq, inArray, isNotNull, isNull, ne, or, sql } from 'drizzle-orm';
 
 import { getDb } from '@/db/client';
-import { createRepo, type NewRow, type Row } from '@/db/repo';
-import { sessionExercises, sessions, sets, type SetType } from '@/db/schema';
+import { notifyLocalWrite } from '@/db/events';
+import { createRepo, DIRTY, type NewRow, type Row } from '@/db/repo';
+import { sessionExercises, sessions, sets, type SetType, type SyncTableName } from '@/db/schema';
 
 import { prefillSets, type Prefill } from './logic/sets';
 
@@ -13,12 +14,70 @@ export type Session = Row<typeof sessions>;
 export type SessionExercise = Row<typeof sessionExercises>;
 export type WorkoutSet = Row<typeof sets>;
 
+let txDepth = 0;
+
+/**
+ * Run several writes as ONE SQLite transaction (A6): atomic (a kill never leaves a half-started
+ * or half-discarded workout) and one WAL commit instead of one per row. Nested calls join the
+ * outer transaction.
+ */
+export function atomic<T>(fn: () => T): T {
+  if (txDepth > 0) return fn();
+  txDepth++;
+  try {
+    return getDb().transaction(() => fn());
+  } catch (e) {
+    // Called inside someone else's transaction: just run in it.
+    if (e instanceof Error && /within a transaction/i.test(e.message)) return fn();
+    throw e;
+  } finally {
+    txDepth--;
+  }
+}
+
+type SoftTable = typeof sets | typeof sessionExercises | typeof sessions;
+
+/** Soft-delete many rows in one statement (sync sees each delete). */
+function softDeleteMany(table: SoftTable, name: SyncTableName, ids: string[], now: number): void {
+  if (ids.length === 0) return;
+  const t = table as typeof sets;
+  getDb()
+    .update(t)
+    .set({
+      deletedAt: sql`MAX(${now}, ${t.updatedAt} + 1)`,
+      updatedAt: sql`MAX(${now}, ${t.updatedAt} + 1)`,
+      dirty: DIRTY.pending,
+    } as never)
+    .where(and(inArray(t.id, ids), isNull(t.deletedAt)))
+    .run();
+  notifyLocalWrite(name);
+}
+
+/** Undo a soft delete (the 5 s "Undo" toast, B8). The restore syncs like any edit. */
+function restoreMany(table: SoftTable, name: SyncTableName, ids: string[], now: number): void {
+  if (ids.length === 0) return;
+  const t = table as typeof sets;
+  getDb()
+    .update(t)
+    .set({
+      deletedAt: null,
+      updatedAt: sql`MAX(${now}, ${t.updatedAt} + 1)`,
+      dirty: DIRTY.pending,
+    } as never)
+    .where(inArray(t.id, ids))
+    .run();
+  notifyLocalWrite(name);
+}
+
 export function sessionsForDate(date: string): Session[] {
   return sessionsRepo.list(eq(sessions.date, date), asc(sessions.createdAt));
 }
 
 export function exercisesForSession(sessionId: string): SessionExercise[] {
-  return sessionExercisesRepo.list(eq(sessionExercises.sessionId, sessionId), asc(sessionExercises.position));
+  return sessionExercisesRepo.list(
+    eq(sessionExercises.sessionId, sessionId),
+    asc(sessionExercises.position),
+  );
 }
 
 export function setsFor(sessionExerciseId: string): WorkoutSet[] {
@@ -55,8 +114,9 @@ export function useSessionExercises(sessionId: string): SessionExercise[] {
 }
 
 export function useSets(sessionExerciseId: string): WorkoutSet[] {
-  return setsRepo.useLive(eq(sets.sessionExerciseId, sessionExerciseId), asc(sets.idx), [sessionExerciseId])
-    .data;
+  return setsRepo.useLive(eq(sets.sessionExerciseId, sessionExerciseId), asc(sets.idx), [
+    sessionExerciseId,
+  ]).data;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,10 +135,60 @@ export function activeSession(): Session | undefined {
   );
 }
 
+/** Sessions dated in [from, to] (indexed range in SQL, not a full-table scan). */
 export function sessionsBetween(from: string, to: string): Session[] {
-  return sessionsRepo
-    .list(undefined, asc(sessions.date))
-    .filter((s) => s.date != null && s.date >= from && s.date <= to);
+  return sessionsRepo.list(between(sessions.date, from, to), asc(sessions.date));
+}
+
+/** Exercises of many sessions in one query, keyed by session id, in position order. */
+export function exercisesForSessions(sessionIds: string[]): Map<string, SessionExercise[]> {
+  const out = new Map<string, SessionExercise[]>(sessionIds.map((id) => [id, []]));
+  if (sessionIds.length === 0) return out;
+  const rows = sessionExercisesRepo.list(
+    inArray(sessionExercises.sessionId, sessionIds),
+    asc(sessionExercises.position),
+  );
+  for (const r of rows) out.get(r.sessionId)?.push(r);
+  return out;
+}
+
+export type SessionSummaryRow = {
+  session: Session;
+  sets: number;
+  volumeKg: number;
+  exercises: number;
+};
+
+/**
+ * Finished workouts with their done sets, volume and exercise count in ONE aggregate query
+ * (was 3 queries per session: about 180 on every set tick with 60 workouts, A2).
+ */
+export function doneSessionSummaries(limit = 60): SessionSummaryRow[] {
+  const work = sql`${sets.doneAt} IS NOT NULL AND ${sets.type} IN ('working', 'drop', 'failure')`;
+  return getDb()
+    .select({
+      session: sessions,
+      sets: sql<number>`COUNT(CASE WHEN ${sets.doneAt} IS NOT NULL THEN 1 END)`,
+      volumeKg: sql<number>`COALESCE(SUM(CASE WHEN ${work} THEN COALESCE(${sets.weightKg}, 0) * COALESCE(${sets.reps}, 0) END), 0)`,
+      exercises: sql<number>`COUNT(DISTINCT ${sessionExercises.id})`,
+    })
+    .from(sessions)
+    .leftJoin(
+      sessionExercises,
+      and(eq(sessionExercises.sessionId, sessions.id), isNull(sessionExercises.deletedAt)),
+    )
+    .leftJoin(sets, and(eq(sets.sessionExerciseId, sessionExercises.id), isNull(sets.deletedAt)))
+    .where(and(isNull(sessions.deletedAt), eq(sessions.status, 'done')))
+    .groupBy(sessions.id)
+    .orderBy(desc(sessions.endedAt))
+    .limit(limit)
+    .all()
+    .map((r) => ({
+      ...r,
+      sets: Number(r.sets),
+      volumeKg: Number(r.volumeKg),
+      exercises: Number(r.exercises),
+    }));
 }
 
 /** Finished workouts, newest first (Train → History). */
@@ -102,7 +212,12 @@ export function setsForSession(sessionId: string): Map<string, WorkoutSet[]> {
   return out;
 }
 
-type HistoryRow = { set: WorkoutSet; sessionId: string; endedAt: number | null; date: string | null };
+type HistoryRow = {
+  set: WorkoutSet;
+  sessionId: string;
+  endedAt: number | null;
+  date: string | null;
+};
 
 /** Done sets of `exerciseId` from finished sessions other than `excludeSessionId`, newest session first. */
 function historyRows(exerciseId: string, excludeSessionId: string | null): HistoryRow[] {
@@ -145,14 +260,25 @@ export function recentSessionExercises(
   return doneSessions(limit)
     .filter((s) => s.id !== excludeSessionId && s.date)
     .reverse()
-    .map((s) => ({ date: s.date as string, exerciseIds: exercisesForSession(s.id).map((e) => e.exerciseId) }));
+    .map((s) => ({
+      date: s.date as string,
+      exerciseIds: exercisesForSession(s.id).map((e) => e.exerciseId),
+    }));
 }
 
 function insertPrefilled(seId: string, rows: Prefill[], startIdx: number, now: number): void {
-  rows.forEach((p, i) =>
-    setsRepo.insert(
-      { sessionExerciseId: seId, idx: startIdx + i, type: p.type, weightKg: p.weightKg, reps: p.reps },
-      now,
+  atomic(() =>
+    rows.forEach((p, i) =>
+      setsRepo.insert(
+        {
+          sessionExerciseId: seId,
+          idx: startIdx + i,
+          type: p.type,
+          weightKg: p.weightKg,
+          reps: p.reps,
+        },
+        now,
+      ),
     ),
   );
 }
@@ -183,13 +309,15 @@ export function startWorkout(
   isCardio: (exerciseId: string) => boolean = () => false,
   now: number = Date.now(),
 ): Session | undefined {
-  const s = getSession(sessionId);
-  if (!s) return undefined;
-  for (const se of exercisesForSession(sessionId)) {
-    ensurePlannedSets(se, { cardio: isCardio(se.exerciseId) }, now);
-  }
-  if (s.status === 'active') return s;
-  return sessionsRepo.update(sessionId, { status: 'active', startedAt: s.startedAt ?? now }, now);
+  return atomic(() => {
+    const s = getSession(sessionId);
+    if (!s) return undefined;
+    for (const se of exercisesForSession(sessionId)) {
+      ensurePlannedSets(se, { cardio: isCardio(se.exerciseId) }, now);
+    }
+    if (s.status === 'active') return s;
+    return sessionsRepo.update(sessionId, { status: 'active', startedAt: s.startedAt ?? now }, now);
+  });
 }
 
 export function pauseWorkout(sessionId: string, now: number = Date.now()): Session | undefined {
@@ -197,7 +325,11 @@ export function pauseWorkout(sessionId: string, now: number = Date.now()): Sessi
 }
 
 /** Resume: the paused span (tracked by the caller) is added to paused_ms so it never counts. */
-export function resumeWorkout(sessionId: string, pausedForMs: number, now: number = Date.now()): Session | undefined {
+export function resumeWorkout(
+  sessionId: string,
+  pausedForMs: number,
+  now: number = Date.now(),
+): Session | undefined {
   const s = getSession(sessionId);
   if (!s) return undefined;
   return sessionsRepo.update(
@@ -209,23 +341,89 @@ export function resumeWorkout(sessionId: string, pausedForMs: number, now: numbe
 
 /** Finish: done + end time; sets never ticked are removed so history only holds real work. */
 export function finishWorkout(sessionId: string, now: number = Date.now()): Session | undefined {
-  for (const list of setsForSession(sessionId).values()) {
-    for (const s of list) if (s.doneAt == null) setsRepo.remove(s.id, now);
-  }
-  return sessionsRepo.update(sessionId, { status: 'done', endedAt: now }, now);
+  return atomic(() => {
+    const open = [...setsForSession(sessionId).values()].flat().filter((s) => s.doneAt == null);
+    softDeleteMany(
+      sets,
+      'sets',
+      open.map((s) => s.id),
+      now,
+    );
+    return sessionsRepo.update(sessionId, { status: 'done', endedAt: now }, now);
+  });
 }
 
+/**
+ * "Mark remaining as done" (Finish sheet, B8): every unticked set that has values counts, so a
+ * set done but not ticked is never lost. Returns how many were marked.
+ */
+export function markRemainingDone(sessionId: string, now: number = Date.now()): number {
+  return atomic(() => {
+    const open = [...setsForSession(sessionId).values()]
+      .flat()
+      .filter(
+        (s) => s.doneAt == null && (s.reps != null || s.durationS != null || s.distanceM != null),
+      );
+    open.forEach((s, i) => setsRepo.update(s.id, { doneAt: now + i }, now));
+    return open.length;
+  });
+}
+
+/** What a discard removed, so the undo toast can put it back exactly. */
+export type DiscardSnapshot = {
+  session: Session;
+  setIds: string[];
+  sessionExerciseIds: string[];
+  sessionDeleted: boolean;
+};
+
 /** Discard: a planned session goes back to planned (sets cleared); an ad-hoc one is deleted. */
-export function discardWorkout(sessionId: string, now: number = Date.now()): void {
-  const s = getSession(sessionId);
-  if (!s) return;
-  for (const list of setsForSession(sessionId).values()) for (const st of list) setsRepo.remove(st.id, now);
-  if (s.planId) {
-    sessionsRepo.update(sessionId, { status: 'planned', startedAt: null, endedAt: null, pausedMs: null }, now);
-    return;
-  }
-  for (const se of exercisesForSession(sessionId)) sessionExercisesRepo.remove(se.id, now);
-  sessionsRepo.remove(sessionId, now);
+export function discardWorkout(
+  sessionId: string,
+  now: number = Date.now(),
+): DiscardSnapshot | null {
+  return atomic(() => {
+    const s = getSession(sessionId);
+    if (!s) return null;
+    const setIds = [...setsForSession(sessionId).values()].flat().map((st) => st.id);
+    softDeleteMany(sets, 'sets', setIds, now);
+    if (s.planId) {
+      sessionsRepo.update(
+        sessionId,
+        { status: 'planned', startedAt: null, endedAt: null, pausedMs: null },
+        now,
+      );
+      return { session: s, setIds, sessionExerciseIds: [], sessionDeleted: false };
+    }
+    const seIds = exercisesForSession(sessionId).map((se) => se.id);
+    softDeleteMany(sessionExercises, 'session_exercises', seIds, now);
+    sessionsRepo.remove(sessionId, now);
+    return { session: s, setIds, sessionExerciseIds: seIds, sessionDeleted: true };
+  });
+}
+
+/**
+ * Undo a discard: rows come back and the workout is in progress again. If another workout was
+ * started meanwhile this one comes back paused, so two never run at once.
+ */
+export function undoDiscard(snap: DiscardSnapshot, now: number = Date.now()): void {
+  atomic(() => {
+    if (snap.sessionDeleted) restoreMany(sessions, 'sessions', [snap.session.id], now);
+    restoreMany(sessionExercises, 'session_exercises', snap.sessionExerciseIds, now);
+    restoreMany(sets, 'sets', snap.setIds, now);
+    const other = activeSession();
+    const busy = other != null && other.id !== snap.session.id;
+    sessionsRepo.update(
+      snap.session.id,
+      {
+        status: busy ? 'paused' : (snap.session.status ?? 'active'),
+        startedAt: snap.session.startedAt,
+        endedAt: snap.session.endedAt,
+        pausedMs: snap.session.pausedMs,
+      },
+      now,
+    );
+  });
 }
 
 export type NewExercise = {
@@ -241,11 +439,16 @@ export function createSession(
   values: { date: string; title: string; exercises?: NewExercise[] },
   now: number = Date.now(),
 ): Session {
-  const s = sessionsRepo.insert({ date: values.date, title: values.title, status: 'planned' }, now);
-  (values.exercises ?? []).forEach((e, i) =>
-    sessionExercisesRepo.insert({ sessionId: s.id, position: i, ...e }, now),
-  );
-  return s;
+  return atomic(() => {
+    const s = sessionsRepo.insert(
+      { date: values.date, title: values.title, status: 'planned' },
+      now,
+    );
+    (values.exercises ?? []).forEach((e, i) =>
+      sessionExercisesRepo.insert({ sessionId: s.id, position: i, ...e }, now),
+    );
+    return s;
+  });
 }
 
 /** Add an exercise at the end; if the workout is running its set rows are created at once. */
@@ -257,7 +460,15 @@ export function addExercise(
 ): SessionExercise {
   const position = exercisesForSession(sessionId).reduce((m, x) => Math.max(m, x.position + 1), 0);
   const se = sessionExercisesRepo.insert(
-    { sessionId, position, targetSets: e.targetSets ?? 3, targetReps: e.targetReps ?? '8-12', targetLoad: e.targetLoad ?? null, restS: e.restS ?? 90, exerciseId: e.exerciseId },
+    {
+      sessionId,
+      position,
+      targetSets: e.targetSets ?? 3,
+      targetReps: e.targetReps ?? '8-12',
+      targetLoad: e.targetLoad ?? null,
+      restS: e.restS ?? 90,
+      exerciseId: e.exerciseId,
+    },
     now,
   );
   const s = getSession(sessionId);
@@ -265,9 +476,23 @@ export function addExercise(
   return se;
 }
 
-export function removeExercise(seId: string, now: number = Date.now()): void {
-  for (const s of setsFor(seId)) setsRepo.remove(s.id, now);
-  sessionExercisesRepo.remove(seId, now);
+export type RemovedExercise = { sessionExerciseId: string; setIds: string[] };
+
+/** Remove an exercise and its sets (soft, one transaction); returns what to restore on Undo. */
+export function removeExercise(seId: string, now: number = Date.now()): RemovedExercise {
+  return atomic(() => {
+    const setIds = setsFor(seId).map((s) => s.id);
+    softDeleteMany(sets, 'sets', setIds, now);
+    sessionExercisesRepo.remove(seId, now);
+    return { sessionExerciseId: seId, setIds };
+  });
+}
+
+export function restoreExercise(r: RemovedExercise, now: number = Date.now()): void {
+  atomic(() => {
+    restoreMany(sessionExercises, 'session_exercises', [r.sessionExerciseId], now);
+    restoreMany(sets, 'sets', r.setIds, now);
+  });
 }
 
 /** Swap (S15): replace the exercise; its not-done sets are re-filled from the new one's history. */
@@ -277,25 +502,39 @@ export function swapExerciseRow(
   opts: { cardio?: boolean } = {},
   now: number = Date.now(),
 ): SessionExercise | undefined {
-  const se = sessionExercisesRepo.get(seId);
-  if (!se) return undefined;
-  const existing = setsFor(seId);
-  const hadSets = existing.length > 0;
-  for (const s of existing) if (s.doneAt == null) setsRepo.remove(s.id, now);
-  const updated = sessionExercisesRepo.update(
-    seId,
-    { exerciseId: newExerciseId, targetLoad: null, notes: null },
-    now,
-  );
-  if (updated && hadSets && setsFor(seId).length === 0) ensurePlannedSets(updated, opts, now);
-  return updated;
+  return atomic(() => {
+    const se = sessionExercisesRepo.get(seId);
+    if (!se) return undefined;
+    const existing = setsFor(seId);
+    const hadSets = existing.length > 0;
+    softDeleteMany(
+      sets,
+      'sets',
+      existing.filter((s) => s.doneAt == null).map((s) => s.id),
+      now,
+    );
+    const updated = sessionExercisesRepo.update(
+      seId,
+      { exerciseId: newExerciseId, targetLoad: null, notes: null },
+      now,
+    );
+    if (updated && hadSets && setsFor(seId).length === 0) ensurePlannedSets(updated, opts, now);
+    return updated;
+  });
 }
 
 /** Reorder (RW-26): write positions 0..n-1 in the given order (only rows that move). */
-export function reorderExercises(sessionId: string, orderedIds: string[], now: number = Date.now()): void {
-  const current = new Map(exercisesForSession(sessionId).map((e) => [e.id, e.position]));
-  orderedIds.forEach((id, position) => {
-    if (current.has(id) && current.get(id) !== position) sessionExercisesRepo.update(id, { position }, now);
+export function reorderExercises(
+  sessionId: string,
+  orderedIds: string[],
+  now: number = Date.now(),
+): void {
+  atomic(() => {
+    const current = new Map(exercisesForSession(sessionId).map((e) => [e.id, e.position]));
+    orderedIds.forEach((id, position) => {
+      if (current.has(id) && current.get(id) !== position)
+        sessionExercisesRepo.update(id, { position }, now);
+    });
   });
 }
 
@@ -312,12 +551,21 @@ export type SetPatch = {
   distanceM?: number | null;
 };
 
-export function updateSet(id: string, patch: SetPatch, now: number = Date.now()): WorkoutSet | undefined {
+export function updateSet(
+  id: string,
+  patch: SetPatch,
+  now: number = Date.now(),
+): WorkoutSet | undefined {
   return setsRepo.update(id, patch, now);
 }
 
 /** The 1-tap log: mark done (with the values shown) or undo. */
-export function setDone(id: string, done: boolean, patch: SetPatch = {}, now: number = Date.now()): WorkoutSet | undefined {
+export function setDone(
+  id: string,
+  done: boolean,
+  patch: SetPatch = {},
+  now: number = Date.now(),
+): WorkoutSet | undefined {
   return setsRepo.update(id, { ...patch, doneAt: done ? now : null }, now);
 }
 
@@ -341,4 +589,9 @@ export function addSet(seId: string, now: number = Date.now()): WorkoutSet {
 
 export function removeSet(id: string, now: number = Date.now()): void {
   setsRepo.remove(id, now);
+}
+
+/** Undo "Delete set". */
+export function restoreSet(id: string, now: number = Date.now()): void {
+  restoreMany(sets, 'sets', [id], now);
 }

@@ -1,5 +1,6 @@
 # P0 workout (F2 "Do the planned workout", WK-1..WK-6): start a workout, add an exercise,
-# log sets with 1 tap each, the rest timer, finish and the summary. Runs fully OFFLINE:
+# set values with the gym stepper editor, log sets with 1 tap each (row tick and the thumb-zone
+# "Log set" button), the rest bar (+15 / big timer / skip), finish and the summary. Runs fully OFFLINE:
 # airplane mode on Android (Maestro can't toggle it on iOS; the flow is identical there).
 # Precondition: onboarding done, no workout in progress. testIDs render on iOS and Android.
 appId: com.client.repwise
@@ -41,51 +42,58 @@ tags:
           id: "pick-search"
       - inputText: "bench press"
       - tapOn:
-          id: "pick-barbell-bench-press"
+          id: "exercise-row-barbell-bench-press"
       - assertVisible: ".*added"
 - extendedWaitUntil:
     visible:
       id: "exercise-0-set-0-check"
     timeout: 5000
-# Set 1: enter weight and reps (strength rows), then one tap to log it.
-- runFlow:
-    when:
-      visible:
-        id: "exercise-0-set-0-weight"
-    commands:
-      - tapOn:
-          id: "exercise-0-set-0-weight"
-      - eraseText
-      - inputText: "60"
-      - tapOn:
-          id: "exercise-0-set-0-reps"
-      - eraseText
-      - inputText: "8"
-      - hideKeyboard
+# Set 1: set weight and reps with the stepper editor (no keyboard), then log from it.
 - tapOn:
-    id: "exercise-0-set-0-check"
-# The rest timer starts on its own; open it, add 15 s, then skip.
+    id: "exercise-0-set-0-weight"
+- assertVisible:
+    id: "set-editor-weight"
+- tapOn:
+    id: "set-editor-weight-inc"
+- tapOn:
+    id: "set-editor-weight-inc"
+- tapOn:
+    id: "set-editor-reps-inc"
+- tapOn:
+    id: "set-editor-log"
+# The rest bar appears on its own: +15 inline, open the big timer, then skip.
 - extendedWaitUntil:
     visible:
-      id: "rest-pill"
+      id: "rest-bar"
     timeout: 3000
 - assertVisible:
-    id: "rest-pill-time"
+    id: "rest-bar-time"
 - tapOn:
-    id: "rest-pill"
+    id: "rest-bar-plus"
+- tapOn:
+    id: "rest-bar-open"
 - assertVisible:
-    id: "rest-sheet-time"
+    id: "rest-time"
 - tapOn:
     id: "rest-plus"
 - tapOn:
     id: "rest-skip"
 - assertNotVisible:
-    id: "rest-pill"
-# Set 2: one tap.
+    id: "rest-bar"
+# Set 2: one tap on the row tick; set 3: one tap on the thumb-zone "Log set" button.
 - tapOn:
     id: "exercise-0-set-1-check"
 - assertVisible:
-    id: "rest-pill"
+    id: "rest-bar"
+- tapOn:
+    id: "rest-bar-skip"
+- runFlow:
+    when:
+      visible:
+        id: "player-log"
+    commands:
+      - tapOn:
+          id: "player-log"
 # Finish; confirm only when some sets are still unticked.
 - tapOn:
     id: "player-finish"

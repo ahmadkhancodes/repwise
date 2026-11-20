@@ -16,14 +16,25 @@ function run<T>(compute: () => T): LiveValue<T> {
  * listener, coalesced per tick). Runs during the first render, so screens paint from SQLite with
  * no empty flash (sheet 11: no spinner after first launch). Use for multi-table reads that
  * drizzle's single-table `useLiveQuery` cannot follow.
+ *
+ * `active: false` (a screen in the background, e.g. Train under the player) stops re-querying on
+ * every write; the screen refreshes once when it becomes active again, only if something changed.
  */
-export function useLiveValue<T>(compute: () => T, tables: string[], deps: unknown[]): LiveValue<T> {
+export function useLiveValue<T>(
+  compute: () => T,
+  tables: string[],
+  deps: unknown[],
+  opts: { active?: boolean } = {},
+): LiveValue<T> {
+  const active = opts.active ?? true;
   const [value, setValue] = useState<LiveValue<T>>(() => run(compute));
   const computeRef = useRef(compute);
   useLayoutEffect(() => {
     computeRef.current = compute;
   });
   const first = useRef(true);
+  const stale = useRef(false);
+  const activeRef = useRef(active);
   const key = tables.join(',');
 
   useEffect(() => {
@@ -36,7 +47,12 @@ export function useLiveValue<T>(compute: () => T, tables: string[], deps: unknow
     else refresh();
     const watched = new Set(key.split(','));
     const sub = addDatabaseChangeListener(({ tableName }) => {
-      if (!watched.has(tableName) || queued) return;
+      if (!watched.has(tableName)) return;
+      if (!activeRef.current) {
+        stale.current = true;
+        return;
+      }
+      if (queued) return;
       queued = true;
       void Promise.resolve().then(() => {
         queued = false;
@@ -49,6 +65,14 @@ export function useLiveValue<T>(compute: () => T, tables: string[], deps: unknow
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, ...deps]);
+
+  useEffect(() => {
+    activeRef.current = active;
+    if (active && stale.current) {
+      stale.current = false;
+      setValue(run(computeRef.current));
+    }
+  }, [active]);
 
   return value;
 }
