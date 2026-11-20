@@ -77,7 +77,8 @@ function Cell({
         paddingHorizontal: t.spacing.xxs,
         backgroundColor: done ? 'transparent' : t.colors.bg,
         borderWidth: done ? 0 : t.sizes.hairline,
-        borderColor: t.colors.border,
+        // ≥ 3:1 outline (P2-18): bg on a surface card alone is only 1.11:1.
+        borderColor: t.colors.borderStrong,
       }}
     >
       <Text
@@ -121,6 +122,7 @@ function SetRowImpl({
   const reduce = useReducedMotion();
   const pending = useOptimisticSet(set.id);
   const done = pending?.done ?? set.doneAt != null;
+  const next = active && !done;
   const v = { ...set, ...(pending?.patch ?? {}) };
   const spoken = spokenSetName(set.type, label);
   const units = unit === 'lb' ? 'imperial' : 'metric';
@@ -187,9 +189,10 @@ function SetRowImpl({
         paddingVertical: t.spacing.xxs,
         borderRadius: t.radius.button,
         overflow: 'hidden',
-        backgroundColor: active && !done ? t.colors.surface2 : 'transparent',
-        borderLeftWidth: t.sizes.borderThick,
-        borderLeftColor: active && !done ? t.colors.accent : 'transparent',
+        // Next set (P2-19): a 4dp accent bar plus the set number in an inverse pill — readable
+        // from standing height, unlike a surface2 tint (1.10:1 on the card).
+        borderLeftWidth: t.spacing.xxs,
+        borderLeftColor: next ? t.colors.accent : 'transparent',
       }}
     >
       <Animated.View
@@ -228,13 +231,26 @@ function SetRowImpl({
             testID={testID ? `${testID}-pr` : undefined}
           />
         ) : (
-          <Text
-            variant="headline"
-            tabular
-            color={set.type === 'working' ? 'textPrimary' : 'accentText'}
+          <View
+            testID={testID && next ? `${testID}-next` : undefined}
+            style={{
+              minWidth: t.spacing.xxl,
+              height: t.spacing.xxl,
+              paddingHorizontal: t.spacing.xs,
+              borderRadius: t.radius.pill,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: next ? t.colors.inverse : 'transparent',
+            }}
           >
-            {label}
-          </Text>
+            <Text
+              variant="headline"
+              tabular
+              color={next ? 'onInverse' : set.type === 'working' ? 'textPrimary' : 'accentText'}
+            >
+              {label}
+            </Text>
+          </View>
         )}
         {set.rpe != null ? (
           <Text variant="caption" color="textSecondary" tabular>

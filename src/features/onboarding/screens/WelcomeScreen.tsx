@@ -27,17 +27,17 @@ type Slide = { eyebrow: string; title: string; body: string };
 
 export const SLIDES: Slide[] = [
   {
-    eyebrow: 'TRAIN',
+    eyebrow: 'Train',
     title: 'Your workouts and meals, planned daily',
     body: 'One plan for the gym and the kitchen, built around your goal, kit and schedule.',
   },
   {
-    eyebrow: 'EAT',
+    eyebrow: 'Eat',
     title: 'Meals that hit your numbers',
     body: 'Real recipes for your diet, allergies and budget, portioned to your calories and protein.',
   },
   {
-    eyebrow: 'PROGRESS',
+    eyebrow: 'Progress',
     title: 'Never the same week twice',
     body: 'Fresh sessions and menus every week that adapt as you get stronger.',
   },
@@ -181,7 +181,7 @@ export function WelcomeScreen() {
                 <WelcomeArt slide={i} />
               </Animated.View>
               <View style={{ gap: t.spacing.sm }}>
-                <Text variant="caption" color="accentText">
+                <Text variant="eyebrow" color="accentText">
                   {s.eyebrow}
                 </Text>
                 <Text variant="title1" numberOfLines={3}>

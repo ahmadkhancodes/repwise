@@ -11,10 +11,10 @@ import { setAnalyticsSink } from '@/services/analytics';
 import { useBillingStore } from '@/services/billing';
 
 import { latestCheckin, setDeloadRequested } from '../repo';
-import { CheckinScreen } from '../screens/CheckinScreen';
+import { CheckinScreen, startWeight } from '../screens/CheckinScreen';
 
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), back: jest.fn(), setParams: jest.fn() },
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: jest.fn(() => true), setParams: jest.fn() },
   useLocalSearchParams: jest.fn(() => ({})),
 }));
 
@@ -130,7 +130,7 @@ describe('CheckinScreen states', () => {
     await renderThemed(<CheckinScreen now={SUNDAY} />);
     expect(screen.getByTestId('checkin-pro')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('checkin-pro-action'));
-    expect(router.push).toHaveBeenCalledWith('/paywall');
+    expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
   });
 
   it('before onboarding', async () => {
@@ -155,5 +155,14 @@ describe('CheckinScreen states', () => {
     await fireEvent.press(screen.getByTestId('checkin-back'));
     expect(router.back).toHaveBeenCalled();
     add.mockRestore();
+  });
+});
+
+describe('startWeight (P2-20)', () => {
+  it('starts "Add today’s weight" at the profile weight, in the user’s units', () => {
+    expect(startWeight(82, false)).toBe(82);
+    expect(startWeight(null, false)).toBe(75);
+    expect(startWeight(null, true)).toBe(165);
+    expect(startWeight(80, true)).toBeCloseTo(176.5, 0);
   });
 });

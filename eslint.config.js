@@ -20,6 +20,27 @@ module.exports = defineConfig([
     ],
   },
   {
+    // Perf audit r2 N1: the `@repwise/content` barrel evaluates ~1 MB of JSON and every zod schema.
+    // App code imports only its types; values come from the data-free subpaths or the lazy catalogue.
+    files: ['app/**/*.{ts,tsx}', 'src/**/*.{ts,tsx}'],
+    ignores: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@repwise/content',
+              allowTypeImports: true,
+              message:
+                "Type imports only. Use '@repwise/content/toEngine' | '/media' | '/enums' for values, or src/services/catalog.ts for the data.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // Tokens only: no hard-coded colours outside src/theme (CLAUDE.md non-negotiable).
     files: ['app/**/*.{ts,tsx}', 'src/**/*.{ts,tsx}'],
     ignores: ['src/theme/**'],

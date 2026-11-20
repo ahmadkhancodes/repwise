@@ -14,25 +14,8 @@ import { getPlanner } from '@/features/today/plannerBridge';
 import { track } from '@/services/analytics';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import {
-  Badge,
-  BigNumber,
-  Button,
-  Card,
-  Chip,
-  EmptyState,
-  IconButton,
-  ProgressRing,
-  Screen,
-  Skeleton,
-  SkeletonGroup,
-  SkeletonText,
-  StepProgress,
-  Stepper,
-  Text,
-} from '@/ui';
+import { Badge, BigNumber, Button, Card, Chip, EmptyState, goBack, IconButton, ProgressRing, Screen, Skeleton, SkeletonGroup, SkeletonText, Sparkline, Stepper, StepProgress, Text } from '@/ui';
 
-import { Sparkline } from '../components/Sparkline';
 import {
   appliesFrom,
   CHECKIN_STEPS,
@@ -78,6 +61,15 @@ function loadCheckin(today: ISODate) {
 }
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+
+/**
+ * Where "Add today's weight" starts (P2-20): the profile weight in the user's units, else a
+ * neutral default. Never a fixed 75 kg for everyone. Pure.
+ */
+export function startWeight(profileKg: number | null, imperial: boolean): number {
+  if (profileKg != null && profileKg > 0) return displayWeight(profileKg, imperial);
+  return imperial ? 165 : 75;
+}
 
 /** S28 weekly check-in: weigh-in → energy/sleep → your week → adjustments → approve (flow F4). */
 export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
@@ -125,7 +117,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
       setStep((s) => s - 1);
       return true;
     }
-    router.back();
+    goBack();
     return true;
   }, [step, done]);
 
@@ -177,7 +169,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
           title="Weekly check-in is part of Pro"
           body="Each week Repwise tunes your calories, training volume and menus from your own progress."
           actionLabel="See Repwise Pro"
-          onAction={() => router.push('/paywall' as Href)}
+          onAction={() => router.push({ pathname: '/paywall', params: { source: 'checkin' } } as Href)}
           testID="checkin-pro"
         />
       </Screen>
@@ -310,7 +302,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
                 />
               </>
             ) : (
-              <Button label="Add today’s weight" variant="secondary" onPress={() => setWeight(imperial ? 165 : 75)} testID="checkin-add-weight" />
+              <Button label="Add today’s weight" variant="secondary" onPress={() => setWeight(startWeight(data?.profile?.weightKg ?? null, imperial))} testID="checkin-add-weight" />
             )}
           </View>
         ) : null}
@@ -341,7 +333,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
           <View style={{ gap: t.spacing.md }} testID="checkin-step-week">
             <Text variant="title2">Your week</Text>
             <Card>
-              <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+              <Text variant="eyebrow" color="textSecondary">
                 Weight trend
               </Text>
               {result.trend.length > 0 ? (
@@ -395,12 +387,13 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
           <View style={{ gap: t.spacing.md }} testID="checkin-step-adjust">
             <Text variant="title2">Next week</Text>
             <Card testID="checkin-kcal">
-              <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+              <Text variant="eyebrow" color="textSecondary">
                 Daily calories
               </Text>
               {kcalKnown ? (
                 <>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, marginTop: t.spacing.xs }}>
+                  {/* Wraps at 130% font on 360dp instead of overflowing (P2-20). */}
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: t.spacing.sm, rowGap: t.spacing.xxs, marginTop: t.spacing.xs }}>
                     <Text variant="title2" color="textSecondary" tabular style={{ textDecorationLine: result.adjustment.deltaKcal ? 'line-through' : 'none' }} testID="kcal-before">
                       {fmt(result.before.kcal)}
                     </Text>
@@ -424,7 +417,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
                 <Dumbbell color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
                 <View style={{ flex: 1 }}>
-                  <Text variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>
+                  <Text variant="eyebrow" color="textSecondary">
                     Training
                   </Text>
                   <Text variant="headline">{VOLUME_COPY[result.volume].title}</Text>
@@ -438,8 +431,8 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
                 <UtensilsCrossed color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
                 <View style={{ flex: 1 }}>
-                  <Text variant="caption" color="textSecondary">
-                    MENUS
+                  <Text variant="eyebrow" color="textSecondary">
+                    Menus
                   </Text>
                   <Text variant="headline">Fresh menus</Text>
                   <Text variant="callout" color="textSecondary">

@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router/js-tabs';
 import { BookOpen, ChartLine, Dumbbell, Sun, Utensils, type LucideIcon } from 'lucide-react-native';
 
+import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
 
 const TABS: { name: string; title: string; icon: LucideIcon }[] = [
@@ -16,8 +17,13 @@ export default function TabsLayout() {
   const t = useTheme();
   return (
     <Tabs
+      // Selection tick on a tab switch (sheet 11 pickers; P2-24). Fires on commit (tabPress).
+      screenListeners={{ tabPress: () => haptics.selection() }}
       screenOptions={{
         headerShown: false,
+        // Backstop for the live-query focus gate (perf audit r2 A2/N4): a tab in the background
+        // does not render at all until it is focused again.
+        freezeOnBlur: true,
         tabBarActiveTintColor: t.colors.textPrimary,
         tabBarInactiveTintColor: t.colors.textSecondary,
         tabBarStyle: {

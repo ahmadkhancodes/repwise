@@ -108,6 +108,7 @@ function mealViews(day: SnapshotDay, recipe: RecipeLookup, mealTimes: string[] |
       slotLabel: slotLabel(m.slot),
       time: times[i] ?? null,
       recipeId: m.recipeId,
+      portion: m.portion,
       title: info?.title ?? slotLabel(m.slot),
       status: m.status,
       nutrients: portionNutrients(info?.perServing, m.portion),

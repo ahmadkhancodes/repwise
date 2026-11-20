@@ -107,7 +107,7 @@ it('core loop: onboard → Today → tick meal → start workout → log set →
 
   // 3. Tick a meal (core action, 1 tap).
   const slot = plannedMeals[0]!.slot;
-  await fireEvent.press(screen.getByTestId(`today-meal-${slot}`));
+  await fireEvent.press(screen.getByTestId(`today-tick-${slot}`));
   await waitFor(() => expect(screen.getByTestId('meals-count')).toHaveTextContent('1 of 3 eaten'));
   expect(mealsForPlan(mealPlanForDate(TODAY)!.id).find((m) => m.slot === slot)?.status).toBe('eaten');
 

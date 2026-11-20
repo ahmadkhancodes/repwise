@@ -1,22 +1,13 @@
 import { router } from 'expo-router';
-import {
-  ChevronLeft,
-  ExternalLink,
-  FileText,
-  Lock,
-  Mail,
-  Trash2,
-  UserX,
-} from 'lucide-react-native';
+import { ExternalLink, FileText, Lock, Mail, Trash2, UserX } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, View } from 'react-native';
 
 import { useAuth } from '@/services/auth';
 import { useTheme } from '@/theme';
-import { IconButton, ListRow, Screen, Text } from '@/ui';
+import { BackButton, ListGroup, ListRow, Screen, Text } from '@/ui';
 
 import { DeleteDataSheet } from '../components/DeleteDataSheet';
-import { SettingsGroup } from '../components/SettingsGroup';
 import { helpLinks, SUPPORT_EMAIL, supportMailto } from '../config';
 import { appVersion } from '../data';
 import { openLink } from '../links';
@@ -29,14 +20,8 @@ export function HelpScreen() {
   const [deleting, setDeleting] = useState(false);
 
   return (
-    <Screen
-      title="Help & legal"
-      testID="screen-help"
-      headerLeft={
-        <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={() => router.back()} />
-      }
-    >
-      <SettingsGroup title="Get help" footnote={`We usually reply within two working days.`}>
+    <Screen title="Help & legal" testID="screen-help" headerLeft={<BackButton />}>
+      <ListGroup title="Get help" footnote={`We usually reply within two working days.`}>
         <ListRow
           icon={Mail}
           title="Email support"
@@ -51,9 +36,9 @@ export function HelpScreen() {
           onPress={() => void openLink(links.help)}
           testID="help-centre"
         />
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup title="Legal">
+      <ListGroup title="Legal">
         <ListRow
           icon={FileText}
           title="Terms of use"
@@ -66,9 +51,9 @@ export function HelpScreen() {
           onPress={() => void openLink(links.privacy)}
           testID="help-privacy"
         />
-      </SettingsGroup>
+      </ListGroup>
 
-      <SettingsGroup
+      <ListGroup
         title="Delete"
         footnote={
           signedIn
@@ -93,7 +78,7 @@ export function HelpScreen() {
           onPress={() => setDeleting(true)}
           testID="help-delete-data"
         />
-      </SettingsGroup>
+      </ListGroup>
 
       <View style={{ gap: t.spacing.xs, paddingVertical: t.spacing.md }}>
         <Text variant="callout" color="textSecondary">

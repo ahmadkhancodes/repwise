@@ -76,3 +76,27 @@ export function historySections(
       data: data.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'workout' ? -1 : 1)),
     }));
 }
+
+/** Free users see this many days of history (Train AND Progress, one rule: UI audit N4). */
+export const HISTORY_FREE_DAYS = 30;
+
+/** First date a user may see ('YYYY-MM-DD'), or null for no limit (Pro, or payments off). Pure. */
+export function historyWindowStart(isPro: boolean, today: ISODate): ISODate | null {
+  if (isPro) return null;
+  const d = new Date(`${today}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - (HISTORY_FREE_DAYS - 1));
+  return d.toISOString().slice(0, 10);
+}
+
+/** Split anything dated into what the user sees and how many older ones Pro unlocks. Pure. */
+export function gateHistory<T>(
+  items: readonly T[],
+  dateOf: (item: T) => string | null | undefined,
+  isPro: boolean,
+  today: ISODate,
+): { visible: T[]; hidden: number } {
+  const from = historyWindowStart(isPro, today);
+  if (from === null) return { visible: [...items], hidden: 0 };
+  const visible = items.filter((it) => (dateOf(it) ?? '') >= from);
+  return { visible, hidden: items.length - visible.length };
+}

@@ -14,7 +14,7 @@ import { addDays, localDateOf, parseHm, weekdayOf, zonedTimeToUtc, type LocalDat
 export type NotificationKind = 'brief' | 'meal' | 'workout' | 'fuel' | 'evening' | 'checkin' | 'trial';
 
 /** Android channels (sheet 17). `timer` and the ongoing rest timer live in restTimer.ts. */
-export type ChannelId = 'brief' | 'meals' | 'training' | 'timer' | 'checkin' | 'account';
+export type ChannelId = 'brief' | 'meals' | 'training' | 'timer' | 'timer-silent' | 'checkin' | 'account';
 
 /** Notification categories = the action-button sets (registered in services/notifications.ts). */
 export type CategoryId = 'meal' | 'workout' | 'checkin' | 'trial' | 'open';

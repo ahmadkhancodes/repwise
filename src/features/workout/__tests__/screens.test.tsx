@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 import { finishedBench, freshDb, plannedSession, TODAY } from '../../../../test/workoutFixtures';
@@ -7,16 +7,20 @@ import { finishedBench, freshDb, plannedSession, TODAY } from '../../../../test/
 import { routinesRepo } from '@/features/library/repo';
 import { resetCatalogForTests } from '@/services/catalog';
 import { setAnalyticsSink } from '@/services/analytics';
+import { useBillingStore } from '@/services/billing';
 import { useToastStore } from '@/ui';
 
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
-import { flushSetWrites, resetSetWritesForTests } from '../actions';
+import { DEFAULT_APP_PREFS, useAppPrefs } from '@/features/settings';
+
+import { finishWorkoutAction, flushSetWrites, resetSetWritesForTests } from '../actions';
+import { resetKeepAwakeForTests } from '../hooks/useWorkoutKeepAwake';
 import { optimisticSets, resetOptimisticForTests } from '../optimistic';
-import { exercisesForSession, getSession, setsFor, startWorkout } from '../repo';
+import { exercisesForSession, getSession, sessionsRepo, setsFor, startWorkout } from '../repo';
 import { resetRestTimerForTests, restTimer } from '../restTimerStore';
 import { resetRestNotifierForTests } from '../restNotifier';
-import { weekOf } from '../logic/dates';
+import { localDate, weekOf } from '../logic/dates';
 import { ExerciseScreen } from '../screens/ExerciseScreen';
 import { ExercisePickerScreen } from '../screens/ExercisePickerScreen';
 import { RoutineBuilderScreen } from '../screens/RoutineBuilderScreen';
@@ -62,6 +66,8 @@ beforeEach(async () => {
   resetRestNotifierForTests();
   resetSetWritesForTests();
   resetOptimisticForTests();
+  resetKeepAwakeForTests();
+  useAppPrefs.setState({ ...DEFAULT_APP_PREFS });
   useToastStore.setState({ current: null });
   events.length = 0;
   setAnalyticsSink((e, p) => events.push({ e, p }));
@@ -170,6 +176,25 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(pushed).toMatch(/^\/workout\/routine\//);
       expect(routinesRepo.list()).toHaveLength(1);
     });
+
+    it('history: the shared rows, the same free window as Progress, and a link to all history', async () => {
+      useBillingStore.setState({ paymentsEnabled: true });
+      const recent = finishedBench(localDate(), 80, 8, Date.now() - 3_600_000);
+      finishedBench('2025-01-10', 70, 8, Date.UTC(2025, 0, 10, 9));
+      try {
+        await renderThemed(<TrainScreen />, scheme);
+        await fireEvent.press(screen.getByText('History'));
+        expect(await screen.findByTestId('history-0')).toBeTruthy();
+        expect(screen.queryByTestId('history-1')).toBeNull();
+        expect(screen.getByTestId('history-more')).toHaveTextContent(/1 older workout is kept safe/);
+        await fireEvent.press(screen.getByTestId('history-0'));
+        expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${recent.id}/summary`);
+        await fireEvent.press(screen.getByTestId('train-history-all'));
+        expect(mockRouter.push).toHaveBeenCalledWith('/progress/history');
+      } finally {
+        useBillingStore.setState({ paymentsEnabled: false });
+      }
+    });
   });
 
   describe('Workout player (S09/S13)', () => {
@@ -188,7 +213,7 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(screen.getByTestId('player-clock')).toBeTruthy();
       expect(screen.getByTestId('player-position')).toHaveTextContent('Exercise 1 of 2 · Set 1 of 3');
       // B1: the screen stays awake while the workout runs.
-      expect(activateKeepAwakeAsync).toHaveBeenCalledWith('workout');
+      expect(activateKeepAwakeAsync).toHaveBeenCalledWith(`workout-${s.id}`);
     });
 
     it('ticks in one tap: green tick, rest timer, one batched write (A3)', async () => {
@@ -346,7 +371,7 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(getSession(s.id)?.status).toBe('paused');
       expect(restTimer.getState().status).toBe('paused');
       expect(await screen.findByTestId('player-paused')).toBeTruthy();
-      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith('workout'));
+      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith(`workout-${s.id}`));
       await fireEvent.press(screen.getByTestId('player-menu'));
       await fireEvent.press(screen.getByTestId('menu-pause'));
       expect(getSession(s.id)?.status).toBe('active');
@@ -359,6 +384,11 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       await renderThemed(<WorkoutPlayerScreen sessionId={s.id} />, scheme);
       await fireEvent.press(screen.getByTestId('exercise-0-set-0-check'));
       expect(await screen.findByTestId('rest-bar-time')).toHaveTextContent('2:00');
+      // N21: hero-size digits; N8: the drain is a transform, never a width animation.
+      expect(StyleSheet.flatten(screen.getByTestId('rest-bar-time').props.style).fontSize).toBeGreaterThan(40);
+      const fill = StyleSheet.flatten(screen.getByTestId('rest-bar-fill').props.style);
+      expect(fill.width).toBe('100%');
+      expect(fill.transform).toEqual([{ scaleX: expect.any(Number) }]);
       const before = restTimer.getState();
       await fireEvent.press(screen.getByTestId('rest-bar-plus'));
       const after = restTimer.getState();
@@ -442,6 +472,39 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
     });
   });
 
+  describe('Keep the screen on (N2, N6)', () => {
+    it('leaving or switching the exercise screen never lets the phone sleep mid-workout', async () => {
+      const s = plannedSession();
+      startWorkout(s.id);
+      const [squat, bench] = exercisesForSession(s.id);
+      await renderThemed(<WorkoutPlayerScreen sessionId={s.id} />, scheme);
+      const ex1 = await renderThemed(<ExerciseScreen sessionId={s.id} seId={squat!.id} />, scheme);
+      const ex2 = await renderThemed(<ExerciseScreen sessionId={s.id} seId={bench!.id} />, scheme); // next via replace
+      await ex1.unmount();
+      await ex2.unmount(); // back to the list
+      await settle();
+      expect(activateKeepAwakeAsync).toHaveBeenCalledTimes(1);
+      expect(activateKeepAwakeAsync).toHaveBeenCalledWith(`workout-${s.id}`);
+      expect(deactivateKeepAwake).not.toHaveBeenCalled();
+      // Released on finish.
+      await act(async () => finishWorkoutAction(s.id, null, 'kg'));
+      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith(`workout-${s.id}`));
+    });
+
+    it('Settings → "Keep screen on" off: never held; switching it off mid-workout releases it', async () => {
+      useAppPrefs.setState({ keepAwake: false });
+      const s = plannedSession();
+      startWorkout(s.id);
+      await renderThemed(<WorkoutPlayerScreen sessionId={s.id} />, scheme);
+      await settle();
+      expect(activateKeepAwakeAsync).not.toHaveBeenCalled();
+      await act(async () => useAppPrefs.setState({ keepAwake: true }));
+      expect(activateKeepAwakeAsync).toHaveBeenCalledWith(`workout-${s.id}`);
+      await act(async () => useAppPrefs.setState({ keepAwake: false }));
+      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith(`workout-${s.id}`));
+    });
+  });
+
   describe('Exercise screen (S14)', () => {
     it('shows the library demo hero, logs sets, saves notes and moves on', async () => {
       const s = plannedSession();
@@ -450,9 +513,19 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       await renderThemed(<ExerciseScreen sessionId={s.id} seId={squat!.id} />, scheme);
       expect(screen.getByText('Exercise 1 of 2')).toBeTruthy();
       expect(screen.queryByTestId('ex-media') ?? screen.queryByTestId('ex-media-placeholder')).toBeTruthy();
+      // The hero gets the exercise, so its muscle map names the muscles.
+      expect(screen.getByTestId('ex-media-map', { includeHiddenElements: true }).props.accessibilityLabel).toMatch(/Main: /);
+      // Gym footer (N6/N21): 56dp chevrons and a one-line "Log set N" with the target below.
+      for (const id of ['ex-prev', 'ex-next']) {
+        expect(StyleSheet.flatten(screen.getByTestId(id).props.style)).toMatchObject({ width: 56, height: 56 });
+      }
+      expect(screen.getByTestId('ex-log-label')).toHaveTextContent('Log set 1');
+      expect(screen.getByTestId('ex-log-label').props.numberOfLines).toBe(1);
+      expect(screen.getByTestId('ex-log-caption').props.children).toMatch(/×/);
       await fireEvent.press(screen.getByTestId('ex-set-0-check'));
       await settle();
       expect(setsFor(squat!.id)[0]?.doneAt).not.toBeNull();
+      expect(screen.getByTestId('ex-log-label')).toHaveTextContent('Log set 2');
       await fireEvent.press(screen.getByTestId('ex-log'));
       await fireEvent.press(screen.getByTestId('ex-log'));
       await settle();
@@ -540,6 +613,17 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(setsFor(exercisesForSession(id)[0]!.id)).toHaveLength(4);
     });
 
+    it('Start while another workout runs opens that one and creates no orphan (R2-3)', async () => {
+      const running = plannedSession();
+      startWorkout(running.id);
+      const r = routinesRepo.insert({ name: 'Upper A', items: [{ exerciseId: 'barbell-bench-press', sets: 3, reps: '8-12', restS: 90 }] });
+      await renderThemed(<RoutineBuilderScreen routineId={r.id} />, scheme);
+      const before = sessionsRepo.list().length;
+      await fireEvent.press(screen.getByTestId('routine-start'));
+      expect(mockRouter.replace).toHaveBeenLastCalledWith(`/workout/${running.id}`);
+      expect(sessionsRepo.list()).toHaveLength(before);
+    });
+
     it('picker adds to a live session and shows no-match state', async () => {
       const s = plannedSession();
       startWorkout(s.id);
@@ -558,6 +642,27 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(screen.getByTestId('routine-empty')).toBeTruthy();
       expect(screen.getByTestId('routine-start').props.accessibilityState).toMatchObject({ disabled: true });
       await act(async () => undefined);
+    });
+
+    it('trash asks first, then soft-deletes with an undo that restores the routine', async () => {
+      const r = routinesRepo.insert({ name: 'Upper A', items: [] });
+      await renderThemed(<RoutineBuilderScreen routineId={r.id} />, scheme);
+      await fireEvent.press(screen.getByTestId('routine-delete'));
+      // Nothing is gone until the user confirms.
+      expect(routinesRepo.get(r.id)).toBeTruthy();
+      expect(screen.getByTestId('routine-delete-sheet')).toBeTruthy();
+      expect(screen.getByTestId('routine-delete-confirm')).toBeTruthy();
+      await fireEvent.press(screen.getByTestId('routine-delete-cancel'));
+      expect(routinesRepo.get(r.id)).toBeTruthy();
+
+      await fireEvent.press(screen.getByTestId('routine-delete'));
+      await fireEvent.press(screen.getByTestId('routine-delete-confirm'));
+      expect(routinesRepo.get(r.id)).toBeUndefined();
+      expect(mockRouter.back).toHaveBeenCalled();
+      const toast = useToastStore.getState().current;
+      expect(toast).toMatchObject({ message: 'Routine deleted', actionLabel: 'Undo', silent: true });
+      await act(async () => toast?.onAction?.());
+      expect(routinesRepo.get(r.id)?.name).toBe('Upper A');
     });
   });
 });

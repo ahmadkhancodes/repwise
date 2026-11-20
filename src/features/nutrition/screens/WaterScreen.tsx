@@ -1,57 +1,19 @@
 import { useLocalSearchParams } from 'expo-router';
 import { GlassWater, Trash2 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { View } from 'react-native';
-import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSpring } from 'react-native-reanimated';
 
-import { BackButton } from '@/features/meals/components/BackButton';
 import { dayLabel, isISODate, todayISO } from '@/features/meals/logic/dates';
 import { addWater, undoLog } from '@/features/meals/service';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { BigNumber, Button, Chip, IconButton, ProgressRing, Screen, Stepper, Text, ringInnerWidth, showUndoToast } from '@/ui';
+import { BackButton, BigNumber, Button, Chip, IconButton, ProgressRing, ringInnerWidth, Screen, showUndoToast, Stepper, Text } from '@/ui';
 
 import { progress } from '../logic/intake';
-import {
-  GLASS_ML,
-  QUICK_ADD_ML,
-  WATER_GOAL_MAX,
-  WATER_GOAL_MIN,
-  formatLogTime,
-  formatWater,
-  glassCount,
-  isWaterLog,
-  totalWaterMl,
-  waterMl,
-} from '../logic/water';
+import { Glass } from '../components/Glass';
+import { GLASS_ML, QUICK_ADD_ML, WATER_GOAL_MAX, WATER_GOAL_MIN, formatLogTime, formatWater, glassCount, isWaterLog, totalWaterMl, waterMl } from '../logic/water';
 import { useFoodLogs } from '../repo';
 import { getWaterGoal, setWaterGoal } from '../waterGoal';
-
-function Glass({ full, index }: { full: boolean; index: number }) {
-  const t = useTheme();
-  const reduce = useReducedMotion();
-  const s = useSharedValue(full ? 1 : 0);
-  useEffect(() => {
-    s.set(reduce ? (full ? 1 : 0) : withSpring(full ? 1 : 0, t.motion.spring));
-  }, [full, reduce, s, t.motion.spring]);
-  const fill = useAnimatedStyle(() => ({ transform: [{ scaleY: s.value }], opacity: 0.3 + 0.7 * s.value }));
-  return (
-    <View
-      testID={`glass-${index}`}
-      style={{
-        width: t.spacing.xxxl - t.spacing.xxs,
-        height: t.spacing.huge,
-        borderRadius: t.radius.button,
-        borderWidth: t.sizes.borderThick,
-        borderColor: full ? t.colors.accent : t.colors.borderStrong,
-        overflow: 'hidden',
-        justifyContent: 'flex-end',
-      }}
-    >
-      <Animated.View style={[{ height: '100%', backgroundColor: t.colors.accent, transformOrigin: 'bottom' }, fill]} />
-    </View>
-  );
-}
 
 /** S27 Water: one-tap quick add, glasses that fill with a spring, goal you can change. */
 export function WaterScreen() {
@@ -83,7 +45,7 @@ export function WaterScreen() {
   return (
     <Screen
       title="Water"
-      headerLeft={<BackButton />}
+      headerLeft={<BackButton fallback="/eat" />}
       testID="screen-water"
       footer={<Button label={`Add a glass · ${GLASS_ML} ml`} onPress={() => add(GLASS_ML)} testID="water-add" />}
     >
@@ -107,7 +69,7 @@ export function WaterScreen() {
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs, justifyContent: 'center' }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         {Array.from({ length: glasses }, (_, i) => (
-          <Glass key={i} index={i} full={i < filled} />
+          <Glass key={i} index={i} full={i < filled} size="large" />
         ))}
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>

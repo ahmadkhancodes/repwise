@@ -1,10 +1,11 @@
 import { SkipForward } from 'lucide-react-native';
 import { useWindowDimensions, View } from 'react-native';
 
-import { useTheme } from '@/theme';
+import { fonts, useTheme } from '@/theme';
 
 import { Button } from './Button';
 import { fitFontSize, ringInnerWidth } from './fit';
+import { PressableScale } from './PressableScale';
 import { ProgressRing } from './ProgressRing';
 import { Text } from './Text';
 
@@ -50,7 +51,7 @@ export type BigTimerProps = {
 
 /**
  * Rest timer hero (sheet 11 Timer): hero-size tabular countdown inside a draining ring,
- * readable at 1 m; −15 / +15 / Skip as 56dp buttons. The number auto-fits the ring at any
+ * readable at 1 m; −15 / Skip / +15 as 56dp controls. The number auto-fits the ring at any
  * font scale. Haptics: buttons fire light on commit; the rest-end triple (haptics.restEnd) is
  * owned by the timer store, not this view.
  */
@@ -83,7 +84,6 @@ export function BigTimer({
   const remainingS = Math.ceil(Math.max(0, remainingMs) / 1000);
   const ending = remainingS > 0 && remainingS <= FINAL_SECONDS;
   const progress = totalMs > 0 ? Math.max(0, remainingMs) / totalMs : 0;
-  const btn = { flex: 1, minHeight: t.sizes.hitGym } as const;
 
   return (
     <View testID={testID} style={{ alignItems: 'center', gap: t.spacing.lg, alignSelf: 'stretch' }}>
@@ -122,39 +122,102 @@ export function BigTimer({
         </Text>
       ) : null}
       {onAdjust || onSkip ? (
-        <View style={{ flexDirection: 'row', gap: t.spacing.xs, alignSelf: 'stretch' }}>
+        // −15 · Skip · +15: two 56dp round adjusters and one wide Skip. Fits 360dp at 130%
+        // font (UI audit N5: three flex buttons clipped "Skip" and wrapped "−15 s").
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: t.spacing.sm,
+            alignSelf: 'stretch',
+          }}
+        >
           {onAdjust ? (
-            <Button
-              label={`−${stepSeconds} s`}
-              variant="secondary"
+            <AdjustButton
+              label={`−${stepSeconds}`}
               accessibilityLabel={`Remove ${stepSeconds} seconds`}
               onPress={() => onAdjust(-stepSeconds)}
               testID={testID ? `${testID}-minus` : undefined}
-              style={btn}
-            />
-          ) : null}
-          {onAdjust ? (
-            <Button
-              label={`+${stepSeconds} s`}
-              variant="secondary"
-              accessibilityLabel={`Add ${stepSeconds} seconds`}
-              onPress={() => onAdjust(stepSeconds)}
-              testID={testID ? `${testID}-plus` : undefined}
-              style={btn}
             />
           ) : null}
           {onSkip ? (
             <Button
               label="Skip"
               icon={SkipForward}
+              compact
               accessibilityLabel="Skip rest"
               onPress={onSkip}
               testID={testID ? `${testID}-skip` : undefined}
-              style={btn}
+              style={{ flex: 1, minHeight: t.sizes.hitGym }}
+            />
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
+          {onAdjust ? (
+            <AdjustButton
+              label={`+${stepSeconds}`}
+              accessibilityLabel={`Add ${stepSeconds} seconds`}
+              onPress={() => onAdjust(stepSeconds)}
+              testID={testID ? `${testID}-plus` : undefined}
             />
           ) : null}
         </View>
       ) : null}
     </View>
+  );
+}
+
+/** Round 56dp ±seconds control; the number auto-fits so it never clips at any font scale. */
+function AdjustButton({
+  label,
+  accessibilityLabel,
+  onPress,
+  testID,
+}: {
+  label: string;
+  accessibilityLabel: string;
+  onPress: () => void;
+  testID?: string;
+}) {
+  const t = useTheme();
+  const { fontScale } = useWindowDimensions();
+  const type = t.typography.headline;
+  const dim = t.sizes.hitGym;
+  const fontSize = fitFontSize({
+    text: label,
+    maxWidth: dim - t.spacing.xs * 2,
+    fontSize: type.fontSize,
+    fontScale,
+    maxMultiplier: 1.3,
+  });
+  return (
+    <PressableScale
+      feedback="light"
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      testID={testID}
+      style={{
+        width: dim,
+        height: dim,
+        borderRadius: t.radius.pill,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: t.colors.surface,
+        borderWidth: t.sizes.hairline,
+        borderColor: t.colors.borderStrong,
+      }}
+    >
+      <Text
+        variant="headline"
+        tabular
+        allowFontScaling={false}
+        numberOfLines={1}
+        testID={testID ? `${testID}-label` : undefined}
+        style={{ fontSize, lineHeight: Math.ceil(fontSize * 1.3), fontFamily: fonts.bold }}
+      >
+        {label}
+      </Text>
+    </PressableScale>
   );
 }

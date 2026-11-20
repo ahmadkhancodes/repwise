@@ -1,5 +1,8 @@
 import { getCatalog } from '@/services/catalog';
 
+import { swapSubtitle } from '../components/Sheets';
+import { equipmentLabel, exerciseMeta, muscleLabel } from '../exerciseMeta';
+
 import {
   availableEquipment,
   hasEquipment,
@@ -26,14 +29,25 @@ afterEach(() => registerSwapProvider(null));
 describe('engine adapter', () => {
   it('maps catalogue items to the engine shape via the @repwise/content adapter', () => {
     const e = toEngineExercise(byId.get('barbell-bench-press')!);
-    expect(e).toMatchObject({ id: 'barbell-bench-press', pattern: 'push_h', level: 2, compound: true });
+    expect(e).toMatchObject({
+      id: 'barbell-bench-press',
+      pattern: 'push_h',
+      level: 2,
+      compound: true,
+    });
     expect(e?.equipment).toEqual(expect.arrayContaining(['barbell', 'bench']));
     const mobility = catalog.exercises.find((x) => x.pattern === 'mobility');
     if (mobility) expect(toEngineExercise(mobility)).toBeNull();
   });
   it('builds a valid profile with defaults', () => {
     const p = toEngineProfile({ injuries: ['knee', 'nonsense'], days: 9, experience: 'beginner' });
-    expect(p).toMatchObject({ goal: 'maintain', sex: 'male', daysPerWeek: 6, experience: 'beginner', injuries: ['knee'] });
+    expect(p).toMatchObject({
+      goal: 'maintain',
+      sex: 'male',
+      daysPerWeek: 6,
+      experience: 'beginner',
+      injuries: ['knee'],
+    });
     expect(toEngineProfile(null).sessionMin).toBe(60);
   });
   it('checks equipment in the content vocabulary (with engine spellings as aliases)', () => {
@@ -41,7 +55,9 @@ describe('engine adapter', () => {
     expect(hasEquipment(byId.get('dumbbell-bench-press')!, home)).toBe(true);
     expect(hasEquipment(byId.get('barbell-bench-press')!, home)).toBe(false);
     expect(hasEquipment(byId.get('push-up')!, home)).toBe(true);
-    expect(hasEquipment(byId.get('smith-machine-bench-press')!, availableEquipment(['smith', 'bench']))).toBe(true);
+    expect(
+      hasEquipment(byId.get('smith-machine-bench-press')!, availableEquipment(['smith', 'bench'])),
+    ).toBe(true);
     expect(hasEquipment(byId.get('barbell-bench-press')!, availableEquipment(null))).toBe(true);
   });
 });
@@ -58,7 +74,9 @@ describe('swapAlternatives', () => {
   });
   it('respects the user equipment and recent sessions', () => {
     const recent = [{ date: '2026-11-17', exerciseIds: ['dumbbell-bench-press'] }];
-    const ids = swapAlternatives(req({ recentSessions: recent }), catalog.exercises, { equipment: ['dumbbell', 'bench'] });
+    const ids = swapAlternatives(req({ recentSessions: recent }), catalog.exercises, {
+      equipment: ['dumbbell', 'bench'],
+    });
     expect(ids.length).toBeGreaterThan(0);
     for (const id of ids) {
       expect(hasEquipment(byId.get(id)!, availableEquipment(['dumbbell', 'bench']))).toBe(true);
@@ -75,11 +93,48 @@ describe('swapAlternatives', () => {
   });
   it('falls back to curated alternatives for exercises the engine does not plan', () => {
     const mobility = catalog.exercises.find((e) => e.pattern === 'mobility')!;
-    const ids = swapAlternatives(req({ sessionExerciseIds: [mobility.id], index: 0 }), catalog.exercises);
+    const ids = swapAlternatives(
+      req({ sessionExerciseIds: [mobility.id], index: 0 }),
+      catalog.exercises,
+    );
     expect(ids.length).toBeGreaterThan(0);
     expect(ids).not.toContain(mobility.id);
   });
   it('returns nothing for an unknown exercise', () => {
-    expect(swapAlternatives(req({ sessionExerciseIds: ['nope'], index: 0 }), catalog.exercises)).toEqual([]);
+    expect(
+      swapAlternatives(req({ sessionExerciseIds: ['nope'], index: 0 }), catalog.exercises),
+    ).toEqual([]);
+  });
+  it('never suggests an exercise the user ruled out (swap sheet "Never suggest")', () => {
+    const first = swapAlternatives(req(), catalog.exercises);
+    expect(first.length).toBeGreaterThan(0);
+    const without = swapAlternatives(req({ never: [first[0]!] }), catalog.exercises);
+    expect(without).not.toContain(first[0]);
+    const mobility = catalog.exercises.find((e) => e.pattern === 'mobility')!;
+    const curated = swapAlternatives(
+      req({ sessionExerciseIds: [mobility.id], index: 0 }),
+      catalog.exercises,
+    );
+    const curatedWithout = swapAlternatives(
+      req({ sessionExerciseIds: [mobility.id], index: 0, never: curated }),
+      catalog.exercises,
+    );
+    for (const id of curated) expect(curatedWithout).not.toContain(id);
+  });
+});
+
+describe('exercise labels (UI audit P2-4)', () => {
+  it('title-case muscles and equipment from the library labels', () => {
+    expect(muscleLabel('front_delts')).toBe('Front delts');
+    expect(muscleLabel('lats')).toBe('Lats');
+    expect(muscleLabel('mystery_muscle')).toBe('Mystery muscle');
+    expect(equipmentLabel('dumbbell')).toBe('Dumbbell');
+    expect(exerciseMeta('barbell-bench-press', catalog).primaryMuscles[0]).toMatch(/^[A-Z]/);
+    expect(
+      swapSubtitle({
+        primaryMuscles: ['Chest', 'Triceps', 'Front delts'],
+        equipment: ['barbell', 'bench'],
+      }),
+    ).toBe('Chest, Triceps · Barbell, Bench');
   });
 });

@@ -43,6 +43,7 @@ import {
 } from './logic/plan';
 import { toMealProfile, type MealProfile } from './logic/profile';
 import {
+  customRecipesRepo,
   mealPlansRepo,
   mealsRepo,
   setMealStatus,
@@ -347,6 +348,30 @@ function markMealEatenTx(mealId: string, fraction: number, now: number): boolean
   setMealStatus(mealId, 'eaten', now);
   track('meal_logged', { slot: meal.slot, from_plan: true, partial: fraction < 1 });
   return true;
+}
+
+export type TickFromLinkResult =
+  | { status: 'ticked'; name: string; date: ISODate; previous: 'planned' | 'skipped' }
+  | { status: 'already'; name: string; date: ISODate }
+  | { status: 'missing' };
+
+/**
+ * Widget "Ate it" (`repwise://eat?mealId=…&tick=1`): mark the meal eaten only while it is still
+ * open (planned or skipped). Idempotent: a second delivery of the same link, or a meal already
+ * eaten or swapped away, writes nothing. Check and write run in one transaction.
+ */
+export function tickMealIfOpen(mealId: string, now: number = Date.now()): TickFromLinkResult {
+  return withTransaction((): TickFromLinkResult => {
+    const ctx = mealContext(mealId);
+    if (!ctx) return { status: 'missing' };
+    const id = ctx.meal.recipeId;
+    const name = engineRecipe(id)?.name ?? (id ? customRecipesRepo.get(id)?.title : undefined) ?? 'Meal';
+    const date = ctx.plan.date;
+    if (ctx.meal.status === 'eaten' || ctx.meal.status === 'swapped') return { status: 'already', name, date };
+    const previous = ctx.meal.status === 'skipped' ? 'skipped' : 'planned';
+    if (!markMealEatenTx(mealId, 1, now)) return { status: 'missing' };
+    return { status: 'ticked', name, date, previous };
+  });
 }
 
 /** Undo a tick or skip a meal; that meal's plan log goes too (never another meal's). */

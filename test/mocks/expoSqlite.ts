@@ -40,13 +40,30 @@ function normalise(params: unknown): unknown[] {
   return list.map((v) => (typeof v === 'boolean' ? (v ? 1 : 0) : v === undefined ? null : v));
 }
 
-function notify(name: string, sql: string) {
+/**
+ * How change events are delivered. 'statement' (default): once per write statement, synchronously.
+ * 'rowAsync': like the device (expo-sqlite's update hook, perf audit r2 N3): once per changed ROW,
+ * each in its own macrotask, so tests can prove that a burst coalesces.
+ */
+let eventMode: 'statement' | 'rowAsync' = 'statement';
+export function __setChangeEventMode(mode: 'statement' | 'rowAsync'): void {
+  eventMode = mode;
+}
+
+function notify(name: string, sql: string, rows = 1) {
   const m = WRITE_RE.exec(sql);
   if (!m?.[1]) return;
   const tableName = m[1];
-  for (const l of [...listeners]) {
-    l({ databaseName: name, databaseFilePath: name, tableName, rowId: 0 });
+  const fire = () => {
+    for (const l of [...listeners]) {
+      l({ databaseName: name, databaseFilePath: name, tableName, rowId: 0 });
+    }
+  };
+  if (eventMode === 'statement') {
+    fire();
+    return;
   }
+  for (let i = 0; i < rows; i++) setTimeout(fire, 0);
 }
 
 function toNumber(v: number | bigint): number {
@@ -64,7 +81,7 @@ export function openDatabaseSync(name: string, options?: { enableChangeListener?
     },
     runSync(sql: string, ...params: unknown[]) {
       const r = db.prepare(sql).run(...normalise(params.length === 1 ? params[0] : params));
-      if (emit) notify(name, sql);
+      if (emit) notify(name, sql, toNumber(r.changes));
       return { changes: toNumber(r.changes), lastInsertRowId: toNumber(r.lastInsertRowid) };
     },
     getAllSync(sql: string, ...params: unknown[]) {
@@ -92,7 +109,7 @@ export function openDatabaseSync(name: string, options?: { enableChangeListener?
           if (isRead) {
             stmt.setReturnArrays?.(false);
             const rows = stmt.all(...p);
-            if (emit) notify(name, sql);
+            if (emit) notify(name, sql, rows.length);
             return {
               changes: 0,
               lastInsertRowId: 0,
@@ -101,7 +118,7 @@ export function openDatabaseSync(name: string, options?: { enableChangeListener?
             };
           }
           const r = stmt.run(...p);
-          if (emit) notify(name, sql);
+          if (emit) notify(name, sql, toNumber(r.changes));
           return {
             changes: toNumber(r.changes),
             lastInsertRowId: toNumber(r.lastInsertRowid),
@@ -118,7 +135,7 @@ export function openDatabaseSync(name: string, options?: { enableChangeListener?
           } else {
             rows = stmt.all(...p).map((r) => Object.values(r));
           }
-          if (emit) notify(name, sql);
+          if (emit) notify(name, sql, rows.length);
           return { getAllSync: () => rows };
         },
         finalizeSync() {},

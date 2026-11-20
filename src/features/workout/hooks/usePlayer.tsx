@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
-import { ArrowUpDown, Info, Repeat, Trash2 } from 'lucide-react-native';
+import { ArrowUpDown, Info, Trash2 } from 'lucide-react-native';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { getProfile } from '@/features/settings/repo';
 import { haptics } from '@/services/haptics';
 import { useCatalogFor } from '@/services/catalog';
-import { showToast, showUndoToast } from '@/ui';
+import { neverSuggestedExercises } from '@/features/library/prefs';
+import { showToast, showUndoToast, SwapIcon } from '@/ui';
 
 import {
   discardWorkoutAction,
@@ -141,6 +142,7 @@ export function usePlayer(sessionId: string) {
             index: all.findIndex((i) => i.se.id === item.se.id),
             recentSessions: recentSessionExercises(sessionId),
             now: Date.now(),
+            never: neverSuggestedExercises(),
           },
           c.exercises,
           getProfile(),
@@ -200,7 +202,7 @@ export function usePlayer(sessionId: string) {
     if (!swapFor) return;
     const meta = exerciseMeta(id, catalog);
     swapExerciseRow(swapFor.se.id, id, { cardio: meta.cardio });
-    haptics.success();
+    haptics.light();
     showToast({ message: `Swapped to ${meta.name}`, tone: 'success', silent: true });
     setSwap(null);
   };
@@ -308,7 +310,7 @@ export function usePlayer(sessionId: string) {
                 {
                   key: 'swap',
                   label: 'Swap exercise',
-                  icon: Repeat,
+                  icon: SwapIcon,
                   onPress: () => {
                     setMenuFor(null);
                     openSwap(menuItem);

@@ -135,16 +135,16 @@ describe('TodayScreen core loop', () => {
   it('tick a meal: logs it, rings update instantly, success haptic, undo within 5 s', async () => {
     const { meals } = seedTrainingDay();
     await renderToday();
-    await fireEvent.press(screen.getByTestId('today-meal-lunch'));
+    await fireEvent.press(screen.getByTestId('today-tick-lunch'));
     expect(mealsRepo.get(meals[1]!.id)?.status).toBe('eaten');
     expect(logsForDate(TODAY)).toHaveLength(1);
     await waitFor(() => expect(screen.getByTestId('meals-count')).toHaveTextContent('1 of 2 eaten'));
     expect(screen.getByTestId('today-macros-kcal-value').props.defaultValue).toBe('1,656'); // 2,300 − 644
-    expect(screen.getByTestId('today-meal-lunch')).toBeChecked();
+    expect(screen.getByTestId('today-tick-lunch')).toBeChecked();
     expect(events).toContainEqual(['meal_logged', { slot: 'lunch', from_plan: true, partial: false }]);
     const toast = await screen.findByTestId('toast');
     expect(within(toast).getByText('Chicken karahi logged')).toBeTruthy();
-    // One buzz: the row's success haptic; the undo toast is silent (no double buzz).
+    // One buzz: the tick's success haptic; the undo toast is silent (no double buzz).
     if (Platform.OS === 'ios') expect(Haptics.notificationAsync).toHaveBeenCalledTimes(1);
     else expect(Haptics.performAndroidHapticsAsync).toHaveBeenCalledWith('confirm');
     expect(useToastStore.getState().current?.silent).toBe(true);
@@ -155,13 +155,14 @@ describe('TodayScreen core loop', () => {
     await waitFor(() => expect(screen.getByTestId('meals-count')).toHaveTextContent('0 of 2 eaten'));
   });
 
-  it('tapping an eaten meal unticks it', async () => {
+  it('tapping an eaten meal tick unticks it; eaten rows offer no swap', async () => {
     const { meals } = seedTrainingDay();
     markMealEaten(meals[0]!.id);
     expect(logsForDate(TODAY)).toHaveLength(1);
     await renderToday();
-    expect(screen.getByTestId('today-meal-breakfast')).toBeChecked();
-    await fireEvent.press(screen.getByTestId('today-meal-breakfast'));
+    expect(screen.getByTestId('today-tick-breakfast')).toBeChecked();
+    expect(screen.queryByTestId('today-swap-breakfast')).toBeNull();
+    await fireEvent.press(screen.getByTestId('today-tick-breakfast'));
     expect(mealsRepo.get(meals[0]!.id)?.status).toBe('planned');
     expect(logsForDate(TODAY)).toEqual([]);
   });
@@ -185,6 +186,17 @@ describe('TodayScreen core loop', () => {
     expect(events).toContainEqual(['meal_swapped', { slot: 'lunch' }]);
   });
 
+  it('tapping a meal opens its recipe, the same as on Eat (N2)', async () => {
+    const { meals } = seedTrainingDay();
+    await renderToday();
+    await fireEvent.press(screen.getByTestId('today-meal-lunch'));
+    expect(router.push).toHaveBeenCalledWith({
+      pathname: '/recipe/[id]',
+      params: { id: RECIPE.lunch, portion: '1', mealId: meals[1]!.id },
+    });
+    expect(mealsRepo.get(meals[1]!.id)?.status).toBe('planned');
+  });
+
   it('long-press a meal opens swap (W4)', async () => {
     seedTrainingDay();
     await renderToday();
@@ -199,6 +211,23 @@ describe('TodayScreen core loop', () => {
     expect(events.map((e) => e[0])).not.toContain('plan_generated');
     await waitFor(() => expect(events.map((e) => e[0])).toContain('plan_generated'), { timeout: 4000 });
     expect(mealPlanForDate('2026-11-20')).toBeDefined();
+  });
+});
+
+describe('TodayScreen with the system clock on another day (R2-7)', () => {
+  it('plans the screen\'s day and week, never the real clock\'s', async () => {
+    const real = jest.spyOn(Date, 'now').mockReturnValue(at(2031, 3, 3, 9)); // a Monday in 2031
+    try {
+      seedTrainingDay();
+      await renderToday();
+      await waitFor(() => expect(events.map((e) => e[0])).toContain('plan_generated'), { timeout: 4000 });
+      expect(mealPlanForDate('2026-11-20')).toBeDefined();
+      expect(mealPlanForDate('2031-03-03')).toBeUndefined();
+      expect(sessionsRepo.list().some((s) => (s.date ?? '').startsWith('2031'))).toBe(false);
+      expect(screen.getByTestId('today-brief')).toBeTruthy();
+    } finally {
+      real.mockRestore();
+    }
   });
 });
 

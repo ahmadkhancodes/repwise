@@ -54,6 +54,12 @@ function contract(name: string, make: () => Promise<Db>) {
       expect((await db.consumeRefreshToken(`h-${id}`, now + 30_000, 60_000)).status).toBe('grace');
       expect((await db.consumeRefreshToken(`h-${id}`, now + 61_000, 60_000)).status).toBe('reused');
       expect((await db.getRefreshToken(`h-${id}`))?.familyId).toBe(`f-${id}`);
+      // Late lost-response recovery claims an unused token once; a rotated one never.
+      expect(await db.markRefreshTokenRecovered(`h-${id}`, now)).toBe(false);
+      await db.insertRefreshToken({ _id: `rt3-${id}`, userId: id, tokenHash: `h3-${id}`, familyId: `f-${id}`, createdAt: now, expiresAt: now + 600_000 });
+      expect(await db.markRefreshTokenRecovered(`h3-${id}`, now)).toBe(true);
+      expect(await db.markRefreshTokenRecovered(`h3-${id}`, now)).toBe(false);
+      expect((await db.getRefreshToken(`h3-${id}`))?.recoveredAt).toBe(now);
       await expect(db.insertRefreshToken({ _id: `rt2-${id}`, userId: id, tokenHash: `h-${id}`, familyId: `f-${id}`, createdAt: now, expiresAt: now + 60_000 })).rejects.toThrow();
       // Email codes: check-and-count is one step and stops at the cap.
       await db.putEmailCode({ _id: `ec-${id}`, email, codeHash: 'h', attempts: 0, createdAt: now, expiresAt: now + 60_000 });

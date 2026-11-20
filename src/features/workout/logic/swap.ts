@@ -10,7 +10,8 @@
  * The selection rules live in the engine; this file only adapts data and filters equipment
  * against the profile's own vocabulary.
  */
-import { exerciseToEngine, type Exercise as ContentExercise } from '@repwise/content';
+import type { Exercise as ContentExercise } from '@repwise/content';
+import { exerciseToEngine } from '@repwise/content/toEngine';
 import {
   EQUIPMENT,
   swapExercise,
@@ -31,6 +32,8 @@ export type SwapRequest = {
   /** Exercise ids from the last sessions (newest last) — not suggested again. */
   recentSessions: { date: string; exerciseIds: string[] }[];
   now: number;
+  /** Exercises the user said never to suggest. */
+  never?: readonly string[];
 };
 
 export type SwapProvider = (req: SwapRequest) => string[];
@@ -173,9 +176,11 @@ function catalogueSwap(
   const injuries = new Set(profile?.injuries ?? []);
   const inSession = new Set(req.sessionExerciseIds);
   const recent = new Set(req.recentSessions.slice(-2).flatMap((s) => s.exerciseIds));
+  const never = new Set(req.never ?? []);
   const ok = (e: ContentExercise | undefined): e is ContentExercise =>
     !!e &&
     !inSession.has(e.id) &&
+    !never.has(e.id) &&
     !recent.has(e.id) &&
     hasEquipment(e, available) &&
     !e.contraindications.some((c) => injuries.has(c));
@@ -193,8 +198,11 @@ export function swapAlternatives(
   const known = new Set(catalogue.map((e) => e.id));
   const inSession = new Set(req.sessionExerciseIds);
   const recent = new Set(req.recentSessions.slice(-2).flatMap((s) => s.exerciseIds));
+  const never = new Set(req.never ?? []);
   const valid = (ids: string[]) =>
-    [...new Set(ids)].filter((id) => known.has(id) && !inSession.has(id) && !recent.has(id)).slice(0, 3);
+    [...new Set(ids)]
+      .filter((id) => known.has(id) && !inSession.has(id) && !recent.has(id) && !never.has(id))
+      .slice(0, 3);
   if (provider) {
     try {
       const ids = valid(provider(req));

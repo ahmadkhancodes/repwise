@@ -6,10 +6,9 @@ import {
   ChevronRight,
   Dumbbell,
   Plus,
-  Repeat,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 import { ExerciseHero } from '@/features/library';
 import { useTheme } from '@/theme';
@@ -24,6 +23,7 @@ import {
   Skeleton,
   Text,
   TextField,
+  SwapIcon,
 } from '@/ui';
 
 import { ExerciseCard } from '../components/ExerciseCard';
@@ -49,7 +49,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
   const index = p.items.findIndex((i) => i.se.id === seId);
   const item = index >= 0 ? p.items[index] : undefined;
   const [notes, setNotes] = useState<string | null>(null);
-  useWorkoutKeepAwake(p.session?.status === 'active');
+  useWorkoutKeepAwake(sessionId, p.session?.status === 'active');
 
   const back = () => (router.canGoBack() ? router.back() : router.replace(`/workout/${sessionId}`));
   const backButton = (
@@ -104,10 +104,13 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
     : '';
 
   const primary = pending ? (
+    // Two-line label (UI audit N6): "Log set 2" never wraps; the target sits underneath.
     <Button
-      label={`Log set ${pending.label}${target ? ` · ${target}` : ''}`}
+      label={`Log set ${pending.label}`}
+      caption={target || undefined}
       icon={Check}
       accent
+      compact
       onPress={() => p.logNext(item)}
       testID="ex-log"
       style={{ flex: 1, minHeight: t.sizes.hitGymLarge }}
@@ -116,17 +119,16 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
     <Button
       label={next ? `Next: ${next.meta.name}` : 'Back to workout'}
       onPress={() => (next ? go(next) : back())}
+      compact
       testID="ex-footer"
       style={{ flex: 1, minHeight: t.sizes.hitGymLarge }}
     />
   );
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <>
       <Screen
+        keyboard
         title={item.meta.name}
         headerLeft={backButton}
         footer={
@@ -137,6 +139,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
                 icon={ChevronLeft}
                 accessibilityLabel="Previous exercise"
                 disabled={!prev}
+                size="gym"
                 onPress={() => go(prev)}
                 testID="ex-prev"
               />
@@ -145,6 +148,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
                 icon={ChevronRight}
                 accessibilityLabel="Next exercise"
                 disabled={!next}
+                size="gym"
                 onPress={() => go(next)}
                 testID="ex-next"
               />
@@ -169,7 +173,13 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
           ))}
         </View>
 
-        <ExerciseHero mediaId={item.meta.mediaId} name={item.meta.name} testID="ex-media" />
+        <ExerciseHero
+          mediaId={item.meta.mediaId}
+          name={item.meta.name}
+          exercise={p.catalog.exerciseById.get(item.se.exerciseId) ?? null}
+          exerciseId={item.se.exerciseId}
+          testID="ex-media"
+        />
 
         {item.meta.cues.length ? (
           <View style={{ gap: t.spacing.xxs }} testID="ex-cues">
@@ -212,7 +222,7 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
         )}
         <Button
           label="Swap exercise"
-          icon={Repeat}
+          icon={SwapIcon}
           variant="secondary"
           onPress={() => p.handlers.onSwap(item)}
           testID="ex-swap"
@@ -230,6 +240,6 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
       </Screen>
       {p.sheets}
       <PRCelebration moment={p.prMoment} onDone={p.clearPrMoment} />
-    </KeyboardAvoidingView>
+    </>
   );
 }

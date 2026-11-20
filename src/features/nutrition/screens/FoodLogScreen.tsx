@@ -1,10 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Clock, Search, UtensilsCrossed } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { BackButton } from '@/features/meals/components/BackButton';
 import { enterAt } from '@/ui/listMotion';
 import { useEatDay } from '@/features/meals/hooks/useEat';
 import { isISODate, todayISO } from '@/features/meals/logic/dates';
@@ -12,23 +11,7 @@ import { nextSlotIndex, slotLabel } from '@/features/meals/logic/slots';
 import { logOffPlan } from '@/features/meals/service';
 import { searchFoods, type Food } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import {
-  BigNumber,
-  Button,
-  Checkbox,
-  Chip,
-  EmptyState,
-  ListRow,
-  Screen,
-  SearchBar,
-  SkeletonCard,
-  SkeletonGroup,
-  Segmented,
-  Sheet,
-  Text,
-  WheelPicker,
-  showToast,
-} from '@/ui';
+import { BackButton, BigNumber, Button, Checkbox, Chip, EmptyState, ListRow, Screen, SearchBar, Segmented, Sheet, showToast, SkeletonCard, SkeletonGroup, Text, WheelPicker } from '@/ui';
 
 import {
   QUICK_ESTIMATES,
@@ -143,10 +126,11 @@ export function FoodLogScreen() {
   );
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <>
       <Screen
+        keyboard
         title="Log food"
-        headerLeft={<BackButton />}
+        headerLeft={<BackButton fallback="/eat" />}
         testID="screen-log"
         footer={mode === 'out' ? <Button label={`Log ${estimate.label.toLowerCase()} out`} onPress={logOut} testID="log-out-save" /> : undefined}
       >
@@ -239,6 +223,6 @@ export function FoodLogScreen() {
           ) : null}
         </Sheet>
       </Screen>
-    </KeyboardAvoidingView>
+    </>
   );
 }

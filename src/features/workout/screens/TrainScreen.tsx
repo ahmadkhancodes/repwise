@@ -16,17 +16,22 @@ import { usePro } from '@/features/billing';
 import { routinesRepo, useRoutines } from '@/features/library/repo';
 import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { loadCatalogParts, useCatalogFor } from '@/services/catalog';
+import { HistoryProFooter, HistoryRow } from '@/features/progress/components/HistoryRow';
+import { gateHistory } from '@/features/progress/logic/history';
 import { useTheme } from '@/theme';
 import {
   Button,
   Card,
   EmptyState,
   IconButton,
+  ListGroup,
+  ListRow,
   Screen,
+  SectionHeader,
   Segmented,
+  showToast,
   SkeletonCard,
   SkeletonGroup,
-  showToast,
   Text,
   WeekStrip,
 } from '@/ui';
@@ -192,16 +197,24 @@ function useTrainDeepLink() {
   }, [key]);
 }
 
-/** Train › History: one aggregate query, mounted only while the History segment is shown. */
+/**
+ * Train › History: one aggregate query, mounted only while the History segment is shown. Same
+ * rows and the same free window as Progress › History (UI audit N4); "All history" links there.
+ */
 function HistoryList({ active }: { active: boolean }) {
+  const t = useTheme();
   const { unit } = useUnits();
-  const history = useHistory(60, active);
+  const { isPro } = usePro();
+  const [attempt, setAttempt] = useState(0);
+  const history = useHistory(60, active, attempt);
   if (history.error) {
     return (
       <EmptyState
         icon={TriangleAlert}
         title="Couldn't load your history"
         body="Your workouts are safe on this phone."
+        actionLabel="Try again"
+        onAction={() => setAttempt((a) => a + 1)}
         testID="train-history-error"
       />
     );
@@ -214,8 +227,13 @@ function HistoryList({ active }: { active: boolean }) {
       </SkeletonGroup>
     );
   }
-  const list = history.data ?? [];
-  if (list.length === 0) {
+  const { visible: list, hidden } = gateHistory(
+    history.data ?? [],
+    (h) => h.session.date,
+    isPro,
+    localDate(),
+  );
+  if (list.length === 0 && hidden === 0) {
     return (
       <EmptyState
         icon={History}
@@ -226,25 +244,33 @@ function HistoryList({ active }: { active: boolean }) {
     );
   }
   return (
-    <>
+    <View style={{ gap: t.spacing.xs }}>
       {list.map((h, i) => (
-        <Card
+        <HistoryRow
           key={h.session.id}
-          onPress={() => router.push(`/workout/${h.session.id}/summary`)}
-          accessibilityLabel={`${h.session.title ?? 'Workout'}, ${h.session.date ? shortDate(h.session.date) : ''}, ${formatMinutes(h.durationMs)}, ${h.sets} sets`}
           testID={`history-${i}`}
-        >
-          <Text variant="caption" color="textSecondary">
-            {h.session.date ? shortDate(h.session.date) : ''}
-          </Text>
-          <Text variant="headline">{h.session.title ?? 'Workout'}</Text>
-          <Text variant="callout" color="textSecondary" tabular>
-            {formatMinutes(h.durationMs)} · {formatWeight(h.volumeKg, unit) || '0'} {unit} ·{' '}
-            {h.sets} sets
-          </Text>
-        </Card>
+          item={{
+            kind: 'workout',
+            sessionId: h.session.id,
+            title: h.session.title ?? 'Workout',
+            date: h.session.date ? shortDate(h.session.date) : undefined,
+            detail: `${formatMinutes(h.durationMs)} · ${h.sets} sets`,
+            value: h.volumeKg > 0 ? `${formatWeight(h.volumeKg, unit)} ${unit}` : undefined,
+          }}
+        />
       ))}
-    </>
+      <HistoryProFooter hidden={hidden} noun="workout" />
+      <ListGroup>
+        <ListRow
+          title="All history"
+          subtitle="Workouts and food days"
+          icon={History}
+          chevron
+          onPress={() => router.push('/progress/history')}
+          testID="train-history-all"
+        />
+      </ListGroup>
+    </View>
   );
 }
 
@@ -348,21 +374,15 @@ export function TrainScreen() {
           </SkeletonGroup>
         ) : (
           <View style={{ gap: t.spacing.md }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'baseline',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Text variant="title2" accessibilityRole="header">
-                This week
-              </Text>
-              <Text variant="callout" color="textSecondary" tabular testID="train-week-count">
-                {counts.total ? `${counts.done} of ${counts.total} done` : ''}
-                {week.data?.blockNo ? ` · Block ${week.data.blockNo}` : ''}
-              </Text>
-            </View>
+            <SectionHeader
+              title="This week"
+              trailing={
+                <Text variant="callout" color="textSecondary" tabular testID="train-week-count">
+                  {counts.total ? `${counts.done} of ${counts.total} done` : ''}
+                  {week.data?.blockNo ? ` · Block ${week.data.blockNo}` : ''}
+                </Text>
+              }
+            />
             <WeekStrip
               days={weekStates(
                 cards.map((c) => c.session),

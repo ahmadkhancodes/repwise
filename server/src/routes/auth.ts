@@ -14,6 +14,12 @@ import type { AppEnv } from '../types';
 const MIN = 60_000;
 /** A rotated refresh token presented again within this window gets the same successor back. */
 export const REFRESH_REUSE_GRACE_MS = 60_000;
+/**
+ * A late retry of a rotated token (the app was suspended or killed after the server rotated but
+ * before the reply was saved) is treated as a lost response, not theft, for up to this long, but
+ * only once per lineage and only while the successor was never used (R2-5).
+ */
+export const REFRESH_LOST_RESPONSE_MS = 24 * 60 * 60_000;
 export const EMAIL_CODE_MAX_ATTEMPTS = 5;
 
 /** The anonymous account the caller is upgrading, if it sent a valid access token for one. */
@@ -177,9 +183,22 @@ authRoutes.post('/refresh', async (c) => {
   // very same refresh token back (idempotent rotation) instead of forking the family.
   const successor = await successorRefreshToken(deps.config.jwt.secret, token);
   if (res.status !== 'ok') {
-    const next = await db.getRefreshToken(await sha256Hex(successor));
-    // Reuse outside the grace window, or the successor was already used: assume theft.
-    if (res.status === 'reused' || (next && next.rotatedAt)) {
+    const successorHash = await sha256Hex(successor);
+    const next = await db.getRefreshToken(successorHash);
+    // The successor was already used: assume theft.
+    let theft = !!(next && next.rotatedAt);
+    if (!theft && res.status === 'reused') {
+      // Outside the grace window. Recover a lost response once: the presented token was never
+      // itself a recovery hand-out, it was rotated recently, and we atomically claim the unused
+      // successor. A second holder replaying either token later finds the claim and is refused.
+      const late = now - Number(res.token.rotatedAt ?? 0);
+      theft =
+        !next ||
+        !!res.token.recoveredAt ||
+        late > REFRESH_LOST_RESPONSE_MS ||
+        !(await db.markRefreshTokenRecovered(successorHash, now));
+    }
+    if (theft) {
       await db.revokeRefreshFamily(res.token.familyId);
       throw unauthorized('token_reused');
     }

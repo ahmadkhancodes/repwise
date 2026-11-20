@@ -1,26 +1,15 @@
 import { router } from 'expo-router';
-import { ChevronLeft, CircleAlert, Plus, Ruler, Scale, Trash2 } from 'lucide-react-native';
+import { CircleAlert, Plus, Ruler, Scale, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
 import { usePro } from '@/features/billing/hooks/usePro';
-import {
-  BigNumber,
-  Button,
-  Card,
-  EmptyState,
-  IconButton,
-  ListRow,
-  Screen,
-  Segmented,
-  Text,
-  showToast,
-} from '@/ui';
+import { BackButton, BigNumber, Button, Card, EmptyState, Enter, IconButton, ListRow, Screen, SectionHeader, Segmented, showToast, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { LineChart } from '../components/LineChart';
 import { ChartSkeleton } from '../components/Skeletons';
-import { RangePicker, SectionTitle, Stagger } from '../components/bits';
+import { RangePicker } from '../components/bits';
 import { useToday, useUnits } from '../hooks/useProgress';
 import { FREE_RANGE, measurementSeries, weightSeries, type Range } from '../logic/body';
 import { dayLabel, shortDate } from '../logic/dates';
@@ -78,14 +67,7 @@ export function BodyScreen() {
     });
   };
 
-  const back = (
-    <IconButton
-      icon={ChevronLeft}
-      accessibilityLabel="Back"
-      onPress={() => router.back()}
-      testID="back"
-    />
-  );
+  const back = <BackButton fallback="/progress" />;
   const footer = (
     <Button
       label={tab === 'weight' ? 'Add weight' : 'Add measurements'}
@@ -131,7 +113,7 @@ export function BodyScreen() {
             testID="body-empty"
           />
         ) : (
-          <Stagger index={0}>
+          <Enter index={0}>
             <View style={{ gap: t.spacing.md }}>
               <View
                 style={{
@@ -177,10 +159,10 @@ export function BodyScreen() {
                 value={effective}
                 onChange={setRange}
                 isPro={isPro}
-                onLocked={() => router.push('/paywall')}
+                onLocked={() => router.push({ pathname: '/paywall', params: { source: 'body' } })}
               />
             </View>
-          </Stagger>
+          </Enter>
         )
       ) : measures.length === 0 ? (
         <EmptyState
@@ -195,12 +177,12 @@ export function BodyScreen() {
             value={effective}
             onChange={setRange}
             isPro={isPro}
-            onLocked={() => router.push('/paywall')}
+            onLocked={() => router.push({ pathname: '/paywall', params: { source: 'body' } })}
           />
           {measures.map((m, i) => {
             const unit = m.kind === 'percent' ? '%' : lu;
             return (
-              <Stagger index={i} key={m.key}>
+              <Enter index={i} key={m.key}>
                 <Card testID={`measure-${m.key}`}>
                   <View
                     style={{
@@ -237,7 +219,7 @@ export function BodyScreen() {
                     />
                   ) : null}
                 </Card>
-              </Stagger>
+              </Enter>
             );
           })}
         </View>
@@ -245,7 +227,7 @@ export function BodyScreen() {
 
       {!body.loading && entries.length > 0 ? (
         <View testID="body-entries">
-          <SectionTitle title="Entries" />
+          <SectionHeader title="Entries" />
           {entries.map((r, i) => {
             const parts = [
               r.weightKg != null ? `${displayWeight(r.weightKg, units)} ${wu}` : null,

@@ -1,14 +1,13 @@
-import { router } from 'expo-router';
-import { BarChart3, ChevronLeft, CircleAlert } from 'lucide-react-native';
+import { BarChart3, CircleAlert } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
-import { Card, Chip, EmptyState, IconButton, Screen, Text } from '@/ui';
+import { BackButton, Card, Chip, EmptyState, Enter, Screen, SectionHeader, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { BarChart } from '../components/BarChart';
 import { ChartSkeleton } from '../components/Skeletons';
-import { SectionTitle, Stagger } from '../components/bits';
+
 import { useNutrition, useToday, useTraining } from '../hooks/useProgress';
 import { lastDays, lastWeekStarts, shortDate } from '../logic/dates';
 import { MUSCLES, type Muscle } from '../logic/engine';
@@ -47,14 +46,7 @@ export function TrendsScreen() {
   );
   const kcal = calorieSummary(calories);
   const weekLabels = weeks.map(shortDate);
-  const back = (
-    <IconButton
-      icon={ChevronLeft}
-      accessibilityLabel="Back"
-      onPress={() => router.back()}
-      testID="back"
-    />
-  );
+  const back = <BackButton fallback="/progress" />;
   const loading = training.loading || nutrition.loading;
   const error = training.error ?? nutrition.error;
   const hasAdherence = adherence.some((w) => w.rate != null);
@@ -73,12 +65,12 @@ export function TrendsScreen() {
         />
       ) : (
         <>
-          <Stagger index={0}>
-            <SectionTitle title="Weekly volume" />
+          <Enter index={0}>
+            <SectionHeader title="Weekly volume" />
             <Text variant="callout" color="textSecondary">
               Hard sets per week (a secondary muscle counts half).
             </Text>
-          </Stagger>
+          </Enter>
           {trained.length === 0 ? (
             <Card testID="volume-empty">
               <Text variant="callout" color="textSecondary">
@@ -114,12 +106,12 @@ export function TrendsScreen() {
             </View>
           )}
 
-          <Stagger index={1}>
-            <SectionTitle title="Adherence" />
+          <Enter index={1}>
+            <SectionHeader title="Adherence" />
             <Text variant="callout" color="textSecondary">
               Planned workouts done and planned meals eaten, per week.
             </Text>
-          </Stagger>
+          </Enter>
           {hasAdherence ? (
             <View style={{ gap: t.spacing.xs }}>
               <BarChart
@@ -143,12 +135,12 @@ export function TrendsScreen() {
             </Card>
           )}
 
-          <Stagger index={2}>
-            <SectionTitle title="Calories" />
+          <Enter index={2}>
+            <SectionHeader title="Calories" />
             <Text variant="callout" color="textSecondary">
               Logged per day vs your target (the dark line).
             </Text>
-          </Stagger>
+          </Enter>
           {kcal.logged === 0 ? (
             <EmptyState
               icon={BarChart3}

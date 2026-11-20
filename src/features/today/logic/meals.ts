@@ -13,6 +13,8 @@ export type MealView = {
   /** "13:00" from the user's meal times, when known. */
   time: string | null;
   recipeId: string | null;
+  /** Servings of the recipe (opens the recipe at this portion). */
+  portion: number;
   title: string;
   status: MealStatus;
   nutrients: Nutrients;

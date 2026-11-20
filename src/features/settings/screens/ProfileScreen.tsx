@@ -19,7 +19,17 @@ import { localToday, regenerateWeek } from '@/features/planner/planService';
 import { planForWeek, useLatestPlan } from '@/features/planner/repo';
 import { track } from '@/services/analytics';
 import { useTheme } from '@/theme';
-import { Button, Chip, EmptyState, IconButton, Screen, Segmented, showToast, Text } from '@/ui';
+import {
+  Button,
+  Chip,
+  EmptyState,
+  goBack,
+  IconButton,
+  Screen,
+  Segmented,
+  showToast,
+  Text,
+} from '@/ui';
 
 import { draftChanged, draftProblem, locationOf, type PlanDraft } from '../logic/profile';
 import { saveProfile, useProfile, type Profile } from '../repo';
@@ -82,7 +92,7 @@ export function ProfileScreen({ replan = replanWeeks }: ProfileScreenProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const back = () => router.back();
+  const back = () => goBack();
   const header = <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={back} />;
 
   if (!profile || !draft || !saved) {

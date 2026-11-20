@@ -15,6 +15,7 @@
 | ab10258f06bbd5122 | r2 perf+gym audit (read-only) → perf_gym_audit_r2.md | main |
 | a5954d6d830fe1ec9 | r2 bug audit (read-only) → bug_audit_r2.md | main |
 | a2d272f393858266d | r2 perf+gym audit (Opus, replaces Fable one) | main |
-| aab70c661baf2e36c | r2-ui fix (Opus) | /home/user/repwise-r2-ui |
-| a06d7fc68ba94f84d | r2-bug fix (Opus) | /home/user/repwise-r2-bug |
-| a40e5c39fb2ebdcb7 | r2-perf fix (Opus) | /home/user/repwise-r2-perf |
+| aab70c661baf2e36c | r2-ui fix (Opus) (MERGED) | /home/user/repwise-r2-ui |
+| a06d7fc68ba94f84d | r2-bug fix (Opus) (MERGED) | /home/user/repwise-r2-bug |
+| a40e5c39fb2ebdcb7 | r2-perf fix (Opus) (MERGED) | /home/user/repwise-r2-perf |
+| ac63d437e6f073c62 | r2-native build fix (Opus) | /home/user/repwise-r2-native |

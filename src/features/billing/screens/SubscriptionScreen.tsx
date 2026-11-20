@@ -1,9 +1,9 @@
 import { Redirect, router } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+
 import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { Button, Card, IconButton, Screen, showToast, Text } from '@/ui';
+import { BackButton, Button, Card, Screen, showToast, Text } from '@/ui';
 
 import { useBilling } from '../hooks/useBilling';
 import { usePro } from '../hooks/usePro';
@@ -31,9 +31,7 @@ export function SubscriptionScreen() {
     <Screen
       title="Subscription"
       testID="screen-subscription"
-      headerLeft={
-        <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={() => router.back()} />
-      }
+      headerLeft={<BackButton />}
       footer={
         <>
           {pro.subscribed ? (

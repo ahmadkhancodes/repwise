@@ -65,6 +65,9 @@ export async function keyPair(curve: 'P-256' | 'P-384'): Promise<CryptoKeyPair> 
   return (await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: curve }, true, ['sign', 'verify'])) as CryptoKeyPair;
 }
 
+const DEFAULT_NOT_BEFORE = Date.UTC(2020, 0, 1);
+const DEFAULT_NOT_AFTER = Date.UTC(2049, 0, 1);
+
 export async function makeCert(opts: {
   cn: string;
   curve: 'P-256' | 'P-384';
@@ -92,7 +95,9 @@ export async function makeCert(opts: {
     int(crypto.getRandomValues(new Uint8Array(8))),
     seq(sigOid),
     name(issuerCn),
-    seq(time(opts.notBefore ?? now - 86_400_000), time(opts.notAfter ?? now + 10 * 365 * 86_400_000)),
+    // Fixed default validity (not relative to the real clock): tests verify at the injected T0,
+    // which must stay inside the window whatever day the suite runs.
+    seq(time(opts.notBefore ?? Math.min(now, DEFAULT_NOT_BEFORE)), time(opts.notAfter ?? Math.max(now, DEFAULT_NOT_AFTER))),
     name(opts.cn),
     spki,
     explicit(3, seq(...exts)),

@@ -90,6 +90,8 @@ function RootLayout() {
             <Stack
               screenOptions={{
                 headerShown: false,
+                // Screens under the player (tabs) do not re-render while covered (perf r2 A2).
+                freezeOnBlur: true,
                 contentStyle: { backgroundColor: t.colors.bg },
                 animationDuration: t.motion.duration.base,
               }}

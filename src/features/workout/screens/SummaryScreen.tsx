@@ -1,10 +1,9 @@
 import { router } from 'expo-router';
 import { Share2, TrendingUp, Trophy, TriangleAlert } from 'lucide-react-native';
-import { useEffect, useRef, type ComponentRef } from 'react';
+import { useRef, type ComponentRef } from 'react';
 import { Share, View } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { haptics } from '@/services/haptics';
 import { useCatalogFor } from '@/services/catalog';
 import { useTheme } from '@/theme';
 import { shareViewAsImage } from '@/features/progress/services/shareImage';
@@ -13,7 +12,9 @@ import {
   Button,
   Card,
   EmptyState,
+  enterAt,
   Screen,
+  SectionHeader,
   SkeletonCard,
   SkeletonGroup,
   SkeletonText,
@@ -33,20 +34,14 @@ import { formatWeight, toDisplayWeight } from '../logic/units';
 /** S35 Workout summary: one huge number, PRs (W3 wow moment), next-time suggestions, share. */
 export function SummaryScreen({ sessionId }: { sessionId: string }) {
   const t = useTheme();
+  const reduce = useReducedMotion();
   const catalog = useCatalogFor('exercises');
   const { unit } = useUnits();
   const { data, loaded, error } = useSummary(sessionId, catalog, unit);
-  const celebrated = useRef(false);
   const card = useRef<ComponentRef<typeof View>>(null);
   const prCount = data?.summary.prs.length ?? 0;
 
-  useEffect(() => {
-    if (prCount > 0 && !celebrated.current) {
-      celebrated.current = true;
-      haptics.success();
-    }
-  }, [prCount]);
-
+  // No buzz here (P2-11): finishing already buzzed success once, and PRs were celebrated live.
   const done = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/train'));
 
   if (error) {
@@ -156,40 +151,52 @@ export function SummaryScreen({ sessionId }: { sessionId: string }) {
 
           {summary.prs.length ? (
             <View style={{ gap: t.spacing.sm }}>
-              <Text variant="title2" accessibilityRole="header">
-                New records
-              </Text>
+              <SectionHeader title="New records" />
               {summary.prs.map((p, i) => (
-                <Animated.View
-                  key={p.name}
-                  entering={FadeInUp.delay(200 + i * 120)
-                    .springify()
-                    .damping(t.motion.spring.damping)
-                    .stiffness(t.motion.spring.stiffness)}
-                >
-                  <Card
-                    selected
+                // One PR look app-wide (P2-14): inverse card, accent-on-inverse trophy disc.
+                <Animated.View key={p.name} entering={enterAt(i + 2, reduce)}>
+                  <View
                     testID={`summary-pr-${i}`}
-                    accessibilityLabel={`New PR: ${p.name}`}
+                    accessible
+                    accessibilityLabel={`New PR: ${p.name}, ${formatWeight(p.pr.weightKg, unit)} ${unit} for ${p.pr.reps}`}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: t.spacing.sm,
+                      padding: t.spacing.card,
+                      borderRadius: t.radius.card,
+                      backgroundColor: t.colors.inverse,
+                    }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
+                    <View
+                      style={{
+                        width: t.spacing.xxxl,
+                        height: t.spacing.xxxl,
+                        borderRadius: t.radius.pill,
+                        backgroundColor: t.colors.accentOnInverse,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
                       <Trophy
-                        color={t.colors.accentText}
-                        size={t.sizes.icon}
-                        strokeWidth={t.sizes.iconStroke}
+                        color={t.colors.inverse}
+                        size={t.sizes.iconMedium}
+                        strokeWidth={t.sizes.iconStrokeBold}
                       />
-                      <View style={{ flex: 1 }}>
-                        <Text variant="caption" color="accentText">
-                          New PR{p.pr.kind === 'e1rm' ? ' · best set' : ''}
-                        </Text>
-                        <Text variant="headline">{p.name}</Text>
-                      </View>
-                      <Text variant="title2" tabular>
-                        {formatWeight(p.pr.weightKg, unit)} {unit}
-                        <Text variant="callout" color="textSecondary">{` × ${p.pr.reps}`}</Text>
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text variant="eyebrow" color="accentOnInverse">
+                        New PR{p.pr.kind === 'e1rm' ? ' · best set' : ''}
+                      </Text>
+                      <Text variant="headline" color="onInverse" numberOfLines={2}>
+                        {p.name}
                       </Text>
                     </View>
-                  </Card>
+                    <Text variant="title2" color="onInverse" tabular>
+                      {formatWeight(p.pr.weightKg, unit)} {unit}
+                      <Text variant="callout" color="onInverse">{` × ${p.pr.reps}`}</Text>
+                    </Text>
+                  </View>
                 </Animated.View>
               ))}
             </View>
@@ -198,9 +205,7 @@ export function SummaryScreen({ sessionId }: { sessionId: string }) {
 
         {summary.next.length ? (
           <View style={{ gap: t.spacing.xs }}>
-            <Text variant="title2" accessibilityRole="header">
-              Next time
-            </Text>
+            <SectionHeader title="Next time" />
             {summary.next.map((n, i) => (
               <View
                 key={n.name}

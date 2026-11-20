@@ -26,8 +26,10 @@ import {
 } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
 
-import { quickAddWater, toggleMeal } from '../actions';
-import { TargetsIcon } from '../components/icons';
+import { ListGroup, TargetsIcon } from '@/ui';
+
+import { quickAddWater, tickMealFromLink, toggleMeal } from '../actions';
+import { openMeal } from '../navigation';
 import { MealTile } from '../components/MealTile';
 import { SwapSheet } from '../components/SwapSheet';
 import { useEatDay, useEatWeek, type MealView } from '../hooks/useEat';
@@ -45,8 +47,17 @@ export function EatScreen() {
   const today = todayISO();
   const [date, setDate] = useState(today);
   const t = useTheme();
-  // Deep links: widget quick log `/eat?log=1`; meal notification `/eat?mealId=…[&swap=1]`.
-  const params = useLocalSearchParams<{ log?: string; mealId?: string; swap?: string }>();
+  // Deep links: widget quick log `/eat?log=1`; meal notification `/eat?mealId=…[&swap=1]`;
+  // widget "Ate it" `/eat?mealId=…&tick=1`.
+  const params = useLocalSearchParams<{ log?: string; mealId?: string; swap?: string; tick?: string }>();
+  const tickMealId = params.tick === '1' && params.mealId ? params.mealId : null;
+  const handledTick = useRef<string | null>(null);
+  useEffect(() => {
+    if (!tickMealId || handledTick.current === tickMealId) return;
+    handledTick.current = tickMealId;
+    tickMealFromLink(tickMealId); // the widget's next meal is today's: the Day view already shows it
+    router.setParams({ tick: undefined, mealId: undefined });
+  }, [tickMealId]);
   const logKey = params.log === '1' ? 'log' : null;
   const handledLog = useRef<string | null>(null);
   useEffect(() => {
@@ -147,8 +158,7 @@ function DayView({
   }, [dayMeals]);
   const onSwap = useCallback((m: MealView) => setSwap(m), []);
   const onOpen = useCallback((m: MealView) => {
-    if (!m.recipeId) return;
-    router.push({ pathname: '/recipe/[id]', params: { id: m.recipeId, portion: String(m.portion), mealId: m.id } });
+    openMeal(m);
   }, []);
 
   const header = (
@@ -214,14 +224,16 @@ function DayView({
           />
         </Card>
       ) : null}
-      <ListRow
-        title="Daily targets"
-        value={target ? `${target.kcal.toLocaleString()} kcal` : undefined}
-        icon={TargetsIcon}
-        onPress={() => router.push({ pathname: '/meal/targets', params: { date } })}
-        chevron
-        testID="open-targets"
-      />
+      <ListGroup>
+        <ListRow
+          title="Daily targets"
+          value={target ? `${target.kcal.toLocaleString()} kcal` : undefined}
+          icon={TargetsIcon}
+          onPress={() => router.push({ pathname: '/meal/targets', params: { date } })}
+          chevron
+          testID="open-targets"
+        />
+      </ListGroup>
 
       {locked ? (
         <EmptyState
@@ -253,14 +265,16 @@ function DayView({
         </View>
       )}
 
-      <ListRow
-        title="Ate out or off-plan?"
-        subtitle="Log food or a meal out"
-        icon={UtensilsCrossed}
-        onPress={() => router.push({ pathname: '/meal/log', params: { date } })}
-        chevron
-        testID="open-log"
-      />
+      <ListGroup>
+        <ListRow
+          title="Ate out or off-plan?"
+          subtitle="Log food or a meal out"
+          icon={UtensilsCrossed}
+          onPress={() => router.push({ pathname: '/meal/log', params: { date } })}
+          chevron
+          testID="open-log"
+        />
+      </ListGroup>
       <WaterCard
         totalMl={day.waterMl}
         goalMl={waterGoal}
@@ -314,14 +328,16 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
         />
       </View>
 
-      <ListRow
-        title="Grocery list"
-        subtitle="The whole week in one list, by aisle"
-        icon={ShoppingBasket}
-        onPress={() => router.push({ pathname: '/grocery', params: { week: start } })}
-        chevron
-        testID="week-grocery"
-      />
+      <ListGroup>
+        <ListRow
+          title="Grocery list"
+          subtitle="The whole week in one list, by aisle"
+          icon={ShoppingBasket}
+          onPress={() => router.push({ pathname: '/grocery', params: { week: start } })}
+          chevron
+          testID="week-grocery"
+        />
+      </ListGroup>
 
       {week.state === 'loading' ? (
         <SkeletonGroup label="Loading the week" testID="week-loading" style={{ gap: t.spacing.sm }}>

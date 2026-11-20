@@ -32,7 +32,7 @@ const {
 const ALLOWED_EXCLUSIONS: Record<string, string> = {};
 
 describe('toEngine adapter', () => {
-  const out = toEngineCatalogues();
+  const out = toEngineCatalogues({ exercises, recipes, foods });
 
   it('every exercise parses with the engine ExerciseSchema, except the pinned exclusions', () => {
     for (const e of out.exercises) {

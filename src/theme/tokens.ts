@@ -84,7 +84,15 @@ export const fonts = {
 } as const;
 
 export type TypeVariant =
-  'hero' | 'display' | 'title1' | 'title2' | 'headline' | 'body' | 'callout' | 'caption';
+  | 'hero'
+  | 'display'
+  | 'title1'
+  | 'title2'
+  | 'headline'
+  | 'body'
+  | 'callout'
+  | 'caption'
+  | 'eyebrow';
 
 export type TypeStyle = {
   fontFamily: string;
@@ -96,6 +104,8 @@ export type TypeStyle = {
   letterSpacing?: number;
   /** Always render with tabular figures (numbers that tick). */
   tabular?: boolean;
+  /** Rendered uppercase by style (the source text stays sentence case for screen readers). */
+  uppercase?: boolean;
 };
 
 export const typography: Record<TypeVariant, TypeStyle> = {
@@ -125,6 +135,17 @@ export const typography: Record<TypeVariant, TypeStyle> = {
   body: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 24 },
   callout: { fontFamily: fonts.medium, fontSize: 14, lineHeight: 20 },
   caption: { fontFamily: fonts.medium, fontSize: 12, lineHeight: 16 },
+  /**
+   * Section kicker above a title ("Up next", "Your plan is ready"): caption size, semibold,
+   * uppercase by style with open tracking. Write the text in sentence case.
+   */
+  eyebrow: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.8,
+    uppercase: true,
+  },
 };
 
 /** Spacing scale (sheet 11 + CLAUDE.md union). */
@@ -177,6 +198,8 @@ export const sizes = {
   /** BigTimer / kcal-reveal ring. Fits a 360dp screen with screen padding. */
   ringHero: 240,
   ringStroke: 10,
+  /** Small macro rings beside the kcal ring. */
+  ringStrokeThin: 5,
   /** Wheel picker row height at 100% font scale. */
   wheelRow: 44,
 } as const;

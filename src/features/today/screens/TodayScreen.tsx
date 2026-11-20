@@ -8,7 +8,7 @@ import { CardDetailSheet } from '@/features/assistant/components/CardDetailSheet
 import { useAssistant } from '@/features/assistant/hooks/useAssistant';
 import type { ShownCard } from '@/features/assistant/logic/cardState';
 import { usePro } from '@/features/billing';
-import { quickAddWater, SwapSheet, toggleMeal, toMealView, type MealView as EatMealView } from '@/features/meals';
+import { openMeal, quickAddWater, SwapSheet, toggleMeal, toMealView, type MealView as EatMealView } from '@/features/meals';
 import { getWaterGoal } from '@/features/nutrition';
 import { WaterCard } from '@/features/nutrition/components/WaterCard';
 import { trainHref } from '@/features/workout';
@@ -127,6 +127,9 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
     toggleMeal(meal, dayMeals ?? []);
   }, [dayMeals]);
   const onSwap = useCallback((meal: MealView) => setSwapId(meal.id), []);
+  const onOpenMeal = useCallback((meal: MealView) => {
+    openMeal(meal);
+  }, []);
 
   // The meals swap sheet (engine swapChoices + applySwap) works on the meals domain's view.
   const swapRow = swapId ? model.snapshot?.today.meals.find((m) => m.id === swapId) : undefined;
@@ -219,6 +222,7 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
           meals={view.meals}
           nextId={view.next?.id}
           loading={model.catalogLoading}
+          onOpen={onOpenMeal}
           onToggle={onToggle}
           onSwap={onSwap}
           index={2}

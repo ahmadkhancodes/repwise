@@ -119,7 +119,7 @@ export function NotifyScreen() {
     setBusy(true);
     // Shows the system prompt and fires `notification_permission` (notifications service).
     const result = await requestPermission();
-    if (result === 'granted') haptics.success();
+    if (result === 'granted') haptics.light();
     setBusy(false);
     toPlan();
   };

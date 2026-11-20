@@ -5,9 +5,8 @@ import { View } from 'react-native';
 
 import { saveProfile, useProfile } from '@/features/settings/repo';
 import { useTheme, type ColorToken } from '@/theme';
-import { BigNumber, Button, Card, Chip, EmptyState, Screen, Segmented, Sheet, Text, showToast } from '@/ui';
+import { BackButton, BigNumber, Button, Card, Chip, EmptyState, Screen, Segmented, Sheet, showToast, Text } from '@/ui';
 
-import { BackButton } from '../components/BackButton';
 import { isISODate, todayISO } from '../logic/dates';
 import { targetsFor } from '../logic/plan';
 import { energyShare } from '../logic/targets';
@@ -54,7 +53,7 @@ export function TargetsScreen() {
 
   if (!profile || !targets) {
     return (
-      <Screen title="Targets" headerLeft={<BackButton />} testID="screen-targets">
+      <Screen title="Targets" headerLeft={<BackButton fallback="/eat" />} testID="screen-targets">
         <EmptyState
           icon={Utensils}
           title="No targets yet"
@@ -82,7 +81,7 @@ export function TargetsScreen() {
   return (
     <Screen
       title="Targets"
-      headerLeft={<BackButton />}
+      headerLeft={<BackButton fallback="/eat" />}
       testID="screen-targets"
       footer={<Button label="Edit goal and activity" onPress={() => setEditing(true)} testID="targets-edit" />}
     >

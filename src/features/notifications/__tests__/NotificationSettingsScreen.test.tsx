@@ -16,11 +16,18 @@ import { NotificationSettingsScreen } from '../screens/NotificationSettingsScree
 jest.mock('expo-notifications', () => require('../../../../test/mocks/expoNotifications'));
 jest.mock('react-native-android-widget', () => require('../../../../test/mocks/androidWidget'));
 jest.mock('@bacons/apple-targets', () => ({
-  ExtensionStorage: Object.assign(jest.fn().mockImplementation(() => ({ set: jest.fn() })), { reloadWidget: jest.fn() }),
+  ExtensionStorage: Object.assign(
+    jest.fn().mockImplementation(() => ({ set: jest.fn() })),
+    { reloadWidget: jest.fn() },
+  ),
 }));
-jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
+jest.mock('expo-router', () => ({
+  router: { back: jest.fn(), push: jest.fn(), replace: jest.fn(), canGoBack: jest.fn(() => true) },
+}));
 
-const N = jest.requireMock('expo-notifications') as typeof import('../../../../test/mocks/expoNotifications');
+const N = jest.requireMock(
+  'expo-notifications',
+) as typeof import('../../../../test/mocks/expoNotifications');
 
 beforeEach(async () => {
   resetDbForTests();
@@ -39,13 +46,22 @@ describe.each(SCHEMES)('NotificationSettingsScreen (%s)', (scheme) => {
   it('granted: shows every reminder toggle and times, no primary button', async () => {
     await renderThemed(<NotificationSettingsScreen />, scheme);
     expect(await screen.findByTestId('toggle-brief')).toBeTruthy();
-    for (const id of ['toggle-meals', 'toggle-workout', 'toggle-fuel', 'toggle-evening', 'toggle-checkin', 'toggle-quiet']) {
+    for (const id of [
+      'toggle-meals',
+      'toggle-workout',
+      'toggle-fuel',
+      'toggle-evening',
+      'toggle-checkin',
+      'toggle-quiet',
+    ]) {
       expect(screen.getByTestId(id)).toBeTruthy();
     }
     expect(screen.getByTestId('time-lunch')).toBeTruthy();
     expect(screen.queryByTestId('turn-on')).toBeNull();
     expect(screen.queryByTestId('toggle-trial')).toBeNull(); // payments off
-    expect(screen.getByRole('switch', { name: /Morning brief/ }).props.accessibilityState.checked).toBe(true);
+    expect(
+      screen.getByRole('switch', { name: /Morning brief/ }).props.accessibilityState.checked,
+    ).toBe(true);
   });
 });
 
@@ -72,7 +88,9 @@ describe('NotificationSettingsScreen', () => {
     await fireEvent.press(row);
     expect(useNotificationPrefs.getState().prefs.meals).toBe(false);
     expect(JSON.parse(kv.getString('notifications.prefs.v1')!).meals).toBe(false);
-    expect(screen.getByRole('switch', { name: /Meal reminders/ }).props.accessibilityState.checked).toBe(false);
+    expect(
+      screen.getByRole('switch', { name: /Meal reminders/ }).props.accessibilityState.checked,
+    ).toBe(false);
   });
 
   it('quiet hours: turning off hides the From/To rows', async () => {
@@ -129,7 +147,10 @@ describe('NotificationSettingsScreen', () => {
     const row = await screen.findByTestId('toggle-meals');
     expect(screen.getByTestId('toggle-trial')).toBeTruthy();
     await fireEvent.press(row);
-    expect(router.push).toHaveBeenCalledWith('/paywall');
+    expect(router.push).toHaveBeenCalledWith({
+      pathname: '/paywall',
+      params: { source: 'notifications' },
+    });
     expect(useNotificationPrefs.getState().prefs.meals).toBe(true);
   });
 

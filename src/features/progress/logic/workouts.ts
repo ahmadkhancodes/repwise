@@ -73,6 +73,41 @@ export function flattenSets(
   return out.sort((a, b) => a.doneAt - b.doneAt || a.id.localeCompare(b.id));
 }
 
+/** One row of the joined logged-sets query (progress/repo.ts `loggedSetRows`). */
+export type LoggedSetRow = {
+  id: string;
+  sessionId: string;
+  exerciseId: string;
+  sessionDate: string | null;
+  doneAt: number | null;
+  type: string;
+  weightKg: number | null;
+  reps: number | null;
+};
+
+/**
+ * Joined rows → `LoggedSet`s, exactly as `flattenSets` builds them (same date fallback, type
+ * normalisation, clamping and order). SQL already did the join and the filters.
+ */
+export function toLoggedSets(rows: readonly LoggedSetRow[]): LoggedSet[] {
+  const out: LoggedSet[] = [];
+  for (const r of rows) {
+    if (r.doneAt == null) continue;
+    out.push({
+      id: r.id,
+      sessionId: r.sessionId,
+      exerciseId: r.exerciseId,
+      date: r.sessionDate ?? localISODate(r.doneAt),
+      doneAt: r.doneAt,
+      type: (SET_TYPES.has(r.type) ? r.type : 'working') as LoggedSet['type'],
+      weightKg: Math.max(0, r.weightKg ?? 0),
+      reps: Math.max(0, Math.round(r.reps ?? 0)),
+    });
+  }
+  // Input is in done_at order already, so this is a linear pass; it fixes ties exactly as before.
+  return out.sort((a, b) => a.doneAt - b.doneAt || a.id.localeCompare(b.id));
+}
+
 /** Sets that count as hard work for volume and records (no warm-ups, no cardio). */
 export function isWorkSet(s: Pick<LoggedSet, 'type'>): boolean {
   return s.type === 'working' || s.type === 'drop' || s.type === 'failure';

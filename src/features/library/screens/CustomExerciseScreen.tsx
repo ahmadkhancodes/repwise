@@ -2,7 +2,7 @@ import type { Equipment, Level, Muscle, PatternFamily } from '@repwise/content';
 import { router } from 'expo-router';
 import { SearchX, Trash2, X } from 'lucide-react-native';
 import { useMemo, useState, type ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
@@ -182,11 +182,9 @@ export function CustomExerciseScreen({ id }: { id?: string }) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <>
       <Screen
+        keyboard
         title={editing ? 'Edit exercise' : 'New exercise'}
         testID="screen-custom-exercise"
         headerLeft={
@@ -315,6 +313,6 @@ export function CustomExerciseScreen({ id }: { id?: string }) {
           testID="custom-delete-confirm"
         />
       </Sheet>
-    </KeyboardAvoidingView>
+    </>
   );
 }

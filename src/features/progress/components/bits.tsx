@@ -1,7 +1,5 @@
 import { Lock } from 'lucide-react-native';
-import type { ReactNode } from 'react';
 import { View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Segmented, Text } from '@/ui';
 import { useTheme } from '@/theme';
@@ -25,41 +23,6 @@ export function Stat({ label, value, testID }: { label: string; value: string; t
         {value}
       </Text>
     </View>
-  );
-}
-
-/** Section title row with an optional trailing element. */
-export function SectionTitle({ title, right }: { title: string; right?: ReactNode }) {
-  const t = useTheme();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginTop: t.spacing.xs,
-      }}
-    >
-      <Text variant="title2" accessibilityRole="header">
-        {title}
-      </Text>
-      {right}
-    </View>
-  );
-}
-
-/** List stagger (sheet 11: 20 ms) with the shared spring. */
-export function Stagger({ index, children }: { index: number; children: ReactNode }) {
-  const t = useTheme();
-  return (
-    <Animated.View
-      entering={FadeInDown.delay(index * t.motion.listStagger)
-        .springify()
-        .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness)}
-    >
-      {children}
-    </Animated.View>
   );
 }
 

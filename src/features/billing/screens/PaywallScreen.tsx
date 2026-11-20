@@ -11,14 +11,16 @@ import {
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Linking, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { billing, type PurchaseOutcome, type RestoreOutcome } from '@/services/billing';
 import { useTheme } from '@/theme';
 import { Badge, Button, IconButton, PressableScale, Screen, showToast, Text, TickMark } from '@/ui';
+import { enterAt } from '@/ui/listMotion';
 
 import { LEGAL_URLS } from '../config';
 import { useBilling } from '../hooks/useBilling';
+import { paywallHeadline } from '../logic/headline';
 import type { PlanOffer } from '../logic/offers';
 import { cancelInstructions, storeName } from '../logic/manage';
 import { trialTimeline, type TimelineStep } from '../logic/timeline';
@@ -118,7 +120,7 @@ function PlanRow({
         paddingVertical: t.spacing.sm,
         borderRadius: t.radius.card,
         borderWidth: t.sizes.borderThick,
-        borderColor: selected ? t.colors.accent : t.colors.border,
+        borderColor: selected ? t.colors.accent : t.colors.borderStrong,
         backgroundColor: selected ? t.colors.accentSoft : t.colors.surface,
       }}
     >
@@ -199,8 +201,8 @@ function TrialTimeline({ steps }: { steps: TimelineStep[] }) {
             <View
               style={{ flex: 1, gap: t.spacing.xxs / 2, paddingBottom: last ? 0 : t.spacing.md }}
             >
-              <Text variant="caption" color="textSecondary" tabular>
-                {s.day.toUpperCase()}
+              <Text variant="eyebrow" color="textSecondary" tabular>
+                {s.day}
               </Text>
               <Text variant="headline" tabular>
                 {s.title}
@@ -224,6 +226,7 @@ function TrialTimeline({ steps }: { steps: TimelineStep[] }) {
 export function PaywallScreen() {
   const t = useTheme();
   const params = useLocalSearchParams<{ source?: string; name?: string }>();
+  const reduceMotion = useReducedMotion();
   const b = useBilling();
   const [selected, setSelected] = useState<PlanId>(DEFAULT_PLAN);
 
@@ -256,16 +259,12 @@ export function PaywallScreen() {
     if (out.status === 'restored') close();
   };
 
-  const header = params.name ? `Your plan is ready, ${params.name}.` : 'Your plan is ready.';
-  const springIn = (i: number) =>
-    FadeInDown.delay(i * t.motion.listStagger * 3)
-      .springify()
-      .damping(t.motion.spring.damping)
-      .stiffness(t.motion.spring.stiffness);
+  const header = paywallHeadline(params.source, params.name);
+  const springIn = (i: number) => enterAt(i, reduceMotion);
 
   return (
+    // One hero title (N7): no Screen title above it; the eyebrow names the product.
     <Screen
-      title="Repwise Pro"
       testID="screen-paywall"
       headerLeft={
         <IconButton icon={X} accessibilityLabel="Close" onPress={close} testID="paywall-close" />
@@ -294,9 +293,14 @@ export function PaywallScreen() {
       }
     >
       <Animated.View entering={springIn(0)} style={{ gap: t.spacing.sm }}>
-        <Text variant="title1" accessibilityRole="header">
-          {header}
-        </Text>
+        <View style={{ gap: t.spacing.xxs }}>
+          <Text variant="eyebrow" color="accentText" testID="paywall-eyebrow">
+            Repwise Pro
+          </Text>
+          <Text variant="title1" accessibilityRole="header" testID="paywall-title">
+            {header}
+          </Text>
+        </View>
         <View style={{ gap: t.spacing.xs }}>
           {BENEFITS.map(({ icon: Icon, text }) => (
             <View

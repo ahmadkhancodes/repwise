@@ -1,6 +1,5 @@
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useState } from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useTheme } from '@/theme';
 import { Button, Chip, Sheet, Text } from '@/ui';
@@ -71,14 +70,33 @@ export function FilterSheet({ open, value, onClose, onApply, countFor }: Props) 
     if (open) setDraft(value);
   }
   const count = open ? countFor(draft) : 0; // no search work while closed
-  const { height } = useWindowDimensions();
 
   return (
-    <Sheet open={open} onClose={onClose} title="Filters" testID="filter-sheet">
-      <BottomSheetScrollView
-        style={{ maxHeight: height * 0.55 }}
-        contentContainerStyle={{ gap: t.spacing.lg, paddingBottom: t.spacing.xs }}
-      >
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title="Filters"
+      scrollable
+      footer={
+        <>
+          <Button
+            label={count === 1 ? 'Show 1 exercise' : `Show ${count} exercises`}
+            onPress={() => onApply(draft)}
+            disabled={count === 0}
+            testID="filter-apply"
+          />
+          <Button
+            label="Clear all"
+            variant="tertiary"
+            onPress={() => setDraft(EMPTY_FILTERS)}
+            disabled={activeFilterCount(draft) === 0}
+            testID="filter-clear"
+          />
+        </>
+      }
+      testID="filter-sheet"
+    >
+      <View style={{ gap: t.spacing.lg }}>
         <Group
           id="muscle"
           title="Muscle"
@@ -112,21 +130,6 @@ export function FilterSheet({ open, value, onClose, onApply, countFor }: Props) 
           options={LEVELS.map((l) => ({ value: l, label: LEVEL_LABEL[l] }))}
           selected={draft.levels}
           onToggle={(v) => setDraft((d) => ({ ...d, levels: toggle(d.levels, v) }))}
-        />
-      </BottomSheetScrollView>
-      <View style={{ gap: t.spacing.xs }}>
-        <Button
-          label={count === 1 ? 'Show 1 exercise' : `Show ${count} exercises`}
-          onPress={() => onApply(draft)}
-          disabled={count === 0}
-          testID="filter-apply"
-        />
-        <Button
-          label="Clear all"
-          variant="tertiary"
-          onPress={() => setDraft(EMPTY_FILTERS)}
-          disabled={activeFilterCount(draft) === 0}
-          testID="filter-clear"
         />
       </View>
     </Sheet>

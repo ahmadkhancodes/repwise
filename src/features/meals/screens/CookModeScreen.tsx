@@ -2,7 +2,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
 import { CircleAlert, ListChecks, Pause, Play, RotateCcw, Timer, X } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, View, useWindowDimensions } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import Animated, { FadeInLeft, FadeInRight, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -38,7 +38,6 @@ export function CookModeScreen() {
   useKeepAwake();
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
   const reduce = useReducedMotion();
   const params = useLocalSearchParams<{ id: string; servings?: string; mealId?: string }>();
   const cat = useCatalogFor('recipes', 'foods');
@@ -66,7 +65,7 @@ export function CookModeScreen() {
       const i = Number(k);
       if (v.endsAt !== null && remainingSeconds(v.endsAt, now) === 0 && !announced.current.has(i)) {
         announced.current.add(i);
-        haptics.success();
+        haptics.light();
         showToast({ message: `Step ${i + 1} timer is done`, tone: 'success', silent: true });
         setTimers((s) => ({ ...s, [i]: { ...v, endsAt: null, left: 0, done: true } }));
       }
@@ -138,7 +137,7 @@ export function CookModeScreen() {
       markMealEaten(String(params.mealId));
       showToast({ message: `Enjoy! ${recipe.title} is logged.`, tone: 'success' });
     } else {
-      haptics.success();
+      haptics.light();
     }
     router.back();
   };
@@ -246,9 +245,8 @@ export function CookModeScreen() {
         />
       </View>
 
-      <Sheet open={showIngredients} onClose={() => setShowIngredients(false)} title={`Ingredients · ${formatServings(servings)} ${servings === 1 ? 'serving' : 'servings'}`} testID="cook-ingredients-sheet">
-        {/* Sheet has no scroll of its own: 10–15 ingredients scroll here instead of clipping. */}
-        <ScrollView nestedScrollEnabled style={{ maxHeight: windowHeight * 0.6 }} testID="cook-ingredients-list">
+      <Sheet scrollable open={showIngredients} onClose={() => setShowIngredients(false)} title={`Ingredients · ${formatServings(servings)} ${servings === 1 ? 'serving' : 'servings'}`} testID="cook-ingredients-sheet">
+        <View testID="cook-ingredients-list">
           {scaledIngredients(recipe, servings, cat.foodById).map((ing, i) => (
             <View
               key={ing.foodId}
@@ -267,7 +265,7 @@ export function CookModeScreen() {
               </Text>
             </View>
           ))}
-        </ScrollView>
+        </View>
       </Sheet>
     </View>
   );

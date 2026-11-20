@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { CloudOff, Plus, SearchX } from 'lucide-react-native';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { FlatList, Platform, ScrollView, View } from 'react-native';
-import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { searchExercises } from '@/services/catalog';
 import { useTheme } from '@/theme';
@@ -16,6 +16,7 @@ import {
   SkeletonGroup,
   SkeletonText,
   Text,
+  enterAt,
 } from '@/ui';
 
 import { ExerciseRow } from '../components/ExerciseRow';
@@ -53,15 +54,10 @@ const StaggeredRow = memo(function StaggeredRow({
   index: number;
   animate: boolean;
 }) {
-  const t = useTheme();
+  const reduce = useReducedMotion();
   if (!animate || index >= STAGGER_ROWS) return <ExerciseRow item={item} onPress={openExercise} />;
   return (
-    <Animated.View
-      entering={FadeInDown.delay(index * t.motion.listStagger)
-        .springify()
-        .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness)}
-    >
+    <Animated.View entering={enterAt(index, reduce)}>
       <ExerciseRow item={item} onPress={openExercise} />
     </Animated.View>
   );

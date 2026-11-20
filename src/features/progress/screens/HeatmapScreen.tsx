@@ -1,10 +1,9 @@
-import { router } from 'expo-router';
-import { Activity, ChevronLeft } from 'lucide-react-native';
+import { Activity } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Card, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/ui';
+import { BackButton, Card, EmptyState, PressableScale, Screen, SectionHeader, Segmented, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import {
@@ -16,7 +15,7 @@ import {
 } from '@/features/library';
 
 import { HeatmapSkeleton } from '../components/Skeletons';
-import { SectionTitle } from '../components/bits';
+
 import { useNow, useTraining } from '../hooks/useProgress';
 import type { Muscle } from '../logic/engine';
 import { muscleLabel, rankMuscles, recoveryHeatmap, recoveryLabel } from '../logic/muscles';
@@ -39,14 +38,7 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
   );
   const worked = ranked.filter((r) => r.sets > 0);
   const focus = selected ?? worked[0]?.muscle ?? null;
-  const back = (
-    <IconButton
-      icon={ChevronLeft}
-      accessibilityLabel="Back"
-      onPress={() => router.back()}
-      testID="back"
-    />
-  );
+  const back = <BackButton fallback="/progress" />;
 
   const select = (m: Muscle) => {
     setSelected(m);
@@ -109,7 +101,7 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
                   </Card>
                 </Animated.View>
               ) : null}
-              <SectionTitle title="This week" />
+              <SectionHeader title="This week" />
               <View style={{ gap: t.spacing.xs }}>
                 {worked.map((r) => (
                   <PressableScale

@@ -17,7 +17,7 @@ import {
   niceDomain,
   tickLabel,
 } from '../logic/chart';
-import { historySections } from '../logic/history';
+import { gateHistory, historySections, historyWindowStart } from '../logic/history';
 import {
   engineExerciseMap,
   rankMuscles,
@@ -512,5 +512,18 @@ describe('dates', () => {
     expect(lastWeekStarts('2026-11-19', 3)).toEqual(['2026-11-02', '2026-11-09', '2026-11-16']);
     expect(shortDate('2026-11-08')).toBe('8 Nov');
     expect(dayLabel('2026-11-19')).toBe('Thu 19 Nov');
+  });
+});
+
+describe('history window (UI audit N4: one rule for Train and Progress)', () => {
+  it('free users see 30 days including today; Pro sees everything', () => {
+    expect(historyWindowStart(true, '2026-11-20')).toBeNull();
+    expect(historyWindowStart(false, '2026-11-20')).toBe('2026-10-22');
+    const items = [{ d: '2026-11-20' }, { d: '2026-10-22' }, { d: '2026-10-21' }, { d: null }];
+    expect(gateHistory(items, (x) => x.d, false, '2026-11-20')).toEqual({
+      visible: [{ d: '2026-11-20' }, { d: '2026-10-22' }],
+      hidden: 2,
+    });
+    expect(gateHistory(items, (x) => x.d, true, '2026-11-20').hidden).toBe(0);
   });
 });

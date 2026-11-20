@@ -4,11 +4,12 @@
  */
 import { haptics } from '@/services/haptics';
 import { track } from '@/services/analytics';
-import type { Catalog } from '@/services/catalog';
+import { lazyCatalog, type Catalog } from '@/services/catalog';
 import { kv } from '@/services/storage';
 import { showToast } from '@/ui';
 
 import { exerciseMeta } from './exerciseMeta';
+import { holdWorkoutAwake, releaseWorkoutAwake } from './hooks/useWorkoutKeepAwake';
 import { durationBucket } from './logic/duration';
 import type { ItemLike } from './logic/player';
 import { nextAfter } from './logic/player';
@@ -22,6 +23,7 @@ import { optimisticSets } from './optimistic';
 import {
   activeSession,
   atomic,
+  createSession,
   discardWorkout,
   type DiscardSnapshot,
   exerciseHistory,
@@ -67,7 +69,12 @@ export function startWorkoutAction(
     return { started: false, activeSessionId: running.id };
   }
   const before = getSession(sessionId);
-  const s = startWorkout(sessionId, (id) => exerciseMeta(id, catalog).cardio, now);
+  // A null catalogue (exercises part not parsed yet) would make every cardio exercise "strength"
+  // and pre-fill weight × reps rows for the whole workout (R2-2). lazyCatalog's getters parse the
+  // part synchronously, so the cardio flag is always right.
+  const cat = catalog ?? lazyCatalog();
+  const s = startWorkout(sessionId, (id) => exerciseMeta(id, cat).cardio, now);
+  if (s?.status === 'active') holdWorkoutAwake(sessionId);
   if (s && before?.status === 'planned') {
     track('workout_started', {
       source: before.planId ? 'plan' : 'custom',
@@ -75,6 +82,29 @@ export function startWorkoutAction(
     });
   }
   return { started: true };
+}
+
+export type RoutineStartResult =
+  | { started: true; sessionId: string }
+  | { started: false; activeSessionId: string };
+
+/**
+ * Start a routine as a new ad-hoc workout. While another workout is active or paused nothing is
+ * created (no orphan session, R2-3): the caller opens the running one to resume or finish it.
+ */
+export function startRoutineAction(
+  routine: { name: string; date: string; exercises: Parameters<typeof createSession>[0]['exercises'] },
+  catalog: Catalog | null,
+  now: number = Date.now(),
+): RoutineStartResult {
+  const running = activeSession();
+  if (running) {
+    showToast({ message: 'Finish or discard the workout in progress first' });
+    return { started: false, activeSessionId: running.id };
+  }
+  const s = createSession({ date: routine.date, title: routine.name, exercises: routine.exercises }, now);
+  const res = startWorkoutAction(s.id, catalog, now);
+  return res.started ? { started: true, sessionId: s.id } : res;
 }
 
 export function pauseWorkoutAction(sessionId: string, now: number = Date.now()): void {
@@ -85,6 +115,7 @@ export function pauseWorkoutAction(sessionId: string, now: number = Date.now()):
   }
   pauseWorkout(sessionId, now);
   restTimer.pause(now);
+  releaseWorkoutAwake(sessionId); // a paused workout lets the phone sleep
 }
 
 export function resumeWorkoutAction(sessionId: string, now: number = Date.now()): void {
@@ -96,6 +127,7 @@ export function resumeWorkoutAction(sessionId: string, now: number = Date.now())
     // ignore
   }
   restTimer.resume(now);
+  holdWorkoutAwake(sessionId);
 }
 
 /** Who comes next after `setId` (for the rest timer + "Rest over" notification copy). */
@@ -333,6 +365,7 @@ export function finishWorkoutAction(
   if (s.status === 'paused') resumeWorkoutAction(sessionId, now);
   const done = finishWorkout(sessionId, now);
   restTimer.clearFor(sessionId);
+  releaseWorkoutAwake(sessionId);
   haptics.success();
   if (!done) return;
   const map = setsForSession(sessionId);
@@ -367,5 +400,6 @@ export function discardWorkoutAction(
 ): DiscardSnapshot | null {
   flushSetWrites();
   restTimer.clearFor(sessionId);
+  releaseWorkoutAwake(sessionId);
   return discardWorkout(sessionId, now);
 }

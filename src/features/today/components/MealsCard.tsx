@@ -1,86 +1,61 @@
-import { memo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { SwapIcon } from '@/features/meals/components/icons';
+import { MealRow, type MealRowModel } from '@/features/meals';
 import { useTheme } from '@/theme';
-import { Badge, Card, IconButton, PressableScale, Skeleton, SkeletonGroup, Text, TickMark } from '@/ui';
+import { Card, SectionHeader, Skeleton, SkeletonGroup, Text } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
 
-import { mealMeta, type MealView } from '../logic/meals';
+import type { MealView } from '../logic/meals';
+
+/** Today's view of a meal mapped onto the shared meals MealRow (compact: no art). Pure. */
+export function todayMealRow(meal: MealView): MealRowModel {
+  return {
+    id: meal.id,
+    slot: meal.slot,
+    title: meal.title,
+    status: meal.status,
+    meta: [meal.time, meal.slotLabel].filter(Boolean).join(' · '),
+    kcal: meal.nutrients.kcal,
+    protein: meal.nutrients.p,
+    carbs: meal.nutrients.c,
+    fat: meal.nutrients.f,
+  };
+}
 
 /**
- * One meal on the timeline. The row IS the checkbox (≥ 56dp, whole row is the target) with the
- * shared TickMark inside: ticking buzzes success (core action), unticking selection. Swap is a
- * sibling icon button so screen readers reach both.
+ * One meal on the timeline: the SAME row as Eat (UI audit N2): leading tick logs it, the body
+ * opens the recipe, long-press or the swap icon swaps.
  */
-export const MealRow = memo(function MealRow({
+export const TodayMealRow = memo(function TodayMealRow({
   meal,
   next = false,
+  onOpen,
   onToggle,
   onSwap,
 }: {
   meal: MealView;
   /** The next meal to eat today (gets a "Next" badge). */
   next?: boolean;
+  onOpen: (meal: MealView) => void;
   onToggle: (meal: MealView) => void;
   onSwap: (meal: MealView) => void;
 }) {
-  const t = useTheme();
-  const eaten = meal.status === 'eaten';
-  const when = [meal.time, meal.slotLabel].filter(Boolean).join(' · ');
+  const model = useMemo(() => todayMealRow(meal), [meal]);
+  const open = useCallback(() => onOpen(meal), [onOpen, meal]);
+  const toggle = useCallback(() => onToggle(meal), [onToggle, meal]);
+  const swap = useCallback(() => onSwap(meal), [onSwap, meal]);
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: t.sizes.row }}>
-      <PressableScale
-        testID={`today-meal-${meal.slot}`}
-        onPress={() => onToggle(meal)}
-        onLongPress={() => onSwap(meal)}
-        feedback={eaten ? 'selection' : 'success'}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: eaten }}
-        accessibilityLabel={`${meal.slotLabel}: ${meal.title}, ${mealMeta(meal.nutrients)}`}
-        accessibilityHint={eaten ? 'Marks it as not eaten' : 'Logs it as eaten. Long-press to swap.'}
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: t.spacing.sm,
-          minHeight: t.sizes.row,
-          paddingVertical: t.spacing.xs,
-          borderRadius: t.radius.button,
-        }}
-      >
-        <TickMark checked={eaten} testID={`today-tick-${meal.slot}`} />
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
-            <Text variant="caption" color="textSecondary" tabular numberOfLines={1} style={{ flexShrink: 1 }}>
-              {when}
-            </Text>
-            {next && !eaten ? <Badge label="Next" tone="accent" testID="today-next-meal" /> : null}
-          </View>
-          <Text
-            variant="headline"
-            color={eaten ? 'textSecondary' : 'textPrimary'}
-            numberOfLines={2}
-            style={eaten ? { textDecorationLine: 'line-through' } : undefined}
-          >
-            {meal.title}
-          </Text>
-          <Text variant="callout" color="textSecondary" tabular numberOfLines={1}>
-            {mealMeta(meal.nutrients)}
-          </Text>
-        </View>
-      </PressableScale>
-      {eaten ? null : (
-        <IconButton
-          icon={SwapIcon}
-          accessibilityLabel={`Swap ${meal.title}`}
-          onPress={() => onSwap(meal)}
-          color="textSecondary"
-          testID={`today-swap-${meal.slot}`}
-        />
-      )}
-    </View>
+    <MealRow
+      meal={model}
+      compact
+      next={next}
+      idPrefix="today-"
+      onOpen={open}
+      onToggle={toggle}
+      onSwap={swap}
+    />
   );
 });
 
@@ -101,6 +76,7 @@ export const MealsCard = memo(function MealsCard({
   meals,
   nextId,
   loading,
+  onOpen,
   onToggle,
   onSwap,
   index = 2,
@@ -108,6 +84,7 @@ export const MealsCard = memo(function MealsCard({
   meals: MealView[];
   nextId?: string;
   loading: boolean;
+  onOpen: (meal: MealView) => void;
   onToggle: (meal: MealView) => void;
   onSwap: (meal: MealView) => void;
   index?: number;
@@ -118,15 +95,18 @@ export const MealsCard = memo(function MealsCard({
   return (
     <Animated.View entering={enterAt(index, reduceMotion)}>
       <Card testID="today-meals">
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: t.spacing.xs }}>
-          <Text variant="headline" accessibilityRole="header" style={{ flex: 1 }}>
-            Meals
-          </Text>
-          {meals.length > 0 ? (
-            <Text variant="callout" color="textSecondary" tabular testID="meals-count">
-              {eaten} of {meals.length} eaten
-            </Text>
-          ) : null}
+        <View style={{ marginBottom: t.spacing.xs }}>
+          <SectionHeader
+            title="Meals"
+            level="card"
+            trailing={
+              meals.length > 0 ? (
+                <Text variant="callout" color="textSecondary" tabular testID="meals-count">
+                  {eaten} of {meals.length} eaten
+                </Text>
+              ) : null
+            }
+          />
         </View>
         {loading ? (
           <MealsSkeleton rows={Math.max(2, meals.length)} />
@@ -137,7 +117,14 @@ export const MealsCard = memo(function MealsCard({
         ) : (
           <View style={{ gap: t.spacing.xxs }}>
             {meals.map((m) => (
-              <MealRow key={m.id} meal={m} next={m.id === nextId} onToggle={onToggle} onSwap={onSwap} />
+              <TodayMealRow
+                key={m.id}
+                meal={m}
+                next={m.id === nextId}
+                onOpen={onOpen}
+                onToggle={onToggle}
+                onSwap={onSwap}
+              />
             ))}
           </View>
         )}

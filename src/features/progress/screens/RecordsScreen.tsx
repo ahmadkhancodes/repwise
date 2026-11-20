@@ -1,13 +1,13 @@
 import { router } from 'expo-router';
-import { ChevronLeft, CircleAlert, Dumbbell, Trophy } from 'lucide-react-native';
+import { CircleAlert, Dumbbell, Trophy } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
-import { EmptyState, IconButton, ListRow, Screen, Segmented } from '@/ui';
+import { BackButton, EmptyState, Enter, ListRow, Screen, Segmented } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { RowsSkeleton } from '../components/Skeletons';
-import { Stagger } from '../components/bits';
+
 import { useTraining, useUnits } from '../hooks/useProgress';
 import { shortDate } from '../logic/dates';
 import { personalRecords, trainedExercises } from '../logic/strength';
@@ -23,14 +23,7 @@ export function RecordsScreen() {
   const [tab, setTab] = useState<Tab>('exercises');
   const list = useMemo(() => trainedExercises(training.sets), [training.sets]);
   const prs = useMemo(() => personalRecords(training.sets), [training.sets]);
-  const back = (
-    <IconButton
-      icon={ChevronLeft}
-      accessibilityLabel="Back"
-      onPress={() => router.back()}
-      testID="back"
-    />
-  );
+  const back = <BackButton fallback="/progress" />;
 
   return (
     <Screen title="Strength" headerLeft={back} testID="screen-progress-records">
@@ -64,7 +57,7 @@ export function RecordsScreen() {
         ) : (
           <View>
             {list.map((e, i) => (
-              <Stagger key={e.exerciseId} index={i}>
+              <Enter key={e.exerciseId} index={i}>
                 <ListRow
                   title={training.exerciseName(e.exerciseId)}
                   subtitle={`${e.sessions} ${e.sessions === 1 ? 'session' : 'sessions'} · last ${shortDate(e.lastDate)}`}
@@ -74,7 +67,7 @@ export function RecordsScreen() {
                   onPress={() => router.push(`/progress/exercise/${e.exerciseId}`)}
                   testID={`exercise-${e.exerciseId}`}
                 />
-              </Stagger>
+              </Enter>
             ))}
           </View>
         )
@@ -88,7 +81,7 @@ export function RecordsScreen() {
       ) : (
         <View style={{ gap: t.spacing.xxs }}>
           {prs.map((p, i) => (
-            <Stagger key={`${p.exerciseId}-${p.sessionId}`} index={i}>
+            <Enter key={`${p.exerciseId}-${p.sessionId}`} index={i}>
               <ListRow
                 icon={Trophy}
                 title={training.exerciseName(p.exerciseId)}
@@ -102,7 +95,7 @@ export function RecordsScreen() {
                 onPress={() => router.push(`/progress/exercise/${p.exerciseId}`)}
                 testID={`pr-row-${i}`}
               />
-            </Stagger>
+            </Enter>
           ))}
         </View>
       )}

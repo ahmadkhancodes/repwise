@@ -1,26 +1,21 @@
 import { z } from 'zod';
 
+import {
+  ALLERGENS,
+  CUISINES,
+  DIET_TAGS,
+  EQUIPMENT,
+  MUSCLES,
+  PATTERN_FAMILIES,
+  PATTERNS,
+} from './enums';
+
+export { ALLERGENS, CUISINES, DIET_TAGS, EQUIPMENT, MUSCLES, PATTERN_FAMILIES, PATTERNS };
+
 /* ------------------------------------------------------------------ */
 /* Shared enums                                                        */
 /* ------------------------------------------------------------------ */
 
-/** EU FIC Annex II — the 14 major allergens. */
-export const ALLERGENS = [
-  'celery',
-  'gluten',
-  'crustaceans',
-  'eggs',
-  'fish',
-  'lupin',
-  'milk',
-  'molluscs',
-  'mustard',
-  'nuts',
-  'peanuts',
-  'sesame',
-  'soybeans',
-  'sulphites',
-] as const;
 export const Allergen = z.enum(ALLERGENS);
 export type Allergen = z.infer<typeof Allergen>;
 
@@ -32,114 +27,15 @@ const kebabId = z
 /* Exercises                                                           */
 /* ------------------------------------------------------------------ */
 
-/** Coarse movement family — the values used in build bible sheet 29. */
-export const PATTERN_FAMILIES = [
-  'squat',
-  'hinge',
-  'lunge',
-  'push_h',
-  'push_v',
-  'pull_h',
-  'pull_v',
-  'carry',
-  'core',
-  'isolation',
-  'cardio',
-  'mobility',
-] as const;
 export const PatternFamily = z.enum(PATTERN_FAMILIES);
 export type PatternFamily = z.infer<typeof PatternFamily>;
 
-/**
- * Rotation group used by the planner's uniqueness rules (sheet 28):
- * every pattern holds 6–20 interchangeable variants.
- */
-export const PATTERNS = {
-  squat: 'squat',
-  hinge: 'hinge',
-  lunge: 'lunge',
-  push_h: 'push_h',
-  push_v: 'push_v',
-  pull_h: 'pull_h',
-  pull_v: 'pull_v',
-  carry: 'carry',
-  core_anti_extension: 'core',
-  core_anti_rotation: 'core',
-  core_flexion: 'core',
-  isolation_chest: 'isolation',
-  isolation_shoulders: 'isolation',
-  isolation_biceps: 'isolation',
-  isolation_triceps: 'isolation',
-  isolation_back: 'isolation',
-  isolation_quads: 'isolation',
-  isolation_hamstrings: 'isolation',
-  isolation_glutes: 'isolation',
-  isolation_calves: 'isolation',
-  isolation_forearms: 'isolation',
-  cardio: 'cardio',
-  mobility: 'mobility',
-} as const satisfies Record<string, PatternFamily>;
 export const Pattern = z.enum(Object.keys(PATTERNS) as [keyof typeof PATTERNS, ...(keyof typeof PATTERNS)[]]);
 export type Pattern = z.infer<typeof Pattern>;
 
-/** Fixed muscle list (drives the recovery heatmap). */
-export const MUSCLES = [
-  'chest',
-  'front_delts',
-  'side_delts',
-  'rear_delts',
-  'biceps',
-  'triceps',
-  'forearms',
-  'upper_back',
-  'lats',
-  'traps',
-  'lower_back',
-  'abs',
-  'obliques',
-  'hip_flexors',
-  'glutes',
-  'abductors',
-  'adductors',
-  'quads',
-  'hamstrings',
-  'calves',
-] as const;
 export const Muscle = z.enum(MUSCLES);
 export type Muscle = z.infer<typeof Muscle>;
 
-export const EQUIPMENT = [
-  'bodyweight',
-  'dumbbell',
-  'barbell',
-  'ez_bar',
-  'trap_bar',
-  'kettlebell',
-  'cable',
-  'machine',
-  'smith_machine',
-  'band',
-  'bench',
-  'squat_rack',
-  'pull_up_bar',
-  'dip_station',
-  'landmine',
-  'box',
-  'medicine_ball',
-  'suspension_trainer',
-  'ab_wheel',
-  'stability_ball',
-  'weight_plate',
-  'sled',
-  'jump_rope',
-  'treadmill',
-  'bike',
-  'rower',
-  'elliptical',
-  'stair_climber',
-  'foam_roller',
-  'mat',
-] as const;
 export const Equipment = z.enum(EQUIPMENT);
 export type Equipment = z.infer<typeof Equipment>;
 
@@ -275,37 +171,12 @@ export type Food = z.infer<typeof FoodSchema>;
 /* Recipes                                                             */
 /* ------------------------------------------------------------------ */
 
-export const CUISINES = [
-  'american',
-  'british',
-  'mediterranean',
-  'italian',
-  'middle_eastern',
-  'gulf',
-  'north_african',
-  'pakistani',
-  'indian',
-  'east_asian',
-  'southeast_asian',
-  'mexican',
-  'global',
-] as const;
 export const Cuisine = z.enum(CUISINES);
 export type Cuisine = z.infer<typeof Cuisine>;
 
 export const MealSlot = z.enum(['breakfast', 'lunch', 'dinner', 'snack']);
 export type MealSlot = z.infer<typeof MealSlot>;
 
-export const DIET_TAGS = [
-  'vegetarian',
-  'vegan',
-  'pescatarian',
-  'halal_friendly',
-  'high_protein',
-  'low_carb',
-  'gluten_free',
-  'dairy_free',
-] as const;
 export const DietTag = z.enum(DIET_TAGS);
 export type DietTag = z.infer<typeof DietTag>;
 

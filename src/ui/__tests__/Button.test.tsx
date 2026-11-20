@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { Play } from 'lucide-react-native';
 import { Platform } from 'react-native';
 
-import { colors } from '@/theme';
+import { colors, fonts, spacing } from '@/theme';
 
 import { flat, renderThemed, SCHEMES } from '../../../test/render';
 import { Button, buttonPalette, type ButtonVariant } from '../Button';
@@ -68,5 +68,28 @@ describe.each(SCHEMES)('Button (%s)', (scheme) => {
     } else {
       expect(btn.props.nativeBackgroundAndroid).toBeUndefined();
     }
+  });
+
+  it('labels are bold (sheet 11) and wrap freely by default', async () => {
+    await renderThemed(<Button label="Save" testID="b" />, scheme);
+    const label = screen.getByTestId('b-label');
+    expect(flat(label.props.style).fontFamily).toBe(fonts.bold);
+    expect(label.props.numberOfLines).toBeUndefined();
+  });
+
+  it('caption: a one-line label with the detail underneath, both spoken', async () => {
+    await renderThemed(
+      <Button label="Log set 2" caption="102.5 kg × 10" accent testID="log" />,
+      scheme,
+    );
+    expect(screen.getByRole('button', { name: 'Log set 2, 102.5 kg × 10' })).toBeTruthy();
+    expect(screen.getByTestId('log-label').props.numberOfLines).toBe(1);
+    expect(screen.getByTestId('log-caption')).toHaveTextContent('102.5 kg × 10');
+  });
+
+  it('compact: tight padding and a label that never wraps', async () => {
+    await renderThemed(<Button label="Skip" compact testID="c" />, scheme);
+    expect(flat(screen.getByRole('button').props.style).paddingHorizontal).toBe(spacing.sm);
+    expect(screen.getByTestId('c-label').props.numberOfLines).toBe(1);
   });
 });

@@ -23,7 +23,6 @@ export type SegmentedProps<T extends string> = {
   testID?: string;
 };
 
-const INSET = 4;
 
 /** Day / Week style toggle with a spring-animated thumb. */
 export function Segmented<T extends string>({
@@ -35,12 +34,13 @@ export function Segmented<T extends string>({
 }: SegmentedProps<T>) {
   const t = useTheme();
   const reduceMotion = useReducedMotion();
+  const inset = t.spacing.xxs;
   const [width, setWidth] = useState(0);
   const index = Math.max(
     0,
     options.findIndex((o) => o.value === value),
   );
-  const segment = options.length > 0 ? (width - INSET * 2) / options.length : 0;
+  const segment = options.length > 0 ? (width - inset * 2) / options.length : 0;
   const x = useSharedValue(index * segment);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export function Segmented<T extends string>({
         flexDirection: 'row',
         backgroundColor: t.colors.surface2,
         borderRadius: t.radius.button,
-        padding: INSET,
+        padding: inset,
         minHeight: t.sizes.touch,
       }}
     >
@@ -70,11 +70,11 @@ export function Segmented<T extends string>({
           style={[
             {
               position: 'absolute',
-              top: INSET,
-              bottom: INSET,
-              left: INSET,
+              top: inset,
+              bottom: inset,
+              left: inset,
               width: segment,
-              borderRadius: t.radius.button - 2,
+              borderRadius: t.radius.button - inset / 2,
               backgroundColor: t.colors.bg,
             },
             thumbStyle,
@@ -97,7 +97,7 @@ export function Segmented<T extends string>({
             }}
             style={{
               flex: 1,
-              minHeight: t.sizes.touch - INSET * 2,
+              minHeight: t.sizes.touch - inset * 2,
               alignItems: 'center',
               justifyContent: 'center',
               paddingHorizontal: t.spacing.xs,

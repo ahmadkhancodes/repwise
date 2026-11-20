@@ -1,13 +1,8 @@
 import type { PlannedMeal } from '@repwise/engine';
-import { Ban, CircleAlert } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
-import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { useCatalogFor } from '@/services/catalog';
-import { useTheme } from '@/theme';
-import { Button, EmptyState, PressableScale, Sheet, SkeletonCard, SkeletonGroup, Text, showToast } from '@/ui';
-import { enterAt } from '@/ui/listMotion';
+import { SwapChooser, showToast } from '@/ui';
 
 import type { MealView } from '../hooks/useEat';
 import { recipeArt } from '../logic/art';
@@ -26,8 +21,6 @@ type Props = { meal: MealView | null; onClose: () => void };
  * "Never show again" teach the planner.
  */
 export function SwapSheet({ meal, onClose }: Props) {
-  const t = useTheme();
-  const reduce = useReducedMotion();
   const cat = useCatalogFor('recipes');
   const [nonce, setNonce] = useState(0);
   const [result, setResult] = useState<{ key: string; options: PlannedMeal[] | null } | null>(null);
@@ -74,83 +67,37 @@ export function SwapSheet({ meal, onClose }: Props) {
   };
 
   return (
-    <Sheet open={meal !== null} onClose={onClose} title={meal ? `Swap ${slotLabel(meal.slot).toLowerCase()}` : 'Swap'} testID="swap-sheet">
-      {meal ? (
-        <Text variant="callout" color="textSecondary">
-          Instead of {meal.title} · {meal.kcal} kcal · {Math.round(meal.protein)} g protein
-        </Text>
-      ) : null}
-      {!meal ? null : error ? (
-        <EmptyState
-          icon={CircleAlert}
-          title="Couldn’t load swaps"
-          body="Something went wrong on this phone. Try again."
-          actionLabel="Try again"
-          onAction={() => setNonce((n) => n + 1)}
-          testID="swap-error"
-        />
-      ) : options === null ? (
-        <SkeletonGroup label="Finding swaps" testID="swap-loading" style={{ gap: t.spacing.sm }}>
-          <SkeletonCard media lines={2} />
-          <SkeletonCard media lines={2} />
-          <SkeletonCard media lines={2} />
-        </SkeletonGroup>
-      ) : options.length === 0 ? (
-        <EmptyState
-          title="No close matches"
-          body="Nothing else fits this meal's calories and protein with your food settings right now."
-          testID="swap-empty"
-        />
-      ) : (
-        <View style={{ gap: t.spacing.sm }}>
-          {options.map((o, i) => {
-            const r = cat?.recipeById.get(o.recipeId);
-            return (
-              <Animated.View key={o.recipeId} entering={enterAt(i, reduce)}>
-                <PressableScale
-                  testID={`swap-option-${i}`}
-                  onPress={() => pick(o)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Swap to ${r?.title ?? o.recipeId}, ${o.kcal} calories, ${Math.round(o.protein)} grams protein`}
-                  style={{
-                    backgroundColor: t.colors.surface,
-                    borderRadius: t.radius.card,
-                    padding: t.spacing.card,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: t.spacing.sm,
-                  }}
-                >
-                  <RecipeArt
-                    art={recipeArt(r ? { ...r, slot: meal.slot } : { slot: meal.slot })}
-                    testID={`swap-art-${i}`}
-                  />
-                  <View style={{ flex: 1, minWidth: 0, gap: t.spacing.xxs }}>
-                    <Text variant="headline" numberOfLines={2}>
-                      {r?.title ?? o.recipeId}
-                    </Text>
-                    {r ? (
-                      <Text variant="caption" color="textSecondary">
-                        {cuisineLabel(r.cuisine)} · {totalMinutes(r)} min
-                      </Text>
-                    ) : null}
-                    <MacroChips kcal={o.kcal} protein={o.protein} carbs={o.carbs} fat={o.fat} />
-                  </View>
-                </PressableScale>
-              </Animated.View>
-            );
-          })}
-        </View>
-      )}
-      {meal?.recipeId ? (
-        <Button
-          label={`Never show ${meal.title}`}
-          variant="tertiary"
-          icon={Ban}
-          onPress={never}
-          testID="swap-never"
-        />
-      ) : null}
-    </Sheet>
+    <SwapChooser
+      open={meal !== null}
+      onClose={onClose}
+      title={meal ? `Swap ${slotLabel(meal.slot).toLowerCase()}` : 'Swap'}
+      intro={
+        meal
+          ? `Instead of ${meal.title} · ${meal.kcal} kcal · ${Math.round(meal.protein)} g protein`
+          : undefined
+      }
+      state={error ? 'error' : options === null ? 'loading' : 'ready'}
+      choices={(options ?? []).map((o) => {
+        const r = cat?.recipeById.get(o.recipeId);
+        return {
+          key: o.recipeId,
+          title: r?.title ?? o.recipeId,
+          subtitle: r ? `${cuisineLabel(r.cuisine)} · ${totalMinutes(r)} min` : undefined,
+          media: <RecipeArt art={recipeArt(r ? { ...r, slot: meal?.slot } : { slot: meal?.slot })} />,
+          detail: <MacroChips kcal={o.kcal} protein={o.protein} carbs={o.carbs} fat={o.fat} />,
+          accessibilityLabel: `Swap to ${r?.title ?? o.recipeId}, ${o.kcal} calories, ${Math.round(o.protein)} grams protein`,
+        };
+      })}
+      onPick={(key) => {
+        const o = options?.find((x) => x.recipeId === key);
+        if (o) pick(o);
+      }}
+      empty={{
+        title: 'No close matches',
+        body: 'Nothing else fits this meal’s calories and protein with your food settings right now.',
+      }}
+      onRetry={() => setNonce((n) => n + 1)}
+      never={meal?.recipeId ? { label: `Never show ${meal.title}`, onPress: never } : undefined}
+    />
   );
 }

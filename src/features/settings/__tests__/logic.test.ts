@@ -8,6 +8,7 @@ import {
   DELETE_UNDO_MS,
   exportedRows,
   exportFileName,
+  isExportFileName,
 } from '../logic/data';
 import {
   draftChanged,
@@ -43,6 +44,9 @@ describe(`settings logic (${Platform.OS})`, () => {
 
   it('export file name uses the local date', () => {
     expect(exportFileName(new Date(2026, 0, 5, 9).getTime())).toBe('repwise-export-2026-01-05.json');
+    expect(isExportFileName(exportFileName(new Date(2026, 0, 5, 9).getTime()))).toBe(true);
+    expect(isExportFileName('repwise-export-2026-01-05.json.tmp')).toBe(false);
+    expect(isExportFileName('photo.jpg')).toBe(false);
   });
 
   it('delete plan per auth status', () => {

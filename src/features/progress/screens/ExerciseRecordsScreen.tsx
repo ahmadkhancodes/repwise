@@ -1,15 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, Dumbbell, Trophy } from 'lucide-react-native';
+import { Dumbbell, Trophy } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
 import { usePro } from '@/features/billing/hooks/usePro';
-import { BigNumber, Card, EmptyState, IconButton, ListRow, Screen, Segmented, Text } from '@/ui';
+import { BackButton, BigNumber, Card, EmptyState, Enter, ListRow, Screen, SectionHeader, Segmented, Text } from '@/ui';
 import { useTheme } from '@/theme';
 
 import { LineChart } from '../components/LineChart';
 import { ChartSkeleton } from '../components/Skeletons';
-import { RangePicker, SectionTitle, Stagger } from '../components/bits';
+import { RangePicker } from '../components/bits';
 import { useToday, useTraining, useUnits } from '../hooks/useProgress';
 import { FREE_RANGE, inRange, type Range } from '../logic/body';
 import { shortDate } from '../logic/dates';
@@ -44,14 +44,7 @@ export function ExerciseRecordsScreen() {
   const heaviest = all.reduce((m, r) => Math.max(m, r.topWeightKg), 0);
   const points = rows.filter((r) => (metric === 'e1rm' ? r.e1rm != null : r.volumeKg > 0));
   const name = training.exerciseName(id);
-  const back = (
-    <IconButton
-      icon={ChevronLeft}
-      accessibilityLabel="Back"
-      onPress={() => router.back()}
-      testID="back"
-    />
-  );
+  const back = <BackButton fallback="/progress" />;
 
   return (
     <Screen
@@ -70,7 +63,7 @@ export function ExerciseRecordsScreen() {
         />
       ) : (
         <>
-          <Stagger index={0}>
+          <Enter index={0}>
             <View style={{ flexDirection: 'row', gap: t.spacing.md }}>
               <View style={{ flex: 1 }}>
                 <BigNumber
@@ -85,7 +78,7 @@ export function ExerciseRecordsScreen() {
             <Text variant="callout" color="textSecondary">
               {`Heaviest set ${formatWeight(heaviest, units)} · ${all.length} ${all.length === 1 ? 'session' : 'sessions'}`}
             </Text>
-          </Stagger>
+          </Enter>
           <Segmented
             testID="exercise-metric"
             accessibilityLabel="Chart"
@@ -126,10 +119,10 @@ export function ExerciseRecordsScreen() {
             value={effective}
             onChange={setRange}
             isPro={isPro}
-            onLocked={() => router.push('/paywall')}
+            onLocked={() => router.push({ pathname: '/paywall', params: { source: 'records' } })}
           />
 
-          <SectionTitle title="Records" />
+          <SectionHeader title="Records" />
           {prs.length === 0 ? (
             <Text variant="callout" color="textSecondary">
               Beat your heaviest set to set your first PR.
@@ -151,7 +144,7 @@ export function ExerciseRecordsScreen() {
             ))
           )}
 
-          <SectionTitle title="Sessions" />
+          <SectionHeader title="Sessions" />
           {[...rows]
             .reverse()
             .slice(0, 12)

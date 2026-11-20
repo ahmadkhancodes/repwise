@@ -1,6 +1,6 @@
 import { Pause, Play, Plus, SkipForward } from 'lucide-react-native';
-import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
@@ -12,11 +12,12 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useTheme } from '@/theme';
+import { useTheme, type Theme } from '@/theme';
 import {
   BigTimer,
   Button,
   FINAL_SECONDS,
+  fitFontSize,
   formatCountdown,
   PressableScale,
   Sheet,
@@ -52,8 +53,9 @@ function DrainBar({ state }: { state: RestTimerState }) {
     }
     return () => cancelAnimation(fill);
   }, [state, reduce, fill]);
+  // Transform only (perf N8): scaleX from the left edge never triggers a layout pass.
   const style = useAnimatedStyle(() => ({
-    width: `${Math.max(0, Math.min(1, fill.value)) * 100}%`,
+    transform: [{ scaleX: Math.max(0, Math.min(1, fill.value)) }],
   }));
   return (
     <View style={{ height: t.spacing.xxs, borderRadius: t.radius.pill, overflow: 'hidden' }}>
@@ -61,26 +63,70 @@ function DrainBar({ state }: { state: RestTimerState }) {
         style={[StyleSheet.absoluteFill, { backgroundColor: t.colors.onInverse, opacity: 0.25 }]}
       />
       <Animated.View
-        style={[{ height: '100%', backgroundColor: t.colors.accentOnInverse }, style]}
+        testID="rest-bar-fill"
+        style={[
+          {
+            height: '100%',
+            width: '100%',
+            transformOrigin: 'left',
+            backgroundColor: t.colors.accentOnInverse,
+          },
+          style,
+        ]}
       />
     </View>
   );
 }
 
+/** Width left for the countdown in the rest bar on a `windowWidth` screen. Pure. */
+export function restBarTimeBox(windowWidth: number, t: Pick<Theme, 'spacing' | 'sizes'>): number {
+  return Math.max(
+    0,
+    windowWidth - t.spacing.screen * 2 - t.spacing.sm * 2 - t.sizes.hitGym * 2 - t.spacing.sm * 2,
+  );
+}
+
+/**
+ * Rest-bar countdown size (perf N21): the BigTimer hero size, glanceable at 1 m, shrunk only as
+ * far as the box needs so "10:00" never clips at 360dp / 130% font. Sized for the widest
+ * minute-width of the current text so the digits never jump size mid-countdown. Pure.
+ */
+export function restBarTimeSize(
+  text: string,
+  box: number,
+  fontScale: number,
+  t: Pick<Theme, 'typography'>,
+): number {
+  const hero = t.typography.hero;
+  return fitFontSize({
+    text: text.replace(/\d/g, '0'),
+    maxWidth: box,
+    fontSize: hero.fontSize,
+    fontScale,
+    maxMultiplier: hero.maxFontSizeMultiplier,
+    letterSpacing: hero.letterSpacing,
+  });
+}
+
 /**
  * Rest bar in the player footer (B4): full width, inverse, the countdown at display size, who is
- * next, and +15 / Skip as 56dp buttons, all reachable without opening anything. Only this leaf
+ * next, and +15 / Skip as 56dp buttons. The countdown is hero-size (N21), all reachable without opening anything. Only this leaf
  * ticks (1 Hz). Tap the time for the hero timer.
  */
 export function RestBar({ onOpen }: { onOpen: () => void }) {
   const t = useTheme();
+  const { width, fontScale } = useWindowDimensions();
   const view = useRestCountdown();
+  // Until the first layout, assume the 360dp worst case: bar padding and the two 56dp controls.
+  const [timeBox, setTimeBox] = useState(() => restBarTimeBox(width, t));
+  const hero = t.typography.hero;
   if (view.state.status === 'idle') return null;
   const paused = view.state.status === 'paused';
   const text = formatCountdown(view.remainingMs);
   const s = Math.ceil(view.remainingMs / 1000);
   const ending = !paused && s > 0 && s <= FINAL_SECONDS;
   const next = nextLine(view.state);
+  const timeSize = restBarTimeSize(text, timeBox, fontScale, t);
   const btn = {
     minWidth: t.sizes.hitGym,
     minHeight: t.sizes.hitGym,
@@ -112,13 +158,19 @@ export function RestBar({ onOpen }: { onOpen: () => void }) {
           accessibilityLabel={`Rest ${paused ? 'paused' : 'timer'}, ${spokenCountdown(view.remainingMs)} left${next ? `. ${next}` : ''}`}
           accessibilityHint="Opens the big rest timer"
           testID="rest-bar-open"
+          onLayout={(e) => setTimeBox(e.nativeEvent.layout.width)}
           style={{ flex: 1, minHeight: t.sizes.hitGym, justifyContent: 'center' }}
         >
           <Text
-            variant="display"
-            tabular
+            variant="hero"
+            allowFontScaling={false}
             numberOfLines={1}
-            style={{ color: ending ? t.colors.accentOnInverse : t.colors.onInverse }}
+            style={{
+              color: ending ? t.colors.accentOnInverse : t.colors.onInverse,
+              fontSize: timeSize,
+              lineHeight: Math.ceil(hero.lineHeight * (timeSize / hero.fontSize)),
+              letterSpacing: (hero.letterSpacing ?? 0) * (timeSize / hero.fontSize),
+            }}
             testID="rest-bar-time"
           >
             {text}

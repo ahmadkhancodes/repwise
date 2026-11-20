@@ -59,4 +59,28 @@ describe.each(SCHEMES)('WeekStrip (%s)', (scheme) => {
     expect(screen.queryByText('16')).toBeNull();
     expect(screen.getByText('19')).toBeTruthy();
   });
+
+  it('readOnly: plain text days, no tabs, no presses (the plan reveal)', async () => {
+    await renderThemed(
+      <WeekStrip days={WEEK_FOR_RO} selectedKey={null} todayKey="d1" readOnly testID="ro" />,
+      scheme,
+    );
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+    expect(screen.getByTestId('day-d1').props.accessibilityRole).toBe('text');
+    expect(screen.getByTestId('day-d1').props.onPress).toBeUndefined();
+  });
+
+  it('interactive cells widen their hit area over the gaps (P2-21)', async () => {
+    await renderThemed(
+      <WeekStrip days={WEEK_FOR_RO} selectedKey="d1" onSelect={jest.fn()} testID="rw" />,
+      scheme,
+    );
+    expect(screen.getByTestId('day-d2').props.hitSlop).toMatchObject({ left: 2, right: 2 });
+  });
 });
+
+const WEEK_FOR_RO = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((w, i) => ({
+  key: `d${i + 1}`,
+  weekday: w,
+  day: 16 + i,
+}));

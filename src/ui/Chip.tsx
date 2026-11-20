@@ -48,7 +48,7 @@ export function Chip({
         paddingHorizontal: t.spacing.md,
         borderRadius: t.radius.pill,
         borderWidth: t.sizes.hairline,
-        borderColor: selected ? t.colors.accent : t.colors.border,
+        borderColor: selected ? t.colors.accent : t.colors.borderStrong,
         backgroundColor: selected ? t.colors.accentSoft : t.colors.bg,
         flexDirection: 'row',
         alignItems: 'center',

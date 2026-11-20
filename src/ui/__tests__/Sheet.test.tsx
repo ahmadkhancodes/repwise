@@ -3,7 +3,7 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import { BackHandler, Platform } from 'react-native';
 
 import { renderThemed, SCHEMES } from '../../../test/render';
-import { Sheet } from '../Sheet';
+import { Sheet, sheetMaxHeight } from '../Sheet';
 import { Text } from '../Text';
 
 describe.each(SCHEMES)('Sheet (%s)', (scheme) => {
@@ -54,5 +54,47 @@ describe.each(SCHEMES)('Sheet (%s)', (scheme) => {
     } else {
       expect(calls).toHaveLength(0);
     }
+  });
+
+  it('scrollable: pinned header, scrolling body and a pinned footer', async () => {
+    await renderThemed(
+      <Sheet
+        open
+        onClose={jest.fn()}
+        title="Ingredients"
+        scrollable
+        footer={<Text>Show 24</Text>}
+        testID="ing"
+      >
+        {Array.from({ length: 20 }, (_, i) => (
+          <Text key={i}>Item {i}</Text>
+        ))}
+      </Sheet>,
+      scheme,
+    );
+    expect(screen.getByTestId('ing')).toBeTruthy();
+    expect(screen.getByTestId('ing-scroll')).toBeTruthy();
+    expect(screen.getByText('Item 19')).toBeTruthy();
+    expect(screen.getByTestId('ing-footer')).toBeTruthy();
+    expect(screen.getByText('Show 24')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Ingredients' })).toBeTruthy();
+  });
+
+  it('content sheets expose their testID for tests and Maestro', async () => {
+    await renderThemed(
+      <Sheet open onClose={jest.fn()} testID="plain">
+        <Text>Body</Text>
+      </Sheet>,
+      scheme,
+    );
+    expect(screen.getByTestId('plain')).toBeTruthy();
+    expect(screen.queryByTestId('plain-scroll')).toBeNull();
+  });
+});
+
+describe('sheetMaxHeight', () => {
+  it('caps at 90% of the window minus the status bar', () => {
+    expect(sheetMaxHeight(800, 40)).toBe(680);
+    expect(sheetMaxHeight(0, 40)).toBe(0);
   });
 });

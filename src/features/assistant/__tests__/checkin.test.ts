@@ -13,7 +13,6 @@ import {
   weeklyAdherence,
   weighInsFor,
 } from '../logic/checkin';
-import { pointsAttr, sparkPoints } from '../logic/spark';
 
 const SUN = '2026-11-22';
 
@@ -165,20 +164,3 @@ describe('computeCheckin (engine weeklyAdjustment)', () => {
   });
 });
 
-describe('sparkline geometry', () => {
-  it('fills the box, highest value at the top', () => {
-    const pts = sparkPoints([80, 79, 78], 100, 40, 2);
-    expect(pts).toEqual([
-      { x: 2, y: 2 },
-      { x: 50, y: 20 },
-      { x: 98, y: 38 },
-    ]);
-    expect(pointsAttr(pts)).toBe('2,2 50,20 98,38');
-    expect(sparkPoints([5, 5], 10, 10)).toEqual([
-      { x: 0, y: 5 },
-      { x: 10, y: 5 },
-    ]);
-    expect(sparkPoints([5], 10, 10)).toEqual([{ x: 5, y: 5 }]);
-    expect(sparkPoints([], 10, 10)).toEqual([]);
-  });
-});

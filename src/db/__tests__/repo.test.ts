@@ -106,6 +106,14 @@ describe('generic repo', () => {
     expect(sessionsRepo.remove(s.id)).toBe(false);
   });
 
+  it('restore undoes a soft delete and syncs it as an edit', () => {
+    const s = sessionsRepo.insert({ date: '2026-11-19' }, 1000);
+    expect(sessionsRepo.restore(s.id, 1500)).toBe(false); // not deleted: no-op
+    sessionsRepo.remove(s.id, 2000);
+    expect(sessionsRepo.restore(s.id, 1500)).toBe(true);
+    expect(sessionsRepo.get(s.id)).toMatchObject({ deletedAt: null, updatedAt: 2001, dirty: 1 });
+  });
+
   it('pings the sync scheduler on every write', () => {
     const seen: string[] = [];
     const off = onLocalWrite((t) => seen.push(t));

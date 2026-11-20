@@ -24,6 +24,9 @@ import {
   WeekStrip as SharedWeekStrip,
 } from '@/ui';
 
+import { MealRow, recipeArt } from '@/features/meals';
+import { WorkoutCard as TodayWorkoutCard } from '@/features/today/components/WorkoutCard';
+
 import type { PreviewMeal } from '../hooks/usePlanPreview';
 import {
   BUILD_TICK_MS,
@@ -181,8 +184,9 @@ export function TargetsHero({
               entering={springIn('macro', i)}
               style={{ alignItems: 'center', gap: t.spacing.xs }}
             >
+              {/* Full rings (P2-9): a target, not "30% done". */}
               <ProgressRing
-                progress={shares[r.key]}
+                progress={1}
                 size={small}
                 strokeWidth={smallStroke}
                 color={r.color}
@@ -229,7 +233,7 @@ export function WeekStrip({ days }: { days: StripDay[] }) {
         }))}
         selectedKey={null}
         todayKey={today}
-        onSelect={() => undefined}
+        readOnly
       />
       <Text variant="callout" color="textSecondary" testID="reveal-week-line">
         {training.length
@@ -258,23 +262,25 @@ export function WorkoutCard({
 }) {
   const t = useTheme();
   const springIn = useSpringIn();
-  return (
-    <Animated.View entering={springIn('workout')}>
-      <Card testID="reveal-workout" style={{ gap: t.spacing.sm }}>
-        <Text variant="caption" color="accentText">
-          {rest ? 'TODAY · REST DAY' : 'TODAY'}
-        </Text>
-        {rest ? (
-          <Text variant="headline">
-            Recover today. Next up: {rest.label} · {rest.title || 'Training'}
-          </Text>
-        ) : (
-          <>
-            <Text variant="title2">{title}</Text>
-            <Text variant="callout" color="textSecondary" tabular>
-              {minutes ? `${minutes} min · ` : ''}
-              {count} exercises
-            </Text>
+  if (!rest) {
+    // Training day: Today's own WorkoutCard in preview (P2-10), so nothing changes shape when the
+    // user lands on Today.
+    return (
+      <Animated.View entering={springIn('workout')}>
+        <TodayWorkoutCard
+          testID="reveal-workout"
+          preview
+          workout={{
+            sessionId: 'preview',
+            title,
+            minutes: minutes ?? 0,
+            exercises: count,
+            muscles: [],
+            status: 'planned',
+            done: false,
+            inProgress: false,
+          }}
+          detail={
             <View style={{ gap: t.spacing.xxs }}>
               {names.slice(0, 4).map((n, i) => (
                 <Animated.View
@@ -296,14 +302,29 @@ export function WorkoutCard({
                 </Text>
               ) : null}
             </View>
-          </>
-        )}
+          }
+        />
+      </Animated.View>
+    );
+  }
+  return (
+    <Animated.View entering={springIn('workout')}>
+      <Card testID="reveal-workout" style={{ gap: t.spacing.sm }}>
+        <Text variant="eyebrow" color="accentText">
+          Today · Rest day
+        </Text>
+        <Text variant="headline">
+          Recover today. Next up: {rest.label} · {rest.title || 'Training'}
+        </Text>
       </Card>
     </Animated.View>
   );
 }
 
-/** Today's meals slide up from the bottom, one after another. */
+/**
+ * Today's meals slide up from the bottom, one after another — on the shared MealRow in preview
+ * (P2-10), the same row Today and Eat use.
+ */
 export function MealsList({ meals }: { meals: PreviewMeal[] }) {
   const t = useTheme();
   return (
@@ -316,32 +337,19 @@ export function MealsList({ meals }: { meals: PreviewMeal[] }) {
             .damping(t.motion.spring.damping)
             .stiffness(t.motion.spring.stiffness)}
         >
-          <View
-            accessible
-            accessibilityLabel={`${SLOT_LABEL[m.slot] ?? m.slot}: ${m.title}, ${m.kcal} kcal`}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: t.spacing.sm,
-              minHeight: t.sizes.row,
-              paddingHorizontal: t.spacing.md,
-              paddingVertical: t.spacing.sm,
-              backgroundColor: t.colors.surface,
-              borderRadius: t.radius.card,
+          <MealRow
+            preview
+            idPrefix="reveal-"
+            meal={{
+              id: m.id,
+              slot: m.slot,
+              title: m.title,
+              status: 'planned',
+              meta: SLOT_LABEL[m.slot] ?? m.slot,
+              kcal: m.kcal,
+              art: recipeArt({ title: m.title, slot: m.slot }),
             }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text variant="caption" color="textSecondary">
-                {SLOT_LABEL[m.slot] ?? m.slot}
-              </Text>
-              <Text variant="callout" numberOfLines={2}>
-                {m.title}
-              </Text>
-            </View>
-            <Text variant="callout" tabular>
-              {m.kcal} kcal
-            </Text>
-          </View>
+          />
         </Animated.View>
       ))}
     </View>

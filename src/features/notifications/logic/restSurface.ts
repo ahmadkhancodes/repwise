@@ -54,6 +54,14 @@ export type RestSurfacePlan =
 
 export const REST_ALERT_ID = 'rw:rest';
 
+/**
+ * Android fixes a channel's sound when it is created, so "Rest timer sound" off picks a second,
+ * silent channel (N6). iOS reads `sound` per alert and ignores the channel. Pure.
+ */
+export function restAlertChannel(restSound: boolean): 'timer' | 'timer-silent' {
+  return restSound ? 'timer' : 'timer-silent';
+}
+
 function mmss(ms: number): string {
   const s = Math.max(0, Math.ceil(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
