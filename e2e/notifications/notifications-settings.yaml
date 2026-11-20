@@ -37,10 +37,8 @@ tags:
     id: time-save
 - scrollUntilVisible:
     element:
-      id: toggle-quiet
+      id: time-quiet-start
     direction: DOWN
-- assertVisible:
-    id: time-quiet-start
 - tapOn:
     id: toggle-quiet
 - assertNotVisible:

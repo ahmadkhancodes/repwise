@@ -26,9 +26,11 @@ RETRIES=${RETRIES:-1}
 APP_ID=com.client.repwise
 SETUP_FLOW=e2e/onboarding/01_f1_happy_path.yaml
 # State-wiping flows (clearState) first, in this order; onboarding/01 last so the app ends onboarded.
+# settings/03 ends on Welcome (all data deleted), so it must run before the setup flow too.
 PRIORITY="e2e/onboarding/02_f1_resume_after_kill.yaml
 e2e/notifications/notifications-permission-off.yaml
 e2e/onboarding/03_f1_maintain_permission_granted.yaml
+e2e/settings/03_delete_all_data.yaml
 $SETUP_FLOW"
 # Flows that cannot pass on iOS because they rely on an Android-only command.
 # Format: path|reason
