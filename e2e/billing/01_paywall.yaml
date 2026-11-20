@@ -8,6 +8,14 @@ tags:
 - runFlow: ../onboarding/01_f1_happy_path.yaml
 - openLink: repwise://paywall?source=e2e
 - runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
+- runFlow:
     when:
       visible:
         id: screen-paywall

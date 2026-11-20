@@ -78,7 +78,16 @@ tags:
     id: "screen-quiz-meals"
 - tapOn:
     id: "quiz-next"
-# Primer skipped (already granted) → plan reveal.
+# Primer skipped (already granted) → plan reveal. The iOS simulator does not always apply the
+# notifications grant from launchApp (applesimutils); there the primer still shows, so pass it.
+- runFlow:
+    when:
+      platform: iOS
+      visible:
+        id: "screen-notify"
+    commands:
+      - tapOn:
+          id: "notify-later"
 - extendedWaitUntil:
     visible:
       id: "screen-plan"

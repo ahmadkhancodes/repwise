@@ -9,6 +9,14 @@ tags:
 - launchApp
 - stopApp
 - openLink: repwise://today
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
 - extendedWaitUntil:
     visible:
       id: "screen-today"

@@ -7,6 +7,14 @@ tags:
 - stopApp
 # The widget's quick-log link opens Log food over Eat (EatScreen `log=1`).
 - openLink: repwise://eat?log=1
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
 - assertVisible:
     id: screen-log
 - tapOn:
@@ -15,13 +23,37 @@ tags:
     id: screen-eat
 - stopApp
 - openLink: repwise://train
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
 - assertVisible:
     id: screen-train
 - stopApp
 - openLink: repwise://progress
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
 - assertVisible:
     id: screen-progress
 - stopApp
 - openLink: repwise://today
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
 - assertVisible:
     id: screen-today

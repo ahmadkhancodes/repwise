@@ -16,6 +16,14 @@ tags:
       - setAirplaneMode: enabled
 - stopApp
 - openLink: repwise://train?sessionId=not-on-this-phone&start=1
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
 - extendedWaitUntil:
     visible:
       id: "screen-train"
@@ -23,6 +31,14 @@ tags:
 - assertVisible: "That workout isn't on this phone any more"
 - stopApp
 - openLink: repwise://train
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
 - assertVisible:
     id: "screen-train"
 - assertVisible:
