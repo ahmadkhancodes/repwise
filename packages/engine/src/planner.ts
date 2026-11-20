@@ -8,11 +8,11 @@
  */
 import { cuisinePreferred, recipeCandidates, recipeSafe, relaxPool, slotCandidates } from './candidates';
 import { buildContext, exercisePatternKey, dayTypeOf, type PlanningContext } from './context';
-import { DEFAULT_PROTEIN_G_PER_KG, computeTargets } from './nutrition';
-import { startOfWeek, weekdayMon0, daysBetween, type ISODate } from './dates';
+import { DEFAULT_PROTEIN_G_PER_KG, computeTargets, kgToLb, lbToKg } from './nutrition';
+import { startOfWeek, toDayNumber, weekdayMon0, daysBetween, type ISODate } from './dates';
 import { meanRecovery, muscleHeatmap } from './heatmap';
 import { solvePortions, totalsFor, type PortionItem } from './portion';
-import { deloadSets, doubleProgression, roundToIncrement } from './progression';
+import { deloadSets, doubleProgression, roundToIncrement, type WeightUnit } from './progression';
 import { createRng, type Rng } from './random';
 import {
   LlmMealsOutputSchema,
@@ -86,29 +86,66 @@ export function repRangeFor(role: SlotRole, ex: Pick<Exercise, 'pattern'>, exper
 
 const REST_S: Record<SlotRole, number> = { main: 150, secondary: 105, accessory: 75 };
 
-/** Last session's working sets for an exercise (before `now`). */
+const deloadDayCache = new WeakMap<PlanningContext, Set<number>>();
+/** UTC day numbers of past deload sessions. */
+function deloadDays(ctx: PlanningContext): Set<number> {
+  let d = deloadDayCache.get(ctx);
+  if (!d) {
+    d = new Set(ctx.pastSessions.filter((s) => s.deload).map((s) => toDayNumber(s.date)));
+    deloadDayCache.set(ctx, d);
+  }
+  return d;
+}
+
+/**
+ * Last session's working sets for an exercise (before `now`). Deload sessions are skipped while a
+ * normal one exists (ENGINE_QA bug 7: the week after a deload restarted from the −10% load).
+ */
 function lastWorkingSets(ctx: PlanningContext, exerciseId: string): { weight: number; reps: number; rpe?: number }[] {
+  const skip = deloadDays(ctx);
   let lastDay = -Infinity;
+  let lastAny = -Infinity;
   for (const s of ctx.history.sets) {
     if (s.exerciseId === exerciseId && s.doneAt < ctx.now && (s.type === 'working' || s.type === 'failure')) {
-      lastDay = Math.max(lastDay, Math.floor(s.doneAt / 86_400_000));
+      const day = Math.floor(s.doneAt / 86_400_000);
+      lastAny = Math.max(lastAny, day);
+      if (!skip.has(day)) lastDay = Math.max(lastDay, day);
     }
   }
+  if (lastDay === -Infinity) lastDay = lastAny;
   if (lastDay === -Infinity) return [];
   return ctx.history.sets
     .filter((s) => s.exerciseId === exerciseId && Math.floor(s.doneAt / 86_400_000) === lastDay && (s.type === 'working' || s.type === 'failure'))
     .map((s) => (s.rpe !== undefined ? { weight: s.weightKg, reps: s.reps, rpe: s.rpe } : { weight: s.weightKg, reps: s.reps }));
 }
 
+/** Smallest real load step per unit: 1.25 kg / 2.5 lb plates per side → 2.5 kg / 5 lb totals. */
+export const PLATE_STEP: Record<WeightUnit, number> = { kg: 2.5, lb: 5 };
+
+/**
+ * A load in kg that lands on the user's plates: rounded to 2.5 kg, or for imperial users to 5 lb
+ * (returned as the exact kg of that lb load, so display in lb is a whole plate weight).
+ */
+export function plateLoadKg(kg: number, unit: WeightUnit, mode: 'nearest' | 'down' = 'nearest'): number {
+  if (unit === 'kg') return roundToIncrement(Math.max(0, kg), PLATE_STEP.kg, mode);
+  const lb = roundToIncrement(Math.max(0, kgToLb(kg) + (mode === 'down' ? 1e-6 : 0)), PLATE_STEP.lb, mode);
+  return Math.round(lbToKg(lb) * 1e6) / 1e6;
+}
+
 export function prescribe(ctx: PlanningContext, ex: Exercise, slotKey: string, role: SlotRole): PlannedExercise {
   const repRange = repRangeFor(role, ex, ctx.profile.experience);
   const bodyweight = ex.equipment.every((e) => BODYWEIGHT_KIT.has(e));
-  const last = lastWorkingSets(ctx, ex.id);
-  const p = doubleProgression({ lastSets: last, repRange, lowerBody: isLowerBody(ex), bodyweight, unit: 'kg' });
-  let loadKg = bodyweight ? null : p.weight;
+  const unit: WeightUnit = ctx.profile.units === 'imperial' ? 'lb' : 'kg';
+  // Progress in the user's unit (+2.5/+5 kg or +5/+10 lb), then land on a real plate step: logged
+  // loads like 61.3 kg (or kg values typed from lb) used to come back as 63.8 kg (ENGINE_QA bug 6).
+  const last = lastWorkingSets(ctx, ex.id).map((s) => (unit === 'lb' ? { ...s, weight: kgToLb(s.weight) } : s));
+  const p = doubleProgression({ lastSets: last, repRange, lowerBody: isLowerBody(ex), bodyweight, unit });
+  const toKg = (w: number) => (unit === 'lb' ? lbToKg(w) : w);
+  // Held loads round down (never heavier than what was done); new loads round to the nearest step.
+  let loadKg = bodyweight || p.weight === null ? null : plateLoadKg(toKg(p.weight), unit, p.action === 'increase_load' ? 'nearest' : 'down');
   let targetReps = Math.min(30, p.targetReps);
   if (ctx.deload) {
-    if (loadKg !== null) loadKg = roundToIncrement(loadKg * 0.9, 2.5, 'down');
+    if (loadKg !== null) loadKg = plateLoadKg(loadKg * 0.9, unit, 'down');
     targetReps = repRange[0];
   }
   return {

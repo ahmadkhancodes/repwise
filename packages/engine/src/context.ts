@@ -4,7 +4,7 @@
  * Shared by the planner and the validator so both apply exactly the same rules.
  */
 import { exerciseCandidates, exerciseConstraints, recipeConstraints, slotCandidates, type ExerciseConstraints, type RecipeConstraints } from './candidates';
-import { daysBetween, startOfWeek, weekDates, weekdayMon0, type ISODate } from './dates';
+import { daysBetween, startOfWeek, toDayNumber, weekDates, weekdayMon0, type ISODate } from './dates';
 import { computeTargets, type NutritionTargets } from './nutrition';
 import { BLOCK_WEEKS, deloadDecision, epley1RM, stalledSessions, type DeloadReason } from './progression';
 import { createRng, hashHex } from './random';
@@ -107,10 +107,11 @@ export function defaultSeed(profile: Profile, weekStart: ISODate): string {
   return `${weekStart}:${hashHex(key)}`;
 }
 
-function bestE1rmByDay(history: History, exerciseId: string, beforeMs: number): number[] {
+function bestE1rmByDay(history: History, exerciseId: string, beforeMs: number, skipDays: ReadonlySet<number> = new Set()): number[] {
   const byDay = new Map<number, number>();
   for (const s of history.sets) {
     if (s.exerciseId !== exerciseId || s.doneAt >= beforeMs) continue;
+    if (skipDays.has(Math.floor(s.doneAt / 86_400_000))) continue;
     if (s.type === 'warmup' || s.type === 'cardio' || s.reps < 1 || s.weightKg <= 0) continue;
     const day = Math.floor(s.doneAt / 86_400_000);
     const e = epley1RM(s.weightKg, Math.min(s.reps, 30));
@@ -200,8 +201,11 @@ export function buildContext(profileIn: ProfileInput, historyIn: HistoryInput, c
   const mainLiftIds = new Set(Object.values(mainLifts));
 
   const beforeMs = opts.now;
-  const stalls = Math.max(0, ...[...mainLiftIds].map((id) => stalledSessions(bestE1rmByDay(history, id, beforeMs).slice(-3))));
-  const lastDeload = continuing ? prev.lastDeloadWeekStart : undefined;
+  // Deload sessions are light on purpose: they are not stalls (ENGINE_QA bug 8).
+  const deloadDays = new Set(pastSessions.filter((s) => s.deload).map((s) => toDayNumber(s.date)));
+  const stalls = Math.max(0, ...[...mainLiftIds].map((id) => stalledSessions(bestE1rmByDay(history, id, beforeMs, deloadDays).slice(-3))));
+  // Carried across blocks: a block-end deload must not be followed by a stall deload the next week.
+  const lastDeload = prev?.lastDeloadWeekStart;
   const weeksSinceDeload = lastDeload ? Math.floor(daysBetween(lastDeload, weekStart) / 7) : undefined;
   const dd = deloadDecision({ weekInBlock, blockWeeks, stalledSessions: stalls, ...(weeksSinceDeload !== undefined ? { weeksSinceDeload } : {}), ...(opts.deload ? { requested: true } : {}) });
   const alreadyDeloadedThisWeek = lastDeload === weekStart;
