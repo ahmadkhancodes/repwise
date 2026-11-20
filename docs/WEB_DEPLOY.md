@@ -52,7 +52,7 @@ The site and the legal drafts assume **`https://repwise.app`**. If the final dom
 ## Before going live (owner TODOs)
 
 - **Store badges:** both badges are placeholders with `href="#"` and a `TODO(store links)` comment in `web/index.html` (hero and final CTA). Add the live store URLs, swap in the official Apple / Google badge artwork under their brand guidelines, and remove the "Coming soon" lines. If iOS is not published, remove the App Store badge.
-- **Company details:** `docs/legal` says to confirm the registered company name and address before publishing. That editorial note and the "Draft for ..." note are stripped from the rendered pages by the generator; the pages currently say "Buffersol Technologies". Update the markdown and regenerate once confirmed.
+- **Company details:** `docs/legal` says to confirm the registered company name and address before publishing. That editorial note and the "Draft for ..." note are stripped from the rendered pages by the generator; the pages currently say "BufferSol Technologies LLC". Update the markdown and regenerate once confirmed.
 - **Prices:** the pricing section shows the USD ladder from `CLAUDE.md` (weekly $4.99, monthly $12.99, 3-month $24.99, yearly $59.99 with the 7-day trial). Change it in `web/index.html` (and the JSON-LD block) if the ladder changes.
 
 ## Editing

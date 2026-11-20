@@ -4,7 +4,7 @@ Last updated: 19 November 2026 · Draft for the website page https://repwise.app
 
 Repwise is an AI gym and meal planner. This policy explains what we collect, why, who helps us run the app, and the choices you have. We have tried to keep it short and plain.
 
-**Who we are.** Repwise is operated by Buffersol Technologies (confirm the registered company name and address before publishing) ("we", "us"). We are the controller of your personal data. Contact: **buffersoltechnologies@gmail.com**.
+**Who we are.** Repwise is operated by BufferSol Technologies LLC (confirm the registered company name and address before publishing) ("we", "us"). We are the controller of your personal data. Contact: **buffersoltechnologies@gmail.com**.
 
 ## The short version
 

@@ -57,7 +57,7 @@ Server: App Store Server API key + Server Notifications v2 URL (production and s
 | Support URL | https://repwise.app/support (placeholder) |
 | Marketing URL | https://repwise.app (placeholder) |
 | Version | 1.0 |
-| Copyright | 2026 Buffersol Technologies (confirm legal name) |
+| Copyright | 2026 BufferSol Technologies LLC (confirm legal name) |
 | What's new | from `app-store.md` |
 | Build | Select the TestFlight build from EAS Submit |
 | Sign-in required | **No** (leave Sign-in information blank) |

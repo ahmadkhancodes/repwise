@@ -130,7 +130,7 @@ ${body}
     </div>
     <div class="legal">
       <p>Repwise provides general fitness and nutrition guidance for healthy adults. It is not medical advice. Consult a qualified professional before starting a new exercise or diet program, especially if you have a medical condition.</p>
-      <p>© 2026 Buffersol Technologies. All rights reserved.</p>
+      <p>© 2026 BufferSol Technologies LLC. All rights reserved.</p>
     </div>
   </div>
 </footer>
@@ -146,7 +146,7 @@ function docPage({ file, path, eyebrow, desc, pre = '' }) {
     : '<div class="toc" aria-hidden="true"></div>';
   const body = `<div class="wrap doc">
   <!-- Source of truth: docs/legal/${file}. Regenerate with: node web/_tools/build-pages.mjs -->
-  <!-- TODO(owner): confirm the registered company name and address before publishing. -->
+  <!-- TODO(owner): add the registered business address (company name confirmed: BufferSol Technologies LLC, 20 Nov 2026). -->
   <header class="doc-head">
     <p class="eyebrow"><i></i>${eyebrow}</p>
     <h1 class="h1">${esc(d.title)}</h1>

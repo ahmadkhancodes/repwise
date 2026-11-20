@@ -2,7 +2,7 @@
 
 Last updated: 19 November 2026 · Draft for https://repwise.app/terms
 
-These terms are an agreement between you and Buffersol Technologies (confirm the registered company name and address before publishing) ("we", "us") about your use of the Repwise app. By using Repwise you agree to them. If you do not agree, please do not use the app. Contact: **buffersoltechnologies@gmail.com**.
+These terms are an agreement between you and BufferSol Technologies LLC (confirm the registered company name and address before publishing) ("we", "us") about your use of the Repwise app. By using Repwise you agree to them. If you do not agree, please do not use the app. Contact: **buffersoltechnologies@gmail.com**.
 
 ## 1. Who can use Repwise
 You must be 18 or older. Repwise is for healthy adults. If you are under 18, please do not use it.

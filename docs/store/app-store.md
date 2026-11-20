@@ -117,7 +117,7 @@ Version 1.0. Meet Repwise: AI-personalized gym plans and daily meal plans that a
 
 ## Copyright
 
-`2026 Buffersol Technologies` (confirm the legal entity name before submission).
+`2026 BufferSol Technologies LLC` (confirm the legal entity name before submission).
 
 ## Age rating answers (App Store Connect questionnaire)
 
