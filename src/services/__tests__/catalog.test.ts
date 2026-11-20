@@ -170,6 +170,9 @@ describe('catalog', () => {
   it('a screen that needs exercises gets them on the next macrotask, even when idle never comes (r2 N19)', async () => {
     const g = globalThis as { requestIdleCallback?: unknown };
     const saved = g.requestIdleCallback;
+    // Let loads still queued by earlier tests finish, then start from an empty catalogue.
+    await act(() => new Promise<void>((r) => setTimeout(r, 50)));
+    resetCatalogForTests();
     g.requestIdleCallback = () => undefined; // a busy startup: no idle slice
     try {
       const h = await renderHook(() => useCatalogFor('exercises'));

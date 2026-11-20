@@ -14,7 +14,7 @@ import { EatScreen } from '../screens/EatScreen';
 import { freshDb, lockPro, onboard } from './helpers';
 
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: jest.fn(() => true) },
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), setParams: jest.fn(), canGoBack: jest.fn(() => true) },
   useLocalSearchParams: jest.fn(() => ({})),
 }));
 
@@ -95,6 +95,22 @@ describe('EatScreen interactions', () => {
     jest.mocked(useLocalSearchParams).mockReturnValue({ mealId: dinner.id, swap: '1' });
     await renderThemed(<EatScreen />);
     expect(await screen.findByTestId('swap-option-0')).toBeTruthy();
+  });
+
+  it('widget deep link /eat?mealId=…&tick=1 marks that meal eaten once (R2-1)', async () => {
+    const first = await renderThemed(<EatScreen />);
+    await screen.findByTestId('meal-lunch');
+    const lunch = mealsForPlan(mealPlanForDate(todayISO())!.id).find((m) => m.slot === 'lunch')!;
+    await first.unmount();
+    jest.mocked(useLocalSearchParams).mockReturnValue({ mealId: lunch.id, tick: '1' });
+    const view = await renderThemed(<EatScreen />);
+    await waitFor(() => expect(screen.getByTestId('tick-lunch')).toBeChecked());
+    expect(logsForDate(todayISO()).filter((l) => l.mealId === lunch.id)).toHaveLength(1);
+    expect(useToastStore.getState().current).toMatchObject({ actionLabel: 'Undo', silent: true });
+    expect(router.setParams).toHaveBeenCalledWith({ tick: undefined, mealId: undefined });
+    // Re-render with the same params (link delivered twice): no second log.
+    await view.rerender(<EatScreen />);
+    expect(logsForDate(todayISO()).filter((l) => l.mealId === lunch.id)).toHaveLength(1);
   });
 
   it('long-press opens the swap sheet too (W4)', async () => {

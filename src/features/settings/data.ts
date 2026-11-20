@@ -9,8 +9,10 @@ import * as Sharing from 'expo-sharing';
 
 import { getRawDb } from '@/db/client';
 import { notifyLocalWrite } from '@/db/events';
+import { stopRestSurfaces } from '@/features/notifications/restTimer';
 import { useOnboarding } from '@/features/onboarding/store';
 import { PHOTO_DIR } from '@/features/progress/logic/photos';
+import { restTimer } from '@/features/workout/restTimerStore';
 import { track } from '@/services/analytics';
 import { deleteAccount, useAuth } from '@/services/auth';
 import { kv } from '@/services/storage';
@@ -20,6 +22,7 @@ import {
   deletePlan,
   exportedRows,
   exportFileName,
+  isExportFileName,
   type ExportRow,
 } from './logic/data';
 
@@ -121,8 +124,23 @@ export async function exportAllData(now: number = Date.now()): Promise<ExportRes
 
 export type DeleteResult = { status: 'deleted' } | { status: 'error'; error: unknown };
 
+/** Every export JSON left in the cache (one per day exported): it holds the full dataset. */
+function deleteExportFiles(): void {
+  try {
+    for (const entry of new Directory(Paths.cache).list()) {
+      if (entry instanceof File && isExportFileName(entry.name)) entry.delete();
+    }
+  } catch {
+    // no cache listing: nothing to delete
+  }
+}
+
 /** Remove every personal row, file and per-device key on this phone. */
 export function wipeLocalData(): void {
+  // A running rest belongs to a workout that is about to vanish: stop it, its "Rest over" alert
+  // and its lock-screen surfaces, before its store could re-persist anything (R2-4).
+  restTimer.skip();
+  void stopRestSurfaces();
   const db = getRawDb();
   db.withTransactionSync(() => {
     for (const table of USER_TABLES) db.execSync(`DELETE FROM ${table}`);
@@ -134,6 +152,7 @@ export function wipeLocalData(): void {
   } catch {
     // no photos folder
   }
+  deleteExportFiles();
   for (const key of PERSONAL_KV_KEYS) {
     try {
       kv.remove(key);

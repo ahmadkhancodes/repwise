@@ -239,23 +239,58 @@ export function mergeRemoteRows(
   return changed;
 }
 
+type PullListener = (changed: ReadonlySet<SyncTableName>) => void;
+const pullListeners = new Set<PullListener>();
+
 /**
- * Pull every page since the cursor. From the first page that brings rows, screen refreshes are held
- * (`holdLiveRefresh`) and flushed once at the end: a restore of n rows used to re-read a mounted
- * screen's tables once per row event, O(n²) (perf audit r2 N4).
+ * Called once after a pull finished merging, with the tables whose local rows changed. For
+ * follow-ups that need the whole pull in place first (e.g. collapsing duplicate planned sessions
+ * a second device wrote, R2-6). Returns the unsubscribe.
  */
-async function pull(userId: string): Promise<number> {
-  let release: (() => void) | null = null;
-  try {
-    return await pullPages(userId, () => {
-      release ??= holdLiveRefresh();
-    });
-  } finally {
-    (release as (() => void) | null)?.();
+export function onPullMerged(listener: PullListener): () => void {
+  pullListeners.add(listener);
+  return () => {
+    pullListeners.delete(listener);
+  };
+}
+
+function notifyPullMerged(changed: ReadonlySet<SyncTableName>): void {
+  if (changed.size === 0) return;
+  for (const l of [...pullListeners]) {
+    try {
+      l(changed);
+    } catch {
+      // a follow-up must never fail the sync
+    }
   }
 }
 
-async function pullPages(userId: string, onRows: () => void): Promise<number> {
+/**
+ * Pull every page since the cursor. From the first page that brings rows, screen refreshes are held
+ * (`holdLiveRefresh`) and flushed once at the end, after the pull-merged follow-ups ran: a restore
+ * of n rows used to re-read a mounted screen's tables once per row event, O(n²) (perf audit r2 N4).
+ */
+async function pull(userId: string): Promise<number> {
+  const changed = new Set<SyncTableName>();
+  let release: (() => void) | null = null;
+  try {
+    return await pullPages(userId, changed, () => {
+      release ??= holdLiveRefresh();
+    });
+  } finally {
+    try {
+      if (syncAccountId() === userId) notifyPullMerged(changed);
+    } finally {
+      (release as (() => void) | null)?.();
+    }
+  }
+}
+
+async function pullPages(
+  userId: string,
+  changed: Set<SyncTableName>,
+  onRows: () => void,
+): Promise<number> {
   let since = getPullSince(userId);
   let cursor: string | null = null;
   let pulled = 0;
@@ -269,7 +304,9 @@ async function pullPages(userId: string, onRows: () => void): Promise<number> {
     for (const [table, rows] of Object.entries(res.changes ?? {})) {
       if ((SYNC_TABLE_NAMES as string[]).includes(table) && Array.isArray(rows)) {
         if (rows.length > 0) onRows();
-        pulled += mergeRemoteRows(table as SyncTableName, rows, userId);
+        const n = mergeRemoteRows(table as SyncTableName, rows, userId);
+        if (n > 0) changed.add(table as SyncTableName);
+        pulled += n;
       }
     }
     cursor = res.nextCursor;

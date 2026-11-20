@@ -72,16 +72,18 @@ export function useToday(nowOverride?: number): TodayModel {
       try {
         // Training for this week (no-op when planned), then any missing meal days. The planner
         // service is required here, not imported: Today is on the first-frame path (perf r2 N1).
+        // The screen's clock (nowOverride in screenshots/Maestro/tests), not the real one (R2-7).
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { ensurePlannedAhead } = require('@/features/planner/bridge') as typeof import('@/features/planner/bridge');
-        ensurePlannedAhead(Date.now());
-        if (mealsMissing) ensureWeekMeals(date, Date.now());
+        const at = nowOverride ?? Date.now();
+        ensurePlannedAhead(at);
+        if (mealsMissing) ensureWeekMeals(date, at);
       } catch {
         // planning is best effort; Today still shows what is stored
       }
     }, PLAN_DELAY_MS);
     return () => clearTimeout(id);
-  }, [catalog, date, profileStamp, mealsMissing]);
+  }, [catalog, date, profileStamp, mealsMissing, nowOverride]);
   const minutes = minutesOfDay(now);
 
   const view = useMemo(

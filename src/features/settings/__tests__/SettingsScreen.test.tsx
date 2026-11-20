@@ -47,6 +47,9 @@ jest.mock('expo-file-system', () => {
     write(s: string) {
       files.set(this.uri, s);
     }
+    get name() {
+      return this.uri.split('/').pop() ?? '';
+    }
   }
   class Directory extends File {
     override get exists() {
@@ -54,6 +57,11 @@ jest.mock('expo-file-system', () => {
     }
     override delete() {
       for (const k of [...files.keys()]) if (k.startsWith(this.uri)) files.delete(k);
+    }
+    list() {
+      return [...files.keys()]
+        .filter((k) => k.startsWith(`${this.uri}/`) && !k.slice(this.uri.length + 1).includes('/'))
+        .map((k) => new File(k));
     }
   }
   return { File, Directory, Paths: { cache: { uri: 'cache' }, document: { uri: 'doc' } }, __files: files };
@@ -282,6 +290,31 @@ describe(`wipeLocalData (${Platform.OS})`, () => {
     expect(useOnboarding.getState().phase).toBe('welcome');
     // migrations bookkeeping is untouched
     expect(getRawDb().getAllSync('SELECT name FROM sqlite_master').length).toBeGreaterThan(0);
+  });
+});
+
+describe(`wipeLocalData leaves nothing behind (R2-4, ${Platform.OS})`, () => {
+  it('deletes every export JSON in the cache, keeps other cache files', () => {
+    fsMock.__files.set('cache/repwise-export-2026-11-01.json', '{}');
+    fsMock.__files.set('cache/repwise-export-2026-11-19.json', '{}');
+    fsMock.__files.set('cache/other.bin', 'x');
+    wipeLocalData();
+    expect(fsMock.__files.has('cache/repwise-export-2026-11-01.json')).toBe(false);
+    expect(fsMock.__files.has('cache/repwise-export-2026-11-19.json')).toBe(false);
+    expect(fsMock.__files.has('cache/other.bin')).toBe(true);
+  });
+
+  it('stops a running rest timer, its persisted copy and the "Rest over" alert', async () => {
+    const { restTimer } = require('@/features/workout/restTimerStore') as typeof import('@/features/workout/restTimerStore');
+    const Notifications = require('expo-notifications') as typeof import('expo-notifications');
+    const cancel = jest.spyOn(Notifications, 'cancelScheduledNotificationAsync');
+    restTimer.start('s1', 90, null, Date.now());
+    expect(kv.getString('workout.restTimer.v1')).toBeDefined();
+    wipeLocalData();
+    expect(restTimer.getState().status).toBe('idle');
+    expect(kv.getString('workout.restTimer.v1')).toBeUndefined();
+    await waitFor(() => expect(cancel).toHaveBeenCalledWith('rw:rest'));
+    cancel.mockRestore();
   });
 });
 

@@ -187,10 +187,41 @@ describe('single-flight refresh', () => {
     expect(peekSession()?.refreshToken).toBe(tokenResponse(1).refreshToken);
   });
 
-  it('offline during refresh keeps the tokens', async () => {
+  it('offline during refresh keeps the tokens (every retry fails, nobody is signed out)', async () => {
     await signedIn(NOW - 1);
+    configureApi({ refreshRetryDelaysMs: [0, 0, 0] });
+    const events: SessionEvent[] = [];
+    const off = onSessionEvent((e) => events.push(e));
     fake.setOffline(true);
     await expect(refreshSession()).rejects.toMatchObject({ kind: 'offline' });
+    off();
+    expect(peekSession()).toMatchObject({ refreshToken: 'rt-0' });
+    expect(events).toEqual([]);
+  });
+
+  it('recovers by retrying with backoff after repeated transient failures and a 5xx (R2-5)', async () => {
+    await signedIn(NOW - 1);
+    configureApi({ timeoutMs: 20, refreshRetryDelaysMs: [0, 5, 5] });
+    let n = 0;
+    fake.on('POST /auth/refresh', (c) => {
+      n++;
+      expect(c.body).toEqual({ refreshToken: 'rt-0' });
+      if (n === 1) return new Promise(() => undefined); // reply lost
+      if (n === 2) return new Promise(() => undefined); // radio still asleep after resume
+      if (n === 3) return { status: 503, body: { error: 'unavailable' } };
+      return { status: 200, body: tokenResponse(1) };
+    });
+    const s = await refreshSession();
+    expect(n).toBe(4);
+    expect(s.refreshToken).toBe(tokenResponse(1).refreshToken);
+  });
+
+  it('a persistent 5xx reports an error but keeps the session', async () => {
+    await signedIn(NOW - 1);
+    configureApi({ refreshRetryDelaysMs: [0, 0] });
+    fake.on('POST /auth/refresh', () => ({ status: 500, body: { error: 'boom' } }));
+    await expect(refreshSession()).rejects.toMatchObject({ kind: 'http', status: 500 });
+    expect(fake.callsTo('POST /auth/refresh')).toHaveLength(3);
     expect(peekSession()).toMatchObject({ refreshToken: 'rt-0' });
   });
 

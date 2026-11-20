@@ -20,6 +20,7 @@ import {
   chunkRows,
   getPullSince,
   mergeRemoteRows,
+  onPullMerged,
   resetSyncForTests,
   syncNow,
   useSyncStatus,
@@ -249,6 +250,33 @@ describe('syncNow against a fake Worker', () => {
       off();
       sqlite.__setChangeEventMode('statement');
     }
+  });
+
+  it('tells pull listeners once, after the whole pull, which tables changed (R2-6)', async () => {
+    const seen: string[][] = [];
+    const off = onPullMerged((t) => seen.push([...t]));
+    let page = 0;
+    fake.on('GET /sync/pull', () => {
+      page++;
+      expect(seen).toHaveLength(0); // never mid-pull
+      return page === 1
+        ? {
+            status: 200,
+            body: {
+              changes: { sessions: [{ id: 'p1', created_at: 1, updated_at: 2, deleted_at: null, title: 'Cloud' }], food_logs: [] },
+              nextCursor: 'C',
+              nextSince: 0,
+              serverTime: 9,
+            },
+          }
+        : { status: 200, body: { changes: {}, nextCursor: null, nextSince: 10, serverTime: 9 } };
+    });
+    await syncNow();
+    expect(seen).toEqual([['sessions']]);
+    // Nothing changed: no call.
+    await syncNow();
+    expect(seen).toHaveLength(1);
+    off();
   });
 
   it('skips when signed out or anonymous (no network)', async () => {

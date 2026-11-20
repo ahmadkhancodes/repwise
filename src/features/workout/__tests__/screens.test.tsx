@@ -11,9 +11,12 @@ import { useToastStore } from '@/ui';
 
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
-import { flushSetWrites, resetSetWritesForTests } from '../actions';
+import { DEFAULT_APP_PREFS, useAppPrefs } from '@/features/settings';
+
+import { finishWorkoutAction, flushSetWrites, resetSetWritesForTests } from '../actions';
+import { resetKeepAwakeForTests } from '../hooks/useWorkoutKeepAwake';
 import { optimisticSets, resetOptimisticForTests } from '../optimistic';
-import { exercisesForSession, getSession, setsFor, startWorkout } from '../repo';
+import { exercisesForSession, getSession, sessionsRepo, setsFor, startWorkout } from '../repo';
 import { resetRestTimerForTests, restTimer } from '../restTimerStore';
 import { resetRestNotifierForTests } from '../restNotifier';
 import { weekOf } from '../logic/dates';
@@ -62,6 +65,8 @@ beforeEach(async () => {
   resetRestNotifierForTests();
   resetSetWritesForTests();
   resetOptimisticForTests();
+  resetKeepAwakeForTests();
+  useAppPrefs.setState({ ...DEFAULT_APP_PREFS });
   useToastStore.setState({ current: null });
   events.length = 0;
   setAnalyticsSink((e, p) => events.push({ e, p }));
@@ -188,7 +193,7 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(screen.getByTestId('player-clock')).toBeTruthy();
       expect(screen.getByTestId('player-position')).toHaveTextContent('Exercise 1 of 2 · Set 1 of 3');
       // B1: the screen stays awake while the workout runs.
-      expect(activateKeepAwakeAsync).toHaveBeenCalledWith('workout');
+      expect(activateKeepAwakeAsync).toHaveBeenCalledWith(`workout-${s.id}`);
     });
 
     it('ticks in one tap: green tick, rest timer, one batched write (A3)', async () => {
@@ -346,7 +351,7 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(getSession(s.id)?.status).toBe('paused');
       expect(restTimer.getState().status).toBe('paused');
       expect(await screen.findByTestId('player-paused')).toBeTruthy();
-      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith('workout'));
+      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith(`workout-${s.id}`));
       await fireEvent.press(screen.getByTestId('player-menu'));
       await fireEvent.press(screen.getByTestId('menu-pause'));
       expect(getSession(s.id)?.status).toBe('active');
@@ -442,6 +447,39 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
     });
   });
 
+  describe('Keep the screen on (N2, N6)', () => {
+    it('leaving or switching the exercise screen never lets the phone sleep mid-workout', async () => {
+      const s = plannedSession();
+      startWorkout(s.id);
+      const [squat, bench] = exercisesForSession(s.id);
+      await renderThemed(<WorkoutPlayerScreen sessionId={s.id} />, scheme);
+      const ex1 = await renderThemed(<ExerciseScreen sessionId={s.id} seId={squat!.id} />, scheme);
+      const ex2 = await renderThemed(<ExerciseScreen sessionId={s.id} seId={bench!.id} />, scheme); // next via replace
+      await ex1.unmount();
+      await ex2.unmount(); // back to the list
+      await settle();
+      expect(activateKeepAwakeAsync).toHaveBeenCalledTimes(1);
+      expect(activateKeepAwakeAsync).toHaveBeenCalledWith(`workout-${s.id}`);
+      expect(deactivateKeepAwake).not.toHaveBeenCalled();
+      // Released on finish.
+      await act(async () => finishWorkoutAction(s.id, null, 'kg'));
+      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith(`workout-${s.id}`));
+    });
+
+    it('Settings → "Keep screen on" off: never held; switching it off mid-workout releases it', async () => {
+      useAppPrefs.setState({ keepAwake: false });
+      const s = plannedSession();
+      startWorkout(s.id);
+      await renderThemed(<WorkoutPlayerScreen sessionId={s.id} />, scheme);
+      await settle();
+      expect(activateKeepAwakeAsync).not.toHaveBeenCalled();
+      await act(async () => useAppPrefs.setState({ keepAwake: true }));
+      expect(activateKeepAwakeAsync).toHaveBeenCalledWith(`workout-${s.id}`);
+      await act(async () => useAppPrefs.setState({ keepAwake: false }));
+      await waitFor(() => expect(deactivateKeepAwake).toHaveBeenCalledWith(`workout-${s.id}`));
+    });
+  });
+
   describe('Exercise screen (S14)', () => {
     it('shows the library demo hero, logs sets, saves notes and moves on', async () => {
       const s = plannedSession();
@@ -450,6 +488,8 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       await renderThemed(<ExerciseScreen sessionId={s.id} seId={squat!.id} />, scheme);
       expect(screen.getByText('Exercise 1 of 2')).toBeTruthy();
       expect(screen.queryByTestId('ex-media') ?? screen.queryByTestId('ex-media-placeholder')).toBeTruthy();
+      // The hero gets the exercise, so its muscle map names the muscles.
+      expect(screen.getByTestId('ex-media-map', { includeHiddenElements: true }).props.accessibilityLabel).toMatch(/Main: /);
       await fireEvent.press(screen.getByTestId('ex-set-0-check'));
       await settle();
       expect(setsFor(squat!.id)[0]?.doneAt).not.toBeNull();
@@ -538,6 +578,17 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       const id = target.split('/').pop()!;
       expect(getSession(id)).toMatchObject({ status: 'active', title: 'Upper A' });
       expect(setsFor(exercisesForSession(id)[0]!.id)).toHaveLength(4);
+    });
+
+    it('Start while another workout runs opens that one and creates no orphan (R2-3)', async () => {
+      const running = plannedSession();
+      startWorkout(running.id);
+      const r = routinesRepo.insert({ name: 'Upper A', items: [{ exerciseId: 'barbell-bench-press', sets: 3, reps: '8-12', restS: 90 }] });
+      await renderThemed(<RoutineBuilderScreen routineId={r.id} />, scheme);
+      const before = sessionsRepo.list().length;
+      await fireEvent.press(screen.getByTestId('routine-start'));
+      expect(mockRouter.replace).toHaveBeenLastCalledWith(`/workout/${running.id}`);
+      expect(sessionsRepo.list()).toHaveLength(before);
     });
 
     it('picker adds to a live session and shows no-match state', async () => {

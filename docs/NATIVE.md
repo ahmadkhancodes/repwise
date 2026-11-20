@@ -59,7 +59,7 @@ The workout player publishes its state to `src/features/notifications/restTimer.
 - **Event `onRestAction`:** `{ id, action: 'add15' | 'skip', at, endsAt?, remainingMs?, sessionId? }`.
 - **`consumeRestActions()`:** returns the taps queued while JS was not listening, oldest first, and clears the queue.
 - **When the buttons appear:** only after JS first listens for `onRestAction`. A button must never move the lock screen without the player knowing; otherwise the player would end the rest at the old time and cancel the alert.
-- **Player job (owned by the workout agent, not done yet):**
+- **Player job (done, r2-bug: `src/features/workout/restNotifier.ts` `installRestNotifier` / `applyRestAction`):**
   1. Subscribe to `onRestAction`.
   2. On start or resume, also drain `consumeRestActions()`.
   3. Apply +15 s or skip to its rest state.
@@ -67,7 +67,7 @@ The workout player publishes its state to `src/features/notifications/restTimer.
 
 ## Follow-ups for other owners
 
-1. `src/features/notifications/data.ts` (`loadSnapshot`): add `id: next.id` to `snap.nextMeal`. Until then, Ate it opens Eat (2 taps).
-2. Eat screen: handle `/eat?mealId=…&tick=1`, the same as the notification's Ate it (`markMealEaten`).
-3. Workout player: wire up `onRestAction` / `consumeRestActions` as described above.
+1. Done (r2-bug): `loadSnapshot` carries `nextMeal.id`.
+2. Done (r2-bug): Eat handles `/eat?mealId=…&tick=1` (`tickMealFromLink`).
+3. Done (r2-bug): the player listens to `onRestAction` and drains `consumeRestActions()`.
 4. Set `ios.appleTeamId` for signing the extension. Device-test the widgets, the Live Activity buttons (iOS 17+), and the Android countdown with the screen off on Android 14+.

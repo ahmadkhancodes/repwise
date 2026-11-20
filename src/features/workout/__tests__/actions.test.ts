@@ -2,8 +2,9 @@ import { freshDb, plannedSession, TODAY } from '../../../../test/workoutFixtures
 import { resetAnalyticsForTests, trackedEvents } from '@/services/analytics';
 import { getCatalog } from '@/services/catalog';
 
-import { logSetAction, startWorkoutAction, undoSetAction } from '../actions';
-import { activeSession, exercisesForSession, getSession, setsFor } from '../repo';
+import { logSetAction, pauseWorkoutAction, startRoutineAction, startWorkoutAction, undoSetAction } from '../actions';
+import { isCardioPattern } from '../logic/cardio';
+import { activeSession, createSession, exercisesForSession, getSession, sessionsRepo, setsFor } from '../repo';
 import { restTimer } from '../restTimerStore';
 
 beforeEach(async () => {
@@ -22,6 +23,42 @@ describe('startWorkoutAction', () => {
     expect(activeSession()!.id).toBe(a.id);
     // Starting the same one again is fine (idempotent).
     expect(startWorkoutAction(a.id, getCatalog(), 3_000).started).toBe(true);
+  });
+});
+
+describe('startWorkoutAction before the exercises part loads (R2-2)', () => {
+  it('a null catalogue still gives cardio exercises cardio rows', () => {
+    const rower = getCatalog().exercises.find((e) => isCardioPattern(e.pattern))!;
+    expect(rower).toBeTruthy();
+    const s = createSession({ date: TODAY(), title: 'Cardio', exercises: [{ exerciseId: rower.id, targetSets: 1, targetReps: '1' }] });
+    expect(startWorkoutAction(s.id, null, 1_000).started).toBe(true);
+    const rows = setsFor(exercisesForSession(s.id)[0]!.id);
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((r) => r.type === 'cardio')).toBe(true);
+  });
+});
+
+describe('startRoutineAction (R2-3)', () => {
+  const routine = () => ({
+    date: TODAY(),
+    name: 'My routine',
+    exercises: [{ exerciseId: 'barbell-bench-press', targetSets: 3, targetReps: '8', restS: 90 }],
+  });
+
+  it('starts a new ad-hoc workout when nothing runs', () => {
+    const res = startRoutineAction(routine(), getCatalog(), 1_000);
+    expect(res.started).toBe(true);
+    expect(activeSession()!.id).toBe(res.started ? res.sessionId : '');
+  });
+
+  it('while a workout is paused, creates nothing and points to the running one', () => {
+    const a = plannedSession(TODAY(), 'A');
+    startWorkoutAction(a.id, getCatalog(), 1_000);
+    pauseWorkoutAction(a.id, 1_500);
+    const before = sessionsRepo.list().length;
+    expect(startRoutineAction(routine(), getCatalog(), 2_000)).toEqual({ started: false, activeSessionId: a.id });
+    expect(sessionsRepo.list()).toHaveLength(before);
+    expect(activeSession()!.id).toBe(a.id);
   });
 });
 

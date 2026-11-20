@@ -4,10 +4,11 @@
  * prompt at the "all of today's meals eaten" success moment.
  */
 import { GLASS_ML } from '@/features/nutrition/logic/water';
+import { haptics } from '@/services/haptics';
 import { maybeAskForReview, REVIEW_DELAY_MS } from '@/services/review';
-import { showUndoToast } from '@/ui';
+import { showToast, showUndoToast } from '@/ui';
 
-import { addWater, markMealEaten, setMealOpen, undoLog } from './service';
+import { addWater, markMealEaten, setMealOpen, tickMealIfOpen, undoLog, type TickFromLinkResult } from './service';
 
 type ToggleMeal = { id: string; title: string; status: string };
 
@@ -45,4 +46,25 @@ export function quickAddWater(date: string, ml: number = GLASS_ML): void {
   showUndoToast(`${ml} ml water added`, () => {
     undoLog(row.id);
   });
+}
+
+/**
+ * Widget "Ate it" deep link (`/eat?mealId=…&tick=1`): tick the meal through the meals service with
+ * the core-action success haptic and a silent undo toast. Idempotent: an already-eaten meal only
+ * says so (no write, no buzz); a missing meal says it is gone.
+ */
+export function tickMealFromLink(mealId: string, now: number = Date.now()): TickFromLinkResult {
+  const res = tickMealIfOpen(mealId, now);
+  if (res.status === 'ticked') {
+    haptics.success();
+    const previous = res.previous;
+    showUndoToast(`${res.name} logged`, () => {
+      setMealOpen(mealId, previous);
+    });
+  } else if (res.status === 'already') {
+    showToast({ message: `${res.name} is already logged` });
+  } else {
+    showToast({ message: 'That meal is no longer in your plan' });
+  }
+  return res;
 }
