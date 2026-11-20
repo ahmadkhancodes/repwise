@@ -24,6 +24,10 @@ tags:
 - assertVisible:
     id: "meals-count"
     text: "0 of .* eaten"
+- scrollUntilVisible:
+    element:
+      id: "today-tick-lunch"
+    direction: DOWN
 - tapOn:
     id: "today-tick-lunch"
 - assertVisible: ".* logged"

@@ -8,6 +8,7 @@ import {
 import { X } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { BackHandler, Platform, useWindowDimensions, View } from 'react-native';
+import { ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
@@ -119,8 +120,9 @@ export function Sheet({
       maxDynamicContentSize={maxHeight}
       onDismiss={onClose}
       backdropComponent={renderBackdrop}
-      // Keep gorhom's default mount animation: it already honours reduced motion (instant snap).
-      // animateOnMount={false} left the sheet off-screen on Android with animations removed.
+      // gorhom 5.2 under reduced motion (Android "Remove animations") presents the sheet but never
+      // moves it on-screen, with or without animateOnMount. Its own snap animation always runs.
+      overrideReduceMotion={ReduceMotion.Never}
       backgroundStyle={{
         backgroundColor: t.colors.bg,
         borderTopLeftRadius: t.radius.sheet,

@@ -105,7 +105,8 @@ trap stop_device_log EXIT
 if [ -n "${APP_PATH:-}" ]; then
   echo "Installing $APP_PATH"
   if [ "$PLATFORM" = android ]; then
-    adb_ install -r -g "$APP_PATH" || { echo "adb install failed" >&2; exit 1; }
+    # No -g: launchApp grants or denies permissions per flow (a pre-grant can mask "deny").
+    adb_ install -r "$APP_PATH" || { echo "adb install failed" >&2; exit 1; }
   else
     xcrun simctl install "$SIM" "$APP_PATH" || { echo "simctl install failed" >&2; exit 1; }
   fi

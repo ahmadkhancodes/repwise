@@ -19,6 +19,10 @@ tags:
       visible:
         id: "today-meal-lunch"
     commands:
+      - scrollUntilVisible:
+          element:
+            id: "today-tick-lunch"
+          direction: DOWN
       - tapOn:
           id: "today-tick-lunch"
       - assertVisible: ".* logged"

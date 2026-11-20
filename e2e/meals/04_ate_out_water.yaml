@@ -40,5 +40,7 @@ appId: com.client.repwise
     direction: UP
 - tapOn:
     id: "eat-rings"
-- assertVisible:
-    id: "day-log-items"
+- scrollUntilVisible:
+    element:
+      id: "day-log-items"
+    direction: DOWN

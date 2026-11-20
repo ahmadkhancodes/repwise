@@ -49,3 +49,27 @@ tags:
           visible:
             id: "screen-today"
           timeout: 5000
+# Leave no workout in progress for later flows (workout/01 and 03 start from a clean Train tab).
+- tapOn:
+    id: "tab-train"
+- runFlow:
+    when:
+      visible:
+        id: "resume-banner"
+    commands:
+      - tapOn:
+          id: "resume-banner"
+      - extendedWaitUntil:
+          visible:
+            id: "player-menu"
+          timeout: 10000
+      - tapOn:
+          id: "player-menu"
+      - tapOn:
+          id: "menu-discard"
+      - tapOn:
+          id: "discard-confirm"
+      - extendedWaitUntil:
+          notVisible:
+            id: "screen-workout"
+          timeout: 5000
