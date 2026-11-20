@@ -7,7 +7,7 @@
 | a1afa93eb968248ba | w-libprog (MERGED) library/progress/hero | /home/user/repwise-w-libprog |
 | a5615d9bb024abc55 | w-perf (MERGED) core perf | /home/user/repwise-w-perf |
 | ace197d15361a587d | x-server (MERGED) | /home/user/repwise-x-server |
-| a68713ede725feb5d | x-engine | /home/user/repwise-x-engine |
+| a68713ede725feb5d | x-engine (MERGED) | /home/user/repwise-x-engine |
 | abac096aaee5151ea | x-content (MERGED) | /home/user/repwise-x-content |
 | af4dc6c5e0ea03d12 | x-native (MERGED) | /home/user/repwise-x-native |
 | a4556865b0e423f30 | x-web (MERGED) | /home/user/repwise-x-web |
