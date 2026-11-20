@@ -34,6 +34,7 @@ export function AccountScreen() {
   return (
     <Screen
       title="Backup & account"
+      keyboard
       testID="screen-account"
       headerLeft={
         <IconButton icon={ChevronLeft} accessibilityLabel="Back" onPress={() => router.back()} />

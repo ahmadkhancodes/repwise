@@ -9,7 +9,7 @@ import {
   Repeat,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 import { ExerciseHero } from '@/features/library';
 import { useTheme } from '@/theme';
@@ -122,11 +122,9 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
   );
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <>
       <Screen
+        keyboard
         title={item.meta.name}
         headerLeft={backButton}
         footer={
@@ -230,6 +228,6 @@ export function ExerciseScreen({ sessionId, seId }: { sessionId: string; seId: s
       </Screen>
       {p.sheets}
       <PRCelebration moment={p.prMoment} onDone={p.clearPrMoment} />
-    </KeyboardAvoidingView>
+    </>
   );
 }

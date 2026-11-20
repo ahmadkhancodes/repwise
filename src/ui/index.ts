@@ -17,7 +17,7 @@ export { ListRow, type ListRowProps } from './ListRow';
 export { MacroRings, macroRingModel, type MacroRingsProps, type MacroTotals } from './MacroRings';
 export { PressableScale, type PressableScaleProps } from './PressableScale';
 export { ProgressRing, clampProgress, type ProgressRingProps } from './ProgressRing';
-export { Screen, type ScreenProps } from './Screen';
+export { Screen, SCREEN_KEYBOARD_BEHAVIOR, type ScreenListProps, type ScreenProps } from './Screen';
 export {
   SearchBar,
   SEARCH_DEBOUNCE_MS,
@@ -25,7 +25,7 @@ export {
   type SearchBarProps,
 } from './SearchBar';
 export { Segmented, type SegmentedProps, type SegmentOption } from './Segmented';
-export { Sheet, type SheetProps } from './Sheet';
+export { Sheet, SHEET_MAX_RATIO, sheetMaxHeight, type SheetProps } from './Sheet';
 export {
   Skeleton,
   SkeletonCard,
@@ -86,3 +86,4 @@ export {
   type WeekDayStatus,
   type WeekStripProps,
 } from './WeekStrip';
+export { SwapIcon, TargetsIcon, WaterIcon } from './icons';

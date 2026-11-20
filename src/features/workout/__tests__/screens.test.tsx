@@ -559,5 +559,26 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(screen.getByTestId('routine-start').props.accessibilityState).toMatchObject({ disabled: true });
       await act(async () => undefined);
     });
+
+    it('trash asks first, then soft-deletes with an undo that restores the routine', async () => {
+      const r = routinesRepo.insert({ name: 'Upper A', items: [] });
+      await renderThemed(<RoutineBuilderScreen routineId={r.id} />, scheme);
+      await fireEvent.press(screen.getByTestId('routine-delete'));
+      // Nothing is gone until the user confirms.
+      expect(routinesRepo.get(r.id)).toBeTruthy();
+      expect(screen.getByTestId('routine-delete-sheet')).toBeTruthy();
+      expect(screen.getByTestId('routine-delete-confirm')).toBeTruthy();
+      await fireEvent.press(screen.getByTestId('routine-delete-cancel'));
+      expect(routinesRepo.get(r.id)).toBeTruthy();
+
+      await fireEvent.press(screen.getByTestId('routine-delete'));
+      await fireEvent.press(screen.getByTestId('routine-delete-confirm'));
+      expect(routinesRepo.get(r.id)).toBeUndefined();
+      expect(mockRouter.back).toHaveBeenCalled();
+      const toast = useToastStore.getState().current;
+      expect(toast).toMatchObject({ message: 'Routine deleted', actionLabel: 'Undo', silent: true });
+      await act(async () => toast?.onAction?.());
+      expect(routinesRepo.get(r.id)?.name).toBe('Upper A');
+    });
   });
 });

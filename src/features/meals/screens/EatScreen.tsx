@@ -27,7 +27,8 @@ import {
 import { enterAt } from '@/ui/listMotion';
 
 import { quickAddWater, toggleMeal } from '../actions';
-import { TargetsIcon } from '../components/icons';
+import { TargetsIcon } from '@/ui';
+import { openMeal } from '../navigation';
 import { MealTile } from '../components/MealTile';
 import { SwapSheet } from '../components/SwapSheet';
 import { useEatDay, useEatWeek, type MealView } from '../hooks/useEat';
@@ -147,8 +148,7 @@ function DayView({
   }, [dayMeals]);
   const onSwap = useCallback((m: MealView) => setSwap(m), []);
   const onOpen = useCallback((m: MealView) => {
-    if (!m.recipeId) return;
-    router.push({ pathname: '/recipe/[id]', params: { id: m.recipeId, portion: String(m.portion), mealId: m.id } });
+    openMeal(m);
   }, []);
 
   const header = (

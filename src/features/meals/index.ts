@@ -18,9 +18,11 @@ export {
   undoLog,
 } from './service';
 export { toMealView, useEatDay, useEatWeek, type MealView } from './hooks/useEat';
-export { MealTile } from './components/MealTile';
+export { MealTile, eatMealRow, mealArt } from './components/MealTile';
+export { MealRow, type MealRowModel, type MealRowProps } from './components/MealRow';
 export { RecipeArt } from './components/RecipeArt';
 export { completesDay, quickAddWater, toggleMeal } from './actions';
 export { recipeArt, type RecipeArt as RecipeArtModel } from './logic/art';
 export { SwapSheet } from './components/SwapSheet';
 export { todayISO } from './logic/dates';
+export { openMeal } from './navigation';

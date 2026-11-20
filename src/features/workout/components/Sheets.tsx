@@ -227,9 +227,16 @@ export function ReorderSheet({
 }) {
   const t = useTheme();
   return (
-    <Sheet open={open} onClose={onClose} title="Reorder" testID="reorder-sheet">
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title="Reorder"
+      scrollable
+      footer={<Button label="Done" onPress={onClose} testID="reorder-done" />}
+      testID="reorder-sheet"
+    >
       {open ? (
-        <View style={{ gap: t.spacing.xxs }}>
+        <View>
           {items.map((it, i) => (
             <View
               key={it.id}
@@ -278,12 +285,6 @@ export function ReorderSheet({
               />
             </View>
           ))}
-          <Button
-            label="Done"
-            onPress={onClose}
-            testID="reorder-done"
-            style={{ marginTop: t.spacing.xs }}
-          />
         </View>
       ) : null}
     </Sheet>

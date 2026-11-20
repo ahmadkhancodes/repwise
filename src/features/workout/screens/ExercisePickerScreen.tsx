@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Dumbbell, X } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 
 import { ExerciseRow } from '@/features/library/components/ExerciseRow';
 import { fromCatalog, type LibraryItem } from '@/features/library';
@@ -64,11 +64,9 @@ export function ExercisePickerScreen({
   );
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <>
       <Screen
+        keyboard
         title="Add exercise"
         scroll={false}
         headerLeft={
@@ -113,6 +111,6 @@ export function ExercisePickerScreen({
           />
         )}
       </Screen>
-    </KeyboardAvoidingView>
+    </>
   );
 }

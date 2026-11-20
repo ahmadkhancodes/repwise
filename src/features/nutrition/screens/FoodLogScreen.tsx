@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Clock, Search, UtensilsCrossed } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { BackButton } from '@/features/meals/components/BackButton';
@@ -143,8 +143,9 @@ export function FoodLogScreen() {
   );
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <>
       <Screen
+        keyboard
         title="Log food"
         headerLeft={<BackButton />}
         testID="screen-log"
@@ -239,6 +240,6 @@ export function FoodLogScreen() {
           ) : null}
         </Sheet>
       </Screen>
-    </KeyboardAvoidingView>
+    </>
   );
 }

@@ -20,7 +20,7 @@ tags:
         id: "today-meal-lunch"
     commands:
       - tapOn:
-          id: "today-meal-lunch"
+          id: "today-tick-lunch"
       - assertVisible: ".* logged"
       - tapOn: "Undo"
 - scrollUntilVisible:

@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, sql, type SQL } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
 
@@ -155,6 +155,18 @@ export function createRepo<T extends SyncTable>(table: T, name: SyncTableName) {
     return changed;
   }
 
+  /** Undo a soft delete (the 5 s "Undo" toast). The restore syncs like any edit. */
+  function restore(id: string, now: number = Date.now()): boolean {
+    const at = sql`max(${now}, ${t.updatedAt} + 1)`;
+    const res = getDb()
+      .update(t)
+      .set({ deletedAt: null, updatedAt: at, dirty: DIRTY.pending } as never)
+      .where(and(eq(t.id, id), isNotNull(t.deletedAt)))
+      .run();
+    if (res.changes > 0) notifyLocalWrite(name);
+    return res.changes > 0;
+  }
+
   function list(where?: SQL, orderBy?: SQL | SQLiteColumn): R[] {
     const q = getDb().select().from(t).where(notDeleted(where));
     return (orderBy ? q.orderBy(orderBy) : q).all() as R[];
@@ -189,6 +201,7 @@ export function createRepo<T extends SyncTable>(table: T, name: SyncTableName) {
     update,
     remove,
     removeMany,
+    restore,
     list,
     first,
     useLive,

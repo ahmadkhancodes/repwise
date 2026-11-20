@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { ArrowDown, ArrowUp, ChevronLeft, ListPlus, Plus, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 import { routinesRepo } from '@/features/library/repo';
 import { useCatalogFor } from '@/services/catalog';
@@ -19,7 +19,7 @@ import {
   Stepper,
   Text,
   TextField,
-  showToast,
+  showUndoToast,
 } from '@/ui';
 
 import { startWorkoutAction } from '../actions';
@@ -94,26 +94,27 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
     startWorkoutAction(s.id, catalog);
     router.replace(`/workout/${s.id}`);
   };
+  // Soft delete + 5 s undo (N1): the confirm sheet guards the tap, the toast guards the regret.
   const remove = () => {
     setConfirmDelete(false);
-    routinesRepo.remove(routineId);
-    showToast({ message: 'Routine deleted' });
+    if (!routinesRepo.remove(routineId)) return;
+    showUndoToast('Routine deleted', () => {
+      routinesRepo.restore(routineId);
+    });
     back();
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <>
       <Screen
+        keyboard
         title={routine.name}
         headerLeft={backButton}
         headerRight={
           <IconButton
             icon={Trash2}
             accessibilityLabel="Delete routine"
-            onPress={remove}
+            onPress={() => setConfirmDelete(true)}
             testID="routine-delete"
           />
         }
@@ -280,6 +281,6 @@ export function RoutineBuilderScreen({ routineId }: { routineId: string }) {
           </View>
         ) : null}
       </Sheet>
-    </KeyboardAvoidingView>
+    </>
   );
 }

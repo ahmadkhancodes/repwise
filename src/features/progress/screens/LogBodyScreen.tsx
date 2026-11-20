@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { X } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Button, IconButton, Screen, Segmented, Text, TextField, showToast } from '@/ui';
 import { useTheme } from '@/theme';
@@ -50,11 +50,9 @@ export function LogBodyScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: t.colors.bg }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <>
       <Screen
+        keyboard
         title="Log body"
         testID="screen-progress-log"
         headerLeft={
@@ -115,6 +113,6 @@ export function LogBodyScreen() {
           </Text>
         ) : null}
       </Screen>
-    </KeyboardAvoidingView>
+    </>
   );
 }

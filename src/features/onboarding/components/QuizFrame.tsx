@@ -1,11 +1,18 @@
 import { ChevronLeft } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import Animated, { FadeIn, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
-import { Button, IconButton, PressableScale, StepProgress, Text } from '@/ui';
+import {
+  Button,
+  IconButton,
+  PressableScale,
+  SCREEN_KEYBOARD_BEHAVIOR,
+  StepProgress,
+  Text,
+} from '@/ui';
 
 export type QuizFrameProps = {
   title: string;
@@ -49,7 +56,7 @@ export function QuizFrame({
   return (
     <KeyboardAvoidingView
       testID={testID}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={SCREEN_KEYBOARD_BEHAVIOR}
       style={{ flex: 1, backgroundColor: t.colors.bg, paddingTop: insets.top }}
     >
       <View

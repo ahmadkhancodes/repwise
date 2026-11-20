@@ -5,7 +5,7 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { BackButton } from '@/features/meals/components/BackButton';
 import { MacroChips } from '@/features/meals/components/MacroChips';
-import { mealArt } from '@/features/meals/components/MealTile';
+import { mealArt } from '@/features/meals';
 import { RecipeArt } from '@/features/meals/components/RecipeArt';
 import { enterAt, layoutSpring } from '@/ui/listMotion';
 import { useEatDay, type MealView } from '@/features/meals/hooks/useEat';
