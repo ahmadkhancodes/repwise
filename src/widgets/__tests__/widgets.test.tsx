@@ -6,8 +6,8 @@ import { kv } from '@/services/storage';
 import { colors } from '@/theme';
 
 import { walkWidgetTree } from '../../../test/mocks/androidWidget';
-import { renderWidget, StreakWidget, TodayWidget, WIDGET_NAMES } from '../android/widgets';
-import { ringSvg } from '../android/palette';
+import { MacrosWidget, renderKnownWidget, renderWidget, StreakWidget, TodayWidget, WIDGET_NAMES } from '../android/widgets';
+import { dualRingSvg, ringSvg } from '../android/palette';
 import { widgetTaskHandler } from '../android/widgetTaskHandler';
 import {
   eatenTotals,
@@ -19,6 +19,8 @@ import {
   weekStart,
   weeksInARow,
   WIDGET_LINKS,
+  workoutCta,
+  workoutLines,
   type WidgetSnapshot,
 } from '../snapshot';
 import { MMKV_SNAPSHOT_KEY, readStoredSnapshot, resetWriterForTests, SNAPSHOT_KEY, writeWidgetSnapshot } from '../writer';
@@ -109,6 +111,22 @@ describe('snapshot logic', () => {
     expect(WIDGET_LINKS.workout('s 1', true)).toBe('repwise://train?sessionId=s%201&start=1');
     expect(WIDGET_LINKS.workout(null, false)).toBe('repwise://train');
     expect(WIDGET_LINKS.quickLog).toBe('repwise://eat?log=1');
+    expect(WIDGET_LINKS.tickMeal('m 1')).toBe('repwise://eat?mealId=m%201&tick=1');
+    expect(WIDGET_LINKS.tickMeal(undefined)).toBe('repwise://eat');
+  });
+
+  it('workoutCta: Start a planned session, Resume a running one, nothing when done or rest day', () => {
+    const w = (status: 'planned' | 'active' | 'paused' | 'done' | 'skipped') =>
+      ({ sessionId: 's1', title: 'Push day', exercises: 6, minutes: 52, status });
+    expect(workoutCta(w('planned'))).toEqual({ label: 'Start', url: 'repwise://train?sessionId=s1&start=1' });
+    expect(workoutCta(w('active'))?.label).toBe('Resume');
+    expect(workoutCta(w('paused'))?.url).toBe('repwise://train?sessionId=s1&start=1');
+    expect(workoutCta(w('done'))).toBeNull();
+    expect(workoutCta(w('skipped'))).toBeNull();
+    expect(workoutCta(null)).toBeNull();
+    expect(workoutLines(w('planned'))).toEqual({ title: 'Push day', meta: '6 exercises · 52 min' });
+    expect(workoutLines(w('done')).meta).toBe('Done today');
+    expect(workoutLines(null).title).toBe('Rest day');
   });
 });
 
@@ -121,16 +139,59 @@ describe('Android widgets', () => {
     expect(ringSvg(Number.NaN, 84, 8, 'a', 'b')).not.toContain('stroke-dasharray');
   });
 
-  it.each(['light', 'dark'] as const)('Today (%s): workout, ring, next meal and quick log', (scheme) => {
-    const nodes = walkWidgetTree(<TodayWidget snapshot={snap()} scheme={scheme} />);
+  it('dualRingSvg draws kcal outside and protein inside', () => {
+    const svg = dualRingSvg(0.5, 0.25, 76, 7, { outer: 'o', inner: 'i', track: 't' });
+    expect(svg.match(/<circle/g)).toHaveLength(4);
+    expect(svg).toContain('stroke="o"');
+    expect(svg).toContain('stroke="i"');
+    expect(dualRingSvg(0, 0, 76, 7, { outer: 'o', inner: 'i', track: 't' }).match(/<circle/g)).toHaveLength(2);
+  });
+
+  it.each(['light', 'dark'] as const)('Today (%s): one-tap Start, next meal + Ate it, kcal/protein ring, quick log', (scheme) => {
+    const nodes = walkWidgetTree(<TodayWidget snapshot={snap({ nextMeal: { id: 'm1', slot: 'lunch', label: 'Lunch', name: 'Chicken karahi bowl', kcal: 610, time: '13:00' } })} scheme={scheme} />);
     const texts = nodes.filter((n) => n.type === 'TextWidget').map((n) => n.props.text);
-    expect(texts).toEqual(expect.arrayContaining(['Push day · 52 min', 'Lunch · 13:00', 'Chicken karahi bowl', '1240 / 2350 kcal', '+ Log']));
+    expect(texts).toEqual(
+      expect.arrayContaining(['Push day', '6 exercises · 52 min', 'Start', 'Lunch · 13:00', 'Chicken karahi bowl', 'Ate it', '1240 / 2350 kcal', '96 / 160 g protein', '+ Log']),
+    );
     const uris = nodes.map((n) => (n.props.clickActionData as { uri?: string } | undefined)?.uri).filter(Boolean);
-    expect(uris).toEqual(expect.arrayContaining([WIDGET_LINKS.quickLog, 'repwise://train?sessionId=s1', WIDGET_LINKS.eat]));
+    expect(uris).toEqual(
+      expect.arrayContaining([
+        WIDGET_LINKS.quickLog,
+        'repwise://train?sessionId=s1&start=1',
+        'repwise://train?sessionId=s1',
+        'repwise://eat?mealId=m1&tick=1',
+        WIDGET_LINKS.eat,
+      ]),
+    );
     const root = nodes[0]!;
     expect((root.props.style as { backgroundColor: string }).backgroundColor).toBe(colors[scheme].bg);
     // Every clickable part has an accessibility label.
     for (const n of nodes.filter((x) => x.props.clickAction)) expect(n.props.accessibilityLabel).toBeTruthy();
+  });
+
+  it('Today at 2×2 uses the compact layout; done workouts have no Start and show the meal tick', () => {
+    const small = { width: 150, height: 150 };
+    const texts = (el: unknown) => walkWidgetTree(el).filter((n) => n.type === 'TextWidget').map((n) => n.props.text);
+    const compact = texts(<TodayWidget snapshot={snap()} scheme="light" size={small} />);
+    expect(compact).toEqual(expect.arrayContaining(['Push day', 'Start']));
+    expect(compact).not.toContain('+ Log');
+    const done = snap({ workout: { sessionId: 's1', title: 'Push day', exercises: 6, minutes: 52, status: 'done' } });
+    const doneNodes = walkWidgetTree(<TodayWidget snapshot={done} scheme="dark" size={small} />);
+    expect(doneNodes.some((n) => n.props.text === 'Start')).toBe(false);
+    expect(doneNodes.some((n) => (n.props.clickActionData as { uri?: string } | undefined)?.uri === 'repwise://eat')).toBe(true);
+    // Rest day, no meal: still a calm card with the quick log.
+    const rest = texts(<TodayWidget snapshot={snap({ workout: null, nextMeal: null })} scheme="light" />);
+    expect(rest).toEqual(expect.arrayContaining(['Rest day', 'No meals planned']));
+  });
+
+  it('Macros drops carbs and fat when the widget is short', () => {
+    const texts = (size?: { width: number; height: number }) =>
+      walkWidgetTree(<MacrosWidget snapshot={snap()} scheme="light" size={size} />)
+        .filter((n) => n.type === 'TextWidget')
+        .map((n) => n.props.text);
+    expect(texts()).toEqual(expect.arrayContaining(['1110', 'Protein', 'Carbs', 'Fat', '96/160 g']));
+    expect(texts({ width: 120, height: 110 })).not.toContain('Carbs');
+    expect(texts({ width: 120, height: 110 })).toContain('Protein');
   });
 
   it('not Pro: a calm lock card instead of data', () => {
@@ -138,7 +199,7 @@ describe('Android widgets', () => {
       .filter((n) => n.type === 'TextWidget')
       .map((n) => n.props.text);
     expect(texts).toContain('Widgets are part of Repwise Pro');
-    expect(texts).not.toContain('Push day · 52 min');
+    expect(texts).not.toContain('Push day');
   });
 
   it('Streak and Macros render; renderWidget gives light + dark and null for unknown names', () => {
@@ -150,6 +211,7 @@ describe('Android widgets', () => {
     expect(walkWidgetTree(macros.light).some((n) => n.props.text === '1110')).toBe(true); // kcal left
     expect(macros.dark).toBeTruthy();
     expect(renderWidget('Nope', snap())).toBeNull();
+    expect(renderKnownWidget(WIDGET_NAMES.streak, snap()).dark).toBeTruthy();
   });
 
   it('task handler renders from the stored snapshot and tracks widget_added', async () => {
@@ -166,7 +228,7 @@ describe('Android widgets', () => {
     });
     expect(render).toHaveBeenCalledTimes(1);
     const light = (render.mock.calls[0]![0] as { light: unknown }).light;
-    expect(walkWidgetTree(light).some((n) => n.props.text === 'Push day · 52 min')).toBe(true);
+    expect(walkWidgetTree(light).some((n) => n.props.text === 'Push day')).toBe(true);
     expect(trackedEvents()).toContainEqual({ event: 'widget_added', props: { type: 'RepwiseToday' } });
 
     render.mockClear();
@@ -197,6 +259,9 @@ describe('writeWidgetSnapshot', () => {
       expect(widgetLib.requestWidgetUpdate).not.toHaveBeenCalled();
     } else {
       expect(widgetLib.requestWidgetUpdate).toHaveBeenCalledTimes(3);
+      // Each placed widget renders at its own size.
+      const call = widgetLib.requestWidgetUpdate.mock.calls[0]![0] as { renderWidget: (i: object) => { light: unknown } };
+      expect(call.renderWidget({ width: 150, height: 150 }).light).toBeTruthy();
       expect(mockExtensionSet).not.toHaveBeenCalled();
     }
     // Same content, newer timestamp: nothing written.

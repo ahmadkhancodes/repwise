@@ -23,6 +23,8 @@ module.exports = (config) => ({
     rwAccent: { light: colors.light.accent, dark: colors.dark.accent },
     rwAccentText: { light: colors.light.accentText, dark: colors.dark.accentText },
     rwOnAccent: { light: colors.light.onAccent, dark: colors.dark.onAccent },
+    rwInverse: { light: colors.light.inverse, dark: colors.dark.inverse },
+    rwOnInverse: { light: colors.light.onInverse, dark: colors.dark.onInverse },
     rwProtein: { light: colors.light.macroProtein, dark: colors.dark.macroProtein },
     rwCarb: { light: colors.light.macroCarb, dark: colors.dark.macroCarb },
     rwFat: { light: colors.light.macroFat, dark: colors.dark.macroFat },

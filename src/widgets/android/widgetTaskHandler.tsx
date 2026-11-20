@@ -22,6 +22,6 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<
   if (widgetAction === 'WIDGET_ADDED') track('widget_added', { type: widgetInfo.widgetName });
   const now = new Date();
   const snapshot = forDate(readStoredSnapshot(), todayLocal(now), now.getTime());
-  const ui = renderWidget(widgetInfo.widgetName, snapshot);
+  const ui = renderWidget(widgetInfo.widgetName, snapshot, { width: widgetInfo.width, height: widgetInfo.height });
   if (ui) props.renderWidget(ui);
 }

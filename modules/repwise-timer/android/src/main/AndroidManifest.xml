@@ -1,1 +1,16 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Rest timer (docs/NATIVE.md): short foreground service + wake lock until the rest ends,
+       so the countdown and the "Rest over" alert stay on time with the screen off. -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+  <application>
+    <service
+      android:name="expo.modules.repwisetimer.RestTimerService"
+      android:exported="false"
+      android:foregroundServiceType="shortService" />
+    <receiver
+      android:name="expo.modules.repwisetimer.RestTimerActionReceiver"
+      android:exported="false" />
+  </application>
+</manifest>

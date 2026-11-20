@@ -6,12 +6,15 @@ Pod::Spec.new do |s|
   s.license        = 'UNLICENSED'
   s.author         = 'Repwise'
   s.homepage       = 'https://repwise.app'
-  s.platforms      = { :ios => '16.4' }
+  # Same floor as the app (Expo SDK 58 default 15.1). ActivityKit code is behind #available
+  # checks and the frameworks are weak-linked, so the app still launches on iOS 15/16.0.
+  s.platforms      = { :ios => '15.1' }
   s.swift_version  = '5.9'
   s.source         = { git: '' }
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
+  s.weak_frameworks = 'ActivityKit', 'AppIntents'
 
   s.source_files = '**/*.{h,m,swift}'
   s.pod_target_xcconfig = {

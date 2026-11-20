@@ -24,7 +24,8 @@ export type WidgetSnapshot = {
     minutes: number;
     status: 'planned' | 'active' | 'paused' | 'done' | 'skipped';
   } | null;
-  nextMeal: { slot: string; label: string; name: string; kcal: number; time: string } | null;
+  /** `id` (planned meal id) enables the one-tap "Ate it" link; optional for older writers. */
+  nextMeal: { id?: string; slot: string; label: string; name: string; kcal: number; time: string } | null;
   kcal: MacroPair;
   macros: { p: MacroPair; c: MacroPair; f: MacroPair };
   streakWeeks: number;
@@ -40,7 +41,35 @@ export const WIDGET_LINKS = {
     sessionId
       ? `repwise://train?sessionId=${encodeURIComponent(sessionId)}${start ? '&start=1' : ''}`
       : 'repwise://train',
+  /**
+   * "Ate it" on the next meal: Eat ticks `mealId` (`tick=1`). Without an id it opens Eat,
+   * where the meal is one more tap — still ≤ 2 taps from the widget.
+   */
+  tickMeal: (mealId: string | null | undefined) =>
+    mealId ? `repwise://eat?mealId=${encodeURIComponent(mealId)}&tick=1` : 'repwise://eat',
 } as const;
+
+export type WorkoutCta = { label: 'Start' | 'Resume'; url: string } | null;
+
+/** The widget's one-tap workout button: Start a planned session, Resume a running one. */
+export function workoutCta(w: WidgetSnapshot['workout']): WorkoutCta {
+  if (!w || !w.sessionId) return null;
+  if (w.status === 'planned') return { label: 'Start', url: WIDGET_LINKS.workout(w.sessionId, true) };
+  if (w.status === 'active' || w.status === 'paused') return { label: 'Resume', url: WIDGET_LINKS.workout(w.sessionId, true) };
+  return null;
+}
+
+/** Workout headline and meta line, shared by every widget size. */
+export function workoutLines(w: WidgetSnapshot['workout']): { title: string; meta: string } {
+  if (!w) return { title: 'Rest day', meta: 'Recover and eat well' };
+  const parts: string[] = [];
+  if (w.exercises > 0) parts.push(`${w.exercises} exercise${w.exercises === 1 ? '' : 's'}`);
+  if (w.minutes > 0) parts.push(`${w.minutes} min`);
+  if (w.status === 'done') return { title: w.title, meta: 'Done today' };
+  if (w.status === 'skipped') return { title: w.title, meta: 'Skipped' };
+  if (w.status === 'active' || w.status === 'paused') return { title: w.title, meta: 'In progress' };
+  return { title: w.title, meta: parts.join(' · ') };
+}
 
 export function emptySnapshot(date: LocalDate, now: number, pro: boolean): WidgetSnapshot {
   return {

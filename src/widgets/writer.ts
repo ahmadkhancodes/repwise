@@ -11,7 +11,7 @@ import { requestWidgetUpdate } from 'react-native-android-widget';
 
 import { kv } from '@/services/storage';
 
-import { renderWidget, WIDGET_NAMES } from './android/widgets';
+import { renderKnownWidget, WIDGET_NAMES } from './android/widgets';
 import { parseSnapshot, type WidgetSnapshot } from './snapshot';
 
 export const APP_GROUP = 'group.com.client.repwise';
@@ -54,11 +54,14 @@ export async function writeWidgetSnapshot(snapshot: WidgetSnapshot, force = fals
     }
   } else if (Platform.OS === 'android') {
     await Promise.all(
-      Object.values(WIDGET_NAMES).map((widgetName) => {
-        const ui = renderWidget(widgetName, snapshot);
-        if (!ui) return undefined;
-        return requestWidgetUpdate({ widgetName, renderWidget: () => ui }).catch(() => undefined);
-      }),
+      Object.values(WIDGET_NAMES).map((widgetName) =>
+        // Rendered per placed widget, at its own size (Today shrinks to 2×2, Macros drops rows).
+        requestWidgetUpdate({
+          widgetName,
+          renderWidget: (info) =>
+            renderKnownWidget(widgetName, snapshot, { width: info.width, height: info.height }),
+        }).catch(() => undefined),
+      ),
     );
   }
   return true;
