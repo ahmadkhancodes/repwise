@@ -28,8 +28,10 @@ describe('split choice', () => {
     expect(chooseSplit(4)).toBe('upper_lower');
     expect(chooseSplit(5)).toBe('ppl');
     expect(chooseSplit(6)).toBe('ppl');
-    expect(() => chooseSplit(1)).toThrow();
-    expect(() => chooseSplit(7)).toThrow();
+    expect(chooseSplit(1)).toBe('full_body');
+    expect(chooseSplit(7)).toBe('ppl');
+    expect(() => chooseSplit(0)).toThrow();
+    expect(() => chooseSplit(8)).toThrow();
   });
 
   test('user preference wins when it fits', () => {

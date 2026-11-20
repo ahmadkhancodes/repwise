@@ -118,8 +118,14 @@ export function countsAsProteinSource(source: ProteinSource): boolean {
 }
 
 const STAPLE_RE = /(^|[_-])(salt|pepper|water|oil|spice|spices|herbs|stock)([_-]|$)/;
+const stapleCache = new Map<string, boolean>();
 export function isStaple(ingredientId: string): boolean {
-  return STAPLE_RE.test(ingredientId);
+  let v = stapleCache.get(ingredientId);
+  if (v === undefined) {
+    v = STAPLE_RE.test(ingredientId);
+    if (stapleCache.size < 50_000) stapleCache.set(ingredientId, v);
+  }
+  return v;
 }
 
 export interface RecipeWeightContext {
