@@ -138,6 +138,11 @@ for flow in $ORDERED; do
   [ "$PLATFORM" = android ] && adb_ shell cmd connectivity airplane-mode disable >/dev/null 2>&1
   # A cold emulator can show "Pixel Launcher isn't responding" over the app; close system dialogs.
   [ "$PLATFORM" = android ] && adb_ shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
+  # Maestro's launchApp `notifications: deny` does not revoke an earlier grant on Android
+  # (the app still read "granted"); revoke it here for flows that need it denied.
+  if [ "$PLATFORM" = android ] && grep -qe 'notifications: deny' -e '01_f1_happy_path.yaml' "$flow"; then
+    adb_ shell pm revoke "$APP_ID" android.permission.POST_NOTIFICATIONS >/dev/null 2>&1
+  fi
 
   attempt=0
   status=failed
