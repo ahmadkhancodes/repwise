@@ -40,8 +40,10 @@ tags:
     element:
       id: export-data
     direction: DOWN
-- assertVisible:
-    id: delete-data
+- scrollUntilVisible:
+    element:
+      id: delete-data
+    direction: DOWN
 - scrollUntilVisible:
     element:
       id: app-version
