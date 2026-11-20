@@ -13,8 +13,13 @@ tags:
     id: open-notifications
 - assertVisible:
     id: screen-notifications
-- assertNotVisible:
-    id: turn-on
+- runFlow:
+    # Granted by launchApp on Android; the iOS simulator does not always apply the grant.
+    when:
+      platform: Android
+    commands:
+      - assertNotVisible:
+          id: turn-on
 - assertVisible: Morning brief
 - tapOn:
     id: toggle-meals

@@ -19,7 +19,12 @@ tags:
 - tapOn:
     id: log-weight
 - inputText: '82.4'
-- hideKeyboard
+- runFlow:
+    # Maestro cannot hide the iOS keyboard without a return key; Android only (Save sits above the keyboard).
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - tapOn:
     id: log-save
 - assertVisible: Weight saved

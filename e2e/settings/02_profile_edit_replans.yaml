@@ -16,8 +16,16 @@ tags:
 - tapOn: "4"
 - tapOn:
     id: length-60
+- scrollUntilVisible:
+    element:
+      id: location-home
+    direction: DOWN
 - tapOn:
     id: location-home
+- scrollUntilVisible:
+    element:
+      id: profile-save
+    direction: DOWN
 - tapOn:
     id: profile-save
 - extendedWaitUntil:

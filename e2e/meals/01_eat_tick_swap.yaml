@@ -11,6 +11,10 @@ appId: com.client.repwise
     timeout: 15000
 - assertVisible:
     id: "eat-rings"
+- scrollUntilVisible:
+    element:
+      id: "tick-lunch"
+    direction: DOWN
 - tapOn:
     id: "tick-lunch"
 - assertVisible: ".*logged"

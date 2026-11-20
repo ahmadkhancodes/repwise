@@ -12,7 +12,17 @@ tags:
 - tapOn:
     id: custom-name
 - inputText: Maestro landmine row
-- hideKeyboard
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- runFlow:
+    # Maestro's hideKeyboard fails on iOS; the name field's return key closes it.
+    when:
+      platform: iOS
+    commands:
+      - pressKey: Enter
 - tapOn:
     id: custom-primary-lats
 - scrollUntilVisible:
