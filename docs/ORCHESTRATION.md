@@ -90,3 +90,11 @@ Each paused slice has a WIP commit on its branch and a "Paused: next steps" list
   - x-native: widgets, Live Activity, the timer module's native side;
   - x-web: landing page plus the legal/support site.
   - Merge each when it reports, with `npm run test:all` green.
+
+## Status 20 Nov 2026, ~07:00 UTC
+- All fix-wave lanes and the x-* lanes are merged into main (5351e80), except x-engine, which is still running. Green: 2,815 app tests, lint and tsc.
+- Round-2 audits are running (UI, perf/gym, bugs) → `docs/orchestration/*_r2.md`.
+- **Next:**
+  1. Fix round 2: one agent per area from the r2 reports.
+  2. Device QA via `.github/workflows/e2e-android.yml` and `e2e-ios.yml`; the repo must be public temporarily, which is the owner's step.
+  3. Final report.
