@@ -35527,5 +35527,9072 @@
       "dairy_free"
     ],
     "mainProtein": "legumes"
+  },
+  {
+    "id": "chicken-maqluba",
+    "title": "Chicken maqluba (upside-down rice)",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 20,
+    "cookMin": 50,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 500
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 220
+      },
+      {
+        "foodId": "aubergine",
+        "grams": 300
+      },
+      {
+        "foodId": "cauliflower",
+        "grams": 250
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 2
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 450
+      },
+      {
+        "foodId": "almonds",
+        "grams": 20
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Roast the sliced aubergine and cauliflower florets with half the oil at 220 °C for 20 minutes until golden.",
+      "Brown the chicken and onion in the remaining oil with the spices.",
+      "Layer the chicken in a deep pot, then the roasted vegetables, then the rinsed rice, and pour over the hot stock with the salt.",
+      "Cover and cook on low heat for 25 minutes, then rest for 10 minutes.",
+      "Turn out onto a platter and scatter with toasted almonds and parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 687,
+      "protein": 46.4,
+      "carbs": 80,
+      "fat": 19.8,
+      "fibre": 7.7
+    },
+    "allergens": [
+      "celery",
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "kofta-bil-sanieh",
+    "title": "Baked kofta with potatoes and tomato",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 20,
+    "cookMin": 40,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "parsley",
+        "grams": 20
+      },
+      {
+        "foodId": "potato",
+        "grams": 400
+      },
+      {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
+        "foodId": "passata",
+        "grams": 200
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Mix the mince with the grated onion, chopped parsley, spices and most of the salt and shape into 8 oval patties.",
+      "Arrange them in a baking dish with the sliced potatoes and tomatoes.",
+      "Pour over the passata mixed with 150 ml of water, the oil and the remaining salt.",
+      "Cover with foil and bake at 200 °C for 25 minutes, then uncover for 15 minutes until the potatoes are tender and browned."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 627,
+      "protein": 47.7,
+      "carbs": 51.7,
+      "fat": 26.2,
+      "fibre": 9
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "chicken-livers-pomegranate",
+    "title": "Chicken livers with lemon and pomegranate",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-liver",
+        "grams": 350
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 25
+      },
+      {
+        "foodId": "pomegranate",
+        "grams": 60
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      },
+      {
+        "foodId": "pita",
+        "grams": 120
+      }
+    ],
+    "steps": [
+      "Trim the livers and pat them dry.",
+      "Sear in the hot oil for 3 minutes each side until browned outside and just cooked through.",
+      "Add the garlic, cumin, pepper and salt and cook for 1 minute.",
+      "Take off the heat, pour over the lemon and scatter with pomegranate seeds and parsley.",
+      "Serve with warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 470,
+      "protein": 36.4,
+      "carbs": 44.2,
+      "fat": 15.8,
+      "fibre": 3.1
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "fasolia-lamb",
+    "title": "Fasolia (white bean and lamb stew) with rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 70,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-leg",
+        "grams": 300
+      },
+      {
+        "foodId": "white-beans",
+        "grams": 400
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 120
+      }
+    ],
+    "steps": [
+      "Brown the lamb in the oil, then add the onion and garlic and soften.",
+      "Stir in the tomato paste, spices, tomatoes, salt and 300 ml of water, cover and simmer for 50 minutes until the lamb is tender.",
+      "Add the drained beans and cook for 10 minutes more.",
+      "Cook the rice in salted water and serve with the stew."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 511,
+      "protein": 34.9,
+      "carbs": 71.2,
+      "fat": 10,
+      "fibre": 10.6
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "bamia-beef",
+    "title": "Bamia (okra and beef stew) with rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 75,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-stewing",
+        "grams": 400
+      },
+      {
+        "foodId": "okra",
+        "grams": 400
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 3
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      }
+    ],
+    "steps": [
+      "Brown the beef in the oil, add the onion and half the garlic and soften.",
+      "Stir in the tomato paste, tomatoes, salt and 300 ml of water, cover and simmer for 55 minutes until tender.",
+      "Add the trimmed okra and cook for 15 minutes.",
+      "Stir in the remaining garlic, the coriander and lemon for the last 2 minutes.",
+      "Cook the rice and serve with the stew."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 681,
+      "protein": 55.3,
+      "carbs": 84.8,
+      "fat": 15.9,
+      "fibre": 13.1
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "sayadieh",
+    "title": "Sayadieh (fish with caramelised onion rice)",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "haddock",
+        "grams": 400
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 300
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "pine-nuts",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Cook the sliced onions slowly in most of the oil for 15 minutes until dark brown; set a third aside.",
+      "Add the cumin, cinnamon, turmeric, rinsed rice, most of the salt and 330 ml of water to the pan, cover and cook on low heat for 15 minutes.",
+      "Season the fish with the remaining salt and pan-fry in the rest of the oil for 3 minutes each side.",
+      "Serve the fish on the rice topped with the reserved onions, toasted pine nuts, lemon and parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 632,
+      "protein": 41.1,
+      "carbs": 77.1,
+      "fat": 17.2,
+      "fibre": 4.5
+    },
+    "allergens": [
+      "fish",
+      "nuts"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "chicken-fatteh",
+    "title": "Chicken fatteh with chickpeas and yogurt",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 300
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 250
+      },
+      {
+        "foodId": "pita",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "tahini",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "pine-nuts",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Poach the chicken in simmering salted water for 15 minutes, then shred it.",
+      "Toast the pita until crisp and break it into pieces.",
+      "Whisk the yogurt with the tahini, crushed garlic, lemon and a pinch of salt.",
+      "Warm the chickpeas with the cumin and a splash of the poaching water.",
+      "Layer the pita, chickpeas and chicken, spoon over the yogurt and finish with toasted pine nuts, paprika and parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 650,
+      "protein": 53.6,
+      "carbs": 65.9,
+      "fat": 19.4,
+      "fibre": 10
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "nuts",
+      "sesame"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "fatteh-hummus",
+    "title": "Chickpea fatteh with yogurt and pine nuts",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 300
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 100
+      },
+      {
+        "foodId": "tahini",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 5
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "pine-nuts",
+        "grams": 8
+      },
+      {
+        "foodId": "parsley",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Toast the pita until crisp and break it into a shallow dish.",
+      "Warm the chickpeas with the cumin and 100 ml of water for 5 minutes, then spoon them and a little of their liquid over the bread.",
+      "Whisk the yogurt with the tahini, garlic, lemon and salt and pour over.",
+      "Toast the pine nuts in the oil, pour over the top and finish with parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 547,
+      "protein": 22.9,
+      "carbs": 73.4,
+      "fat": 20.6,
+      "fibre": 13.6
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "nuts",
+      "sesame"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "bayd-bi-lahme",
+    "title": "Egg and spiced mince skillet with pita",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 150
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "tomato",
+        "grams": 80
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.5
+      },
+      {
+        "foodId": "parsley",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 1.5
+      },
+      {
+        "foodId": "pita",
+        "grams": 60
+      }
+    ],
+    "steps": [
+      "Soften the onion in the oil, add the mince and spices and fry until browned.",
+      "Stir in the chopped tomato and salt and cook for 2 minutes.",
+      "Make two wells, crack in the eggs, cover and cook for 3 to 4 minutes until the whites are set.",
+      "Scatter with parsley and serve with warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 655,
+      "protein": 49.6,
+      "carbs": 42.4,
+      "fat": 30.7,
+      "fibre": 3.6
+    },
+    "allergens": [
+      "gluten",
+      "eggs"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "balila",
+    "title": "Balila (warm chickpeas with cumin and lemon)",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 5,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 250
+      },
+      {
+        "foodId": "garlic",
+        "grams": 4
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "parsley",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 60
+      }
+    ],
+    "steps": [
+      "Warm the chickpeas in a small pan with 80 ml of water for 4 to 5 minutes.",
+      "Crush the garlic with the salt and stir in with the cumin and lemon.",
+      "Lightly mash a few of the chickpeas to thicken the juices.",
+      "Drizzle with the oil, scatter with parsley and serve with warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 592,
+      "protein": 24.2,
+      "carbs": 94.4,
+      "fat": 15.8,
+      "fibre": 19.9
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "kousa-mahshi",
+    "title": "Stuffed courgettes with beef and rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 25,
+    "cookMin": 45,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "courgette",
+        "grams": 600
+      },
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 250
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 100
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "mint",
+        "grams": 5
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Halve the courgettes lengthways and scoop out the centres to make boats.",
+      "Mix the mince with the rinsed rice, cinnamon, pepper and half the salt and fill the boats loosely.",
+      "Blend the tomatoes with the garlic, mint, oil, remaining salt and 250 ml of water and pour into a wide pan.",
+      "Sit the courgettes in the sauce, cover and simmer gently for 40 to 45 minutes until the rice is cooked.",
+      "Serve with the sauce spooned over."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 519,
+      "protein": 34.2,
+      "carbs": 58.9,
+      "fat": 16.9,
+      "fibre": 8.1
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "beef-shawarma-wrap",
+    "title": "Beef shawarma wrap with tahini sauce",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-flank",
+        "grams": 350
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 40
+      },
+      {
+        "foodId": "vinegar-cider",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "pita",
+        "grams": 120
+      },
+      {
+        "foodId": "tomato",
+        "grams": 120
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "tahini",
+        "grams": 25
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Slice the beef thinly across the grain and toss with the yogurt, vinegar, spices, garlic and most of the salt.",
+      "Whisk the tahini with the lemon, a pinch of salt and enough water to make a pourable sauce.",
+      "Sear the beef in a very hot pan for 3 to 4 minutes until browned at the edges.",
+      "Fill the warmed pitas with the beef, tomato, onion and parsley and drizzle with the tahini sauce."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 552,
+      "protein": 47.9,
+      "carbs": 45.1,
+      "fat": 19.9,
+      "fibre": 4.8
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "sesame",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "arayes",
+    "title": "Arayes (crisp meat-stuffed pita) with yogurt",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 12,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 50
+      },
+      {
+        "foodId": "parsley",
+        "grams": 20
+      },
+      {
+        "foodId": "tomato",
+        "grams": 60
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 120
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 100
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Mix the mince with the finely chopped onion, parsley, tomato, spices and salt.",
+      "Cut the pitas in half and spread a thin layer of the mixture inside each pocket.",
+      "Brush the outsides with the oil and cook in a hot pan or under the grill for 5 to 6 minutes each side until the meat is cooked and the bread is crisp.",
+      "Serve with the yogurt and cucumber."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 507,
+      "protein": 39.2,
+      "carbs": 43,
+      "fat": 20.7,
+      "fibre": 5.6
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "shorbat-djaj",
+    "title": "Chicken and vermicelli soup with lemon",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 250
+      },
+      {
+        "foodId": "pasta",
+        "grams": 60
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "celery",
+        "grams": 50
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 800
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Soften the onion, carrot and celery in the oil.",
+      "Add the stock, cinnamon and whole chicken breast and simmer for 15 minutes.",
+      "Lift out the chicken and shred it; add the broken pasta to the pot and cook for 6 minutes.",
+      "Return the chicken and season with the salt and lemon.",
+      "Finish with parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 472,
+      "protein": 43.3,
+      "carbs": 46.8,
+      "fat": 11.2,
+      "fibre": 3.7
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "adas-bi-hamod",
+    "title": "Lentil, chard and lemon soup",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "lentils",
+        "grams": 150
+      },
+      {
+        "foodId": "swiss-chard",
+        "grams": 250
+      },
+      {
+        "foodId": "potato",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 40
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      },
+      {
+        "foodId": "pita",
+        "grams": 60
+      }
+    ],
+    "steps": [
+      "Simmer the lentils in 1 litre of water for 15 minutes.",
+      "Add the diced potato and cook for 10 minutes more.",
+      "Soften the onion and garlic in the oil with the cumin and coriander and add to the pot with the chopped chard and salt.",
+      "Cook for 8 minutes until the chard is tender, then stir in the lemon.",
+      "Serve with warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 556,
+      "protein": 26.9,
+      "carbs": 95.9,
+      "fat": 9.6,
+      "fibre": 14.4
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "maghmour",
+    "title": "Maghmour (aubergine and chickpea stew)",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "aubergine",
+        "grams": 500
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 120
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "mint",
+        "grams": 5
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Brown the cubed aubergine in half the oil and set aside.",
+      "Soften the onion and garlic in the remaining oil with the cumin.",
+      "Add the tomatoes, chickpeas, aubergine, salt and 150 ml of water and simmer for 25 minutes until thick.",
+      "Stir in the mint and serve warm or at room temperature with pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 628,
+      "protein": 24.3,
+      "carbs": 103.7,
+      "fat": 17.3,
+      "fibre": 28.4
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "batata-harra-eggs",
+    "title": "Batata harra (spicy potatoes) with fried eggs",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "potato",
+        "grams": 400
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Par-boil the cubed potatoes for 6 minutes and drain well.",
+      "Fry them in most of the oil for 12 to 15 minutes, turning, until crisp and golden.",
+      "Add the garlic, chilli and salt for the last minute, then toss with the coriander and lemon.",
+      "Fry the eggs in the remaining oil and serve them on the potatoes."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 365,
+      "protein": 17.5,
+      "carbs": 39,
+      "fat": 15.9,
+      "fibre": 4.9
+    },
+    "allergens": [
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "hummus-bi-lahme",
+    "title": "Hummus with spiced lamb and pine nuts",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 10,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "hummus",
+        "grams": 150
+      },
+      {
+        "foodId": "lamb-leg",
+        "grams": 250
+      },
+      {
+        "foodId": "pine-nuts",
+        "grams": 10
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "pita",
+        "grams": 100
+      },
+      {
+        "foodId": "parsley",
+        "grams": 6
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Dice the lamb very small and toss with the cinnamon, cumin and salt.",
+      "Sear in the hot oil for 4 to 5 minutes until browned, adding the pine nuts for the last minute.",
+      "Spread the hummus on two plates and pile the lamb in the centre.",
+      "Finish with lemon and parsley and serve with warm pita and sliced tomato."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 557,
+      "protein": 36.7,
+      "carbs": 42.6,
+      "fat": 26.2,
+      "fibre": 6.2
+    },
+    "allergens": [
+      "gluten",
+      "nuts",
+      "sesame"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "fish-tahini-bake",
+    "title": "Baked cod in tahini sauce with rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "cod",
+        "grams": 400
+      },
+      {
+        "foodId": "tahini",
+        "grams": 40
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 1
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.5
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "pine-nuts",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 110
+      }
+    ],
+    "steps": [
+      "Cook the rice in salted water until tender.",
+      "Cook the sliced onion in the oil for 10 minutes until golden and spread in a baking dish.",
+      "Season the fish with the cumin, coriander, chilli and most of the salt and lay it on the onions.",
+      "Whisk the tahini with the lemon, garlic, remaining salt and 100 ml of water, pour over the fish and bake at 200 °C for 15 minutes.",
+      "Scatter with pine nuts and parsley and serve with the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 617,
+      "protein": 45.1,
+      "carbs": 59.3,
+      "fat": 22.5,
+      "fibre": 4.7
+    },
+    "allergens": [
+      "fish",
+      "nuts",
+      "sesame"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "hummus-veg-sticks",
+    "title": "Hummus with vegetable sticks",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "hummus",
+        "grams": 80
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 100
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 80
+      }
+    ],
+    "steps": [
+      "Cut the carrot, cucumber and pepper into sticks.",
+      "Spoon the hummus into a small bowl.",
+      "Serve the vegetables alongside for dipping."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 271,
+      "protein": 8.3,
+      "carbs": 29.9,
+      "fat": 14.2,
+      "fibre": 9.3
+    },
+    "allergens": [
+      "sesame"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "zaatar-roasted-chickpeas",
+    "title": "Thyme and sesame roasted chickpeas",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "snack"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "thyme",
+        "grams": 2
+      },
+      {
+        "foodId": "sesame-seeds",
+        "grams": 6
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Drain the chickpeas and dry them well with a clean towel.",
+      "Toss with the oil, thyme, sesame seeds and salt and spread on a tray.",
+      "Roast at 200 °C for 20 to 25 minutes, shaking once, until crisp.",
+      "Squeeze over the lemon and cool before eating."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 222,
+      "protein": 9,
+      "carbs": 29.1,
+      "fat": 8.6,
+      "fibre": 8.3
+    },
+    "allergens": [
+      "sesame"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "cucumber-yogurt-walnuts",
+    "title": "Cucumber and mint yogurt with walnuts",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "yogurt",
+        "grams": 200
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 120
+      },
+      {
+        "foodId": "garlic",
+        "grams": 2
+      },
+      {
+        "foodId": "mint",
+        "grams": 4
+      },
+      {
+        "foodId": "walnuts",
+        "grams": 15
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Finely dice the cucumber.",
+      "Stir it into the yogurt with the crushed garlic, chopped mint and salt.",
+      "Top with the roughly chopped walnuts."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 243,
+      "protein": 10.4,
+      "carbs": 16.8,
+      "fat": 16.5,
+      "fibre": 1.9
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "ijjeh",
+    "title": "Ijjeh (herb and courgette omelette) with pita",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 8,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "parsley",
+        "grams": 20
+      },
+      {
+        "foodId": "mint",
+        "grams": 5
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "courgette",
+        "grams": 60
+      },
+      {
+        "foodId": "flour-plain",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 50
+      },
+      {
+        "foodId": "salt",
+        "grams": 1.5
+      }
+    ],
+    "steps": [
+      "Grate the courgette and squeeze out the excess water.",
+      "Beat the eggs with the flour and salt, then stir in the courgette and chopped herbs and spring onion.",
+      "Pour into the hot oiled pan and cook for 3 to 4 minutes until set underneath.",
+      "Flip and cook for 2 minutes more, then serve with warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 461,
+      "protein": 26.7,
+      "carbs": 41.6,
+      "fat": 21.6,
+      "fibre": 5.4
+    },
+    "allergens": [
+      "gluten",
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "feta-egg-olive-plate",
+    "title": "Feta, egg and olive breakfast plate",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 9,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "feta",
+        "grams": 50
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 60
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 80
+      },
+      {
+        "foodId": "tomato",
+        "grams": 80
+      },
+      {
+        "foodId": "olives",
+        "grams": 20
+      },
+      {
+        "foodId": "mint",
+        "grams": 3
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the egg for 9 minutes, cool, peel and halve.",
+      "Slice the cucumber and tomato and arrange on a plate with the feta, olives and egg.",
+      "Drizzle with the oil and scatter with mint.",
+      "Serve with warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 439,
+      "protein": 20.8,
+      "carbs": 43.3,
+      "fat": 22,
+      "fibre": 5.5
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "djej-w-batata",
+    "title": "Lemon and garlic chicken with potatoes",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 45,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-drumstick",
+        "grams": 500
+      },
+      {
+        "foodId": "potato",
+        "grams": 500
+      },
+      {
+        "foodId": "garlic",
+        "grams": 20
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 40
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "romaine",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Toss the chicken and potato wedges with the crushed garlic, lemon, oil, paprika, thyme and salt in a roasting tin.",
+      "Add 100 ml of water and cover with foil.",
+      "Bake at 200 °C for 25 minutes, then uncover and roast for 20 minutes until golden and the chicken is cooked through.",
+      "Serve with the pan juices and the lettuce."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 581,
+      "protein": 55.3,
+      "carbs": 50.9,
+      "fat": 17.4,
+      "fibre": 7.1
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "lahm-bi-ajeen",
+    "title": "Lahm bi ajeen (spiced lamb flatbreads)",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 10,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 160
+      },
+      {
+        "foodId": "lamb-mince",
+        "grams": 200
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 15
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 100
+      },
+      {
+        "foodId": "rocket",
+        "grams": 40
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Mix the mince with the finely chopped tomato and onion, the tomato paste, parsley, spices and salt.",
+      "Spread the mixture thinly over the pitas, right to the edges.",
+      "Bake at 230 °C for 8 to 10 minutes until the meat is cooked and the edges are crisp.",
+      "Squeeze over the lemon, top with rocket and serve with the yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 569,
+      "protein": 28.5,
+      "carbs": 56.8,
+      "fat": 27.2,
+      "fibre": 7.6
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "lentil-tabbouleh-feta",
+    "title": "Lentil tabbouleh with feta",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "lentils",
+        "grams": 100
+      },
+      {
+        "foodId": "parsley",
+        "grams": 60
+      },
+      {
+        "foodId": "mint",
+        "grams": 10
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 30
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "feta",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Simmer the lentils for 18 to 20 minutes until just tender, drain and cool.",
+      "Finely chop the herbs, tomato, cucumber and spring onion.",
+      "Toss everything with the lemon, oil and salt.",
+      "Crumble the feta over the top."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 372,
+      "protein": 19.4,
+      "carbs": 43.9,
+      "fat": 15.1,
+      "fibre": 8.7
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "mansaf-style-lamb",
+    "title": "Mansaf-style lamb with yogurt sauce and rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 90,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-leg",
+        "grams": 450
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 300
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "almonds",
+        "grams": 20
+      },
+      {
+        "foodId": "pine-nuts",
+        "grams": 10
+      },
+      {
+        "foodId": "ghee",
+        "grams": 10
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "bay-leaf",
+        "grams": 1
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "cornflour",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Simmer the lamb with the onion, cardamom, bay and half the salt in 800 ml of water for 70 minutes until tender; keep the broth.",
+      "Whisk the yogurt with the cornflour and 300 ml of the broth and heat gently, stirring constantly in one direction, until it simmers and thickens.",
+      "Add the lamb to the yogurt sauce and simmer for 10 minutes.",
+      "Cook the rice with the turmeric, ghee and remaining salt.",
+      "Serve the lamb and sauce over the rice with toasted almonds, pine nuts and parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 623,
+      "protein": 41,
+      "carbs": 66.3,
+      "fat": 20.8,
+      "fibre": 2.8
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "tuna-chickpea-tahini-salad",
+    "title": "Tuna and chickpea salad with tahini-lemon dressing",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tuna-canned",
+        "grams": 150
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 200
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "onion",
+        "grams": 20
+      },
+      {
+        "foodId": "tahini",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Whisk the tahini with the lemon, salt and a spoon or two of water until creamy.",
+      "Drain the tuna and chickpeas.",
+      "Toss with the chopped cucumber, tomato, onion and parsley.",
+      "Pour over the dressing and mix."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 543,
+      "protein": 47.8,
+      "carbs": 60.2,
+      "fat": 15,
+      "fibre": 16.4
+    },
+    "allergens": [
+      "fish",
+      "sesame"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "potato-egg-mint-salad",
+    "title": "Potato, egg and mint salad",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "potato",
+        "grams": 250
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 20
+      },
+      {
+        "foodId": "mint",
+        "grams": 5
+      },
+      {
+        "foodId": "parsley",
+        "grams": 5
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 0.5
+      },
+      {
+        "foodId": "salt",
+        "grams": 1.5
+      }
+    ],
+    "steps": [
+      "Boil the cubed potato for 12 minutes until tender, adding the eggs to the pan for the last 9 minutes.",
+      "Drain; peel and quarter the eggs.",
+      "Toss the warm potato with the lemon, oil, cumin and salt.",
+      "Fold in the herbs, spring onion and eggs."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 439,
+      "protein": 18.7,
+      "carbs": 47.9,
+      "fat": 20,
+      "fibre": 6.4
+    },
+    "allergens": [
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "sabanekh-beef",
+    "title": "Spinach and beef stew with rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 300
+      },
+      {
+        "foodId": "spinach",
+        "grams": 500
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 3
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "pine-nuts",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      }
+    ],
+    "steps": [
+      "Cook the rice in salted water until tender.",
+      "Brown the mince with the onion in the oil.",
+      "Add the garlic and coriander, then the spinach in handfuls with 150 ml of water and the salt, and simmer for 10 minutes.",
+      "Stir in the lemon and scatter with toasted pine nuts.",
+      "Serve over the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 666,
+      "protein": 43.8,
+      "carbs": 70.3,
+      "fat": 24.2,
+      "fibre": 8.2
+    },
+    "allergens": [
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "loubieh-bi-zeit",
+    "title": "Green beans in tomato and olive oil with bulgur",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "green-beans",
+        "grams": 350
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "bulgur",
+        "grams": 120
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 150
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Soften the onion and garlic in the oil.",
+      "Add the trimmed beans and cumin and stir for 3 minutes.",
+      "Add the tomatoes and most of the salt, cover and simmer for 25 minutes until the beans are very tender.",
+      "Simmer the bulgur in 260 ml of salted water for 12 minutes, covered.",
+      "Serve the beans over the bulgur with the yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 451,
+      "protein": 15.5,
+      "carbs": 73.9,
+      "fat": 14.3,
+      "fibre": 16.1
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "koobideh-kebab",
+    "title": "Koobideh-style beef kebabs with saffron rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 20,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 350
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "saffron",
+        "grams": 0.1
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "tomato",
+        "grams": 250
+      },
+      {
+        "foodId": "butter",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Grate the onion, squeeze out the juice and knead it into the mince with the turmeric, pepper and most of the salt for 3 minutes until sticky.",
+      "Shape into 4 long flat kebabs around skewers, or on a tray.",
+      "Cook the rice in salted water, then stir in the butter and the saffron soaked in a spoon of hot water.",
+      "Grill the kebabs and halved tomatoes on high heat for 4 to 5 minutes each side.",
+      "Serve the kebabs and tomatoes on the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 615,
+      "protein": 41.3,
+      "carbs": 61.3,
+      "fat": 21.5,
+      "fibre": 3.3
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "ghormeh-sabzi-style",
+    "title": "Herb, kidney bean and beef stew",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 20,
+    "cookMin": 100,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-stewing",
+        "grams": 350
+      },
+      {
+        "foodId": "kidney-beans",
+        "grams": 240
+      },
+      {
+        "foodId": "parsley",
+        "grams": 80
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 60
+      },
+      {
+        "foodId": "spinach",
+        "grams": 150
+      },
+      {
+        "foodId": "spring-onion",
+        "grams": 60
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 2
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      }
+    ],
+    "steps": [
+      "Brown the onion and beef in half the oil with the turmeric.",
+      "Add 600 ml of water and the salt, cover and simmer for 60 minutes.",
+      "Fry the finely chopped herbs, spinach and spring onion in the remaining oil for 8 minutes until dark and fragrant.",
+      "Add the herbs, beans and lime juice to the pot and simmer for 30 minutes more.",
+      "Cook the rice and serve with the stew."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 516,
+      "protein": 38.9,
+      "carbs": 67.5,
+      "fat": 11.1,
+      "fibre": 8.9
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "saffron-chicken-jewelled-rice",
+    "title": "Saffron chicken with cranberry and pistachio rice",
+    "cuisine": "middle_eastern",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 35,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      },
+      {
+        "foodId": "dried-cranberries",
+        "grams": 30
+      },
+      {
+        "foodId": "pistachios",
+        "grams": 15
+      },
+      {
+        "foodId": "saffron",
+        "grams": 0.1
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "butter",
+        "grams": 10
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Soak the saffron in 2 spoons of hot water.",
+      "Brown the chicken in the oil with the onion, turmeric and most of the salt, add 150 ml of water and half the saffron, cover and simmer for 25 minutes.",
+      "Cook the rice in salted water, drain and toss with the remaining saffron.",
+      "Warm the cranberries and pistachios in the butter with the cinnamon for 1 minute and fold through the rice.",
+      "Serve the chicken and its juices over the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 697,
+      "protein": 46.9,
+      "carbs": 79.7,
+      "fat": 20.4,
+      "fibre": 3.7
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "chicken-saloona",
+    "title": "Chicken saloona (spiced chicken and vegetable stew)",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 45,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-drumstick",
+        "grams": 500
+      },
+      {
+        "foodId": "potato",
+        "grams": 250
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "courgette",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "ginger",
+        "grams": 10
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      }
+    ],
+    "steps": [
+      "Brown the onion in the oil, add the garlic, ginger, spices and chicken and sear.",
+      "Stir in the tomato, tomato paste, salt and 600 ml of water and simmer for 20 minutes.",
+      "Add the potato and carrot and cook for 10 minutes, then the courgette for 8 minutes more.",
+      "Cook the rice in salted water and serve with the stew."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 550,
+      "protein": 40.5,
+      "carbs": 71,
+      "fat": 11.4,
+      "fibre": 6.8
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "thareed-lamb",
+    "title": "Thareed (lamb and vegetable stew over flatbread)",
+    "cuisine": "gulf",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 80,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-leg",
+        "grams": 400
+      },
+      {
+        "foodId": "potato",
+        "grams": 250
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "courgette",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      },
+      {
+        "foodId": "chapati",
+        "grams": 150
+      }
+    ],
+    "steps": [
+      "Brown the lamb and onion in the oil with the garlic and spices.",
+      "Add the tomato, tomato paste, salt and 800 ml of water, cover and simmer for 50 minutes.",
+      "Add the potato and carrot for 12 minutes, then the courgette for 8 minutes.",
+      "Tear the flatbread into a wide dish.",
+      "Ladle the stew and its broth over the bread and leave for 3 minutes to soak before serving."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 493,
+      "protein": 37.1,
+      "carbs": 53.6,
+      "fat": 15,
+      "fibre": 8.5
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "madrouba-chicken",
+    "title": "Madrouba (soft spiced chicken and rice)",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 10,
+    "cookMin": 60,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 400
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "ginger",
+        "grams": 10
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "ghee",
+        "grams": 12
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 500
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Soften the onion, garlic and ginger in half the ghee with the spices.",
+      "Add the tomato, chicken, rinsed rice, stock, salt and 700 ml of water.",
+      "Cover and simmer on low heat for 50 minutes, stirring now and then, until the rice has broken down.",
+      "Lift out the chicken, shred it and beat it back into the rice with a wooden spoon until thick and smooth.",
+      "Top with the remaining ghee."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 478,
+      "protein": 39.3,
+      "carbs": 54.6,
+      "fat": 10.3,
+      "fibre": 2.8
+    },
+    "allergens": [
+      "celery",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "fish-machboos",
+    "title": "Fish machboos",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 30,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tilapia",
+        "grams": 400
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 120
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Rub the fish with half the spices, the lemon and half the salt and sear in half the oil for 2 minutes each side; set aside.",
+      "Brown the onion in the remaining oil with the garlic and the rest of the spices.",
+      "Add the tomato, rinsed rice, remaining salt and 320 ml of water, cover and cook on low heat for 12 minutes.",
+      "Lay the fish on the rice, cover and steam for 6 minutes more.",
+      "Serve the fish on the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 589,
+      "protein": 47.6,
+      "carbs": 72.7,
+      "fat": 12.1,
+      "fibre": 4.2
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "shuwa-style-lamb",
+    "title": "Shuwa-style slow-roast lamb with rice",
+    "cuisine": "gulf",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 180,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-leg",
+        "grams": 500
+      },
+      {
+        "foodId": "garlic",
+        "grams": 20
+      },
+      {
+        "foodId": "cumin",
+        "grams": 4
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 4
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "cloves",
+        "grams": 0.5
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "vinegar-cider",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 200
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 150
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Blend the garlic, spices, vinegar, oil and most of the salt to a paste and rub it all over the lamb.",
+      "Wrap tightly in baking paper and foil and roast at 160 °C for 3 hours until it pulls apart.",
+      "Cook the rice in salted water until tender.",
+      "Shred the lamb into its juices.",
+      "Serve on the rice with the cucumber and yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 558,
+      "protein": 41.5,
+      "carbs": 61.9,
+      "fat": 15.1,
+      "fibre": 2.5
+    },
+    "allergens": [
+      "milk",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "dango-chickpeas",
+    "title": "Dango (warm spiced chickpeas)",
+    "cuisine": "gulf",
+    "slots": [
+      "snack"
+    ],
+    "servings": 2,
+    "prepMin": 2,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 250
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 4
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 1.5
+      }
+    ],
+    "steps": [
+      "Simmer the chickpeas in 150 ml of water with the chilli and salt for 8 minutes.",
+      "Drain off most of the liquid.",
+      "Toss with the oil, cumin and lemon and serve warm in cups."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 195,
+      "protein": 8.9,
+      "carbs": 29.4,
+      "fat": 5.3,
+      "fibre": 8.1
+    },
+    "allergens": [],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "chebab-pancakes",
+    "title": "Chebab (cardamom pancakes) with dates and yogurt",
+    "cuisine": "gulf",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 8,
+    "cookMin": 10,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "flour-wholewheat",
+        "grams": 60
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 100
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 0.5
+      },
+      {
+        "foodId": "saffron",
+        "grams": 0.05
+      },
+      {
+        "foodId": "butter",
+        "grams": 5
+      },
+      {
+        "foodId": "dates",
+        "grams": 20
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Whisk the flour, egg, milk, cardamom and saffron to a smooth batter and rest for 5 minutes.",
+      "Cook 3 small pancakes in the butter for 2 minutes each side until golden.",
+      "Chop the dates and mash them with a spoon of hot water into a rough syrup.",
+      "Serve the pancakes with the yogurt and dates."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 477,
+      "protein": 28.2,
+      "carbs": 67.3,
+      "fat": 12.8,
+      "fibre": 7.9
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "regag-egg-cheese",
+    "title": "Egg and cheese regag-style wrap",
+    "cuisine": "gulf",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 5,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "chapati",
+        "grams": 60
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "cheddar",
+        "grams": 20
+      },
+      {
+        "foodId": "butter",
+        "grams": 3
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.3
+      }
+    ],
+    "steps": [
+      "Beat the eggs with the pepper.",
+      "Melt the butter in a pan, pour in the egg and lay the flatbread on top while it is still wet.",
+      "Flip after 1 minute, scatter the cheese over the egg and cook for 1 minute more.",
+      "Fold in half and eat warm."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 424,
+      "protein": 24,
+      "carbs": 29.4,
+      "fat": 23.1,
+      "fibre": 3
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "date-cardamom-porridge",
+    "title": "Date and cardamom porridge with pistachios",
+    "cuisine": "gulf",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 6,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "oats",
+        "grams": 60
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 250
+      },
+      {
+        "foodId": "dates",
+        "grams": 30
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "pistachios",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Simmer the oats with the milk and cardamom for 5 minutes, stirring, until creamy.",
+      "Stir in the chopped dates.",
+      "Top with the chopped pistachios."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 501,
+      "protein": 21.1,
+      "carbs": 77.7,
+      "fat": 13.8,
+      "fibre": 9.7
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "stuffed-dates-labneh",
+    "title": "Dates stuffed with strained yogurt and almonds",
+    "cuisine": "gulf",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "dates",
+        "grams": 30
+      },
+      {
+        "foodId": "almonds",
+        "grams": 10
+      },
+      {
+        "foodId": "greek-yogurt",
+        "grams": 70
+      }
+    ],
+    "steps": [
+      "Slit the dates and remove the stones.",
+      "Fill each with a spoon of the strained yogurt.",
+      "Press an almond into each one."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 209,
+      "protein": 9,
+      "carbs": 27.5,
+      "fat": 8.6,
+      "fibre": 3.3
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "prawn-skewers-lemon-rice",
+    "title": "Grilled prawn skewers with lemon rice",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 350
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 25
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Toss the prawns with the garlic, paprika, cumin, oil, half the lemon and half the salt and thread onto skewers.",
+      "Cook the rice with the turmeric and remaining salt until tender, then fork through the rest of the lemon and the parsley.",
+      "Grill the skewers on high heat for 2 to 3 minutes each side until pink.",
+      "Serve on the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 448,
+      "protein": 40.6,
+      "carbs": 55.8,
+      "fat": 6.8,
+      "fibre": 1.7
+    },
+    "allergens": [
+      "crustaceans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "mumawwash",
+    "title": "Mumawwash (prawn and mung bean rice)",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 250
+      },
+      {
+        "foodId": "mung-beans",
+        "grams": 80
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 120
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Simmer the mung beans for 15 minutes until half cooked and drain.",
+      "Brown the onion in the oil with the garlic and spices, then stir in the tomato.",
+      "Add the rice, mung beans, salt and 350 ml of water, cover and cook on low heat for 12 minutes.",
+      "Scatter the prawns on top, cover and steam for 6 minutes until pink.",
+      "Fold together and serve."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 562,
+      "protein": 40.6,
+      "carbs": 82.6,
+      "fat": 8.1,
+      "fibre": 9.6
+    },
+    "allergens": [
+      "crustaceans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "sea-bass-chickpea-salad",
+    "title": "Cumin sea bass with chickpea salad",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 12,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "sea-bass",
+        "grams": 350
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 25
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "onion",
+        "grams": 40
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Rub the fish with the cumin, garlic, half the oil, a third of the lemon and half the salt.",
+      "Bake at 200 °C for 10 to 12 minutes until the flesh flakes.",
+      "Toss the drained chickpeas with the chopped cucumber, tomato, onion and parsley and dress with the remaining lemon, oil and salt.",
+      "Serve the fish on the salad."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 425,
+      "protein": 42.6,
+      "carbs": 37.6,
+      "fat": 12,
+      "fibre": 9.5
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "shorbat-shofan",
+    "title": "Chicken and oat soup",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 250
+      },
+      {
+        "foodId": "oats",
+        "grams": 60
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 700
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "parsley",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Soften the onion and garlic in the oil with the spices.",
+      "Add the diced chicken and cook for 3 minutes, then stir in the tomato and tomato paste.",
+      "Pour in the stock and 200 ml of water, add the oats and simmer for 15 minutes until thick and silky.",
+      "Season with the salt and lemon and finish with parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 479,
+      "protein": 44,
+      "carbs": 43.3,
+      "fat": 14.1,
+      "fibre": 5.6
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "tuna-rice-daqoos",
+    "title": "Tuna rice with daqoos tomato sauce",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tuna-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 140
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 250
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 15
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 1
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Cook the rice with the turmeric and half the salt until tender.",
+      "Soften half the onion in half the oil and stir through the rice with the drained tuna.",
+      "For the daqoos, fry the remaining onion and the garlic in the rest of the oil, add the tomato, tomato paste, chilli, cumin, coriander and remaining salt and simmer for 10 minutes.",
+      "Serve the rice with the sauce spooned over."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 476,
+      "protein": 30.9,
+      "carbs": 69.9,
+      "fat": 8.5,
+      "fibre": 4.3
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "goat-mandi",
+    "title": "Goat mandi",
+    "cuisine": "gulf",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 100,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "goat-meat",
+        "grams": 500
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 220
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "raisins",
+        "grams": 20
+      },
+      {
+        "foodId": "almonds",
+        "grams": 20
+      },
+      {
+        "foodId": "ghee",
+        "grams": 12
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 3
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "cloves",
+        "grams": 0.5
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Rub the goat with half the spices and half the salt.",
+      "Simmer it with the onion in 900 ml of water, covered, for 75 minutes until tender; keep the broth.",
+      "Brown the meat under a hot grill for 5 minutes.",
+      "Cook the rice in 450 ml of the broth with the remaining spices and salt for 15 minutes.",
+      "Fry the raisins and almonds in the ghee and scatter over the rice and meat."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 566,
+      "protein": 42,
+      "carbs": 70.3,
+      "fat": 12.2,
+      "fibre": 3.5
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "goat"
+  },
+  {
+    "id": "chickpea-spinach-machboos",
+    "title": "Chickpea and spinach machboos with yogurt",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "spinach",
+        "grams": 200
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "yogurt",
+        "grams": 150
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Brown the onion in the oil with the garlic and spices.",
+      "Add the tomato and cook for 3 minutes, then stir in the chickpeas and rinsed rice.",
+      "Pour in 320 ml of water with the salt, cover and cook on low heat for 12 minutes.",
+      "Pile the spinach on top, cover again and steam for 5 minutes, then fold through.",
+      "Serve with the yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 653,
+      "protein": 23.3,
+      "carbs": 112.4,
+      "fat": 13.8,
+      "fibre": 15.5
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "karak-protein-shake",
+    "title": "Karak-spiced protein shake",
+    "cuisine": "gulf",
+    "slots": [
+      "snack",
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "milk-semi",
+        "grams": 300
+      },
+      {
+        "foodId": "whey-protein",
+        "grams": 25
+      },
+      {
+        "foodId": "cardamom",
+        "grams": 0.5
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "ginger-ground",
+        "grams": 0.3
+      },
+      {
+        "foodId": "honey",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Put the milk, whey, spices and honey in a shaker or blender.",
+      "Shake or blend until smooth.",
+      "Serve cold, or warm gently without boiling."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 259,
+      "protein": 24.5,
+      "carbs": 26.8,
+      "fat": 6.4,
+      "fibre": 0.5
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "tahini-date-shake",
+    "title": "Tahini and date shake",
+    "cuisine": "gulf",
+    "slots": [
+      "snack",
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "milk-semi",
+        "grams": 250
+      },
+      {
+        "foodId": "dates",
+        "grams": 30
+      },
+      {
+        "foodId": "tahini",
+        "grams": 10
+      },
+      {
+        "foodId": "whey-protein",
+        "grams": 15
+      },
+      {
+        "foodId": "banana",
+        "grams": 50
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.3
+      }
+    ],
+    "steps": [
+      "Remove the stones from the dates.",
+      "Blend everything until completely smooth.",
+      "Serve cold."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 367,
+      "protein": 19.8,
+      "carbs": 52.6,
+      "fat": 10.8,
+      "fibre": 4.4
+    },
+    "allergens": [
+      "milk",
+      "sesame"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "saloonat-samak",
+    "title": "Tamarind fish curry with rice",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "haddock",
+        "grams": 400
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tamarind",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      }
+    ],
+    "steps": [
+      "Cook the rice in salted water until tender.",
+      "Brown the onion in the oil, add the garlic, ginger and spices, then the tomato, and cook until soft.",
+      "Stir in the tamarind loosened in 250 ml of water and the salt and simmer for 5 minutes.",
+      "Add the fish pieces and poach gently for 7 to 8 minutes.",
+      "Finish with coriander and serve with the rice."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 514,
+      "protein": 39.7,
+      "carbs": 69,
+      "fat": 8.3,
+      "fibre": 4.4
+    },
+    "allergens": [
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "spiced-crab-rice",
+    "title": "Spiced crab and pea rice",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "crab",
+        "grams": 240
+      },
+      {
+        "foodId": "rice-white",
+        "grams": 140
+      },
+      {
+        "foodId": "peas",
+        "grams": 80
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "ginger",
+        "grams": 8
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "coriander-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "rapeseed-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Brown the onion in the oil with the garlic, ginger and spices.",
+      "Add the tomato and cook for 3 minutes, then the rinsed rice, salt and 300 ml of water.",
+      "Cover and cook on low heat for 12 minutes.",
+      "Fold in the peas and drained crab, cover and steam for 4 minutes.",
+      "Finish with the lemon."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 492,
+      "protein": 30.5,
+      "carbs": 72.9,
+      "fat": 8.2,
+      "fibre": 5.3
+    },
+    "allergens": [
+      "crustaceans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "chicken-pomegranate-salad",
+    "title": "Chicken, pomegranate and mint salad",
+    "cuisine": "gulf",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 300
+      },
+      {
+        "foodId": "romaine",
+        "grams": 150
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "pomegranate",
+        "grams": 80
+      },
+      {
+        "foodId": "mint",
+        "grams": 8
+      },
+      {
+        "foodId": "walnuts",
+        "grams": 20
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 120
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Season the chicken with the cumin and half the salt and grill for 6 to 7 minutes each side until cooked through.",
+      "Chop the lettuce, cucumber and mint and toss with the chickpeas.",
+      "Dress with the lemon, oil and remaining salt.",
+      "Slice the chicken over the salad and scatter with pomegranate seeds and walnuts."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 444,
+      "protein": 41.8,
+      "carbs": 29,
+      "fat": 18.9,
+      "fibre": 8.4
+    },
+    "allergens": [
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "chicken-olive-lemon-tagine",
+    "title": "Chicken, olive and lemon tagine",
+    "cuisine": "north_african",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 45,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 450
+      },
+      {
+        "foodId": "olives",
+        "grams": 60
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "ginger-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "saffron",
+        "grams": 0.05
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Soften the onion and garlic in the oil with the ginger, turmeric, cumin and saffron.",
+      "Add the chicken and turn it in the spices, then add the potato chunks, salt and 300 ml of water.",
+      "Cover and simmer for 35 minutes until the chicken and potatoes are tender.",
+      "Stir in the olives and lemon and cook uncovered for 5 minutes to reduce the sauce.",
+      "Finish with parsley and coriander."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 527,
+      "protein": 49.4,
+      "carbs": 39.6,
+      "fat": 19.1,
+      "fibre": 5.7
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "lamb-fig-tagine",
+    "title": "Lamb and fig tagine with couscous",
+    "cuisine": "north_african",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 80,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-leg",
+        "grams": 400
+      },
+      {
+        "foodId": "dried-figs",
+        "grams": 60
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "ginger-ground",
+        "grams": 2
+      },
+      {
+        "foodId": "turmeric",
+        "grams": 1
+      },
+      {
+        "foodId": "honey",
+        "grams": 10
+      },
+      {
+        "foodId": "almonds",
+        "grams": 20
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 300
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "couscous",
+        "grams": 120
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Brown the lamb in the oil, then add the onion and spices and soften.",
+      "Pour in the stock and 200 ml of water with the salt, cover and simmer for 60 minutes.",
+      "Add the halved figs and honey and cook uncovered for 15 minutes until the sauce is glossy.",
+      "Pour 150 ml of boiling water over the couscous, cover for 5 minutes and fluff.",
+      "Serve the tagine on the couscous with toasted almonds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 517,
+      "protein": 37.3,
+      "carbs": 57,
+      "fat": 15.4,
+      "fibre": 6
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "nuts"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "tuna-egg-brik-wrap",
+    "title": "Tunisian-style tuna and egg wrap",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 6,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "tortilla-flour",
+        "grams": 70
+      },
+      {
+        "foodId": "tuna-canned",
+        "grams": 80
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "parsley",
+        "grams": 5
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.3
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Scatter the drained tuna and parsley over one half of the tortilla and make a hollow in the middle.",
+      "Crack the egg into the hollow, dust with chilli and fold the tortilla over, pressing the edges.",
+      "Slide into the hot oiled pan and cook for 2 to 3 minutes each side until crisp and the egg is set.",
+      "Squeeze over the lemon."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 402,
+      "protein": 27.8,
+      "carbs": 35.7,
+      "fat": 16.2,
+      "fibre": 2.7
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "ojja-prawns",
+    "title": "Ojja (Tunisian eggs with prawns and peppers)",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 250
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 80
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the sliced pepper and garlic in the oil with the spices.",
+      "Add the tomatoes and salt and simmer for 10 minutes until thick.",
+      "Stir in the prawns, then make wells and crack in the eggs.",
+      "Cover and cook for 4 to 5 minutes until the prawns are pink and the egg whites are set.",
+      "Serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 471,
+      "protein": 45.2,
+      "carbs": 36.1,
+      "fat": 17.4,
+      "fibre": 7.2
+    },
+    "allergens": [
+      "gluten",
+      "crustaceans",
+      "eggs"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "lablabi",
+    "title": "Lablabi (Tunisian chickpea soup)",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 480
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 4
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 2
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 100
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "vegetable-stock",
+        "grams": 500
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Simmer the chickpeas with the garlic, cumin, chilli, stock and salt for 15 minutes.",
+      "Soft-boil the eggs for 6 minutes and peel.",
+      "Tear the bread into two deep bowls.",
+      "Ladle the chickpeas and broth over the bread and top each with an egg.",
+      "Finish with the lemon and oil."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 642,
+      "protein": 30,
+      "carbs": 88.4,
+      "fat": 20.4,
+      "fibre": 17
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "mechouia-tuna-egg",
+    "title": "Mechouia salad with tuna and egg",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 9,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "roasted-peppers",
+        "grams": 250
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "garlic",
+        "grams": 5
+      },
+      {
+        "foodId": "tuna-canned",
+        "grams": 150
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "olives",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 80
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Boil the eggs for 9 minutes, cool, peel and quarter.",
+      "Chop the drained peppers and the tomato finely with the garlic until almost a relish.",
+      "Season with the cumin, lemon, oil and salt.",
+      "Top with the tuna, eggs and olives and serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 363,
+      "protein": 27.5,
+      "carbs": 32.4,
+      "fat": 14.8,
+      "fibre": 3.9
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "bessara",
+    "title": "Bessara (fava bean soup) with pita",
+    "cuisine": "north_african",
+    "slots": [
+      "breakfast",
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "fava-beans",
+        "grams": 400
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Simmer the drained beans with the garlic and 250 ml of water for 10 minutes.",
+      "Blend until smooth with the cumin, lemon, salt and two-thirds of the oil.",
+      "Reheat gently, loosening with water if needed.",
+      "Drizzle with the remaining oil, dust with paprika and serve with warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 357,
+      "protein": 16.7,
+      "carbs": 56.1,
+      "fat": 9.3,
+      "fibre": 11.1
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "macarona-bechamel",
+    "title": "Lighter macarona béchamel",
+    "cuisine": "north_african",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 40,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "pasta",
+        "grams": 160
+      },
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 250
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 300
+      },
+      {
+        "foodId": "flour-plain",
+        "grams": 20
+      },
+      {
+        "foodId": "butter",
+        "grams": 10
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "passata",
+        "grams": 150
+      },
+      {
+        "foodId": "nutmeg",
+        "grams": 0.5
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 20
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Boil the pasta until just tender and drain.",
+      "Brown the mince with the onion, add the passata and half the salt and simmer for 8 minutes.",
+      "Melt the butter, stir in the flour, then whisk in the milk and simmer until thick; season with the nutmeg and remaining salt.",
+      "Layer half the pasta, all the meat, then the rest of the pasta in a dish and pour over the sauce.",
+      "Sprinkle with the cheese and bake at 200 °C for 20 minutes until golden."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 490,
+      "protein": 30.8,
+      "carbs": 54.5,
+      "fat": 15.8,
+      "fibre": 3
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "moroccan-chicken-couscous-prep",
+    "title": "Moroccan chicken couscous salad (meal prep)",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 500
+      },
+      {
+        "foodId": "couscous",
+        "grams": 200
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "courgette",
+        "grams": 200
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "raisins",
+        "grams": 30
+      },
+      {
+        "foodId": "cumin",
+        "grams": 3
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "parsley",
+        "grams": 12
+      },
+      {
+        "foodId": "mint",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Toss the chicken with the spices, half the oil and half the salt and roast at 200 °C with the diced courgette and pepper for 18 to 20 minutes.",
+      "Pour 250 ml of boiling water over the couscous and raisins, cover for 5 minutes and fluff.",
+      "Dice the chicken and fold it into the couscous with the vegetables and chickpeas.",
+      "Dress with the lemon, remaining oil and salt and the herbs.",
+      "Divide between 4 containers; keeps for 3 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 514,
+      "protein": 40.3,
+      "carbs": 63.8,
+      "fat": 10.6,
+      "fibre": 8.5
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "loubia-white-beans",
+    "title": "Loubia (Moroccan white beans in tomato)",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "white-beans",
+        "grams": 480
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "ginger-ground",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion and garlic in the oil with the spices.",
+      "Add the tomatoes and salt and simmer for 10 minutes.",
+      "Stir in the drained beans with 100 ml of water and cook for 10 minutes until thick and saucy.",
+      "Finish with parsley and serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 539,
+      "protein": 25.6,
+      "carbs": 90.3,
+      "fat": 10.4,
+      "fibre": 17.3
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "berber-omelette",
+    "title": "Berber-style tomato omelette",
+    "cuisine": "north_african",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 50
+      },
+      {
+        "foodId": "cumin",
+        "grams": 1
+      },
+      {
+        "foodId": "paprika",
+        "grams": 1
+      },
+      {
+        "foodId": "parsley",
+        "grams": 5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 6
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 50
+      },
+      {
+        "foodId": "salt",
+        "grams": 1.5
+      }
+    ],
+    "steps": [
+      "Soften the onion in the oil, add the chopped tomato, cumin, paprika and salt and cook for 6 minutes to a thick sauce.",
+      "Pour the beaten eggs over the sauce.",
+      "Cover and cook on low heat for 4 minutes until just set.",
+      "Scatter with parsley and serve from the pan with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 459,
+      "protein": 26.7,
+      "carbs": 38.8,
+      "fat": 22.2,
+      "fibre": 4.4
+    },
+    "allergens": [
+      "gluten",
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "baghrir-yogurt",
+    "title": "Semolina pancakes with honey and yogurt",
+    "cuisine": "north_african",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 8,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "semolina",
+        "grams": 60
+      },
+      {
+        "foodId": "flour-plain",
+        "grams": 20
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 150
+      },
+      {
+        "foodId": "honey",
+        "grams": 12
+      },
+      {
+        "foodId": "butter",
+        "grams": 5
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Whisk the semolina, flour and warm milk to a thin batter and rest for 10 minutes.",
+      "Cook 3 pancakes in a lightly buttered pan over medium heat, on one side only, until the tops are set and full of holes.",
+      "Warm the honey with the remaining butter.",
+      "Serve the pancakes with the honey butter and yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 495,
+      "protein": 24.9,
+      "carbs": 79.6,
+      "fat": 8.3,
+      "fibre": 2.9
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "chorba-lamb-bulgur",
+    "title": "Chorba (lamb, chickpea and bulgur soup)",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 50,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "lamb-leg",
+        "grams": 250
+      },
+      {
+        "foodId": "bulgur",
+        "grams": 70
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 150
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "celery",
+        "grams": 50
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 15
+      },
+      {
+        "foodId": "coriander-leaves",
+        "grams": 8
+      },
+      {
+        "foodId": "mint",
+        "grams": 4
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Brown the diced lamb in the oil with the onion, celery and spices.",
+      "Add the tomatoes, tomato paste, salt and 800 ml of water and simmer for 30 minutes.",
+      "Stir in the bulgur and chickpeas and cook for 15 minutes more.",
+      "Finish with the coriander and mint."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 485,
+      "protein": 37.4,
+      "carbs": 56.9,
+      "fat": 13.7,
+      "fibre": 14.2
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "lamb"
+  },
+  {
+    "id": "turkey-merguez-meatballs",
+    "title": "Merguez-spiced turkey meatballs with couscous",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-mince",
+        "grams": 400
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "paprika",
+        "grams": 3
+      },
+      {
+        "foodId": "fennel-seed",
+        "grams": 1
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 1
+      },
+      {
+        "foodId": "couscous",
+        "grams": 120
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 100
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 100
+      },
+      {
+        "foodId": "mint",
+        "grams": 5
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Mix the mince with the spices, garlic and most of the salt and roll into 12 meatballs.",
+      "Pan-fry in the oil for 10 to 12 minutes, turning, until browned and cooked through.",
+      "Pour 150 ml of boiling water over the couscous, cover for 5 minutes and fluff with the lemon.",
+      "Stir the grated cucumber, mint and a pinch of salt into the yogurt.",
+      "Serve the meatballs on the couscous with the yogurt."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 618,
+      "protein": 51.4,
+      "carbs": 53.9,
+      "fat": 21.8,
+      "fibre": 4.5
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "orange-almond-yogurt",
+    "title": "Orange, cinnamon and almond yogurt",
+    "cuisine": "north_african",
+    "slots": [
+      "snack"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "orange",
+        "grams": 150
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "almonds",
+        "grams": 15
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 150
+      },
+      {
+        "foodId": "honey",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Peel the orange and slice it into rounds.",
+      "Spoon the yogurt into a bowl and arrange the orange on top.",
+      "Dust with cinnamon, drizzle with honey and scatter with chopped almonds."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 262,
+      "protein": 19.9,
+      "carbs": 30.9,
+      "fat": 8.2,
+      "fibre": 5.8
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "sweet-potato-chickpea-tagine",
+    "title": "Sweet potato and chickpea tagine with couscous",
+    "cuisine": "north_african",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 10,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "sweet-potato",
+        "grams": 400
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 120
+      },
+      {
+        "foodId": "dried-apricots",
+        "grams": 40
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "ginger-ground",
+        "grams": 1
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "couscous",
+        "grams": 120
+      },
+      {
+        "foodId": "salt",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Soften the onion in the oil with the spices.",
+      "Add the cubed sweet potato, tomatoes, chopped apricots, salt and 250 ml of water and simmer for 20 minutes.",
+      "Stir in the chickpeas and cook for 8 minutes until the sauce is thick.",
+      "Pour 150 ml of boiling water over the couscous, cover for 5 minutes and fluff.",
+      "Serve the tagine over the couscous."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 560,
+      "protein": 18.8,
+      "carbs": 106.2,
+      "fat": 8.5,
+      "fibre": 19.1
+    },
+    "allergens": [
+      "gluten",
+      "sulphites"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "menemen",
+    "title": "Menemen (Turkish eggs with tomato and pepper)",
+    "cuisine": "mediterranean",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 10,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "egg",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "green-pepper",
+        "grams": 80
+      },
+      {
+        "foodId": "onion",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "paprika",
+        "grams": 1
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 1.5
+      }
+    ],
+    "steps": [
+      "Soften the onion and pepper in the oil for 3 minutes.",
+      "Add the chopped tomato, paprika and salt and cook for 4 minutes until saucy.",
+      "Pour in the lightly beaten eggs and stir gently until just set and still soft.",
+      "Serve from the pan with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 515,
+      "protein": 28.4,
+      "carbs": 47,
+      "fat": 24.4,
+      "fibre": 5.9
+    },
+    "allergens": [
+      "gluten",
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "kofte-piyaz",
+    "title": "Turkish kofte with white bean salad",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 12,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 350
+      },
+      {
+        "foodId": "onion",
+        "grams": 60
+      },
+      {
+        "foodId": "parsley",
+        "grams": 15
+      },
+      {
+        "foodId": "cumin",
+        "grams": 2
+      },
+      {
+        "foodId": "breadcrumbs",
+        "grams": 20
+      },
+      {
+        "foodId": "white-beans",
+        "grams": 300
+      },
+      {
+        "foodId": "tomato",
+        "grams": 150
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "vinegar-red-wine",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Knead the mince with half the onion (grated), half the parsley, the cumin, breadcrumbs and most of the salt, and shape into 8 small flat patties.",
+      "Grill or pan-fry for 4 to 5 minutes each side until cooked through.",
+      "Toss the drained beans with the sliced remaining onion, tomato, parsley, lemon, oil, vinegar and remaining salt.",
+      "Serve the kofte on the bean salad."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 607,
+      "protein": 48.7,
+      "carbs": 46.3,
+      "fat": 25,
+      "fibre": 9.4
+    },
+    "allergens": [
+      "gluten",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "imam-bayildi-bulgur",
+    "title": "Imam bayildi with bulgur and yogurt",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 45,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "aubergine",
+        "grams": 500
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "bulgur",
+        "grams": 110
+      },
+      {
+        "foodId": "greek-yogurt",
+        "grams": 150
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Halve the aubergines, score the flesh, brush with a little of the oil and bake at 200 °C for 25 minutes.",
+      "Cook the onion and garlic in the remaining oil until soft, add the chopped tomato and most of the salt and simmer for 8 minutes.",
+      "Spoon the filling over the aubergines and bake for 15 minutes more.",
+      "Simmer the bulgur in 240 ml of salted water for 12 minutes, covered.",
+      "Serve the aubergines on the bulgur with the yogurt and parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 482,
+      "protein": 18.8,
+      "carbs": 75.1,
+      "fat": 15.4,
+      "fibre": 17.8
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "chicken-youvetsi",
+    "title": "Greek chicken and pasta bake (youvetsi)",
+    "cuisine": "mediterranean",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 10,
+    "cookMin": 45,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "pasta",
+        "grams": 150
+      },
+      {
+        "foodId": "passata",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 0.5
+      },
+      {
+        "foodId": "oregano",
+        "grams": 2
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 300
+      },
+      {
+        "foodId": "feta",
+        "grams": 40
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Brown the chicken in the oil in an ovenproof pan and set aside.",
+      "Soften the onion and garlic, then add the passata, stock, cinnamon, oregano, salt and 150 ml of water and bring to a simmer.",
+      "Stir in the small pasta (orzo or broken spaghetti) and sit the chicken on top.",
+      "Bake at 190 °C for 30 minutes, stirring once, until the pasta is tender and has absorbed the sauce.",
+      "Crumble over the feta."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 486,
+      "protein": 39,
+      "carbs": 51.5,
+      "fat": 13.3,
+      "fibre": 4.1
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "lighter-moussaka",
+    "title": "Lighter moussaka with yogurt topping",
+    "cuisine": "mediterranean",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 25,
+    "cookMin": 50,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-mince-lean",
+        "grams": 400
+      },
+      {
+        "foodId": "aubergine",
+        "grams": 500
+      },
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "passata",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "cinnamon",
+        "grams": 1
+      },
+      {
+        "foodId": "oregano",
+        "grams": 2
+      },
+      {
+        "foodId": "greek-yogurt",
+        "grams": 200
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "salt",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Brush the sliced aubergine and potato with the oil and bake at 220 °C for 20 minutes.",
+      "Brown the mince with the onion and garlic, add the passata, cinnamon, oregano and most of the salt and simmer for 10 minutes.",
+      "Layer the potato, half the aubergine, the meat and the remaining aubergine in a dish.",
+      "Whisk the yogurt, egg, cheese and remaining salt and spread over the top.",
+      "Bake at 190 °C for 25 to 30 minutes until golden and set."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 421,
+      "protein": 33,
+      "carbs": 30.5,
+      "fat": 19.2,
+      "fibre": 7.3
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "spanakorizo-egg",
+    "title": "Spanakorizo (spinach rice) with feta and egg",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "rice-white",
+        "grams": 130
+      },
+      {
+        "foodId": "spinach",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "dill",
+        "grams": 10
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "feta",
+        "grams": 80
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion in the oil, then stir in the rice for a minute.",
+      "Add 300 ml of water and the salt, cover and cook for 10 minutes.",
+      "Stir in the spinach and dill, cover and cook for 6 minutes more until the rice is tender.",
+      "Fry or poach the eggs.",
+      "Stir the lemon into the rice and serve topped with the feta and eggs."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 547,
+      "protein": 23.1,
+      "carbs": 65.9,
+      "fat": 22.2,
+      "fibre": 6.1
+    },
+    "allergens": [
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "briam-chickpeas-feta",
+    "title": "Briam (Greek roast vegetables) with chickpeas and feta",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 50,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "courgette",
+        "grams": 300
+      },
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "aubergine",
+        "grams": 200
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 20
+      },
+      {
+        "foodId": "oregano",
+        "grams": 2
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 240
+      },
+      {
+        "foodId": "feta",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Slice all the vegetables to the same thickness and toss with the tomatoes, oil, oregano and salt in a roasting tin.",
+      "Cover with foil and bake at 200 °C for 30 minutes.",
+      "Stir in the drained chickpeas and roast uncovered for 20 minutes until the edges caramelise.",
+      "Crumble over the feta."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 566,
+      "protein": 21.2,
+      "carbs": 80.5,
+      "fat": 21,
+      "fibre": 20.9
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "grilled-squid-salad",
+    "title": "Grilled squid salad with lemon and rocket",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 5,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "squid",
+        "grams": 350
+      },
+      {
+        "foodId": "rocket",
+        "grams": 80
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "olives",
+        "grams": 30
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 25
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "garlic",
+        "grams": 5
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 80
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Score the squid and toss it with the garlic, a third of the oil and half the salt.",
+      "Sear on a very hot griddle for 1 to 2 minutes each side until just opaque; any longer and it turns rubbery.",
+      "Toss the rocket, tomato, cucumber, olives and parsley with the lemon and remaining oil and salt.",
+      "Pile the squid on the salad and serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 401,
+      "protein": 34.5,
+      "carbs": 37.1,
+      "fat": 13.2,
+      "fibre": 3.6
+    },
+    "allergens": [
+      "gluten",
+      "molluscs"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "mussels-tomato-garlic",
+    "title": "Mussels in tomato and garlic with bread",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "mussels",
+        "grams": 500
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "garlic",
+        "grams": 15
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "parsley",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.5
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 120
+      },
+      {
+        "foodId": "salt",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Scrub the mussels and discard any that stay open when tapped (the weight given is for cleaned mussel meat; allow about 1.5 kg in the shell).",
+      "Soften the onion and garlic in the oil with the chilli, add the tomatoes and salt and simmer for 8 minutes.",
+      "Add the mussels, cover and cook for 4 to 5 minutes until they open; discard any that stay shut.",
+      "Scatter with parsley and serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 484,
+      "protein": 38.9,
+      "carbs": 54,
+      "fat": 12.7,
+      "fibre": 6.2
+    },
+    "allergens": [
+      "gluten",
+      "molluscs"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "trout-almonds-green-beans",
+    "title": "Trout with almonds, green beans and potatoes",
+    "cuisine": "mediterranean",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "trout",
+        "grams": 300
+      },
+      {
+        "foodId": "almonds",
+        "grams": 20
+      },
+      {
+        "foodId": "green-beans",
+        "grams": 200
+      },
+      {
+        "foodId": "potato",
+        "grams": 350
+      },
+      {
+        "foodId": "butter",
+        "grams": 10
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "parsley",
+        "grams": 6
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the potatoes for 15 minutes until tender, adding the beans for the last 4 minutes.",
+      "Season the trout with half the salt and pan-fry in half the butter, skin side down, for 3 minutes, then turn for 2 minutes.",
+      "Toast the flaked almonds in the remaining butter and add the lemon.",
+      "Serve the fish with the vegetables and spoon over the almond butter and parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 474,
+      "protein": 37.6,
+      "carbs": 40.5,
+      "fat": 18.8,
+      "fibre": 7.7
+    },
+    "allergens": [
+      "fish",
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "gambas-white-beans",
+    "title": "Garlic prawns with white beans and spinach",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 8,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "prawns",
+        "grams": 300
+      },
+      {
+        "foodId": "garlic",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "paprika",
+        "grams": 2
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.5
+      },
+      {
+        "foodId": "white-beans",
+        "grams": 300
+      },
+      {
+        "foodId": "spinach",
+        "grams": 100
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Warm the oil with the sliced garlic, paprika and chilli until it sizzles.",
+      "Add the prawns and cook for 2 minutes each side until pink.",
+      "Stir in the drained beans, spinach and salt and heat for 2 minutes until the spinach wilts.",
+      "Finish with lemon and parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 398,
+      "protein": 43.5,
+      "carbs": 38.3,
+      "fat": 9.2,
+      "fibre": 9.1
+    },
+    "allergens": [
+      "crustaceans"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "shellfish"
+  },
+  {
+    "id": "pisto-fried-egg",
+    "title": "Pisto (Spanish vegetable stew) with fried eggs",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "courgette",
+        "grams": 300
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 200
+      },
+      {
+        "foodId": "onion",
+        "grams": 120
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "egg",
+        "grams": 200
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 80
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Soften the onion and pepper in most of the oil for 8 minutes.",
+      "Add the diced courgette and cook for 5 minutes.",
+      "Add the tomatoes and salt and simmer for 15 minutes until thick.",
+      "Fry the eggs in the remaining oil.",
+      "Serve the pisto topped with the eggs, with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 426,
+      "protein": 22,
+      "carbs": 44.7,
+      "fat": 19.4,
+      "fibre": 9.3
+    },
+    "allergens": [
+      "gluten",
+      "eggs"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "dairy_free"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "chicken-chickpea-paprika-stew",
+    "title": "Spanish chicken and chickpea stew",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-thigh",
+        "grams": 400
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 300
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "red-pepper",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "paprika",
+        "grams": 5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "spinach",
+        "grams": 100
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 200
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Brown the chicken in the oil and set aside.",
+      "Soften the onion, pepper and garlic, then stir in the paprika.",
+      "Add the tomatoes, stock, chickpeas, salt and the chicken and simmer for 20 minutes.",
+      "Stir in the spinach until wilted and serve in bowls."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 627,
+      "protein": 57.4,
+      "carbs": 58.8,
+      "fat": 19.6,
+      "fibre": 17.8
+    },
+    "allergens": [
+      "celery"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "fakes-lentil-soup",
+    "title": "Fakes (Greek lentil soup) with feta",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 35,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "lentils",
+        "grams": 160
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "bay-leaf",
+        "grams": 1
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 20
+      },
+      {
+        "foodId": "vinegar-red-wine",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "feta",
+        "grams": 50
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 60
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Simmer the lentils with the carrot, onion, garlic, bay leaf and tomato paste in 900 ml of water for 30 minutes until soft.",
+      "Season with the salt and stir in the vinegar and oil.",
+      "Ladle into bowls and crumble over the feta.",
+      "Serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 555,
+      "protein": 28.3,
+      "carbs": 80.7,
+      "fat": 14.7,
+      "fibre": 12.1
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "sulphites"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "artichoke-chickpea-feta-salad",
+    "title": "Artichoke, chickpea and feta salad",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "artichoke-hearts",
+        "grams": 150
+      },
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 150
+      },
+      {
+        "foodId": "feta",
+        "grams": 40
+      },
+      {
+        "foodId": "sun-dried-tomatoes",
+        "grams": 15
+      },
+      {
+        "foodId": "rocket",
+        "grams": 40
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 6
+      }
+    ],
+    "steps": [
+      "Quarter the cooked artichoke hearts and slice the sun-dried tomatoes.",
+      "Toss with the drained chickpeas and rocket.",
+      "Dress with the lemon and oil.",
+      "Crumble the feta over the top."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 487,
+      "protein": 24.3,
+      "carbs": 62.2,
+      "fat": 19.4,
+      "fibre": 20.1
+    },
+    "allergens": [
+      "milk",
+      "sulphites"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "fennel-orange-chicken-salad",
+    "title": "Fennel, orange and chicken salad with quinoa",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 300
+      },
+      {
+        "foodId": "fennel",
+        "grams": 250
+      },
+      {
+        "foodId": "orange",
+        "grams": 200
+      },
+      {
+        "foodId": "rocket",
+        "grams": 60
+      },
+      {
+        "foodId": "olives",
+        "grams": 30
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "quinoa",
+        "grams": 80
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Simmer the quinoa for 12 minutes, drain and cool.",
+      "Season the chicken with half the salt and grill for 6 to 7 minutes each side until cooked through.",
+      "Shave the fennel thinly and cut the orange into segments.",
+      "Toss the fennel, orange, rocket, olives and quinoa with the oil, lemon and remaining salt.",
+      "Slice the chicken over the top."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 506,
+      "protein": 42.7,
+      "carbs": 49.1,
+      "fat": 16.1,
+      "fibre": 9.8
+    },
+    "allergens": [],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "watermelon-feta-chicken",
+    "title": "Grilled chicken with watermelon, feta and mint",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 14,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 300
+      },
+      {
+        "foodId": "watermelon",
+        "grams": 400
+      },
+      {
+        "foodId": "feta",
+        "grams": 80
+      },
+      {
+        "foodId": "mint",
+        "grams": 8
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "lime-juice",
+        "grams": 15
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.5
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Season the chicken with the salt and pepper and grill for 6 to 7 minutes each side until cooked through.",
+      "Cube the watermelon and cucumber and toss with the lime, oil and torn mint.",
+      "Crumble over the feta.",
+      "Slice the chicken and serve it on the salad."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 406,
+      "protein": 41.3,
+      "carbs": 20.6,
+      "fat": 18,
+      "fibre": 1.5
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "goat-cheese-lentil-salad",
+    "title": "Roasted pepper, goat cheese and lentil salad",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "lentils",
+        "grams": 120
+      },
+      {
+        "foodId": "roasted-peppers",
+        "grams": 200
+      },
+      {
+        "foodId": "goat-cheese",
+        "grams": 80
+      },
+      {
+        "foodId": "rocket",
+        "grams": 60
+      },
+      {
+        "foodId": "walnuts",
+        "grams": 20
+      },
+      {
+        "foodId": "vinegar-balsamic",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Simmer the lentils for 18 to 20 minutes until just tender and drain.",
+      "Toss them while warm with the vinegar, oil and salt.",
+      "Fold in the sliced peppers and rocket.",
+      "Top with the crumbled goat cheese and walnuts."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 456,
+      "protein": 25.3,
+      "carbs": 45.3,
+      "fat": 21.1,
+      "fibre": 8.8
+    },
+    "allergens": [
+      "milk",
+      "nuts",
+      "sulphites"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "peach-pistachio-yogurt",
+    "title": "Greek yogurt with peach and pistachios",
+    "cuisine": "mediterranean",
+    "slots": [
+      "snack",
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 200
+      },
+      {
+        "foodId": "peach",
+        "grams": 150
+      },
+      {
+        "foodId": "pistachios",
+        "grams": 15
+      },
+      {
+        "foodId": "honey",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Slice the peach.",
+      "Spoon the yogurt into a bowl and top with the fruit.",
+      "Scatter with the chopped pistachios and drizzle with honey."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 276,
+      "protein": 24.8,
+      "carbs": 29.7,
+      "fat": 8,
+      "fibre": 3.9
+    },
+    "allergens": [
+      "milk",
+      "nuts"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "chicken-keftedes-tzatziki",
+    "title": "Chicken keftedes with tzatziki and tomato salad",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-mince",
+        "grams": 400
+      },
+      {
+        "foodId": "oats",
+        "grams": 30
+      },
+      {
+        "foodId": "egg",
+        "grams": 50
+      },
+      {
+        "foodId": "mint",
+        "grams": 5
+      },
+      {
+        "foodId": "oregano",
+        "grams": 1
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "greek-yogurt-0",
+        "grams": 150
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 150
+      },
+      {
+        "foodId": "tomato",
+        "grams": 200
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "pita-wholewheat",
+        "grams": 80
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Mix the mince with the oats, egg, mint, oregano, half the garlic and most of the salt and roll into 12 balls.",
+      "Bake at 210 °C for 15 minutes until golden and cooked through.",
+      "Stir the grated cucumber and remaining garlic into the yogurt with a pinch of salt.",
+      "Dress the sliced tomato with the oil.",
+      "Serve the keftedes with the tzatziki, tomato and warm pita."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 602,
+      "protein": 53.9,
+      "carbs": 43.7,
+      "fat": 24.9,
+      "fibre": 6.1
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "baked-feta-chickpeas",
+    "title": "Baked feta with tomatoes and chickpeas",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chickpeas-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
+        "foodId": "feta",
+        "grams": 120
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "oregano",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "spinach",
+        "grams": 100
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 60
+      }
+    ],
+    "steps": [
+      "Tip the drained chickpeas, halved tomatoes and garlic into a baking dish and toss with the oil and oregano.",
+      "Sit the feta in the middle and bake at 200 °C for 22 to 25 minutes until the tomatoes burst and the feta is soft.",
+      "Stir in the spinach until wilted, breaking up the feta into a sauce.",
+      "Serve with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 608,
+      "protein": 28.9,
+      "carbs": 73.4,
+      "fat": 24.2,
+      "fibre": 16.7
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "lemon-chicken-bulgur-prep",
+    "title": "Lemon-garlic chicken with herby bulgur (meal prep)",
+    "cuisine": "mediterranean",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 20,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 600
+      },
+      {
+        "foodId": "bulgur",
+        "grams": 240
+      },
+      {
+        "foodId": "cucumber",
+        "grams": 300
+      },
+      {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
+        "foodId": "parsley",
+        "grams": 40
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 40
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 25
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "oregano",
+        "grams": 3
+      },
+      {
+        "foodId": "salt",
+        "grams": 7
+      }
+    ],
+    "steps": [
+      "Coat the chicken with the garlic, oregano, half the lemon, a third of the oil and half the salt.",
+      "Bake at 200 °C for 18 to 20 minutes until cooked through, then slice.",
+      "Pour 480 ml of boiling water over the bulgur, cover for 15 minutes and fluff.",
+      "Fold the diced cucumber, tomato and parsley through the bulgur with the remaining lemon, oil and salt.",
+      "Divide between 4 containers with the chicken; keeps for 3 days chilled."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 477,
+      "protein": 42.9,
+      "carbs": 54,
+      "fat": 11.3,
+      "fibre": 9.5
+    },
+    "allergens": [
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "salmon-lentils-spinach",
+    "title": "Salmon with mustard lentils and spinach",
+    "cuisine": "mediterranean",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "salmon",
+        "grams": 300
+      },
+      {
+        "foodId": "lentils",
+        "grams": 100
+      },
+      {
+        "foodId": "spinach",
+        "grams": 150
+      },
+      {
+        "foodId": "shallot",
+        "grams": 40
+      },
+      {
+        "foodId": "mustard",
+        "grams": 8
+      },
+      {
+        "foodId": "vinegar-red-wine",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Simmer the lentils with the thyme for 20 minutes until tender and drain.",
+      "Soften the shallot in half the oil, add the lentils, mustard, vinegar, spinach and most of the salt and stir until the spinach wilts.",
+      "Season the salmon with the remaining salt and pan-fry in the rest of the oil, skin side down, for 4 minutes, then turn for 2 to 3 minutes.",
+      "Serve the salmon on the lentils."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 560,
+      "protein": 45.8,
+      "carbs": 38.3,
+      "fat": 25.1,
+      "fibre": 8
+    },
+    "allergens": [
+      "fish",
+      "mustard",
+      "sulphites"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "tuna-tomato-olive-spaghetti",
+    "title": "Tuna, tomato and olive spaghetti",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 15,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "pasta",
+        "grams": 160
+      },
+      {
+        "foodId": "tuna-canned",
+        "grams": 200
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "olives",
+        "grams": 40
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 10
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the pasta in salted water until just tender.",
+      "Warm the garlic and chilli in the oil, add the tomatoes and simmer for 8 minutes.",
+      "Stir in the drained tuna and sliced olives and heat through.",
+      "Toss with the drained pasta and a splash of its cooking water and finish with parsley."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 490,
+      "protein": 32,
+      "carbs": 69.7,
+      "fat": 10.1,
+      "fibre": 7
+    },
+    "allergens": [
+      "gluten",
+      "fish"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
+  },
+  {
+    "id": "pasta-alla-norma",
+    "title": "Pasta alla norma with ricotta",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "pasta-wholewheat",
+        "grams": 160
+      },
+      {
+        "foodId": "aubergine",
+        "grams": 400
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "basil",
+        "grams": 8
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 15
+      },
+      {
+        "foodId": "ricotta",
+        "grams": 150
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Toss the cubed aubergine with most of the oil and half the salt and roast at 220 °C for 20 minutes until golden.",
+      "Simmer the tomatoes with the garlic, remaining oil and salt for 10 minutes.",
+      "Boil the pasta until just tender and drain.",
+      "Toss the pasta with the sauce and aubergine and top with spoonfuls of ricotta and torn basil."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 540,
+      "protein": 23.7,
+      "carbs": 82.8,
+      "fat": 16.8,
+      "fibre": 17.3
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "grains"
+  },
+  {
+    "id": "chicken-piccata",
+    "title": "Lemon chicken piccata-style with green beans and potatoes",
+    "cuisine": "italian",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 350
+      },
+      {
+        "foodId": "flour-plain",
+        "grams": 15
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 30
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 150
+      },
+      {
+        "foodId": "butter",
+        "grams": 10
+      },
+      {
+        "foodId": "parsley",
+        "grams": 8
+      },
+      {
+        "foodId": "green-beans",
+        "grams": 200
+      },
+      {
+        "foodId": "potato",
+        "grams": 350
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the potatoes for 15 minutes, adding the beans for the last 4 minutes.",
+      "Slice the chicken into thin escalopes, season with the salt and dust with the flour.",
+      "Pan-fry in the oil for 3 minutes each side until golden and set aside.",
+      "Add the stock and lemon to the pan, bubble for 2 minutes, then swirl in the butter and parsley.",
+      "Return the chicken to coat and serve with the vegetables."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 506,
+      "protein": 47.7,
+      "carbs": 47.3,
+      "fat": 14,
+      "fibre": 6.8
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "turkey-meatball-bean-soup",
+    "title": "Turkey meatball, white bean and kale soup",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 3,
+    "prepMin": 15,
+    "cookMin": 25,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "turkey-mince",
+        "grams": 350
+      },
+      {
+        "foodId": "breadcrumbs",
+        "grams": 20
+      },
+      {
+        "foodId": "white-beans",
+        "grams": 300
+      },
+      {
+        "foodId": "kale",
+        "grams": 100
+      },
+      {
+        "foodId": "carrot",
+        "grams": 100
+      },
+      {
+        "foodId": "onion",
+        "grams": 100
+      },
+      {
+        "foodId": "chicken-stock",
+        "grams": 800
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 15
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Mix the mince with the breadcrumbs, half the cheese and half the salt and roll into small meatballs.",
+      "Soften the onion, carrot and garlic in the oil.",
+      "Add the stock and 300 ml of water, bring to a simmer and drop in the meatballs; cook for 10 minutes.",
+      "Add the beans, kale and remaining salt and simmer for 6 minutes.",
+      "Serve with the rest of the cheese."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 497,
+      "protein": 40.3,
+      "carbs": 44.1,
+      "fat": 18.1,
+      "fibre": 8
+    },
+    "allergens": [
+      "celery",
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "turkey"
+  },
+  {
+    "id": "polenta-mushroom-ragu",
+    "title": "Soft polenta with mushroom and white bean ragù",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "cornmeal",
+        "grams": 120
+      },
+      {
+        "foodId": "mushrooms",
+        "grams": 400
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 200
+      },
+      {
+        "foodId": "thyme",
+        "grams": 1
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 30
+      },
+      {
+        "foodId": "white-beans",
+        "grams": 200
+      },
+      {
+        "foodId": "salt",
+        "grams": 4
+      }
+    ],
+    "steps": [
+      "Brown the sliced mushrooms in the oil, then add the onion, garlic and thyme and soften.",
+      "Add the tomatoes, beans and half the salt and simmer for 12 minutes.",
+      "Whisk the cornmeal into 600 ml of simmering water with the remaining salt and cook, stirring often, for 15 minutes until thick.",
+      "Stir most of the cheese into the polenta.",
+      "Serve the ragù over the polenta with the remaining cheese."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 528,
+      "protein": 25.3,
+      "carbs": 83.6,
+      "fat": 13.2,
+      "fibre": 14.1
+    },
+    "allergens": [
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly",
+      "gluten_free"
+    ],
+    "mainProtein": "legumes"
+  },
+  {
+    "id": "beef-ragu-batch",
+    "title": "Slow-cooked beef ragù with pasta (meal prep)",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 150,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.5,
+      "max": 2
+    },
+    "ingredients": [
+      {
+        "foodId": "beef-stewing",
+        "grams": 500
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 800
+      },
+      {
+        "foodId": "onion",
+        "grams": 150
+      },
+      {
+        "foodId": "carrot",
+        "grams": 150
+      },
+      {
+        "foodId": "celery",
+        "grams": 80
+      },
+      {
+        "foodId": "garlic",
+        "grams": 12
+      },
+      {
+        "foodId": "tomato-paste",
+        "grams": 30
+      },
+      {
+        "foodId": "beef-stock",
+        "grams": 300
+      },
+      {
+        "foodId": "bay-leaf",
+        "grams": 1
+      },
+      {
+        "foodId": "thyme",
+        "grams": 2
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "pasta",
+        "grams": 280
+      },
+      {
+        "foodId": "salt",
+        "grams": 7
+      }
+    ],
+    "steps": [
+      "Brown the beef in the oil and set aside.",
+      "Soften the onion, carrot, celery and garlic, then stir in the tomato paste.",
+      "Return the beef with the tomatoes, stock, bay, thyme and salt, cover and simmer very gently for 2 hours until it falls apart.",
+      "Shred the beef into the sauce with two forks.",
+      "Boil the pasta and toss with the ragù; the sauce keeps for 4 days chilled or 3 months frozen."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 534,
+      "protein": 40.9,
+      "carbs": 71,
+      "fat": 10.6,
+      "fibre": 8.7
+    },
+    "allergens": [
+      "celery",
+      "gluten"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "beef"
+  },
+  {
+    "id": "caprese-chicken-traybake",
+    "title": "Caprese chicken tray bake",
+    "cuisine": "italian",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 30,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "chicken-breast",
+        "grams": 350
+      },
+      {
+        "foodId": "tomato",
+        "grams": 300
+      },
+      {
+        "foodId": "mozzarella",
+        "grams": 100
+      },
+      {
+        "foodId": "basil",
+        "grams": 8
+      },
+      {
+        "foodId": "vinegar-balsamic",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "potato",
+        "grams": 300
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Toss the cubed potatoes with half the oil and half the salt and roast at 210 °C for 12 minutes.",
+      "Add the chicken and halved tomatoes to the tray, drizzle with the remaining oil and salt and roast for 12 minutes.",
+      "Lay the sliced mozzarella on the chicken and return to the oven for 5 minutes until melted and the chicken is cooked through.",
+      "Finish with the vinegar and basil."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 520,
+      "protein": 56.2,
+      "carbs": 34.5,
+      "fat": 17,
+      "fibre": 5
+    },
+    "allergens": [
+      "milk",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein",
+      "gluten_free"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "ricotta-lemon-courgette-pasta",
+    "title": "Ricotta, lemon and courgette pasta",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 5,
+    "cookMin": 12,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "pasta",
+        "grams": 160
+      },
+      {
+        "foodId": "ricotta",
+        "grams": 200
+      },
+      {
+        "foodId": "courgette",
+        "grams": 300
+      },
+      {
+        "foodId": "peas",
+        "grams": 100
+      },
+      {
+        "foodId": "lemon-juice",
+        "grams": 20
+      },
+      {
+        "foodId": "garlic",
+        "grams": 6
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 20
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 8
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the pasta in salted water, adding the peas for the last 2 minutes.",
+      "Fry the grated courgette and garlic in the oil for 4 minutes.",
+      "Stir the ricotta, lemon and cheese together with a ladle of the pasta water.",
+      "Toss the drained pasta and peas with the courgette and ricotta sauce."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 580,
+      "protein": 30,
+      "carbs": 78.3,
+      "fat": 16.3,
+      "fibre": 6.4
+    },
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "dairy"
+  },
+  {
+    "id": "egg-spinach-piadina",
+    "title": "Egg, spinach and parmesan breakfast wrap",
+    "cuisine": "italian",
+    "slots": [
+      "breakfast"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 5,
+    "costTier": 1,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.5
+    },
+    "ingredients": [
+      {
+        "foodId": "tortilla-flour",
+        "grams": 70
+      },
+      {
+        "foodId": "egg",
+        "grams": 100
+      },
+      {
+        "foodId": "spinach",
+        "grams": 50
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 10
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 3
+      },
+      {
+        "foodId": "black-pepper",
+        "grams": 0.3
+      }
+    ],
+    "steps": [
+      "Wilt the spinach in the oil.",
+      "Add the beaten eggs and pepper and scramble softly.",
+      "Warm the flatbread in a dry pan.",
+      "Fill with the eggs, grate over the cheese and fold."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 435,
+      "protein": 23.4,
+      "carbs": 37.6,
+      "fat": 20.8,
+      "fibre": 3.6
+    },
+    "allergens": [
+      "gluten",
+      "eggs",
+      "milk"
+    ],
+    "dietTags": [
+      "vegetarian",
+      "pescatarian",
+      "halal_friendly"
+    ],
+    "mainProtein": "eggs"
+  },
+  {
+    "id": "chicken-sundried-tomato-pasta",
+    "title": "Creamy chicken and sun-dried tomato pasta",
+    "cuisine": "italian",
+    "slots": [
+      "lunch",
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 15,
+    "costTier": 2,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "pasta-wholewheat",
+        "grams": 150
+      },
+      {
+        "foodId": "chicken-breast",
+        "grams": 300
+      },
+      {
+        "foodId": "sun-dried-tomatoes",
+        "grams": 30
+      },
+      {
+        "foodId": "spinach",
+        "grams": 100
+      },
+      {
+        "foodId": "garlic",
+        "grams": 8
+      },
+      {
+        "foodId": "cream-cheese",
+        "grams": 40
+      },
+      {
+        "foodId": "milk-semi",
+        "grams": 80
+      },
+      {
+        "foodId": "parmesan",
+        "grams": 15
+      },
+      {
+        "foodId": "basil",
+        "grams": 5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 5
+      },
+      {
+        "foodId": "salt",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Boil the pasta until just tender.",
+      "Brown the sliced chicken in the oil for 6 minutes with the salt.",
+      "Add the garlic and chopped sun-dried tomatoes, then stir in the cream cheese and milk to make a sauce.",
+      "Add the spinach and drained pasta and toss until glossy.",
+      "Finish with the cheese and basil."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 642,
+      "protein": 53.3,
+      "carbs": 69.9,
+      "fat": 18.8,
+      "fibre": 10
+    },
+    "allergens": [
+      "gluten",
+      "milk",
+      "sulphites"
+    ],
+    "dietTags": [
+      "halal_friendly",
+      "high_protein"
+    ],
+    "mainProtein": "chicken"
+  },
+  {
+    "id": "seafood-fennel-stew",
+    "title": "Seafood and fennel stew",
+    "cuisine": "italian",
+    "slots": [
+      "dinner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 25,
+    "costTier": 3,
+    "scalable": {
+      "min": 0.75,
+      "max": 1.75
+    },
+    "ingredients": [
+      {
+        "foodId": "cod",
+        "grams": 250
+      },
+      {
+        "foodId": "prawns",
+        "grams": 150
+      },
+      {
+        "foodId": "mussels",
+        "grams": 150
+      },
+      {
+        "foodId": "tomatoes-canned",
+        "grams": 400
+      },
+      {
+        "foodId": "fennel",
+        "grams": 150
+      },
+      {
+        "foodId": "onion",
+        "grams": 80
+      },
+      {
+        "foodId": "garlic",
+        "grams": 10
+      },
+      {
+        "foodId": "chilli-powder",
+        "grams": 0.5
+      },
+      {
+        "foodId": "olive-oil",
+        "grams": 12
+      },
+      {
+        "foodId": "sourdough",
+        "grams": 100
+      },
+      {
+        "foodId": "salt",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Soften the sliced fennel, onion and garlic in the oil with the chilli for 8 minutes.",
+      "Add the tomatoes, salt and 250 ml of water and simmer for 10 minutes.",
+      "Add the cod chunks and cook for 3 minutes, then the prawns and mussel meat for 3 minutes more until everything is just cooked.",
+      "Serve in bowls with the bread."
+    ],
+    "source": "repwise-original",
+    "licence": "proprietary",
+    "perServing": {
+      "kcal": 499,
+      "protein": 54.9,
+      "carbs": 46.7,
+      "fat": 11,
+      "fibre": 8.1
+    },
+    "allergens": [
+      "gluten",
+      "crustaceans",
+      "fish",
+      "molluscs"
+    ],
+    "dietTags": [
+      "pescatarian",
+      "halal_friendly",
+      "high_protein",
+      "dairy_free"
+    ],
+    "mainProtein": "fish"
   }
 ]
