@@ -7,14 +7,13 @@ import { localISODate } from '../logic/dates';
 import type { EngineExercise, ISODate } from '../logic/engine';
 import { engineExerciseMap, type MuscleSource } from '../logic/muscles';
 import { unitSystem, type UnitSystem } from '../logic/units';
-import { flattenSets, type LoggedSet } from '../logic/workouts';
+import { toLoggedSets, type LoggedSet } from '../logic/workouts';
 import {
   useLiveCustomExercises,
-  useLiveDoneSets,
   useLiveFoodLogs,
+  useLiveLoggedSets,
   useLiveMealPlans,
   useLiveMeals,
-  useLiveSessionExercises,
   useLiveSessions,
 } from '../repo';
 
@@ -47,15 +46,18 @@ export type Training = {
   exerciseName: (id: string) => string;
 };
 
-/** Every finished set joined to its session + exercise, live. */
+/**
+ * Every finished set joined to its session + exercise, live: one joined, indexed query (not three
+ * whole tables joined in JS), refreshed at most once per frame and never while the screen is
+ * blurred (perf audit r2 N4).
+ */
 export function useTraining(): Training {
   const s = useLiveSessions();
-  const se = useLiveSessionExercises();
-  const st = useLiveDoneSets();
+  const st = useLiveLoggedSets();
   const custom = useLiveCustomExercises();
   const catalog = useCatalog();
 
-  const sets = useMemo(() => flattenSets(s.data, se.data, st.data), [s.data, se.data, st.data]);
+  const sets = useMemo(() => toLoggedSets(st.data), [st.data]);
   const exById = useMemo(() => {
     const list: MuscleSource[] = [
       ...(catalog?.exercises ?? []),
@@ -73,8 +75,8 @@ export function useTraining(): Training {
   }, [catalog, custom.data]);
 
   return {
-    loading: s.loading || se.loading || st.loading || catalog == null,
-    error: s.error ?? se.error ?? st.error,
+    loading: s.loading || st.loading || catalog == null,
+    error: s.error ?? st.error,
     sessions: s.data,
     sets,
     exById,

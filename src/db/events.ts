@@ -4,10 +4,17 @@
  * 1. Screen refreshes (`subscribeTables`, perf audit r2 N3). expo-sqlite's change listener fires once
  *    per changed ROW, each delivered as its own JS task, so a per-hook microtask never merged
  *    anything: "start workout" (about 24 inserts) re-ran the player's queries about 24 times, and a
- *    sync settle re-ran every watching screen once per row. One shared listener now collects the
- *    changed tables and flushes once per frame (requestAnimationFrame, with a timer fallback for
- *    when no frame comes), calling each subscriber once if any of its tables changed. While a hold is
- *    active (`holdLiveRefresh`, used by the sync pull) nothing flushes; the release flushes once.
+ *    sync settle re-ran every watching screen once per row. One shared hub now collects the changed
+ *    tables and calls each subscriber once if any of its tables changed:
+ *    - our own writes (the repos' local write signal, sent once per table when a transaction
+ *      commits) flush on the next microtask, so a screen that computes its next write from live
+ *      data never reads a stale value;
+ *    - native row events flush once per frame (requestAnimationFrame, with a timer fallback when no
+ *      frame comes). Most are only the echo of a write already flushed: SQLite's `total_changes()`
+ *      tells, and when nothing was written since the last flush the echo is dropped. So "start
+ *      workout" refreshes the player exactly once;
+ *    - while a hold is active (`holdLiveRefresh`, the sync pull) nothing flushes; the release
+ *      flushes once.
  *
  * 2. Local write signals, below: repos call notifyLocalWrite() after every local write; the sync
  * scheduler and the notification/widget rebuild listen (debounced). Keeps src/db free of any
@@ -19,6 +26,8 @@
  */
 import { addDatabaseChangeListener } from 'expo-sqlite';
 
+import { getRawDb } from './client';
+
 /* ----------------------------- screen refreshes ----------------------------- */
 
 type TableSub = { tables: ReadonlySet<string>; cb: () => void };
@@ -27,8 +36,13 @@ type Scheduler = (flush: () => void) => void;
 const tableSubs = new Set<TableSub>();
 let nativeSub: { remove: () => void } | null = null;
 let changed = new Set<string>();
-let flushArmed = false;
+/** A local write signal is among `changed` (flush on a microtask, never drop as an echo). */
+let localChange = false;
+let microArmed = false;
+let frameArmed = false;
 let holds = 0;
+/** `total_changes()` (and its connection) at the last flush: unchanged → native events are echoes. */
+let lastFlush: { db: unknown; n: number } | null = null;
 
 /** Upper bound on the wait when no frame comes (app in the background, a test environment). */
 export const LIVE_FLUSH_FALLBACK_MS = 100;
@@ -55,23 +69,61 @@ function watched(table: string): boolean {
 }
 
 function arm(): void {
-  if (flushArmed || holds > 0 || changed.size === 0) return;
-  flushArmed = true;
-  scheduler(flushTableChanges);
+  if (holds > 0 || changed.size === 0) return;
+  if (localChange) {
+    if (microArmed) return;
+    microArmed = true;
+    queueMicrotask(() => {
+      microArmed = false;
+      flushTableChanges();
+    });
+    return;
+  }
+  if (frameArmed) return;
+  frameArmed = true;
+  scheduler(() => {
+    frameArmed = false;
+    flushTableChanges();
+  });
 }
 
-/** A table changed (native change event or a local write signal): refresh its watchers once. */
-function markTableChanged(table: string): void {
+/** A table changed (native row event, or `local`: our own write signal): refresh its watchers. */
+function markTableChanged(table: string, local: boolean): void {
   if (!watched(table)) return;
   changed.add(table);
+  if (local) localChange = true;
   arm();
 }
 
+/** Rows written on the app's connection so far, or null when it cannot be read. */
+function writeCounter(): { db: unknown; n: number } | null {
+  try {
+    const db = getRawDb();
+    const row = db.getFirstSync('SELECT total_changes() AS n') as { n: number } | null;
+    return row ? { db, n: Number(row.n) } : null;
+  } catch {
+    return null;
+  }
+}
+
 function flushTableChanges(): void {
-  flushArmed = false;
-  if (holds > 0) return;
+  if (holds > 0 || changed.size === 0) return;
+  const counter = writeCounter();
+  if (
+    !localChange &&
+    counter &&
+    lastFlush &&
+    lastFlush.db === counter.db &&
+    lastFlush.n === counter.n
+  ) {
+    // Only echoes of writes the last flush already covered.
+    changed = new Set();
+    return;
+  }
   const tables = changed;
   changed = new Set();
+  localChange = false;
+  lastFlush = counter;
   for (const s of [...tableSubs]) {
     if (!tableSubs.has(s)) continue;
     for (const t of tables) {
@@ -87,19 +139,20 @@ function flushTableChanges(): void {
 }
 
 /**
- * Call `cb` (at most once per frame) after any of `tables` changed. Every live hook goes through
+ * Call `cb` (once per burst) after any of `tables` changed. Every live hook goes through
  * this, so a burst of row events, from one transaction or a sync page, refreshes each screen once.
  */
 export function subscribeTables(tables: Iterable<string>, cb: () => void): () => void {
   const sub: TableSub = { tables: new Set(tables), cb };
   tableSubs.add(sub);
-  nativeSub ??= addDatabaseChangeListener(({ tableName }) => markTableChanged(tableName));
+  nativeSub ??= addDatabaseChangeListener(({ tableName }) => markTableChanged(tableName, false));
   return () => {
     tableSubs.delete(sub);
     if (tableSubs.size === 0 && nativeSub) {
       nativeSub.remove();
       nativeSub = null;
       changed.clear();
+      localChange = false;
     }
   };
 }
@@ -131,7 +184,10 @@ export function resetLiveRefreshForTests(): void {
   nativeSub?.remove();
   nativeSub = null;
   changed = new Set();
-  flushArmed = false;
+  localChange = false;
+  microArmed = false;
+  frameArmed = false;
+  lastFlush = null;
   holds = 0;
   scheduler = frameScheduler;
 }
@@ -152,8 +208,8 @@ export function onLocalWrite(l: Listener): () => void {
 }
 
 function emit(table: string): void {
-  // Our own writes also refresh screens (merged with the native row events into one flush).
-  markTableChanged(table);
+  // Our own writes refresh screens on the next microtask (their native echoes are then dropped).
+  markTableChanged(table, true);
   for (const l of [...listeners]) {
     try {
       l(table);

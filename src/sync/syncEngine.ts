@@ -17,6 +17,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { create } from 'zustand';
 
 import { getDb } from '@/db/client';
+import { holdLiveRefresh } from '@/db/events';
 import { DIRTY } from '@/db/repo';
 import { cards, SYNC_TABLE_NAMES, syncTables, type SyncTableName } from '@/db/schema';
 import { api, isApiError, isNetworkError } from '@/services/api';
@@ -238,7 +239,23 @@ export function mergeRemoteRows(
   return changed;
 }
 
+/**
+ * Pull every page since the cursor. From the first page that brings rows, screen refreshes are held
+ * (`holdLiveRefresh`) and flushed once at the end: a restore of n rows used to re-read a mounted
+ * screen's tables once per row event, O(n²) (perf audit r2 N4).
+ */
 async function pull(userId: string): Promise<number> {
+  let release: (() => void) | null = null;
+  try {
+    return await pullPages(userId, () => {
+      release ??= holdLiveRefresh();
+    });
+  } finally {
+    (release as (() => void) | null)?.();
+  }
+}
+
+async function pullPages(userId: string, onRows: () => void): Promise<number> {
   let since = getPullSince(userId);
   let cursor: string | null = null;
   let pulled = 0;
@@ -251,6 +268,7 @@ async function pull(userId: string): Promise<number> {
     if (syncAccountId() !== userId) return pulled;
     for (const [table, rows] of Object.entries(res.changes ?? {})) {
       if ((SYNC_TABLE_NAMES as string[]).includes(table) && Array.isArray(rows)) {
+        if (rows.length > 0) onRows();
         pulled += mergeRemoteRows(table as SyncTableName, rows, userId);
       }
     }
