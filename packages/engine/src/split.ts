@@ -1,6 +1,7 @@
 /**
  * Training split + weekly volume (sheet 28 "Training maths").
- * 2–3 days full body, 4 upper/lower, 5–6 PPL (or the user's choice).
+ * 2–3 days full body, 4 upper/lower, 5–6 PPL (or the user's choice). The engine also plans the
+ * edges the app does not offer yet: 1 day = full body (A/B/C rotate week to week), 7 days = PPL.
  * Volume: 10–20 hard sets per muscle group per week by experience, starting at the low end,
  * capped by what the user's days × session length can actually hold.
  */
@@ -108,9 +109,9 @@ export const SPLIT_ROTATIONS: Record<SplitType, string[]> = {
 
 /** Default by days per week; a user preference wins when it fits the days. */
 export function chooseSplit(daysPerWeek: number, preference?: SplitType): SplitType {
-  if (daysPerWeek < 2 || daysPerWeek > 6) throw new RangeError('daysPerWeek must be 2–6');
+  if (!Number.isInteger(daysPerWeek) || daysPerWeek < 1 || daysPerWeek > 7) throw new RangeError('daysPerWeek must be 1–7');
   if (preference) {
-    const minDays: Record<SplitType, number> = { full_body: 2, upper_lower: 2, ppl: 3, ppl_ul: 5 };
+    const minDays: Record<SplitType, number> = { full_body: 1, upper_lower: 2, ppl: 3, ppl_ul: 5 };
     if (daysPerWeek >= minDays[preference]) return preference;
   }
   if (daysPerWeek <= 3) return 'full_body';
@@ -120,11 +121,13 @@ export function chooseSplit(daysPerWeek: number, preference?: SplitType): SplitT
 
 /** Default weekdays (0 = Mon) spreading sessions with rest days between where possible. */
 export const DEFAULT_WEEKDAYS: Record<number, number[]> = {
+  1: [0],
   2: [0, 3],
   3: [0, 2, 4],
   4: [0, 1, 3, 4],
   5: [0, 1, 2, 4, 5],
   6: [0, 1, 2, 3, 4, 5],
+  7: [0, 1, 2, 3, 4, 5, 6],
 };
 
 export function trainingWeekdays(daysPerWeek: number, preferred?: number[]): number[] {
@@ -132,7 +135,7 @@ export function trainingWeekdays(daysPerWeek: number, preferred?: number[]): num
     return [...preferred].sort((a, b) => a - b);
   }
   const d = DEFAULT_WEEKDAYS[daysPerWeek];
-  if (!d) throw new RangeError('daysPerWeek must be 2–6');
+  if (!d) throw new RangeError('daysPerWeek must be 1–7');
   return d;
 }
 

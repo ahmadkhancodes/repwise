@@ -6,7 +6,7 @@
  * Optional LLM variety layer: `planWeekWithVariety` asks a hook for picks; anything that does
  * not pass `validate` falls back to the rules plan.
  */
-import { recipeCandidates, recipeSafe, slotCandidates } from './candidates';
+import { cuisinePreferred, recipeCandidates, recipeSafe, relaxPool, slotCandidates } from './candidates';
 import { buildContext, exercisePatternKey, dayTypeOf, type PlanningContext } from './context';
 import { DEFAULT_PROTEIN_G_PER_KG, computeTargets } from './nutrition';
 import { startOfWeek, weekdayMon0, daysBetween, type ISODate } from './dates';
@@ -229,6 +229,11 @@ export function planSessions(ctx: PlanningContext, warnings: PlanWarning[]): Pla
   const start = rotationStart(ctx);
   const sessions: PlannedSession[] = [];
 
+  if (ctx.exercisePool.length === 0 && ctx.trainingDates.length > 0) {
+    warnings.push({ code: 'no_candidates', message: 'No exercises match your equipment, injuries and level, so no workouts were planned' });
+    return sessions;
+  }
+
   ctx.trainingDates.forEach((date, i) => {
     const templateKey = ctx.rotation[(start + i) % ctx.rotation.length] as string;
     const template = TEMPLATES[templateKey] as DayTemplate;
@@ -249,6 +254,11 @@ export function planSessions(ctx: PlanningContext, warnings: PlanWarning[]): Pla
     }
     const { items, skipped } = chosen as { items: PlannedExercise[]; skipped: string[] };
     if (skipped.length) warnings.push({ code: 'slot_skipped', message: `No suitable exercise for ${skipped.join(', ')}`, date });
+    if (items.length === 0) {
+      // An empty "workout" is worse than none: the day stays a training day for nutrition only.
+      warnings.push({ code: 'no_candidates', message: 'No exercise fits this session with your equipment, injuries and level', date });
+      return;
+    }
     const fp = sessionFingerprint(items.map((it) => it.exerciseId));
     const session: PlannedSession = { date, weekday: weekdayMon0(date), templateKey, title: titleFor(ctx, template, items), items, fingerprint: fp, deload: ctx.deload };
     sessions.push(session);
@@ -315,7 +325,7 @@ function repairConsecutiveVariants(ctx: PlanningContext, sessions: PlannedSessio
 
 /** If minimum sets still overshoot a group's max, drop accessories hitting it (sessions keep ≥ 3 items). */
 function dropOverVolume(ctx: PlanningContext, sessions: PlannedSession[]): void {
-  for (let guard = 0; guard < 50; guard++) {
+  for (let guard = 0; guard < 400; guard++) {
     const vol = weeklyVolume(sessions, ctx.exById);
     const over = VOLUME_GROUP_KEYS.find((g) => vol[g] > ctx.allocationRange[g].max);
     if (!over) return;
@@ -329,7 +339,26 @@ function dropOverVolume(ctx: PlanningContext, sessions: PlannedSession[]): void 
         if (credit > 0 && (!target || credit > target.credit)) target = { s, idx, credit };
       });
     }
-    if (!target) return;
+    if (!target) {
+      // Short sessions (≤ 3 items) on many days can still overshoot with every item at its minimum
+      // sets (ENGINE_QA bug 3: 6 × 20 min PPL gave 21 shoulder sets). Last resort: take single sets
+      // off the biggest contributor, accessories before mains, never below 1 set.
+      let cut: PlannedExercise | undefined;
+      let cutScore = -Infinity;
+      for (const s of sessions) for (const it of s.items) {
+        const ex = ctx.exById.get(it.exerciseId);
+        const credit = ex ? groupContribution(ex)[over] : 0;
+        if (credit <= 0 || it.sets <= 1) continue;
+        const score = credit * 10 + (it.role === 'main' ? 0 : it.role === 'secondary' ? 1 : 2) + it.sets / 100;
+        if (score > cutScore) {
+          cutScore = score;
+          cut = it;
+        }
+      }
+      if (!cut) return;
+      cut.sets -= 1;
+      continue;
+    }
     target.s.items.splice(target.idx, 1);
     target.s.fingerprint = sessionFingerprint(target.s.items.map((it) => it.exerciseId));
   }
@@ -373,20 +402,66 @@ function safeRecipes(ctx: PlanningContext): Recipe[] {
   return list;
 }
 
-function pickDay(
+/**
+ * Per-day search state shared by every menu attempt of that day (ENGINE_QA bug 1: these were
+ * recomputed for every attempt and dominated the planner's run time).
+ */
+interface DaySearch {
+  /** Safe recipes per slot, minus the no-repeat window. */
+  hardBySlot: Map<MealSlot, Recipe[]>;
+  /** recipeWeight factors that do not change within a day (same multiplication order). */
+  dayWeight: Map<string, number>;
+}
+
+function staticWeights(ctx: PlanningContext, liked: ReturnType<typeof likedTraits>): Map<string, number> {
+  const m = new Map<string, number>();
+  const pref = ctx.profile.cuisines;
+  for (const r of safeRecipes(ctx)) {
+    let w = 1;
+    if (ctx.moreLike.has(r.id)) w *= 3;
+    if (liked.cuisines.has(r.cuisine)) w *= 1.3;
+    if (liked.sources.has(r.proteinSource)) w *= 1.2;
+    if (pref.length > 0 && cuisinePreferred(pref, r.cuisine)) w *= 1.5;
+    m.set(r.id, w);
+  }
+  return m;
+}
+
+function daySearch(
   ctx: PlanningContext,
-  slots: MealSlot[],
   date: ISODate,
-  target: { kcal: number; protein: number },
   window: number,
   planned: PastMeal[],
+  slots: readonly MealSlot[],
   ingredientUse: Map<string, number>,
+): DaySearch {
+  const blocked = blockedRecipes([...ctx.pastMeals, ...planned], date, window);
+  const safe = safeRecipes(ctx);
+  const hardBySlot = new Map<MealSlot, Recipe[]>();
+  for (const slot of new Set(slots)) hardBySlot.set(slot, safe.filter((r) => r.slots.includes(slot) && !blocked.has(r.id)));
+  const dayWeight = new Map<string, number>();
+  for (const r of safe) {
+    let shared = 0;
+    for (const ing of r.ingredients) {
+      if (isStaple(ing.id)) continue;
+      const n = ingredientUse.get(ing.id) ?? 0;
+      if (n >= 1 && n <= 2) shared += 1;
+    }
+    dayWeight.set(r.id, Math.min(2, 1 + 0.25 * shared));
+  }
+  return { hardBySlot, dayWeight };
+}
+
+function pickDay(
+  ctx: PlanningContext,
+  search: DaySearch,
+  staticW: Map<string, number>,
+  slots: MealSlot[],
+  target: { kcal: number; protein: number },
   prevCuisine: Cuisine | undefined,
-  liked: ReturnType<typeof likedTraits>,
   relaxed: Set<string>,
   rng: Rng,
 ): { recipes: Recipe[]; slots: MealSlot[] } | null {
-  const blockedBase = blockedRecipes([...ctx.pastMeals, ...planned], date, window);
   const chosen: Recipe[] = [];
   const chosenSlots: MealSlot[] = [];
   const sources = new Set<string>();
@@ -394,14 +469,15 @@ function pickDay(
   let lastCuisine = prevCuisine;
   for (let i = 0; i < slots.length; i++) {
     const slot = slots[i] as MealSlot;
-    const blocked = new Set([...blockedBase, ...chosen.map((r) => r.id)]);
+    const hardAll = search.hardBySlot.get(slot) ?? [];
+    const hard = chosen.length ? hardAll.filter((r) => !chosen.includes(r)) : hardAll;
     const sourceOk = (r: Recipe) => !countsAsProteinSource(r.proteinSource) || !sources.has(r.proteinSource);
-    let { pool, relaxed: rel } = recipeCandidates(safeRecipes(ctx), ctx.recConstraints, slot, blocked, 4, true);
+    let { pool, relaxed: rel } = relaxPool(hard, ctx.recConstraints, 4);
     let eligible = pool.filter(sourceOk);
     // The one-protein-source-a-day rule can empty a pool that was big enough before it: relax the
     // soft filters (cuisine → time → budget) further until something eligible appears (D27).
     while (eligible.length === 0 && rel.length < 3) {
-      const wider = recipeCandidates(safeRecipes(ctx), ctx.recConstraints, slot, blocked, pool.length + 1, true);
+      const wider = relaxPool(hard, ctx.recConstraints, pool.length + 1);
       if (wider.relaxed.length === rel.length) break;
       ({ pool, relaxed: rel } = wider);
       eligible = pool.filter(sourceOk);
@@ -410,17 +486,14 @@ function pickDay(
     const remaining = slots.length - i;
     const sumShares = chosen.reduce((a, r) => a + proteinShare(r), 0);
     const want = Math.min(0.7, Math.max(0.05, (t * slots.length - sumShares) / remaining));
-    const pick = rng.weighted(eligible, (r) =>
-      recipeWeight(r, {
-        moreLike: ctx.moreLike,
-        likedCuisines: liked.cuisines,
-        likedSources: liked.sources,
-        preferredCuisines: ctx.profile.cuisines,
-        ...(lastCuisine ? { previousCuisine: lastCuisine } : {}),
-        ingredientUse,
-        proteinShareTarget: want,
-      }),
-    );
+    // Same factors and order as recipeWeight (variety.ts), with the per-context and per-day parts cached.
+    const pick = rng.weighted(eligible, (r) => {
+      let w = staticW.get(r.id) ?? 1;
+      if (lastCuisine && lastCuisine === r.cuisine) w *= 0.35;
+      w *= search.dayWeight.get(r.id) ?? 1;
+      const d = (proteinShare(r) - want) / 0.1;
+      return w * (Math.exp(-d * d) + 0.05);
+    });
     if (!pick) {
       // Nothing safe is left for this slot even with every soft filter relaxed (e.g. a small
       // breakfast pool inside the no-repeat window): skip it and let the other meals carry the day,
@@ -447,26 +520,38 @@ function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResu
   let failures = 0;
   let prevCuisine: Cuisine | undefined;
 
+  const staticW = staticWeights(ctx, liked);
   for (const date of ctx.dates) {
     const dayType = dayTypeOf(ctx, date);
     const target = dayType === 'training' ? ctx.nutrition.training : ctx.nutrition.rest;
+    const search = daySearch(ctx, date, window, planned, [...ctx.mealSlots, 'snack'], ingredientUse);
     let best: { recipes: Recipe[]; slots: MealSlot[]; servings: number[]; ok: boolean; score: number } | undefined;
     const maxExtra = Math.max(2, 8 - ctx.mealSlots.length); // up to 8 eating occasions for very high targets
     outer: for (let extra = 0; extra <= maxExtra; extra++) {
       const slots: MealSlot[] = [...ctx.mealSlots, ...Array.from({ length: extra }, () => 'snack' as const)];
-      for (let attempt = 0; attempt < 30; attempt++) {
-        const picked = pickDay(ctx, slots, date, target, window, planned, ingredientUse, prevCuisine, liked, relaxed, rng.fork(`${date}/${extra}/${attempt}`));
+      // The planned slots get the full search; each added snack gets a shorter one (ENGINE_QA bug 1:
+      // infeasible days used to cost 30 attempts × every snack count × window × protein step).
+      const attempts = extra === 0 ? MEAL_ATTEMPTS : EXTRA_SNACK_ATTEMPTS;
+      let allOver = true;
+      let any = false;
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        const picked = pickDay(ctx, search, staticW, slots, target, prevCuisine, relaxed, rng.fork(`${date}/${extra}/${attempt}`));
         if (!picked) continue;
+        any = true;
         const res = solvePortions(picked.recipes.map(portionItem), target);
+        if (res.kcalError <= target.kcal * 0.05) allOver = false;
         const score = Math.abs(res.kcalError) / (target.kcal * 0.05) + Math.abs(res.proteinError) / 10 + extra;
         if (!best || (res.ok && !best.ok) || (res.ok === best.ok && score < best.score)) {
           best = { recipes: picked.recipes, slots: picked.slots, servings: res.servings, ok: res.ok, score };
         }
         if (res.ok) break outer;
       }
+      // Every menu already overshoots kcal at its smallest portions: another snack only adds more.
+      if (any && allOver) break;
     }
     if (!best) {
       failures += 1;
+      for (const main of ctx.mealSlots) if (main !== 'snack') skippedMeals.push({ date, slot: main });
       days.push({ date, dayType, targets: target, meals: [], totals: { kcal: 0, protein: 0, carbs: 0, fat: 0 } });
       continue;
     }
@@ -483,6 +568,10 @@ function planMealsWithWindow(ctx: PlanningContext, window: number): MealPlanResu
   }
   return { days, failures: failures + skippedMeals.length, extraSnacks, skippedMeals, relaxed };
 }
+
+/** Menu attempts per day with the planned meal slots, and per extra snack count after that. */
+export const MEAL_ATTEMPTS = 30;
+export const EXTRA_SNACK_ATTEMPTS = 10;
 
 function planMealsBestWindow(ctx: PlanningContext): { res: MealPlanResult; window: number } {
   const requested = ctx.noRepeatDays;
@@ -537,6 +626,14 @@ export function planMeals(ctx: PlanningContext, warnings: PlanWarning[]): DayMea
     }
   }
   const { res, window } = chosen;
+  const safe = safeRecipes(ctx);
+  const mains = ctx.mealSlots.filter((x) => x !== 'snack');
+  const emptyMains = mains.filter((slot) => !safe.some((r) => r.slots.includes(slot)));
+  if (emptyMains.length === mains.length) {
+    warnings.push({ code: 'no_candidates', message: 'No recipes match your diet, allergies and dislikes, so no meals were planned' });
+  } else if (emptyMains.length > 0) {
+    warnings.push({ code: 'no_candidates', message: `No ${emptyMains.join(' or ')} recipes match your diet, allergies and dislikes` });
+  }
   if (window < requested) {
     warnings.push({ code: 'repeat_window_relaxed', message: `Not enough matching recipes for a ${requested}-day no-repeat window; using ${window} days` });
   }

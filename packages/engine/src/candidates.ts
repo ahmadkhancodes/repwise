@@ -217,14 +217,29 @@ export function recipeCandidates(
   presafe = false,
 ): RecipePool {
   const hard = catalogue.filter((r) => r.slots.includes(slot) && !exclude.has(r.id) && (presafe || recipeSafe(r, c)));
+  return relaxPool(hard, c, minPool);
+}
+
+/**
+ * The soft-filter step of `recipeCandidates` on an already hard-filtered list (slot, exclusions and
+ * safety applied): cuisine → time → budget relax while the pool has fewer than `minPool` items.
+ */
+export function relaxPool(hard: readonly Recipe[], c: Pick<RecipeConstraints, 'cuisines' | 'cookMin' | 'budget'>, minPool = 4): RecipePool {
   const relaxed: Relaxation[] = [];
   let useCuisine = c.cuisines.length > 0;
   let useTime = true;
   let useBudget = true;
+  // Resolve the preference once per call (hot path of the meal picker), not once per recipe.
+  const liked = new Map<Cuisine, boolean>();
+  const likes = (x: Cuisine) => {
+    let v = liked.get(x);
+    if (v === undefined) liked.set(x, (v = cuisinePreferred(c.cuisines, x)));
+    return v;
+  };
   const apply = () =>
     hard.filter(
       (r) =>
-        (!useCuisine || cuisinePreferred(c.cuisines, r.cuisine)) &&
+        (!useCuisine || likes(r.cuisine)) &&
         (!useTime || r.prepMin <= c.cookMin) &&
         (!useBudget || r.costTier <= c.budget),
     );

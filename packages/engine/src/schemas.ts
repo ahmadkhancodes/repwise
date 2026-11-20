@@ -363,7 +363,8 @@ export const ProfileSchema = z.object({
   weightKg: z.number().min(30).max(300),
   targetKg: z.number().min(30).max(300).optional(),
   experience: ExperienceSchema,
-  daysPerWeek: z.number().int().min(2).max(6),
+  /** 1–7. The app offers 2–6; the engine also plans 1- and 7-day weeks (docs/ENGINE_QA.md). */
+  daysPerWeek: z.number().int().min(1).max(7),
   /** Preferred training weekdays, 0 = Monday … 6 = Sunday. Length should equal daysPerWeek. */
   trainingWeekdays: z.array(z.number().int().min(0).max(6)).optional(),
   sessionMin: z.number().int().min(20).max(180),

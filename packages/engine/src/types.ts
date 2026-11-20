@@ -76,7 +76,9 @@ export type PlanWarningCode =
   | 'extra_snack_added'
   | 'protein_target_adjusted'
   | 'llm_rejected'
-  | 'llm_error';
+  | 'llm_error'
+  /** Nothing in the catalogue passes the hard filters (equipment/injuries/level, or diet/allergens/dislikes). */
+  | 'no_candidates';
 
 export interface PlanWarning {
   code: PlanWarningCode;
