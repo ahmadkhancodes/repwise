@@ -32,6 +32,9 @@ env:
   API_LEVEL: 34
   EMULATOR_TARGET: google_apis
   EMULATOR_ARCH: x86_64
+  # A real phone size. Without a profile avdmanager makes a 320x640 mdpi device, where one-screen
+  # steps (quiz options, plan reveal) fall below the fold and the flows cannot see them.
+  EMULATOR_PROFILE: pixel_6
   EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 
 jobs:
@@ -104,7 +107,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.API_LEVEL }}-${{ env.EMULATOR_TARGET }}-${{ env.EMULATOR_ARCH }}-v1
+          key: avd-${{ env.API_LEVEL }}-${{ env.EMULATOR_TARGET }}-${{ env.EMULATOR_ARCH }}-${{ env.EMULATOR_PROFILE }}-v2
 
       - name: Create AVD snapshot for the cache
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -113,6 +116,7 @@ jobs:
           api-level: ${{ env.API_LEVEL }}
           target: ${{ env.EMULATOR_TARGET }}
           arch: ${{ env.EMULATOR_ARCH }}
+          profile: ${{ env.EMULATOR_PROFILE }}
           force-avd-creation: false
           emulator-options: ${{ env.EMULATOR_OPTIONS }}
           disable-animations: false
@@ -139,6 +143,7 @@ jobs:
           api-level: ${{ env.API_LEVEL }}
           target: ${{ env.EMULATOR_TARGET }}
           arch: ${{ env.EMULATOR_ARCH }}
+          profile: ${{ env.EMULATOR_PROFILE }}
           force-avd-creation: false
           emulator-options: -no-snapshot-save ${{ env.EMULATOR_OPTIONS }}
           disable-animations: true
