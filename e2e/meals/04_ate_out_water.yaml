@@ -40,7 +40,6 @@ appId: com.client.repwise
     element:
       id: "eat-rings"
     direction: UP
-    centerElement: true
 - tapOn:
     id: "eat-rings"
 - scrollUntilVisible:

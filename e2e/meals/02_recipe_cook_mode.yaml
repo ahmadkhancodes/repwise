@@ -25,7 +25,6 @@ appId: com.client.repwise
     element:
       id: "servings-inc"
     direction: UP
-    centerElement: true
 - tapOn:
     id: "servings-inc"
 - tapOn:
