@@ -39,7 +39,8 @@
 
 ## Tasks
 
-- [ ] (opus) **Finish `feat/r3-fix` until E2E is green on both platforms, then merge to main.**
+- [x] (opus) **Finish `feat/r3-fix` until E2E is green on both platforms, then merge to main.**
+  - result (21 Nov, API run 2): 506cfa6 green on both — e2e-ios https://github.com/ahmadkhancodes/repwise/actions/runs/44870320265 (all flows passed, 0 failed; (b) custom exercise passes), e2e-android https://github.com/ahmadkhancodes/repwise/actions/runs/44870322115. Merged into main as cc4fc7b (PROGRESS/DECISIONS conflicts kept both sides); test:all green (app 3129 tests, engine/content/server checks pass).
   - Already done on the branch (last commit 506cfa6):
     - cook mode "Next" on iOS;
     - the cold-start deep-link "isn't on this phone" notice;
