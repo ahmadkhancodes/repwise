@@ -18,4 +18,5 @@
 | aab70c661baf2e36c | r2-ui fix (Opus) (MERGED) | /home/user/repwise-r2-ui |
 | a06d7fc68ba94f84d | r2-bug fix (Opus) (MERGED) | /home/user/repwise-r2-bug |
 | a40e5c39fb2ebdcb7 | r2-perf fix (Opus) (MERGED) | /home/user/repwise-r2-perf |
-| ac63d437e6f073c62 | r2-native build fix (Opus) | /home/user/repwise-r2-native |
+| ac63d437e6f073c62 | r2-native build fix (Opus) | /home/user/repwise-r2-native | — MERGED e038e0e (21 Nov)
+- r3-fix (Opus, worktree /home/user/repwise-r3-fix, branch feat/r3-fix): 4 iOS-only bugs (Eat tick, cook Next, custom-exercise nav, cold-start toast) + 5th iOS fail, Android notif-permission-off flow, reduced-motion-safe entering animations. RUNNING.
