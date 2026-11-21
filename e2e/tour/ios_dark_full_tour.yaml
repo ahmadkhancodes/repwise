@@ -69,12 +69,25 @@ tags:
           optional: true
       - tapOn:
           id: "welcome-start"
+      # The tap can be lost right after the carousel swipes: tap once more if the quiz did not open.
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-goal"
+          timeout: 3000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-quiz-goal"
+          commands:
+            - tapOn:
+                id: "welcome-start"
 
       # ---------- Quiz: goal (auto-advances) ----------
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-goal"
-          timeout: 5000
+          timeout: 8000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"

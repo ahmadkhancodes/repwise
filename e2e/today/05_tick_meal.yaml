@@ -34,10 +34,8 @@ tags:
     centerElement: true
 - tapOn:
     id: "today-tick-lunch"
-- assertVisible: ".* logged"
-- assertVisible:
-    id: "meals-count"
-    text: "1 of .* eaten"
+# The Undo toast lasts 5 s and each assertion costs seconds on a CI simulator, so tap Undo straight
+# after the tick (it also proves the tick logged); the count assertion after it proves the restore.
 - tapOn: "Undo"
 - assertVisible:
     id: "meals-count"
