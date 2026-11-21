@@ -73,6 +73,7 @@
     5. If anything is wrong, fix the tour flow (or the app bug it reveals) and re-record.
     6. When good: create the GitHub Release `app-tour-dark` and upload the mp4 as a release asset (`gh api` uploads to `uploads.github.com`). Tick this task with the download URL.
   - status (21 Nov, API run 3): steps 1–2 done. Merged `feat/tour-video` into main (4f987c4, test:all green: 3129 app + 757 engine + server 150). Dispatched record-ios-tour, e2e-ios and e2e-android on main; waiting via `.claude-run/wait`. Next run: do steps 3–6 (find the tour run with `gh api "repos/$REPO/actions/workflows/record-ios-tour.yml/runs?branch=main&per_page=1"`).
+  - status (API run 4): first tour run failed at swap-option-0 (flow timing, fixed with a retry tap in 8afdb42). e2e-ios on 4f987c4 failed only `today/05_tick_meal` (flake, no app change). Re-dispatched record-ios-tour + e2e-ios on main; waiting. Next run: if the tour is green do steps 3–6; if e2e-ios 05_tick_meal fails again, investigate the Undo toast on iOS (src/ui Toast) as an app bug.
 
 - [ ] (sonnet) **Final green run on main and the final report to the owner.**
   - Steps:
