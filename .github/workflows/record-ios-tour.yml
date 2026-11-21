@@ -1,0 +1,272 @@
+name: Record iOS tour (dark)
+
+# Records one plain, natural screen video of the whole app on an iPhone simulator in Dark Mode:
+# fresh install → onboarding → every tab → paywall (closed) → Today. The build is the same unsigned
+# Release simulator build as e2e-ios.yml (no EAS credits, no secrets). The Maestro flow is
+# e2e/tour/ios_dark_full_tour.yaml; e2e/tour/stub-server.mjs stands in for the Worker so the
+# paywall can be switched on near the end (everything else runs offline, as in the E2E builds).
+# Artifacts: repwise-ios-dark-tour (tour.mp4), repwise-ios-dark-tour-frames (stills for review),
+# repwise-ios-dark-tour-debug (Maestro log, failure screenshots, raw video if trimming failed).
+on:
+  # TEMP (tour iteration): registers the workflow from this branch; removed before merge.
+  push:
+    branches: [feat/tour-video]
+    paths: ['.github/workflows/record-ios-tour.yml', 'e2e/tour/**']
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or SHA to record
+        type: string
+        default: main
+      maestro_version:
+        description: Maestro CLI version (empty = latest)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: record-ios-tour-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: '1'
+  EXPO_NO_TELEMETRY: '1'
+  EAS_PROJECT_ID: ''
+  GOOGLE_IOS_URL_SCHEME: ''
+  # The local tour stub (127.0.0.1 is reachable from the simulator and exempt from ATS).
+  EXPO_PUBLIC_API_URL: 'http://127.0.0.1:8787'
+  STUB_URL: 'http://127.0.0.1:8787'
+  DERIVED_DATA: ios/build
+  OUT: tour-artifacts
+
+jobs:
+  record:
+    name: Simulator build + recorded Maestro tour
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      # ---------- build: same steps as e2e-ios.yml ----------
+      - name: Select the newest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4 # Maestro CLI runs on the JVM
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Prebuild iOS (never committed)
+        run: npx expo prebuild -p ios --no-install --clean
+
+      - name: CocoaPods cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods/repos
+          key: pods-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: pods-${{ runner.os }}-
+
+      - name: pod install
+        working-directory: ios
+        run: pod install || pod install --repo-update
+
+      - name: Pick a modern iPhone Pro simulator
+        id: sim
+        run: |
+          # Newest iOS runtime first; iPhone 17 Pro, then 16 Pro; else the E2E picker (16-class).
+          UDID=$(node <<'EOF' || SIM_NAME="iPhone 16 Pro" node scripts/ci/ios-sim.mjs
+          const { execFileSync } = require('node:child_process');
+          const { devices } = JSON.parse(
+            execFileSync('xcrun', ['simctl', 'list', 'devices', 'available', '-j'], { encoding: 'utf8' }),
+          );
+          const ver = (id) => (id.match(/iOS-(\d+)-(\d+)/) || [0, 0, 0]).slice(1).map(Number);
+          const runtimes = Object.keys(devices)
+            .filter((k) => k.includes('SimRuntime.iOS-') && devices[k].length)
+            .sort((a, b) => ver(b)[0] - ver(a)[0] || ver(b)[1] - ver(a)[1]);
+          for (const r of runtimes) {
+            for (const name of ['iPhone 17 Pro', 'iPhone 16 Pro']) {
+              const d = devices[r].find((x) => x.name === name);
+              if (d) {
+                console.error(`Using ${name} on ${r.split('.').pop()} (${d.udid})`);
+                console.log(d.udid);
+                process.exit(0);
+              }
+            }
+          }
+          process.exit(1);
+          EOF
+          )
+          test -n "$UDID" || { echo "::error::No simulator found"; exit 1; }
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build Release for the simulator (unsigned)
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          set -o pipefail
+          WS=$(ls -d ios/*.xcworkspace | head -1)
+          SCHEME=$(basename "$WS" .xcworkspace)
+          mkdir -p "$OUT/logs"
+          xcodebuild -workspace "$WS" -scheme "$SCHEME" -configuration Release \
+            -sdk iphonesimulator -destination "platform=iOS Simulator,id=$UDID" \
+            -derivedDataPath "$DERIVED_DATA" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build 2>&1 | tee "$OUT/logs/xcodebuild.log" | \
+            { if command -v xcbeautify >/dev/null; then xcbeautify --quiet; else grep -E 'error:|BUILD (SUCCEEDED|FAILED)' || true; fi; }
+          APP="$DERIVED_DATA/Build/Products/Release-iphonesimulator/$SCHEME.app"
+          test -d "$APP" || { echo "::error::No app at $APP"; exit 1; }
+          echo "APP_PATH=$APP" >> "$GITHUB_ENV"
+
+      # ---------- device: dark mode, clean status bar, fresh install ----------
+      - name: Boot the simulator in Dark Mode
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl ui booted appearance dark
+          echo "Appearance: $(xcrun simctl ui booted appearance)"
+          xcrun simctl status_bar booted override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcrun simctl list devices booted
+
+      - name: Install Maestro and ffmpeg
+        env:
+          WANTED_VERSION: ${{ inputs.maestro_version }}
+        run: |
+          if [ -n "$WANTED_VERSION" ]; then export MAESTRO_VERSION="$WANTED_VERSION"; fi
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+          # launchApp `permissions:` on iOS uses applesimutils when it is present.
+          brew tap wix/brew >/dev/null && brew install applesimutils >/dev/null || echo "applesimutils not installed"
+          command -v ffmpeg >/dev/null || brew install ffmpeg >/dev/null || echo "ffmpeg not installed"
+          command -v ffmpeg && ffmpeg -version | head -1 || true
+
+      - name: Start the tour stub
+        run: |
+          mkdir -p "$OUT/logs"
+          MARKS_FILE="$PWD/$OUT/marks.txt" nohup node e2e/tour/stub-server.mjs >"$OUT/logs/stub.log" 2>&1 &
+          for i in $(seq 1 20); do curl -fsS "$STUB_URL/config" && break; sleep 0.5; done
+          echo
+
+      - name: Install the app fresh (first launch shows onboarding)
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          xcrun simctl uninstall "$UDID" com.client.repwise || true
+          xcrun simctl install "$UDID" "$APP_PATH"
+
+      # ---------- record ----------
+      - name: Record the tour
+        id: tour
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+          MAESTRO_CLI_NO_ANALYTICS: '1'
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '180000'
+        run: |
+          set +e
+          mkdir -p "$OUT/debug"
+          now_ms() { python3 -c 'import time; print(int(time.time() * 1000))'; }
+          xcrun simctl io booted recordVideo --codec=h264 --force "$OUT/raw.mp4" 2>"$OUT/logs/record.log" &
+          REC_PID=$!
+          for i in $(seq 1 40); do grep -q "Recording started" "$OUT/logs/record.log" && break; sleep 0.25; done
+          echo "rec_start $(now_ms)" >>"$OUT/marks.txt"
+          maestro --device "$UDID" test e2e/tour/ios_dark_full_tour.yaml \
+            -e TOUR_RECORDING=true -e STUB_URL="$STUB_URL" \
+            --format junit --output "$OUT/junit.xml" --debug-output "$OUT/debug" 2>&1 | tee "$OUT/logs/maestro.log"
+          RC=${PIPESTATUS[0]}
+          sleep 2
+          kill -INT "$REC_PID"
+          wait "$REC_PID"
+          xcrun simctl io booted screenshot "$OUT/last-screen.png" >/dev/null 2>&1
+          cat "$OUT/marks.txt"
+          ls -la "$OUT"
+          echo "rc=$RC" >> "$GITHUB_OUTPUT"
+          [ "$RC" = 0 ] || echo "::error title=Tour flow failed::Maestro exited $RC (the video still uploads)"
+
+      - name: Trim the video and extract review frames
+        if: always()
+        run: |
+          set -u
+          RAW="$OUT/raw.mp4"
+          test -s "$RAW" || { echo "::error::No video recorded"; exit 1; }
+          mark() { awk -v n="$1" '$1 == n { v = $2 } END { print v }' "$OUT/marks.txt" 2>/dev/null; }
+          REC=$(mark rec_start); START=$(mark start); END=$(mark end)
+          if ! command -v ffmpeg >/dev/null; then
+            echo "::warning::ffmpeg missing: uploading the untrimmed video, no frames"
+            cp "$RAW" tour.mp4; exit 0
+          fi
+          ARGS=()
+          if [ -n "$REC" ] && [ -n "$START" ]; then
+            SS=$(python3 -c "print(max(0, ($START - $REC - 800) / 1000))")
+            ARGS+=(-ss "$SS")
+            if [ -n "$END" ]; then
+              ARGS+=(-t "$(python3 -c "print(($END - $START + 2800) / 1000)")")
+            fi
+          fi
+          echo "trim: ${ARGS[*]:-none}"
+          # Constant 30 fps H.264 with faststart: plays everywhere (phones, Drive, Slack).
+          if ffmpeg -nostdin -y -loglevel error -i "$RAW" ${ARGS[@]+"${ARGS[@]}"} \
+              -r 30 -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -movflags +faststart -an tour.mp4; then
+            echo "trimmed ok"
+          else
+            echo "::warning::trim failed, uploading the raw video"; cp "$RAW" tour.mp4
+          fi
+          ffprobe -v error -show_entries format=duration:stream=width,height,codec_name -of default=nw=1 tour.mp4 | tee "$OUT/tour-info.txt"
+          DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 tour.mp4)
+          mkdir -p frames
+          for i in $(seq 0 15); do
+            T=$(python3 -c "print(round($DUR * ($i + 0.5) / 16, 2))")
+            ffmpeg -nostdin -y -loglevel error -ss "$T" -i tour.mp4 -frames:v 1 -vf scale=540:-2 "frames/frame-$(printf %02d "$i")-${T}s.jpg"
+          done
+          ls frames
+          # Keep the raw recording only when it was not trimmed.
+          [ -n "$START" ] && rm -f "$RAW" || true
+
+      - name: Upload the tour video
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repwise-ios-dark-tour
+          path: tour.mp4
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload review frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repwise-ios-dark-tour-frames
+          path: frames/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload debug output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repwise-ios-dark-tour-debug
+          path: ${{ env.OUT }}/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail if the tour flow failed
+        if: steps.tour.outputs.rc != '0'
+        run: exit 1
