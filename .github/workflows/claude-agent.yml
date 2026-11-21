@@ -72,6 +72,7 @@ jobs:
           mkdir -p .claude-run
 
       - name: Claude works on the next task
+        id: claude
         uses: anthropics/claude-code-action@v1
         env:
           BASH_DEFAULT_TIMEOUT_MS: '1800000'
@@ -79,6 +80,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Runs after the first are started by this workflow itself (actor: github-actions bot).
+          allowed_bots: '*'
           claude_args: >-
             --model ${{ steps.pick.outputs.model }}
             --max-turns 120
@@ -97,7 +100,7 @@ jobs:
             Extra instruction from the owner for this run (may be empty): ${{ inputs.task }}
 
       - name: Wait for dispatched E2E / recording runs (no tokens used)
-        if: always()
+        if: steps.claude.outcome == 'success'
         run: |
           [ -f .claude-run/wait ] || { echo "nothing to wait for"; exit 0; }
           sleep 90
@@ -113,8 +116,9 @@ jobs:
             done
           done < .claude-run/wait
 
+      # Only chain after a successful Claude step, so a broken setup can't loop.
       - name: Start the next run if tasks remain
-        if: always()
+        if: steps.claude.outcome == 'success'
         run: |
           git fetch -q origin main
           open=$(git show origin/main:docs/orchestration/API_QUEUE.md | grep -cE '^- \[ \]' || true)
