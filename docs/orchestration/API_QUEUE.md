@@ -72,6 +72,7 @@
     4. Extract about 12 frames with ffmpeg and LOOK at them. Check: dark mode applied; onboarding, Today, the workout with sets and rest timer, Train, Eat (tick, recipe, cook mode, swap), Progress, Library, Settings and the paywall all appear; nothing is stuck on a spinner or error.
     5. If anything is wrong, fix the tour flow (or the app bug it reveals) and re-record.
     6. When good: create the GitHub Release `app-tour-dark` and upload the mp4 as a release asset (`gh api` uploads to `uploads.github.com`). Tick this task with the download URL.
+  - status (21 Nov, API run 3): steps 1–2 done. Merged `feat/tour-video` into main (4f987c4, test:all green: 3129 app + 757 engine + server 150). Dispatched record-ios-tour, e2e-ios and e2e-android on main; waiting via `.claude-run/wait`. Next run: do steps 3–6 (find the tour run with `gh api "repos/$REPO/actions/workflows/record-ios-tour.yml/runs?branch=main&per_page=1"`).
 
 - [ ] (sonnet) **Final green run on main and the final report to the owner.**
   - Steps:
