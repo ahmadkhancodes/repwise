@@ -119,6 +119,13 @@ start_device_log
 maestro_device_args=()
 [ -n "${DEVICE:-}" ] && maestro_device_args=(--device "$DEVICE")
 
+# iOS only: tap Cancel on a leftover 'Open in "Repwise"?' system alert (no-op when there is none).
+dismiss_open_alert() {
+  [ "$PLATFORM" = ios ] || return 0
+  maestro ${maestro_device_args[@]+"${maestro_device_args[@]}"} test \
+    "$(dirname "$0")/ios-dismiss-open-alert.yaml" >/dev/null 2>&1 || true
+}
+
 # ---------- run ----------
 FAILED=0
 for flow in $ORDERED; do
@@ -167,6 +174,7 @@ for flow in $ORDERED; do
       [ "$attempt" -gt 0 ] && note="${note:+$note, }passed on retry $attempt"
       break
     fi
+    dismiss_open_alert
     attempt=$((attempt + 1))
     [ "$attempt" -gt "$RETRIES" ] && break
     # Keep the failed attempt's evidence; the retry overwrites the plain names.
@@ -174,6 +182,8 @@ for flow in $ORDERED; do
     cp "$OUT/screenshots/$slug.png" "$OUT/screenshots/$slug.try$attempt.png" 2>/dev/null
     echo "Retrying $flow"
   done
+  # A late 'Open in "Repwise"?' alert from this flow's links must not block the next flow.
+  [ "$status" = passed ] && grep -q 'openLink' "$flow" && dismiss_open_alert
   secs=$(($(date +%s) - start))
   if [ "$status" = failed ]; then
     FAILED=$((FAILED + 1))

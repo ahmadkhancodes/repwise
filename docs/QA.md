@@ -56,6 +56,8 @@ If your filter selects flows that need an onboarded app, `onboarding/01` is adde
 
 **iOS accessibility labels.** A pressable row with an `accessibilityLabel` is one element on iOS, named by the whole label, so its inner texts are not separate elements. Tap rows by id or by a regex on the start of the label (`"Maestro landmine row.*"`).
 
+**"Open in Repwise?"** On iOS a custom-scheme link asks for confirmation. Flows tap "Open" (optional), but the alert can appear after that lookup gives up and then blocks every later flow. The runner runs `scripts/ci/ios-dismiss-open-alert.yaml` (taps Cancel if the alert is there) after every failed attempt and after every passing flow that opens a link.
+
 **On failure** the runner saves `debug/<flow>.tryN.hierarchy.json` (`maestro hierarchy`: ids, labels, bounds) next to the screenshot.
 
 ## Artifacts
