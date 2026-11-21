@@ -1,0 +1,1432 @@
+# Owner tour video (iOS, Dark Mode): one calm, natural walk through the whole app on a fresh
+# install, recorded by .github/workflows/record-ios-tour.yml (simctl recordVideo around this flow).
+#
+# Order: onboarding (welcome → every quiz step → reminders permission → plan reveal) → Today
+# (brief, workout card, meal timeline) → workout (exercise detail, 3 sets, rest timer, finish) →
+# Train (week strip, history) → Eat (rings, tick, swap, recipe, cook mode, week) → Progress
+# (log weight, body, heatmap) → Library (muscle chip, exercise with muscle map) → weekly check-in
+# (opened by its notification link) → assistant card if one fired → Settings (scrolled end to end)
+# → paywall (shown, closed with its close button; never purchases) → back on Today.
+#
+# Runs ONLY when TOUR_RECORDING=true (maestro test -e TOUR_RECORDING=true …): scripts/ci/maestro-run.sh
+# picks up every e2e/**/*.yaml, and there this flow is a no-op. It needs the local stub
+# (e2e/tour/stub-server.mjs, STUB_URL) for the paywall step and the video trim marks; without it the
+# paywall step is skipped. Pauses are optional waits on an id that never renders ("tour-pause").
+# Selectors are the ones the E2E flows already use on iOS.
+appId: com.client.repwise
+name: iOS dark-mode full app tour (video)
+tags:
+  - tour
+---
+- runFlow:
+    when:
+      true: ${typeof TOUR_RECORDING !== 'undefined' && TOUR_RECORDING === 'true'}
+    commands:
+      # ---------- start: mark the video, first launch with notifications not yet decided ----------
+      - runScript:
+          file: stub.js
+          env:
+            STUB_URL: ${STUB_URL}
+            ACTION: mark?name=start
+      - launchApp:
+          clearState: true
+          permissions:
+            notifications: unset
+
+      # ---------- S02 Welcome ----------
+      - extendedWaitUntil:
+          visible:
+            id: "screen-welcome"
+          timeout: 20000
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - swipe:
+          from:
+            id: "welcome-carousel"
+          direction: LEFT
+          duration: 600
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - swipe:
+          from:
+            id: "welcome-carousel"
+          direction: LEFT
+          duration: 600
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - tapOn:
+          id: "welcome-start"
+
+      # ---------- Quiz: goal (auto-advances) ----------
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-goal"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "option-fat_loss"
+      # about: sex + year of birth
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-about"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "option-male"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+      # body: height + weight wheels (prefilled)
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-body"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+      # target weight (optional for fat loss): decide later
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-target"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "quiz-skip"
+      # experience (auto-advances)
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-experience"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "option-intermediate"
+      # training days: 4 a week, spread from today
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-days"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      - tapOn:
+          id: "days-count-4"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+      # session length (auto-advances)
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-length"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "option-60"
+      # equipment: a full gym
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-equipment"
+          timeout: 5000
+      - tapOn:
+          id: "option-gym"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+      # injuries: none
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-injuries"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "quiz-skip"
+      # daily activity (auto-advances)
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-activity"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "option-moderate"
+      # diet (auto-advances)
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-diet"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "option-omnivore"
+      # foods to avoid: no mushrooms
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-avoid"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "dislikes-mushrooms"
+          direction: DOWN
+          centerElement: true
+          optional: true
+      - tapOn:
+          id: "dislikes-mushrooms"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+      # cuisines: a few favourites
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-cuisines"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1000
+          optional: true
+      - tapOn:
+          id: "cuisines-mediterranean"
+          optional: true
+      - tapOn:
+          id: "cuisines-italian"
+          optional: true
+      - tapOn:
+          id: "cuisines-american"
+          optional: true
+      - tapOn:
+          id: "cuisines-british"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+      # kitchen: budget + cooking time (defaults)
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-kitchen"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+      # meals per day → Build my plan
+      - extendedWaitUntil:
+          visible:
+            id: "screen-quiz-meals"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "quiz-next"
+
+      # ---------- S06 reminders primer → the real iOS permission dialog ----------
+      - extendedWaitUntil:
+          visible:
+            id: "screen-notify"
+          timeout: 8000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "notify-allow"
+      - extendedWaitUntil:
+          visible: "Allow"
+          timeout: 6000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      - tapOn:
+          text: "Allow"
+          optional: true
+      # If the system dialog never showed (already decided), the primer may still be up.
+      - runFlow:
+          when:
+            visible:
+              id: "screen-notify"
+          commands:
+            - tapOn:
+                id: "notify-later"
+                optional: true
+
+      # ---------- S07 plan build → W1 reveal ----------
+      - extendedWaitUntil:
+          visible:
+            id: "screen-plan"
+          timeout: 30000
+      - extendedWaitUntil:
+          visible:
+            id: "reveal-targets"
+          timeout: 15000
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 35%
+          duration: 1400
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 35%
+          duration: 1400
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "plan-continue"
+      # Paywall only when payments are on (off at this point of the tour).
+      - tapOn:
+          id: "paywall-close"
+          optional: true
+
+      # ---------- S11 Today: brief, workout card, meal timeline ----------
+      - extendedWaitUntil:
+          visible:
+            id: "screen-today"
+          timeout: 15000
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 40%
+          duration: 1300
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "today-meals"
+          direction: DOWN
+          centerElement: true
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 40%
+          duration: 1300
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "start-workout"
+          direction: UP
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+
+      # ---------- S13 workout: start, exercise detail, 3 sets, rest timer, finish ----------
+      - runFlow:
+          when:
+            visible:
+              id: "start-workout"
+          commands:
+            - tapOn:
+                id: "start-workout"
+      - runFlow:
+          # Rest day (no Start on Today): start from Train instead.
+          when:
+            notVisible:
+              id: "screen-workout"
+          commands:
+            - tapOn:
+                id: "tab-train"
+            - extendedWaitUntil:
+                visible:
+                  id: "train-start"
+                timeout: 10000
+            - tapOn:
+                id: "train-start"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-workout"
+          timeout: 15000
+      - runFlow:
+          when:
+            visible:
+              id: "player-start"
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2000
+                optional: true
+            - tapOn:
+                id: "player-start"
+      - runFlow:
+          # Empty workout (rest day): add an exercise from the bundled catalogue.
+          when:
+            visible:
+              id: "player-empty"
+          commands:
+            - tapOn:
+                id: "player-empty-action"
+            - tapOn:
+                id: "pick-search"
+            - inputText: "bench press"
+            - tapOn:
+                id: "exercise-row-barbell-bench-press"
+      - extendedWaitUntil:
+          visible:
+            id: "player-clock"
+          timeout: 10000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      # The first exercise's detail (cues), then back to the player.
+      - runFlow:
+          when:
+            visible:
+              id: "exercise-0-open"
+          commands:
+            - tapOn:
+                id: "exercise-0-open"
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-exercise"
+                timeout: 8000
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2200
+                optional: true
+            - swipe:
+                start: 50%, 70%
+                end: 50%, 40%
+                duration: 1300
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2000
+                optional: true
+            - runFlow:
+                when:
+                  visible:
+                    id: "ex-back"
+                commands:
+                  - tapOn:
+                      id: "ex-back"
+            - runFlow:
+                when:
+                  visible:
+                    id: "exercise-back"
+                commands:
+                  - tapOn:
+                      id: "exercise-back"
+            - runFlow:
+                when:
+                  visible:
+                    id: "back"
+                  notVisible:
+                    id: "player-clock"
+                commands:
+                  - tapOn:
+                      id: "back"
+            - extendedWaitUntil:
+                visible:
+                  id: "player-clock"
+                timeout: 8000
+      # Set 1: weight and reps with the stepper editor, then log.
+      - runFlow:
+          when:
+            visible:
+              id: "exercise-0-set-0-weight"
+          commands:
+            - tapOn:
+                id: "exercise-0-set-0-weight"
+            - extendedWaitUntil:
+                visible:
+                  id: "set-editor-weight"
+                timeout: 5000
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "set-editor-weight-inc"
+            - tapOn:
+                id: "set-editor-weight-inc"
+            - tapOn:
+                id: "set-editor-reps-inc"
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "set-editor-log"
+      - runFlow:
+          when:
+            visible:
+              id: "player-log"
+            notVisible:
+              id: "rest-bar"
+          commands:
+            - tapOn:
+                id: "player-log"
+      # Rest timer: open the big timer, add 15 s, watch it a moment, skip.
+      - extendedWaitUntil:
+          visible:
+            id: "rest-bar"
+          timeout: 5000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "rest-bar-open"
+          commands:
+            - tapOn:
+                id: "rest-bar-open"
+            - extendedWaitUntil:
+                visible:
+                  id: "rest-time"
+                timeout: 5000
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2000
+                optional: true
+            - tapOn:
+                id: "rest-plus"
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 3000
+                optional: true
+            - tapOn:
+                id: "rest-skip"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      # Set 2: one tap on the row tick (or the thumb-zone button), rest a moment, skip.
+      - runFlow:
+          when:
+            visible:
+              id: "exercise-0-set-1-check"
+          commands:
+            - tapOn:
+                id: "exercise-0-set-1-check"
+      - runFlow:
+          when:
+            notVisible:
+              id: "rest-bar"
+            visible:
+              id: "player-log"
+          commands:
+            - tapOn:
+                id: "player-log"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 3000
+          optional: true
+      - tapOn:
+          id: "rest-bar-skip"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      # Set 3: the thumb-zone "Log set" button.
+      - runFlow:
+          when:
+            visible:
+              id: "player-log"
+          commands:
+            - tapOn:
+                id: "player-log"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn:
+          id: "rest-bar-skip"
+          optional: true
+      # Finish (confirm: the other exercises are not done) → summary.
+      - tapOn:
+          id: "player-finish"
+      - runFlow:
+          when:
+            visible:
+              id: "finish-confirm"
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "finish-confirm"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-summary"
+          timeout: 10000
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 40%
+          duration: 1300
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "summary-done"
+
+      # ---------- Train: week strip, today's session, history ----------
+      - extendedWaitUntil:
+          visible:
+            id: "tab-train"
+          timeout: 8000
+      - tapOn:
+          id: "tab-train"
+      - extendedWaitUntil:
+          visible:
+            id: "train-week-strip"
+          timeout: 10000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - evalScript: ${(function(){var d=new Date();var p=function(n){return (n<10?'0':'')+n};output.today=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());return output.today})()}
+      - runFlow:
+          when:
+            visible:
+              id: "day-${output.today}"
+          commands:
+            - tapOn:
+                id: "day-${output.today}"
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2000
+                optional: true
+            - tapOn:
+                id: "day-${output.today}"
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 40%
+          duration: 1300
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "train-tabs"
+          direction: UP
+          optional: true
+      - tapOn:
+          id: "train-tabs-history"
+      - extendedWaitUntil:
+          visible:
+            id: "history-0"
+          timeout: 8000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "train-tabs-week"
+
+      # ---------- Eat: rings, tick a meal, swap, recipe, cook mode, week ----------
+      - tapOn:
+          id: "tab-eat"
+      - extendedWaitUntil:
+          visible:
+            id: "meal-lunch"
+          timeout: 15000
+      - extendedWaitUntil:
+          visible:
+            id: "eat-rings"
+          timeout: 5000
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "tick-lunch"
+          direction: DOWN
+          centerElement: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      - tapOn:
+          id: "tick-lunch"
+      - extendedWaitUntil:
+          visible: ".*logged"
+          timeout: 4000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "swap-dinner"
+          direction: DOWN
+          centerElement: true
+      - tapOn:
+          id: "swap-dinner"
+      - extendedWaitUntil:
+          visible:
+            id: "swap-option-0"
+          timeout: 8000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "swap-option-0"
+      - extendedWaitUntil:
+          visible: "Swapped to.*"
+          timeout: 4000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      # Recipe detail for dinner, then cook mode for a couple of steps.
+      - scrollUntilVisible:
+          element:
+            id: "meal-dinner"
+          direction: DOWN
+          centerElement: true
+      - tapOn:
+          id: "meal-dinner"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-recipe"
+          timeout: 8000
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "recipe-ingredients"
+          direction: DOWN
+          centerElement: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 40%
+          duration: 1300
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "servings-inc"
+          direction: UP
+      - tapOn:
+          id: "servings-inc"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "start-cook"
+      - extendedWaitUntil:
+          visible: "Step 1 of .*"
+          timeout: 8000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn:
+          id: "cook-next"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "cook-next"
+          commands:
+            - tapOn:
+                id: "cook-next"
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2200
+                optional: true
+      - tapOn:
+          id: "cook-close"
+      - extendedWaitUntil:
+          visible:
+            id: "start-cook"
+          timeout: 5000
+      - tapOn:
+          id: "back"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-eat"
+          timeout: 8000
+      # The week view, then back to the day.
+      - scrollUntilVisible:
+          element:
+            text: "Week"
+          direction: UP
+      - tapOn: "Week"
+      - extendedWaitUntil:
+          visible:
+            id: "week-days"
+          timeout: 5000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn: "Day"
+
+      # ---------- Progress: log today's weight, body, heatmap ----------
+      - tapOn:
+          id: "tab-progress"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-progress"
+          timeout: 10000
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn:
+          id: "progress-log-weight"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-progress-log"
+          timeout: 5000
+      - tapOn:
+          id: "log-day-today"
+      - tapOn:
+          id: "log-weight"
+      - inputText: "82.4"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "log-save"
+      - extendedWaitUntil:
+          visible: "Weight saved"
+          timeout: 5000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-progress"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "nav-body"
+          direction: DOWN
+          centerElement: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1800
+          optional: true
+      - tapOn:
+          id: "nav-body"
+      - extendedWaitUntil:
+          visible:
+            id: "weight-chart"
+          timeout: 8000
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn:
+          id: "back"
+      - scrollUntilVisible:
+          element:
+            id: "nav-heatmap"
+          direction: DOWN
+          centerElement: true
+      - tapOn:
+          id: "nav-heatmap"
+      - extendedWaitUntil:
+          visible:
+            id: "body-map"
+          timeout: 8000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "heatmap-view-back"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - tapOn:
+          id: "back"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-progress"
+          timeout: 5000
+
+      # ---------- Library: muscle chip, an exercise with its muscle map ----------
+      - tapOn:
+          id: "tab-library"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-library"
+          timeout: 10000
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "muscle-chip-chest"
+      - extendedWaitUntil:
+          visible: "Results"
+          timeout: 5000
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - tapOn:
+          id: "exercise-row-.*"
+          index: 0
+      - extendedWaitUntil:
+          visible:
+            id: "exercise-media"
+          timeout: 8000
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn:
+          id: "exercise-media-flip"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - swipe:
+          start: 50%, 70%
+          end: 50%, 35%
+          duration: 1400
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "exercise-back"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-library"
+          timeout: 5000
+      - tapOn:
+          id: "muscle-chip-chest"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+
+      # ---------- Weekly check-in (opened from its reminder link, like the notification) ----------
+      - openLink: repwise://today?checkin=1
+      - runFlow:
+          # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it.
+          when:
+            platform: iOS
+          commands:
+            - tapOn:
+                text: "Open"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "checkin-progress"
+          timeout: 15000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "checkin-skip-weight"
+          commands:
+            - tapOn:
+                id: "checkin-skip-weight"
+      - runFlow:
+          when:
+            visible:
+              id: "checkin-step-weigh"
+          commands:
+            - tapOn:
+                id: "checkin-next"
+      - extendedWaitUntil:
+          visible:
+            id: "energy-ok"
+          timeout: 5000
+      - tapOn:
+          id: "energy-ok"
+      - tapOn:
+          id: "sleep-good"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          id: "checkin-next"
+      - extendedWaitUntil:
+          visible:
+            id: "checkin-summary"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn:
+          id: "checkin-next"
+      - extendedWaitUntil:
+          visible:
+            id: "checkin-volume"
+          timeout: 5000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2500
+          optional: true
+      - tapOn:
+          id: "checkin-approve"
+      - extendedWaitUntil:
+          visible: "Next week is planned around you"
+          timeout: 8000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn:
+          id: "checkin-finish"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-today"
+          timeout: 8000
+
+      # ---------- Assistant card on Today (only when a rule fired today) ----------
+      - runFlow:
+          when:
+            visible:
+              id: "card-[a-z_]+-container"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: "card-[a-z_]+-container"
+                direction: DOWN
+                centerElement: true
+                optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "card-[a-z_]+"
+                index: 0
+                optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "card-detail-text"
+                timeout: 4000
+                optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2500
+                optional: true
+            - tapOn:
+                id: "card-detail-later"
+                optional: true
+      - scrollUntilVisible:
+          element:
+            id: "open-settings"
+          direction: UP
+          optional: true
+
+      # ---------- Settings, scrolled end to end ----------
+      - tapOn:
+          id: "open-settings"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-settings"
+          timeout: 8000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - tapOn: "Dark"
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      - swipe:
+          start: 50%, 75%
+          end: 50%, 35%
+          duration: 1400
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - swipe:
+          start: 50%, 75%
+          end: 50%, 35%
+          duration: 1400
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - swipe:
+          start: 50%, 75%
+          end: 50%, 35%
+          duration: 1400
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2000
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "app-version"
+          direction: DOWN
+          centerElement: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 2200
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "open-profile"
+          direction: UP
+      - tapOn:
+          id: "back"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-today"
+          timeout: 8000
+
+      # ---------- Paywall: payments switched on at the stub, reopen, Settings → Subscription ----------
+      - runScript:
+          file: stub.js
+          env:
+            STUB_URL: ${STUB_URL}
+            ACTION: payments-on
+      - runFlow:
+          when:
+            true: ${output.stub === 'ok'}
+          commands:
+            - stopApp
+            - launchApp
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-today"
+                timeout: 15000
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "open-settings"
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-settings"
+                timeout: 8000
+            - scrollUntilVisible:
+                element:
+                  id: "open-subscription"
+                direction: DOWN
+                centerElement: true
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "open-subscription"
+            - extendedWaitUntil:
+                visible:
+                  id: "subscription-see-plans"
+                timeout: 8000
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2000
+                optional: true
+            - tapOn:
+                id: "subscription-see-plans"
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-paywall"
+                timeout: 10000
+            - waitForAnimationToEnd:
+                timeout: 3000
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 3000
+                optional: true
+            - swipe:
+                start: 50%, 65%
+                end: 50%, 30%
+                duration: 1400
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2200
+                optional: true
+            - scrollUntilVisible:
+                element:
+                  id: "paywall-restore"
+                direction: DOWN
+                centerElement: true
+                optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 2200
+                optional: true
+            - scrollUntilVisible:
+                element:
+                  id: "paywall-close"
+                direction: UP
+                optional: true
+            - tapOn:
+                id: "paywall-close"
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-subscription"
+                timeout: 5000
+                optional: true
+            - tapOn:
+                id: "back"
+                optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-settings"
+                timeout: 5000
+                optional: true
+            - tapOn:
+                id: "back"
+                optional: true
+
+      # ---------- End back on Today ----------
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-today"
+          commands:
+            - tapOn:
+                id: "tab-today"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-today"
+          timeout: 10000
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 3000
+          optional: true
+      - runScript:
+          file: stub.js
+          env:
+            STUB_URL: ${STUB_URL}
+            ACTION: mark?name=end
