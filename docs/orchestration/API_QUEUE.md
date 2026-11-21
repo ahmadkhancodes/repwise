@@ -58,6 +58,7 @@
     1. Read the latest e2e-ios and e2e-android results on `feat/r3-fix`.
     2. If both are green and test:all is green, merge into main (`git merge --no-edit origin/feat/r3-fix`), run `npm run test:all`, push main, and tick this task.
     3. Otherwise fix, push the branch, re-dispatch both E2E runs, and write `.claude-run/wait`.
+  - status (21 Nov 06:50 UTC, API run 1): (a) and (d) were already closed on the branch (PROGRESS r3-fix line: Eat tick was a flow issue; all 36 animated files on `motionSafe`). e2e-ios on bdf13a0 (run 44864469120) failed every flow at launch: the FullWindowOverlay toast host hid the app from accessibility, and 506cfa6 removed it. On 506cfa6, e2e-android passed (run 44870322115). e2e-ios run 44870320265 was still in progress, so this run only waited for it and made no code changes. Next run: read run 44870320265. If it is green, do step 2. If it is red, check (b) `CustomExerciseScreen.tsx` ~153 first.
 
 - [ ] (sonnet) **Merge `feat/tour-video` into main and record the Dark Mode iPhone tour.**
   - The branch adds `.github/workflows/record-ios-tour.yml` and `e2e/tour/ios_dark_full_tour.yaml`: a natural-paced Maestro walk through the WHOLE app in Dark Mode on an iPhone 16-class simulator, starting at fresh-install onboarding.
