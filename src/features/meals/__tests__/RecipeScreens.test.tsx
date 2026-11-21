@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Share } from 'react-native';
 
@@ -11,6 +11,7 @@ import { useToastStore } from '@/ui';
 
 import { todayISO } from '../logic/dates';
 import { mealPlanForDate, mealsForPlan } from '../repo';
+import { COOK_SCREEN_OPTIONS } from '../navigation';
 import { CookModeScreen } from '../screens/CookModeScreen';
 import { GroceryScreen } from '../screens/GroceryScreen';
 import { RecipeScreen } from '../screens/RecipeScreen';
@@ -21,7 +22,7 @@ import { freshDb, lockPro, onboard } from './helpers';
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: jest.fn(() => true) },
   useLocalSearchParams: jest.fn(() => ({})),
-  Stack: { Screen: () => null },
+  Stack: { Screen: jest.fn(() => null) },
 }));
 jest.mock('expo-keep-awake', () => ({ useKeepAwake: jest.fn() }));
 
@@ -81,6 +82,20 @@ describe('RecipeScreen', () => {
 
 describe('CookModeScreen', () => {
   afterEach(() => jest.useRealTimers());
+
+  it('is a pushed full-screen card, never a presentation switched from inside (iOS dead taps)', async () => {
+    // Root Stack options: no native modal (it would cover the sheet + toast hosts), no back swipe.
+    expect(COOK_SCREEN_OPTIONS).toEqual({ animation: 'slide_from_bottom', gestureEnabled: false });
+    expect(COOK_SCREEN_OPTIONS).not.toHaveProperty('presentation');
+    params.mockReturnValue({ id: 'chicken-karahi' });
+    await renderThemed(<CookModeScreen />);
+    expect(Stack.Screen).not.toHaveBeenCalled();
+    // Next works and the ingredients sheet opens over the step (it is not hidden behind a modal).
+    await fireEvent.press(screen.getByTestId('cook-next'));
+    expect(screen.getByTestId('cook-step-count')).toHaveTextContent(/^Step 2 of/);
+    await fireEvent.press(screen.getByTestId('cook-ingredients'));
+    expect(screen.getByTestId('cook-ingredients-list')).toBeTruthy();
+  });
 
   it('keeps the screen awake and walks through big steps', async () => {
     params.mockReturnValue({ id: 'chicken-karahi', servings: '2' });

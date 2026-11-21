@@ -1,11 +1,12 @@
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import * as Haptics from 'expo-haptics';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, AppState, type AppStateStatus } from 'react-native';
 
 import { colors, motion } from '@/theme';
 
 import { flat, renderThemed, SCHEMES } from '../../../test/render';
 import {
+  holdToasts,
   showToast,
   showUndoToast,
   Toast,
@@ -46,7 +47,7 @@ describe('toastBottom', () => {
 describe.each(SCHEMES)('Toast (%s)', (scheme) => {
   beforeEach(() => {
     jest.useFakeTimers();
-    useToastStore.setState({ current: null, footers: [] });
+    useToastStore.setState({ current: null, footers: [], held: false });
     jest.clearAllMocks();
   });
   afterEach(() => jest.useRealTimers());
@@ -114,6 +115,46 @@ describe.each(SCHEMES)('Toast (%s)', (scheme) => {
     );
     await fireEvent.press(screen.getByRole('button', { name: 'Undo' }));
     expect(screen.getByText('Nothing was deleted.')).toBeTruthy();
+  });
+
+  it('a toast raised behind the splash waits, then gets its full time (cold-start links)', async () => {
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+    holdToasts(true);
+    await renderThemed(<ToastHost />, scheme);
+    await act(() => showToast({ message: 'Lunch logged' }));
+    await act(() => jest.advanceTimersByTime(motion.toastMs * 2));
+    expect(screen.queryByTestId('toast')).toBeNull();
+    expect(announce).not.toHaveBeenCalled();
+    await act(() => holdToasts(false));
+    expect(screen.getByTestId('toast')).toBeTruthy();
+    expect(announce).toHaveBeenCalledWith('Lunch logged');
+    await act(() => jest.advanceTimersByTime(motion.toastMs - 100));
+    expect(screen.getByTestId('toast')).toBeTruthy();
+    await act(() => jest.advanceTimersByTime(100));
+    expect(screen.queryByTestId('toast')).toBeNull();
+  });
+
+  it('the clock stops while the app is in the background and resumes with the time left', async () => {
+    const listeners: ((s: AppStateStatus) => void)[] = [];
+    const add = jest.spyOn(AppState, 'addEventListener').mockImplementation((_e, fn) => {
+      listeners.push(fn as (s: AppStateStatus) => void);
+      return { remove: jest.fn() } as never;
+    });
+    const emit = (s: AppStateStatus) => listeners.forEach((fn) => fn(s));
+    await renderThemed(<ToastHost />, scheme);
+    await act(() => showUndoToast('Lunch logged', jest.fn()));
+    await act(() => jest.advanceTimersByTime(2000));
+    await act(() => emit('background'));
+    expect(screen.queryByTestId('toast')).toBeNull();
+    await act(() => jest.advanceTimersByTime(60_000));
+    await act(() => emit('active'));
+    // 3 s of the 5 s undo window are left.
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeTruthy();
+    await act(() => jest.advanceTimersByTime(2900));
+    expect(screen.getByTestId('toast')).toBeTruthy();
+    await act(() => jest.advanceTimersByTime(100));
+    expect(screen.queryByTestId('toast')).toBeNull();
+    add.mockRestore();
   });
 
   it('ToastHost shows, announces and auto-hides', async () => {

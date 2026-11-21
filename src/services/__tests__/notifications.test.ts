@@ -19,8 +19,10 @@ import {
   handleResponse,
   IGNORED_WRITE_TABLES,
   rebuildSchedule,
+  refreshPermission,
   requestPermission,
   resetNotificationsForTests,
+  toPermission,
   startNotifications,
   useNotificationsStore,
 } from '../notifications';
@@ -313,6 +315,23 @@ describe('lifecycle', () => {
     expect(await requestPermission()).toBe('denied');
     expect(open).toHaveBeenCalled();
     expect(N.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads the status, not `granted`: Android app notifications switched off count as denied', () => {
+    // Android 13+: POST_NOTIFICATIONS held but notifications blocked in system settings.
+    expect(toPermission({ granted: true, status: 'denied' as never })).toBe('denied');
+    expect(toPermission({ granted: true, status: 'granted' as never })).toBe('granted');
+    expect(toPermission({ granted: false, status: 'undetermined' as never })).toBe('undetermined');
+    expect(toPermission({ granted: false, status: 'denied' as never })).toBe('denied');
+    // iOS provisional / ephemeral deliver quietly.
+    expect(toPermission({ granted: false, status: 'denied' as never, ios: { status: 3 } })).toBe('granted');
+    expect(toPermission({ granted: false, status: 'denied' as never, ios: { status: 4 } })).toBe('granted');
+  });
+
+  it('refreshPermission reports blocked app notifications as off', async () => {
+    __state.permission = { granted: true, status: 'denied', canAskAgain: true };
+    expect(await refreshPermission()).toBe('denied');
+    expect(useNotificationsStore.getState().permission).toBe('denied');
   });
 
   it('granting permission tracks granted: true', async () => {

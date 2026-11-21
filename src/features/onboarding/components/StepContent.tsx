@@ -57,6 +57,7 @@ import {
 import { ChipGroup } from './ChipGroup';
 import { OptionTile } from './OptionTile';
 import { WeekdayPicker } from './WeekdayPicker';
+import { useMotionSafe } from '@/ui/motion';
 
 export type StepContentProps = {
   step: StepId;
@@ -158,6 +159,7 @@ export function StepContent({
   twelveHour,
 }: StepContentProps) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const year = Number(today.slice(0, 4));
 
   switch (step) {
@@ -286,7 +288,7 @@ export function StepContent({
               </Text>
             </Card>
           ) : projection ? (
-            <Animated.View entering={FadeIn.duration(t.motion.duration.base)}>
+            <Animated.View entering={safe(FadeIn.duration(t.motion.duration.base))}>
               <Card testID="target-projection">
                 <View style={{ flexDirection: 'row', gap: t.spacing.sm, alignItems: 'center' }}>
                   <Scale
@@ -394,7 +396,7 @@ export function StepContent({
             />
           ))}
           {a.location && a.location !== 'bodyweight' ? (
-            <Animated.View entering={FadeIn.duration(t.motion.duration.base)}>
+            <Animated.View entering={safe(FadeIn.duration(t.motion.duration.base))}>
               <ChipGroup
                 label="Your equipment"
                 options={EQUIPMENT_OPTIONS}

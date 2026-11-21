@@ -161,6 +161,11 @@ describe(`paywall (${Platform.OS})`, () => {
     await renderRouter(routes, { initialUrl: '/paywall' });
     await fireEvent.press(await screen.findByRole('button', { name: 'Restore purchases' }));
     expect(store.getAvailablePurchases).toHaveBeenCalledWith({ sync: true });
+    // Nothing to restore: said inline on the paywall (a toast would sit behind the iOS modal).
+    expect(await screen.findByTestId('paywall-notice')).toHaveTextContent(
+      'No active subscription found for this account.',
+    );
+    expect(screen.getByTestId('screen-paywall')).toBeTruthy();
   });
 
   it('cannot open while payments are off', async () => {

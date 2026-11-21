@@ -79,10 +79,20 @@ export const CHANNELS: { id: ChannelId; name: string; description: string; impor
 
 // ---------- permission ----------
 
-function toPermission(p: Notifications.NotificationPermissionsStatus): PermissionState {
-  const iosStatus = (p as { ios?: { status?: number } }).ios?.status;
+/**
+ * The app's view of the OS permission. Reads `status`, never `granted` alone: on Android 13+
+ * expo-notifications reports `granted: true` whenever POST_NOTIFICATIONS is held, even when the
+ * user switched the app's notifications off in system settings (`status: 'denied'`), and then
+ * nothing is delivered. Exported for tests.
+ */
+export function toPermission(
+  p: Pick<Notifications.NotificationPermissionsStatus, 'status' | 'granted'> & {
+    ios?: { status?: number };
+  },
+): PermissionState {
+  const iosStatus = p.ios?.status;
   // iOS provisional (3) / ephemeral (4) still deliver quietly.
-  if (p.granted || iosStatus === 3 || iosStatus === 4) return 'granted';
+  if (p.status === 'granted' || iosStatus === 3 || iosStatus === 4) return 'granted';
   return p.status === 'undetermined' ? 'undetermined' : 'denied';
 }
 

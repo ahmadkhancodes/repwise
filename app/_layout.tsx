@@ -14,6 +14,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseProvider } from '@/db/DatabaseProvider';
+import { COOK_SCREEN_OPTIONS } from '@/features/meals/navigation';
 import { startBackgroundServices } from '@/services/bootstrap';
 import { withCrashReporting } from '@/services/crash';
 import { startNotifications } from '@/services/notifications';
@@ -21,7 +22,7 @@ import { startEarlyObservability, startObservability } from '@/services/observab
 import { markFirstFrame, markStartup } from '@/services/startupTrace';
 import { useTheme } from '@/theme';
 // Direct import, not the '@/ui' barrel: the root must not evaluate Skia, sheets and pickers.
-import { ToastHost } from '@/ui/Toast';
+import { holdToasts, ToastHost } from '@/ui/Toast';
 import { SheetHost } from '@/ui/Sheet';
 
 /*
@@ -31,6 +32,8 @@ import { SheetHost } from '@/ui/Sheet';
  */
 markStartup('layout');
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
+// A toast raised before the splash is gone (a cold-start widget link) waits for it.
+holdToasts(true);
 startEarlyObservability();
 
 /** After the first screen: analytics client and review prompt (none of it is user-visible). */
@@ -68,7 +71,9 @@ function RootLayout() {
 
   useEffect(() => {
     if (!ready || !dbSettled) return;
-    SplashScreen.hideAsync().catch(() => undefined);
+    SplashScreen.hideAsync()
+      .catch(() => undefined)
+      .then(() => holdToasts(false));
     markFirstFrame();
     const timer = setTimeout(() => {
       try {
@@ -99,6 +104,7 @@ function RootLayout() {
             >
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="recipe/cook/[id]" options={COOK_SCREEN_OPTIONS} />
               <Stack.Screen name="settings" />
               <Stack.Screen name="dev/ui" />
             </Stack>

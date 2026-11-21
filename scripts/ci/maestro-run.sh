@@ -34,7 +34,8 @@ e2e/settings/03_delete_all_data.yaml
 $SETUP_FLOW"
 # Flows that cannot pass on iOS because they rely on an Android-only command.
 # Format: path|reason
-IOS_SKIP="e2e/today/06_start_workout.yaml|uses the Android back button (Maestro 'back' is a no-op on iOS)"
+# (none today: today/06 closes the player with its own button, not Maestro `back`)
+IOS_SKIP=""
 
 case "$PLATFORM" in android | ios) ;; *) echo "platform must be android or ios" >&2; exit 2 ;; esac
 command -v maestro >/dev/null || { echo "maestro is not on PATH" >&2; exit 2; }
@@ -118,6 +119,13 @@ start_device_log
 maestro_device_args=()
 [ -n "${DEVICE:-}" ] && maestro_device_args=(--device "$DEVICE")
 
+# iOS only: tap Cancel on a leftover 'Open in "Repwise"?' system alert (no-op when there is none).
+dismiss_open_alert() {
+  [ "$PLATFORM" = ios ] || return 0
+  maestro ${maestro_device_args[@]+"${maestro_device_args[@]}"} test \
+    "$(dirname "$0")/ios-dismiss-open-alert.yaml" >/dev/null 2>&1 || true
+}
+
 # ---------- run ----------
 FAILED=0
 for flow in $ORDERED; do
@@ -138,8 +146,8 @@ for flow in $ORDERED; do
   [ "$PLATFORM" = android ] && adb_ shell cmd connectivity airplane-mode disable >/dev/null 2>&1
   # A cold emulator can show "Pixel Launcher isn't responding" over the app; close system dialogs.
   [ "$PLATFORM" = android ] && adb_ shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
-  # Maestro's launchApp `notifications: deny` does not revoke an earlier grant on Android
-  # (the app still read "granted"); revoke it here for flows that need it denied.
+  # Start flows that deny notifications from a revoked POST_NOTIFICATIONS (belt and braces: the
+  # flows also deny it on every launchApp, since a bare launchApp grants everything).
   if [ "$PLATFORM" = android ] && grep -qe 'notifications: deny' -e '01_f1_happy_path.yaml' "$flow"; then
     adb_ shell pm revoke "$APP_ID" android.permission.POST_NOTIFICATIONS >/dev/null 2>&1
   fi
@@ -156,11 +164,17 @@ for flow in $ORDERED; do
     rc=${PIPESTATUS[0]}
     echo "::endgroup::"
     screenshot "$OUT/screenshots/$slug.png"
+    # On failure keep the view hierarchy (ids, labels, bounds) the failing step saw.
+    if [ "$rc" != 0 ]; then
+      maestro ${maestro_device_args[@]+"${maestro_device_args[@]}"} hierarchy \
+        >"$OUT/debug/$slug.try$((attempt + 1)).hierarchy.json" 2>/dev/null || true
+    fi
     if [ "$rc" = 0 ]; then
       status=passed
       [ "$attempt" -gt 0 ] && note="${note:+$note, }passed on retry $attempt"
       break
     fi
+    dismiss_open_alert
     attempt=$((attempt + 1))
     [ "$attempt" -gt "$RETRIES" ] && break
     # Keep the failed attempt's evidence; the retry overwrites the plain names.
@@ -168,6 +182,8 @@ for flow in $ORDERED; do
     cp "$OUT/screenshots/$slug.png" "$OUT/screenshots/$slug.try$attempt.png" 2>/dev/null
     echo "Retrying $flow"
   done
+  # A late 'Open in "Repwise"?' alert from this flow's links must not block the next flow.
+  [ "$status" = passed ] && grep -q 'openLink' "$flow" && dismiss_open_alert
   secs=$(($(date +%s) - start))
   if [ "$status" = failed ]; then
     FAILED=$((FAILED + 1))

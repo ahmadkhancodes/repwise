@@ -14,6 +14,7 @@ import { deviceContext, trackStep } from '../actions';
 import { formatClock } from '../logic/mealTimes';
 import { revealDelay } from '../logic/reveal';
 import { useOnboarding } from '../store';
+import { useMotionSafe } from '@/ui/motion';
 
 type Preview = { icon: LucideIcon; title: string; body: string; when: string };
 
@@ -36,13 +37,14 @@ export const PREVIEWS: Preview[] = [
 
 function Banner({ p, index, twelveHour }: { p: Preview; index: number; twelveHour: boolean }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const Icon = p.icon;
   return (
     <Animated.View
-      entering={FadeInDown.delay(revealDelay(t.motion, 'banner', index))
+      entering={safe(FadeInDown.delay(revealDelay(t.motion, 'banner', index))
         .springify()
         .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness)}
+        .stiffness(t.motion.spring.stiffness))}
       style={{
         flexDirection: 'row',
         gap: t.spacing.sm,

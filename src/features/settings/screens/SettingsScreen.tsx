@@ -45,6 +45,7 @@ import { openLink } from '../links';
 import { profileSummary } from '../logic/profile';
 import { useAppPrefs } from '../prefs';
 import { saveProfile, useProfile } from '../repo';
+import { useMotionSafe } from '@/ui/motion';
 
 const THEME_OPTIONS = [
   { value: 'system', label: 'System' },
@@ -71,14 +72,15 @@ function SegmentRow({ title, children }: { title: string; children: React.ReactN
 /** Profile & plan summary: the one "hero" on Settings, opens the plan editor. */
 function ProfileCard() {
   const t = useTheme();
+  const safe = useMotionSafe();
   const profile = useProfile();
   const s = profileSummary(profile);
   const initial = s.title.slice(0, 1).toUpperCase();
   return (
     <Animated.View
-      entering={FadeInDown.springify()
+      entering={safe(FadeInDown.springify()
         .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness)}
+        .stiffness(t.motion.spring.stiffness))}
     >
       <PressableScale
         testID="open-profile"

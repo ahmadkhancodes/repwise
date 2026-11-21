@@ -49,6 +49,7 @@ import {
 } from '../logic/reveal';
 import { formatWeight } from '../logic/units';
 import { useOnboarding } from '../store';
+import { useMotionSafe } from '@/ui/motion';
 
 type Status = 'building' | 'ready' | 'error';
 
@@ -57,6 +58,7 @@ const wallClock = () => Date.now();
 
 export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const ctx = useMemo(() => deviceContext(), []);
   const [status, setStatus] = useState<Status>('building');
   const [ticks, setTicks] = useState(0);
@@ -207,19 +209,19 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
       testID="screen-plan"
       footer={
         <Animated.View
-          entering={FadeInDown.delay(revealDelay(t.motion, 'cta'))
+          entering={safe(FadeInDown.delay(revealDelay(t.motion, 'cta'))
             .springify()
             .damping(t.motion.spring.damping)
-            .stiffness(t.motion.spring.stiffness)}
+            .stiffness(t.motion.spring.stiffness))}
         >
           <Button label="Start my plan" onPress={finish} testID="plan-continue" />
         </Animated.View>
       }
     >
       <Animated.View
-        entering={FadeInDown.springify()
+        entering={safe(FadeInDown.springify()
           .damping(t.motion.spring.damping)
-          .stiffness(t.motion.spring.stiffness)}
+          .stiffness(t.motion.spring.stiffness))}
         style={{ gap: t.spacing.xs, paddingTop: t.spacing.lg }}
       >
         <Text variant="eyebrow" color="accentText">

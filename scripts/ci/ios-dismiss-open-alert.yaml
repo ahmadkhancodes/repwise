@@ -1,0 +1,11 @@
+# Run by maestro-run.sh on iOS after a failed attempt and after every flow that opens a link.
+# iOS asks 'Open in "Repwise"?' for a custom-scheme link. When that alert shows up late (after a
+# flow's optional "Open" tap gave up), it stays over the app and every later flow fails behind it.
+# Lives outside e2e/ so it is not picked up as a flow.
+appId: com.client.repwise
+---
+- runFlow:
+    when:
+      visible: 'Open in .*Repwise.*'
+    commands:
+      - tapOn: "Cancel"

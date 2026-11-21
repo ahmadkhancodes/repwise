@@ -46,6 +46,7 @@ import { BRIEF_AFTER_WAKE_MIN } from '../logic/schedule';
 import { slotLabel } from '../logic/copy';
 import { addDays, deviceTimeZone, formatHm, wallClock } from '../logic/zonedTime';
 import { useNotificationPrefs } from '../prefsStore';
+import { useMotionSafe } from '@/ui/motion';
 
 /** Wall clock that ticks every 30 s, so "Next up" moves on by itself. */
 function useNow(): number {
@@ -59,6 +60,7 @@ function useNow(): number {
 
 function NextUpCard() {
   const t = useTheme();
+  const safe = useMotionSafe();
   const scheduled = useNotificationsStore((s) => s.scheduled);
   const h12 = useMemo(() => prefers12h(), []);
   const now = useNow();
@@ -71,9 +73,9 @@ function NextUpCard() {
   return (
     <Animated.View
       key={next.key}
-      entering={FadeInDown.springify()
+      entering={safe(FadeInDown.springify()
         .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness)}
+        .stiffness(t.motion.spring.stiffness))}
     >
       <Card testID="next-up" accessibilityLabel={`Next up, ${when}: ${next.title}. ${next.body}`}>
         <View style={{ gap: t.spacing.xxs }}>
@@ -96,6 +98,7 @@ function NextUpCard() {
  */
 export function NotificationSettingsScreen() {
   const t = useTheme();
+  const safe = useMotionSafe();
   const prefs = useNotificationPrefs((s) => s.prefs);
   const setPref = useNotificationPrefs((s) => s.set);
   const setMealTime = useNotificationPrefs((s) => s.setMealTime);
@@ -165,7 +168,7 @@ export function NotificationSettingsScreen() {
       }
     >
       {off ? (
-        <Animated.View entering={FadeIn.duration(t.motion.duration.base)}>
+        <Animated.View entering={safe(FadeIn.duration(t.motion.duration.base))}>
           <Card testID="permission-card">
             <View style={{ flexDirection: 'row', gap: t.spacing.sm, alignItems: 'flex-start' }}>
               <BellOff
@@ -261,7 +264,7 @@ export function NotificationSettingsScreen() {
       </ListGroup>
 
       {mealsOn ? (
-        <Animated.View entering={FadeInDown.duration(t.motion.duration.base)}>
+        <Animated.View entering={safe(FadeInDown.duration(t.motion.duration.base))}>
           <ListGroup title="Meal times">
             {MEAL_SLOTS.map((slot) => (
               <ListRow

@@ -2,7 +2,7 @@ import { router, type Href } from 'expo-router';
 import { ArrowRight, CalendarCheck, ChevronLeft, CircleAlert, CircleCheck, Dumbbell, Lock, UtensilsCrossed } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BackHandler, Platform, View } from 'react-native';
-import Animated, { FadeInRight, useReducedMotion, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeInRight, ZoomIn } from 'react-native-reanimated';
 
 import { usePro } from '@/features/billing';
 import { latestWeight } from '@/features/progress/repo';
@@ -45,6 +45,7 @@ import {
   weightsSince,
   type CheckinRecord,
 } from '../repo';
+import { useMotionSafe } from '@/ui/motion';
 
 const TABLES = ['profile', 'body_metrics', 'sessions', 'meals', 'meal_plans', 'cards'] as const;
 
@@ -74,7 +75,7 @@ export function startWeight(profileKg: number | null, imperial: boolean): number
 /** S28 weekly check-in: weigh-in → energy/sleep → your week → adjustments → approve (flow F4). */
 export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
   const t = useTheme();
-  const reduceMotion = useReducedMotion();
+  const safe = useMotionSafe();
   const now = useNow(60_000, nowOverride);
   const today = localDate(now);
   const { isPro } = usePro(nowOverride);
@@ -219,7 +220,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
         footer={<Button label="Back to Today" onPress={() => router.back()} testID="checkin-finish" />}
       >
         <View style={{ alignItems: 'center', gap: t.spacing.md, paddingTop: t.spacing.xxl }} testID="checkin-done">
-          <Animated.View entering={reduceMotion ? undefined : ZoomIn.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness)}>
+          <Animated.View entering={safe(ZoomIn.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness))}>
             <View style={{ width: t.sizes.ring, height: t.sizes.ring, borderRadius: t.radius.pill, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
               <CircleCheck color={t.colors.accentText} size={t.sizes.touch} strokeWidth={t.sizes.iconStroke} />
             </View>
@@ -263,7 +264,6 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
       </>
     );
 
-  const enter = reduceMotion ? undefined : FadeInRight.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness);
   const unit = imperial ? 'lb' : 'kg';
   const kcalKnown = data?.kcal != null;
 
@@ -275,7 +275,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
         accessibilityLabel={`Step ${step + 1} of ${CHECKIN_STEPS.length}`}
         testID="checkin-progress"
       />
-      <Animated.View key={current} entering={enter} style={{ gap: t.spacing.md }}>
+      <Animated.View key={current} entering={safe(FadeInRight.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness))} style={{ gap: t.spacing.md }}>
         {current === 'weigh' ? (
           <View style={{ gap: t.spacing.md }} testID="checkin-step-weigh">
             <Text variant="title2">Weigh-in</Text>

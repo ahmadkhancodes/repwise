@@ -22,6 +22,7 @@ import { Button, Text } from '@/ui';
 import { isOnboarded, trackStep } from '../actions';
 import { WelcomeArt } from '../components/WelcomeArt';
 import { useOnboarding } from '../store';
+import { useMotionSafe } from '@/ui/motion';
 
 type Slide = { eyebrow: string; title: string; body: string };
 
@@ -71,6 +72,7 @@ function Dot({ active }: { active: boolean }) {
 /** S02 Welcome: value carousel, "Get started", "I already use Repwise". No account asked. */
 export function WelcomeScreen() {
   const t = useTheme();
+  const safe = useMotionSafe();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
@@ -174,9 +176,9 @@ export function WelcomeScreen() {
               testID={`welcome-slide-${i}`}
             >
               <Animated.View
-                entering={FadeInDown.springify()
+                entering={safe(FadeInDown.springify()
                   .damping(t.motion.spring.damping)
-                  .stiffness(t.motion.spring.stiffness)}
+                  .stiffness(t.motion.spring.stiffness))}
               >
                 <WelcomeArt slide={i} />
               </Animated.View>

@@ -50,8 +50,15 @@ The order is fixed:
 
 If your filter selects flows that need an onboarded app, `onboarding/01` is added as a setup step. Airplane mode is switched off before every Android flow, so a workout flow can't leave it on.
 
-**Android-only steps.** Flows already gate these with `runFlow: when: platform: Android` (airplane mode). `IOS_SKIP` in the script lists flows that can't run on iOS, each with a reason, and they show up as SKIP in the table:
-- `today/06_start_workout`: uses Maestro `back`, which does nothing on iOS.
+**Android-only steps.** Flows already gate these with `runFlow: when: platform: Android` (airplane mode). `IOS_SKIP` in the script lists flows that can't run on iOS, each with a reason, and they show up as SKIP in the table. It is empty: every flow runs on both platforms (`today/06` closes the player with its own button, not Maestro `back`).
+
+**Permissions.** A bare `launchApp` applies Maestro's default `permissions: { all: allow }`. A flow that needs notifications denied must deny them on every `launchApp` (onboarding/01 does, on its relaunch too); otherwise Android grants POST_NOTIFICATIONS again.
+
+**iOS accessibility labels.** A pressable row with an `accessibilityLabel` is one element on iOS, named by the whole label, so its inner texts are not separate elements. Tap rows by id or by a regex on the start of the label (`"Maestro landmine row.*"`).
+
+**"Open in Repwise?"** On iOS a custom-scheme link asks for confirmation. Flows tap "Open" (optional), but the alert can appear after that lookup gives up and then blocks every later flow. The runner runs `scripts/ci/ios-dismiss-open-alert.yaml` (taps Cancel if the alert is there) after every failed attempt and after every passing flow that opens a link.
+
+**On failure** the runner saves `debug/<flow>.tryN.hierarchy.json` (`maestro hierarchy`: ids, labels, bounds) next to the screenshot.
 
 ## Artifacts
 
@@ -86,4 +93,4 @@ The workflows set `EAS_PROJECT_ID`, `GOOGLE_IOS_URL_SCHEME` and `EXPO_PUBLIC_API
 ## Known flow issues (for the e2e owners)
 
 - `notifications/notifications-permission-off.yaml` uses `clearState: true` and then taps `open-settings`. After a state wipe the app opens on Welcome, so this flow fails until it onboards first (or drops `clearState` and keeps `permissions: notifications: deny`).
-- `today/06_start_workout.yaml` relies on `back`. To run it on iOS too, give the player a close or back button with a testID and tap that instead.
+- (fixed) `today/06_start_workout.yaml` uses the player's close button and runs on iOS.

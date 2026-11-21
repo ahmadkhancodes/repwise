@@ -34,6 +34,7 @@ import {
   type PhotoSource,
 } from '../services/photoStore';
 import { shareViewAsImage } from '../services/shareImage';
+import { useMotionSafe } from '@/ui/motion';
 
 type Mode = 'grid' | 'compare';
 const COLS = 3;
@@ -42,6 +43,7 @@ const POSE_LABEL: Record<Pose, string> = { front: 'Front', side: 'Side', back: '
 /** S33 Progress photos (Pro): private grid, add from camera/library, compare slider, share. */
 export function PhotosScreen() {
   const t = useTheme();
+  const safe = useMotionSafe();
   const today = useToday();
   const { isPro } = usePro();
   const photos = useLivePhotos();
@@ -159,7 +161,7 @@ export function PhotosScreen() {
           {mode === 'compare' ? (
             pair ? (
               <Animated.View
-                entering={FadeIn.duration(t.motion.duration.base)}
+                entering={safe(FadeIn.duration(t.motion.duration.base))}
                 style={{ gap: t.spacing.sm }}
               >
                 <CompareSlider

@@ -28,6 +28,7 @@ import {
 import { useRestCountdown } from '../hooks/useRestTimer';
 import { REST_STEP_S, remainingMs, type RestTimerState } from '../logic/restTimer';
 import { restTimer } from '../restTimerStore';
+import { useMotionSafe } from '@/ui/motion';
 
 /** "Next: Bench press · set 3 · 80 kg × 8". */
 export function nextLine(state: RestTimerState): string | undefined {
@@ -115,6 +116,7 @@ export function restBarTimeSize(
  */
 export function RestBar({ onOpen }: { onOpen: () => void }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const { width, fontScale } = useWindowDimensions();
   const view = useRestCountdown();
   // Until the first layout, assume the 360dp worst case: bar padding and the two 56dp controls.
@@ -139,10 +141,10 @@ export function RestBar({ onOpen }: { onOpen: () => void }) {
   } as const;
   return (
     <Animated.View
-      entering={FadeInDown.springify()
+      entering={safe(FadeInDown.springify()
         .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness)}
-      exiting={FadeOutDown.duration(t.motion.duration.fast)}
+        .stiffness(t.motion.spring.stiffness))}
+      exiting={safe(FadeOutDown.duration(t.motion.duration.fast))}
       testID="rest-bar"
       style={{
         backgroundColor: t.colors.inverse,

@@ -7,6 +7,7 @@ import { useTheme } from '@/theme';
 import { Text } from '@/ui';
 
 import { Confetti } from './Confetti';
+import { useMotionSafe } from '@/ui/motion';
 
 export type PRMoment = {
   /** Unique per celebration (the set id), so a second PR replays it. */
@@ -29,6 +30,7 @@ export const PR_MOMENT_MS = 2600;
  */
 export function PRCelebration({ moment, onDone }: { moment: PRMoment | null; onDone: () => void }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   useEffect(() => {
     if (!moment) return;
     AccessibilityInfo.announceForAccessibility(
@@ -50,10 +52,10 @@ export function PRCelebration({ moment, onDone }: { moment: PRMoment | null; onD
         }}
       >
         <Animated.View
-          entering={ZoomIn.springify()
+          entering={safe(ZoomIn.springify()
             .damping(t.motion.spring.damping)
-            .stiffness(t.motion.spring.stiffness)}
-          exiting={FadeOut.duration(t.motion.duration.base)}
+            .stiffness(t.motion.spring.stiffness))}
+          exiting={safe(FadeOut.duration(t.motion.duration.base))}
           importantForAccessibility="no-hide-descendants"
           accessibilityElementsHidden
           style={{

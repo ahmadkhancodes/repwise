@@ -7,6 +7,8 @@ import { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { motion } from '@/theme';
 
+import { motionSafe } from './motion';
+
 /** Rows past this index enter together (only the first screenful staggers). */
 export const STAGGER_CAP = 8;
 
@@ -18,20 +20,23 @@ export function staggerDelay(index: number): number {
 
 /** Card / row entrance: fade up on the shared spring, staggered by `index`. */
 export function enterAt(index: number, reduceMotion: boolean) {
-  if (reduceMotion) return undefined;
-  return FadeInDown.delay(staggerDelay(index))
-    .springify()
-    .damping(motion.spring.damping)
-    .stiffness(motion.spring.stiffness);
+  return motionSafe(
+    FadeInDown.delay(staggerDelay(index))
+      .springify()
+      .damping(motion.spring.damping)
+      .stiffness(motion.spring.stiffness),
+    reduceMotion,
+  );
 }
 
 export function exitFade(reduceMotion: boolean) {
-  return reduceMotion ? undefined : FadeOut.duration(motion.duration.fast);
+  return motionSafe(FadeOut.duration(motion.duration.fast), reduceMotion);
 }
 
 /** Smooth re-layout when cards appear or leave. Use only on the item that changes. */
 export function layoutSpring(reduceMotion: boolean) {
-  return reduceMotion
-    ? undefined
-    : LinearTransition.springify().damping(motion.spring.damping).stiffness(motion.spring.stiffness);
+  return motionSafe(
+    LinearTransition.springify().damping(motion.spring.damping).stiffness(motion.spring.stiffness),
+    reduceMotion,
+  );
 }
