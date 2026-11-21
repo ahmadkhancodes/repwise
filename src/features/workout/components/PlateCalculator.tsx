@@ -7,12 +7,14 @@ import { Card, Chip, Stepper, Text } from '@/ui';
 
 import { DEFAULT_BAR, DEFAULT_PLATES, platesPerSide, type WeightUnit } from '../logic/engine';
 import { trimNumber } from '../logic/units';
+import { useMotionSafe } from '@/ui/motion';
 
 const BARS: Record<WeightUnit, number[]> = { kg: [20, 15, 10], lb: [45, 35, 25] };
 
 /** Plates per side for any bar (RW-25, engine `platesPerSide`), drawn as a loaded sleeve. */
 export function PlateCalculator({ unit, initial }: { unit: WeightUnit; initial?: number }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const [bar, setBar] = useState(DEFAULT_BAR[unit]);
   const step = unit === 'kg' ? 2.5 : 5;
   const [target, setTarget] = useState(initial ?? (unit === 'kg' ? 100 : 225));
@@ -68,8 +70,8 @@ export function PlateCalculator({ unit, initial }: { unit: WeightUnit; initial?:
           {res.perSide.map((p, i) => (
             <Animated.View
               key={`${i}-${p}`}
-              entering={ZoomIn.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness)}
-              layout={LinearTransition.springify().damping(t.motion.spring.damping)}
+              entering={safe(ZoomIn.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness))}
+              layout={safe(LinearTransition.springify().damping(t.motion.spring.damping))}
               style={{
                 width: t.spacing.md + (p / biggest) * t.spacing.xs,
                 height: Math.max(t.spacing.xl, (p / biggest) * sleeveH),

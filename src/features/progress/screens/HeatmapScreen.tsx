@@ -19,10 +19,12 @@ import { HeatmapSkeleton } from '../components/Skeletons';
 import { useNow, useTraining } from '../hooks/useProgress';
 import type { Muscle } from '../logic/engine';
 import { muscleLabel, rankMuscles, recoveryHeatmap, recoveryLabel } from '../logic/muscles';
+import { useMotionSafe } from '@/ui/motion';
 
 /** S32 Muscle heatmap (W6): front/back body that glows by recent work, plus a readable list. */
 export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const training = useTraining();
   const [view, setView] = useState<BodyView>('front');
   const [selected, setSelected] = useState<Muscle | null>(null);
@@ -92,7 +94,7 @@ export function HeatmapScreen({ now: nowOverride }: { now?: number }) {
           ) : (
             <>
               {focus ? (
-                <Animated.View key={focus} entering={FadeIn.duration(t.motion.duration.base)}>
+                <Animated.View key={focus} entering={safe(FadeIn.duration(t.motion.duration.base))}>
                   <Card testID="heatmap-focus">
                     <Text variant="headline">{muscleLabel(focus)}</Text>
                     <Text variant="callout" color="textSecondary" tabular>

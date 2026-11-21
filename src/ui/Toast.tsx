@@ -1,7 +1,7 @@
 import { CircleCheck, Info, TriangleAlert, type LucideIcon } from 'lucide-react-native';
-import { useEffect } from 'react';
-import { AccessibilityInfo, Pressable, View } from 'react-native';
-import Animated, { FadeInDown, FadeOutDown, useReducedMotion } from 'react-native-reanimated';
+import { useEffect, useRef, useState } from 'react';
+import { AccessibilityInfo, AppState, Pressable, View, type AppStateStatus } from 'react-native';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { create } from 'zustand';
 
@@ -9,6 +9,7 @@ import { haptics } from '@/services/haptics';
 import { useTheme, type ColorToken } from '@/theme';
 
 import { Text } from './Text';
+import { useMotionSafe } from './motion';
 
 export type ToastTone = 'default' | 'success' | 'danger';
 
@@ -34,6 +35,8 @@ export function toastBuzzes(o: Pick<ToastOptions, 'tone' | 'silent'>): boolean {
 
 type ToastState = {
   current: (ToastOptions & { id: number }) | null;
+  /** Launch: the splash still covers the app, so no toast is shown or timed yet. */
+  held: boolean;
   /** Pinned footers currently mounted (id → height incl. safe area), in mount order. */
   footers: [id: number, height: number][];
   show: (o: ToastOptions) => void;
@@ -46,6 +49,7 @@ let seq = 0;
 let footerSeq = 0;
 export const useToastStore = create<ToastState>((set) => ({
   current: null,
+  held: false,
   footers: [],
   show: (o) => set({ current: { ...o, id: ++seq } }),
   hide: () => set({ current: null }),
@@ -60,6 +64,20 @@ export const useToastStore = create<ToastState>((set) => ({
     }),
   removeFooter: (id) => set((s) => ({ footers: s.footers.filter(([fid]) => fid !== id) })),
 }));
+
+/**
+ * Hold toasts while the app is not visible yet (the root holds them until the splash is gone).
+ * A toast raised meanwhile (a widget "Ate it" link on a cold start) waits and then gets its full
+ * time on screen instead of running out behind the splash.
+ */
+export function holdToasts(held: boolean): void {
+  useToastStore.setState({ held });
+}
+
+/** Whether the app is in the foreground (a toast's clock only runs while it is). */
+function isForeground(state: AppStateStatus | string | null | undefined): boolean {
+  return state !== 'background' && state !== 'inactive';
+}
 
 /** New id for a pinned footer (Screen calls this once per mount). */
 export function nextFooterId(): number {
@@ -184,26 +202,52 @@ export function Toast({
  */
 export function ToastHost() {
   const t = useTheme();
+  const safe = useMotionSafe();
   const insets = useSafeAreaInsets();
-  const reduceMotion = useReducedMotion();
   const current = useToastStore((s) => s.current);
+  const held = useToastStore((s) => s.held);
   const hide = useToastStore((s) => s.hide);
   const footers = useToastStore((s) => s.footers);
+  const [foreground, setForeground] = useState(() => isForeground(AppState.currentState));
+  // Time left for the current toast; it only counts down while the toast is on screen.
+  const left = useRef<{ id: number; ms: number } | null>(null);
+  const shown = current && !held && foreground ? current : null;
 
   useEffect(() => {
-    if (!current) return;
-    if (toastBuzzes(current)) haptics.success();
-    AccessibilityInfo.announceForAccessibility(current.message);
-    const timer = setTimeout(hide, current.durationMs ?? t.motion.toastMs);
-    return () => clearTimeout(timer);
-  }, [current, hide, t.motion.toastMs]);
+    const sub = AppState.addEventListener('change', (s) => setForeground(isForeground(s)));
+    return () => sub?.remove();
+  }, []);
 
-  if (!current) return null;
+  // Buzz + announce once per toast, when it first appears.
+  const announced = useRef<number | null>(null);
+  useEffect(() => {
+    if (!shown || announced.current === shown.id) return;
+    announced.current = shown.id;
+    if (toastBuzzes(shown)) haptics.success();
+    AccessibilityInfo.announceForAccessibility(shown.message);
+  }, [shown]);
+
+  useEffect(() => {
+    if (!shown) return;
+    if (left.current?.id !== shown.id) {
+      left.current = { id: shown.id, ms: shown.durationMs ?? t.motion.toastMs };
+    }
+    const entry = left.current;
+    const started = Date.now();
+    const timer = setTimeout(hide, entry.ms);
+    return () => {
+      clearTimeout(timer);
+      // Paused (backgrounded or held): keep what is left for when it shows again.
+      entry.ms = Math.max(0, entry.ms - (Date.now() - started));
+    };
+  }, [shown, hide, t.motion.toastMs]);
+
+  if (!shown) return null;
   return (
     <Animated.View
-      key={current.id}
-      entering={reduceMotion ? undefined : FadeInDown.duration(t.motion.duration.base)}
-      exiting={reduceMotion ? undefined : FadeOutDown.duration(t.motion.duration.fast)}
+      key={shown.id}
+      entering={safe(FadeInDown.duration(t.motion.duration.base))}
+      exiting={safe(FadeOutDown.duration(t.motion.duration.fast))}
       pointerEvents="box-none"
       style={{
         position: 'absolute',
@@ -212,7 +256,7 @@ export function ToastHost() {
         bottom: toastBottom(footers, insets.bottom, t.spacing.sm, t.spacing.huge + t.spacing.xl),
       }}
     >
-      <Toast {...current} onDismiss={hide} testID="toast" />
+      <Toast {...shown} onDismiss={hide} testID="toast" />
     </Animated.View>
   );
 }

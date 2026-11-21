@@ -1,7 +1,7 @@
 import { ChevronLeft } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
-import Animated, { FadeIn, FadeInRight, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
@@ -13,6 +13,7 @@ import {
   StepProgress,
   Text,
 } from '@/ui';
+import { useMotionSafe } from '@/ui/motion';
 
 export type QuizFrameProps = {
   title: string;
@@ -48,13 +49,12 @@ export function QuizFrame({
   testID,
 }: QuizFrameProps) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const insets = useSafeAreaInsets();
-  // Reduced motion (Android "Remove animations"): no entering animation at all. A delayed entering
-  // animation could leave the options invisible there.
-  const reduceMotion = useReducedMotion();
-  const enter = reduceMotion
-    ? undefined
-    : FadeInRight.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness);
+  // Reduced motion (Android "Remove animations"): `safe` drops the entering animation (a delayed
+  // one could leave the options invisible there). One builder per view: builder methods mutate.
+  const enter = () =>
+    FadeInRight.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness);
 
   return (
     <KeyboardAvoidingView
@@ -114,7 +114,7 @@ export function QuizFrame({
         }}
         keyboardShouldPersistTaps="handled"
       >
-        <Animated.View entering={enter} style={{ gap: t.spacing.xs }}>
+        <Animated.View entering={safe(enter())} style={{ gap: t.spacing.xs }}>
           <Text variant="title1" accessibilityRole="header" testID="quiz-title">
             {title}
           </Text>
@@ -125,7 +125,7 @@ export function QuizFrame({
           ) : null}
         </Animated.View>
         <Animated.View
-          entering={enter?.delay(t.motion.listStagger * 3)}
+          entering={safe(enter().delay(t.motion.listStagger * 3))}
           style={{ gap: t.spacing.sm }}
         >
           {children}
@@ -142,7 +142,7 @@ export function QuizFrame({
         }}
       >
         {error ? (
-          <Animated.View entering={FadeIn.duration(t.motion.duration.fast)}>
+          <Animated.View entering={safe(FadeIn.duration(t.motion.duration.fast))}>
             <Text
               variant="callout"
               color="danger"

@@ -5,12 +5,14 @@ import {
   CircleCheck,
   Dumbbell,
   History,
+  Info,
   ListPlus,
   Plus,
   TriangleAlert,
+  X,
 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { AccessibilityInfo, View } from 'react-native';
 
 import { usePro } from '@/features/billing';
 import { routinesRepo, useRoutines } from '@/features/library/repo';
@@ -29,7 +31,6 @@ import {
   Screen,
   SectionHeader,
   Segmented,
-  showToast,
   SkeletonCard,
   SkeletonGroup,
   Text,
@@ -154,9 +155,13 @@ function SessionCard({
  * Deep link `/train?sessionId=…&start=1` (Today, notifications, widgets): opens the player for
  * that session and starts it (or resumes it). Works offline: the session and catalogue are local.
  */
-function useTrainDeepLink() {
+/** What Train says when a workout link points at a session this phone does not have. */
+export const MISSING_WORKOUT_MESSAGE = "That workout isn't on this phone any more";
+
+function useTrainDeepLink(): { missing: boolean; dismiss: () => void } {
   const params = useLocalSearchParams<{ sessionId?: string; start?: string }>();
   const handled = useRef<string | null>(null);
+  const [missing, setMissing] = useState(false);
   const link = parseTrainLink(params);
   const key = link ? `${link.sessionId}:${link.start ? 1 : 0}` : null;
 
@@ -169,8 +174,12 @@ function useTrainDeepLink() {
     handled.current = key;
     const action = resolveTrainLink(link, getSession(link.sessionId), activeSession()?.id);
     router.setParams({ sessionId: undefined, start: undefined });
+    // An inline notice, not a 3 s toast: links mostly arrive on a cold start (notification,
+    // widget), where a toast ran out behind the launch (and iOS's "Open in Repwise?" prompt)
+    // before anyone could read it. The notice stays until dismissed or the next link.
+    setMissing(action.kind === 'missing');
     if (action.kind === 'missing') {
-      showToast({ message: "That workout isn't on this phone any more" });
+      AccessibilityInfo.announceForAccessibility(MISSING_WORKOUT_MESSAGE);
       return;
     }
     if (action.kind === 'summary') {
@@ -195,6 +204,34 @@ function useTrainDeepLink() {
     // `key` captures the link; `link` is re-derived from it each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
+
+  const dismiss = useCallback(() => setMissing(false), []);
+  return { missing, dismiss };
+}
+
+/** Calm, dismissible notice for a workout link this phone cannot open. */
+function MissingWorkoutNotice({ onDismiss }: { onDismiss: () => void }) {
+  const t = useTheme();
+  return (
+    <Card testID="train-link-missing">
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
+        <Info color={t.colors.textSecondary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
+        <View style={{ flex: 1, gap: t.spacing.xxs }}>
+          <Text variant="headline">{MISSING_WORKOUT_MESSAGE}</Text>
+          <Text variant="callout" color="textSecondary">
+            Pick a workout from your week, or start an empty one.
+          </Text>
+        </View>
+        <IconButton
+          icon={X}
+          accessibilityLabel="Dismiss"
+          onPress={onDismiss}
+          color="textSecondary"
+          testID="train-link-missing-close"
+        />
+      </View>
+    </Card>
+  );
 }
 
 /**
@@ -276,7 +313,7 @@ function HistoryList({ active }: { active: boolean }) {
 
 /** S08 Train tab: this week's plan, workout history and routines; tools in the header. */
 export function TrainScreen() {
-  useTrainDeepLink();
+  const link = useTrainDeepLink();
   useEffect(() => {
     // Plan this week's workouts if a new week started (no-op when planned; never blocks a frame).
     const id = setTimeout(() => ensurePlannedAhead(), 0);
@@ -349,6 +386,7 @@ export function TrainScreen() {
       testID="screen-train"
     >
       <ResumeBanner />
+      {link.missing ? <MissingWorkoutNotice onDismiss={link.dismiss} /> : null}
       <Segmented
         options={TABS}
         value={tab}

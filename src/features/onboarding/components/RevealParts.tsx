@@ -35,15 +35,20 @@ import {
   type RevealPart,
   type StripDay,
 } from '../logic/reveal';
+import { useMotionSafe } from '@/ui/motion';
 
 /** Spring entrance at the reveal choreography's delay for `part` / `index`. */
 const useSpringIn = () => {
   const t = useTheme();
+  const safe = useMotionSafe();
+  // Reduced motion: nothing (a delayed spring could leave a reveal section invisible).
   return (part: RevealPart, index = 0) =>
-    FadeInDown.delay(revealDelay(t.motion, part, index))
-      .springify()
-      .damping(t.motion.spring.damping)
-      .stiffness(t.motion.spring.stiffness);
+    safe(
+      FadeInDown.delay(revealDelay(t.motion, part, index))
+        .springify()
+        .damping(t.motion.spring.damping)
+        .stiffness(t.motion.spring.stiffness),
+    );
 };
 
 /** Small macro ring size: one gym hit box plus a spacing step (three fit 320dp). */
@@ -60,6 +65,7 @@ export function BuildLine({
   testID?: string;
 }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const reduceMotion = useReducedMotion();
   const pulse = useSharedValue(1);
   useEffect(() => {
@@ -109,7 +115,7 @@ export function BuildLine({
         ]}
       >
         {done ? (
-          <Animated.View entering={FadeIn.duration(t.motion.duration.fast)}>
+          <Animated.View entering={safe(FadeIn.duration(t.motion.duration.fast))}>
             <Check
               size={t.sizes.iconSmall}
               strokeWidth={t.sizes.iconStrokeBold}
@@ -327,15 +333,16 @@ export function WorkoutCard({
  */
 export function MealsList({ meals }: { meals: PreviewMeal[] }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   return (
     <View style={{ gap: t.spacing.xs }} testID="reveal-meals">
       {meals.map((m, i) => (
         <Animated.View
           key={m.id}
-          entering={FadeInUp.delay(revealDelay(t.motion, 'meals', i))
+          entering={safe(FadeInUp.delay(revealDelay(t.motion, 'meals', i))
             .springify()
             .damping(t.motion.spring.damping)
-            .stiffness(t.motion.spring.stiffness)}
+            .stiffness(t.motion.spring.stiffness))}
         >
           <MealRow
             preview

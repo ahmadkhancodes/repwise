@@ -453,8 +453,9 @@ function DemoFrames({
 
   useEffect(() => {
     if (!loaded.start) return;
-    startIn.set(withTiming(1, { duration: t.motion.duration.base }));
-  }, [loaded.start, startIn, t.motion.duration.base]);
+    // Reduced motion: shown at once (never left at opacity 0 waiting on an animation).
+    startIn.set(reduceMotion ? 1 : withTiming(1, { duration: t.motion.duration.base }));
+  }, [loaded.start, startIn, t.motion.duration.base, reduceMotion]);
 
   useEffect(() => {
     if (!both || reduceMotion) return;

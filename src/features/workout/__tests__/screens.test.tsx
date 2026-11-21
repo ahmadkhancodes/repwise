@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { Platform, StyleSheet } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 import { finishedBench, freshDb, plannedSession, TODAY } from '../../../../test/workoutFixtures';
@@ -109,11 +109,35 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${s.id}/summary`);
     });
 
-    it('shows a calm toast for a session that is not on this phone', async () => {
+    it('shows a calm notice for a session that is not on this phone, until dismissed', async () => {
+      const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
       mockParams.current = { sessionId: 'nope', start: '1' };
       await renderThemed(<TrainScreen />, scheme);
       expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(useToastStore.getState().current?.message).toMatch(/isn't on this phone/);
+      // Inline, not a 3 s toast: on a cold start the toast ran out before it could be read (iOS).
+      expect(screen.getByTestId('train-link-missing')).toHaveTextContent(/isn't on this phone any more/);
+      expect(announce).toHaveBeenCalledWith("That workout isn't on this phone any more");
+      expect(useToastStore.getState().current?.message ?? '').not.toMatch(/isn't on this phone/);
+      // It does not time out.
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 50));
+      });
+      expect(screen.getByTestId('train-link-missing')).toBeTruthy();
+      await fireEvent.press(screen.getByTestId('train-link-missing-close'));
+      expect(screen.queryByTestId('train-link-missing')).toBeNull();
+      announce.mockRestore();
+    });
+
+    it('a later link that opens a workout clears the notice', async () => {
+      mockParams.current = { sessionId: 'nope', start: '1' };
+      await renderThemed(<TrainScreen />, scheme);
+      expect(screen.getByTestId('train-link-missing')).toBeTruthy();
+      const s = plannedSession();
+      mockParams.current = { sessionId: s.id };
+      // Any re-render reads the new params (here: switching the segment).
+      await fireEvent.press(screen.getByText('History'));
+      await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith(`/workout/${s.id}`));
+      expect(screen.queryByTestId('train-link-missing')).toBeNull();
     });
 
     it('does not start a second workout while one is in progress', async () => {

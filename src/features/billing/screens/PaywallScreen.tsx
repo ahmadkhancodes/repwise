@@ -260,7 +260,6 @@ export function PaywallScreen() {
   };
 
   const header = paywallHeadline(params.source, params.name);
-  const springIn = (i: number) => enterAt(i, reduceMotion);
 
   return (
     // One hero title (N7): no Screen title above it; the eyebrow names the product.
@@ -292,7 +291,7 @@ export function PaywallScreen() {
         </View>
       }
     >
-      <Animated.View entering={springIn(0)} style={{ gap: t.spacing.sm }}>
+      <Animated.View entering={enterAt(0, reduceMotion)} style={{ gap: t.spacing.sm }}>
         <View style={{ gap: t.spacing.xxs }}>
           <Text variant="eyebrow" color="accentText" testID="paywall-eyebrow">
             Repwise Pro
@@ -340,7 +339,7 @@ export function PaywallScreen() {
         </View>
       ) : null}
 
-      <Animated.View entering={springIn(1)}>
+      <Animated.View entering={enterAt(1, reduceMotion)}>
         <View
           style={{ gap: t.spacing.xs }}
           accessibilityRole="radiogroup"
@@ -363,7 +362,7 @@ export function PaywallScreen() {
       ) : null}
 
       {timeline.length ? (
-        <Animated.View entering={springIn(2)} style={{ gap: t.spacing.xs }}>
+        <Animated.View entering={enterAt(2, reduceMotion)} style={{ gap: t.spacing.xs }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
             <CalendarDays
               color={t.colors.textPrimary}

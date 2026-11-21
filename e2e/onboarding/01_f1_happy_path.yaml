@@ -6,8 +6,7 @@ tags:
   - onboarding
   - p0
 ---
-# Android: the raw permission name, so Maestro revokes POST_NOTIFICATIONS itself (with only
-# `notifications: deny` the app still read "granted" later, see notifications-permission-off).
+# Android: the raw permission name, so Maestro revokes POST_NOTIFICATIONS itself.
 - runFlow:
     when:
       platform: Android
@@ -155,9 +154,24 @@ tags:
     visible:
       id: "screen-today"
     timeout: 10000
-# Relaunch lands on Today, not onboarding.
+# Relaunch lands on Today, not onboarding. Keep notifications denied: a bare `launchApp` applies
+# Maestro's default `permissions: { all: allow }`, which GRANTED POST_NOTIFICATIONS on Android and
+# made notifications-permission-off (which runs this flow) read "on".
 - stopApp
-- launchApp
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - launchApp:
+          permissions:
+            android.permission.POST_NOTIFICATIONS: deny
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - launchApp:
+          permissions:
+            notifications: deny
 - extendedWaitUntil:
     visible:
       id: "screen-today"

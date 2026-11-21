@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Play } from 'lucide-react-native';
 import { View } from 'react-native';
-import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
 import { PressableScale, Text } from '@/ui';
@@ -10,6 +10,7 @@ import { pausedSince } from '../actions';
 import { useActiveSession } from '../hooks/useTrain';
 import { useNow } from '../hooks/useNow';
 import { activeMs, formatClock } from '../logic/duration';
+import { useMotionSafe } from '@/ui/motion';
 
 /**
  * "Workout in progress" card (F2 edge case: app killed mid-workout → resume banner).
@@ -17,16 +18,16 @@ import { activeMs, formatClock } from '../logic/duration';
  */
 export function ResumeBanner({ testID = 'resume-banner' }: { testID?: string }) {
   const t = useTheme();
-  const { data: s } = useActiveSession();
-  const now = useNow(1000, !!s && s.status === 'active');
   // Reduced motion (Android "Remove animations"): no entering animation. On device it could
   // leave the banner invisible after a cold start (Maestro workout/03).
-  const reduceMotion = useReducedMotion();
+  const safe = useMotionSafe();
+  const { data: s } = useActiveSession();
+  const now = useNow(1000, !!s && s.status === 'active');
   if (!s) return null;
   const paused = s.status === 'paused';
   const clock = formatClock(activeMs(s, now, paused ? pausedSince(s.id) : null));
   return (
-    <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(t.motion.duration.base)}>
+    <Animated.View entering={safe(FadeIn.duration(t.motion.duration.base))}>
       <PressableScale
         onPress={() => router.push(`/workout/${s.id}`)}
         accessibilityRole="button"

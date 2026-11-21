@@ -63,6 +63,7 @@ export {
 export {
   Toast,
   ToastHost,
+  holdToasts,
   showToast,
   showUndoToast,
   toastBottom,

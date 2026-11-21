@@ -41,6 +41,7 @@ import {
 } from '../logic/wrapped';
 import { storyColors } from '../logic/storyColors';
 import { shareViewAsImage } from '../services/shareImage';
+import { useMotionSafe } from '@/ui/motion';
 
 const LOGO = require('../../../../assets/images/icon.png');
 
@@ -358,11 +359,12 @@ function StoryCard({
 /** Card content springs up each time the card becomes the active one. */
 function Reveal({ active, children }: { active: boolean; children: ReactNode }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   return active ? (
     <Animated.View
-      entering={FadeInDown.springify()
+      entering={safe(FadeInDown.springify()
         .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness)}
+        .stiffness(t.motion.spring.stiffness))}
     >
       {children}
     </Animated.View>

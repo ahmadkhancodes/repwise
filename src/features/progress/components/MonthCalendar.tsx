@@ -8,6 +8,7 @@ import { useTheme } from '@/theme';
 
 import { monthName, type MonthKey } from '../logic/dates';
 import type { CalendarDay } from '../logic/streak';
+import { useMotionSafe } from '@/ui/motion';
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -31,6 +32,7 @@ export function MonthCalendar({
   testID?: string;
 }) {
   const t = useTheme();
+  const safe = useMotionSafe();
   const title = `${monthName(month.month)} ${month.year}`;
   return (
     <View testID={testID} style={{ gap: t.spacing.xs }}>
@@ -63,13 +65,13 @@ export function MonthCalendar({
         ))}
       </View>
       {locked ? (
-        <Animated.View key={`${title}-locked`} entering={FadeIn.duration(t.motion.duration.base)}>
+        <Animated.View key={`${title}-locked`} entering={safe(FadeIn.duration(t.motion.duration.base))}>
           {locked}
         </Animated.View>
       ) : (
         <Animated.View
           key={title}
-          entering={FadeIn.duration(t.motion.duration.base)}
+          entering={safe(FadeIn.duration(t.motion.duration.base))}
           style={{ gap: t.spacing.xxs }}
         >
           {rows.map((row, ri) => (

@@ -1,9 +1,9 @@
-import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
 import { CircleAlert, ListChecks, Pause, Play, RotateCcw, Timer, X } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import Animated, { FadeInLeft, FadeInRight, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { haptics } from '@/services/haptics';
@@ -26,6 +26,7 @@ import {
 import { formatClock, parseStepTimer, remainingSeconds } from '../logic/cook';
 import { formatGrams, formatServings, scaledIngredients } from '../logic/recipe';
 import { markMealEaten } from '../service';
+import { useMotionSafe } from '@/ui/motion';
 
 type TimerState = { endsAt: number | null; left: number; total: number; done: boolean };
 
@@ -37,8 +38,8 @@ type TimerState = { endsAt: number | null; left: number; total: number; done: bo
 export function CookModeScreen() {
   useKeepAwake();
   const t = useTheme();
+  const safe = useMotionSafe();
   const insets = useSafeAreaInsets();
-  const reduce = useReducedMotion();
   const params = useLocalSearchParams<{ id: string; servings?: string; mealId?: string }>();
   const cat = useCatalogFor('recipes', 'foods');
   const recipe = cat?.recipeById.get(String(params.id));
@@ -75,7 +76,6 @@ export function CookModeScreen() {
   if (!recipe || !cat) {
     return (
       <View style={{ flex: 1, backgroundColor: t.colors.bg, paddingTop: insets.top }} testID="screen-cook">
-        <Stack.Screen options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
         {cat ? (
           <EmptyState
             icon={CircleAlert}
@@ -147,7 +147,6 @@ export function CookModeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg, paddingTop: insets.top }} testID="screen-cook">
-      <Stack.Screen options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: t.spacing.xs }}>
         <IconButton icon={X} accessibilityLabel="Close cook mode" onPress={() => router.back()} testID="cook-close" />
         <Text variant="callout" color="textSecondary" style={{ flex: 1 }} align="center" numberOfLines={1}>
@@ -171,7 +170,7 @@ export function CookModeScreen() {
         <Text variant="callout" color="accentText" testID="cook-step-count">
           Step {step + 1} of {n}
         </Text>
-        <Animated.View key={step} entering={reduce ? undefined : (dir > 0 ? FadeInRight : FadeInLeft).springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness)}>
+        <Animated.View key={step} entering={safe((dir > 0 ? FadeInRight : FadeInLeft).springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness))}>
           <Text variant="title2" testID="cook-step">
             {recipe.steps[step]}
           </Text>
