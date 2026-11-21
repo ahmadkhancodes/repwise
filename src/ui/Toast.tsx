@@ -1,16 +1,8 @@
 import { CircleCheck, Info, TriangleAlert, type LucideIcon } from 'lucide-react-native';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  AccessibilityInfo,
-  AppState,
-  Platform,
-  Pressable,
-  View,
-  type AppStateStatus,
-} from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AccessibilityInfo, AppState, Pressable, View, type AppStateStatus } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FullWindowOverlay } from 'react-native-screens';
 import { create } from 'zustand';
 
 import { haptics } from '@/services/haptics';
@@ -250,34 +242,21 @@ export function ToastHost() {
     };
   }, [shown, hide, t.motion.toastMs]);
 
+  if (!shown) return null;
   return (
-    <ToastLayer>
-      {shown ? (
-        <Animated.View
-          key={shown.id}
-          entering={safe(FadeInDown.duration(t.motion.duration.base))}
-          exiting={safe(FadeOutDown.duration(t.motion.duration.fast))}
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: t.spacing.screen,
-            right: t.spacing.screen,
-            bottom: toastBottom(footers, insets.bottom, t.spacing.sm, t.spacing.huge + t.spacing.xl),
-          }}
-        >
-          <Toast {...shown} onDismiss={hide} testID="toast" />
-        </Animated.View>
-      ) : null}
-    </ToastLayer>
+    <Animated.View
+      key={shown.id}
+      entering={safe(FadeInDown.duration(t.motion.duration.base))}
+      exiting={safe(FadeOutDown.duration(t.motion.duration.fast))}
+      pointerEvents="box-none"
+      style={{
+        position: 'absolute',
+        left: t.spacing.screen,
+        right: t.spacing.screen,
+        bottom: toastBottom(footers, insets.bottom, t.spacing.sm, t.spacing.huge + t.spacing.xl),
+      }}
+    >
+      <Toast {...shown} onDismiss={hide} testID="toast" />
+    </Animated.View>
   );
-}
-
-/**
- * iOS: toasts draw in a full-window overlay, above native modals (paywall, exercise picker, body
- * log). A native modal covers the root view, so "Nothing to restore" on the paywall was shown
- * behind it. The overlay only takes touches on the toast itself. Android modals are in-window.
- */
-function ToastLayer({ children }: { children: ReactNode }) {
-  if (Platform.OS !== 'ios') return <>{children}</>;
-  return <FullWindowOverlay>{children}</FullWindowOverlay>;
 }

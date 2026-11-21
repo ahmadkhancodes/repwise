@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Linking, View } from 'react-native';
+import { AccessibilityInfo, Linking, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { billing, type PurchaseOutcome, type RestoreOutcome } from '@/services/billing';
@@ -229,6 +229,15 @@ export function PaywallScreen() {
   const reduceMotion = useReducedMotion();
   const b = useBilling();
   const [selected, setSelected] = useState<PlanId>(DEFAULT_PLAN);
+  // Outcomes that keep the paywall open are said inline, above the CTA. A toast would draw behind
+  // the paywall on iOS (a native modal covers the root toast host).
+  const [notice, setNotice] = useState<{ message: string; tone?: 'success' | 'danger' } | null>(
+    null,
+  );
+  const say = (n: { message: string; tone?: 'success' | 'danger' }) => {
+    setNotice(n);
+    AccessibilityInfo.announceForAccessibility(n.message);
+  };
 
   useEffect(() => {
     if (b.paymentsEnabled) billing().trackPaywallView(params.source ?? 'direct');
@@ -246,17 +255,25 @@ export function PaywallScreen() {
   const timeline = trialTimeline(offer.trialDays, `${offer.price}/${plan.period}`);
 
   const onBuy = async () => {
+    setNotice(null);
     const out = await b.purchase(selected);
     const msg = purchaseMessage(out);
-    // The success toast is the purchase's one success buzz.
-    if (msg) showToast(msg);
-    if (out.status === 'pro') close();
+    if (!msg) return;
+    if (out.status === 'pro') {
+      // The success toast is the purchase's one success buzz (shown once the paywall closes).
+      showToast(msg);
+      close();
+    } else say(msg);
   };
 
   const onRestore = async () => {
+    setNotice(null);
     const out = await b.restore();
-    showToast(restoreMessage(out));
-    if (out.status === 'restored') close();
+    const msg = restoreMessage(out);
+    if (out.status === 'restored') {
+      showToast(msg);
+      close();
+    } else say(msg);
   };
 
   const header = paywallHeadline(params.source, params.name);
@@ -270,6 +287,18 @@ export function PaywallScreen() {
       }
       footer={
         <View style={{ gap: t.spacing.xs }}>
+          {notice ? (
+            <Text
+              variant="callout"
+              color={notice.tone === 'danger' ? 'danger' : 'textSecondary'}
+              align="center"
+              accessibilityRole="alert"
+              accessibilityLiveRegion="polite"
+              testID="paywall-notice"
+            >
+              {notice.message}
+            </Text>
+          ) : null}
           <Button
             label={ctaLabel(offer.trialDays)}
             accent

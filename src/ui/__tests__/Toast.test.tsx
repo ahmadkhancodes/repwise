@@ -1,6 +1,6 @@
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import * as Haptics from 'expo-haptics';
-import { AccessibilityInfo, AppState, Platform, type AppStateStatus } from 'react-native';
+import { AccessibilityInfo, AppState, type AppStateStatus } from 'react-native';
 
 import { colors, motion } from '@/theme';
 
@@ -155,19 +155,6 @@ describe.each(SCHEMES)('Toast (%s)', (scheme) => {
     await act(() => jest.advanceTimersByTime(100));
     expect(screen.queryByTestId('toast')).toBeNull();
     add.mockRestore();
-  });
-
-  it('iOS draws toasts in a full-window overlay (above native modals); Android in place', async () => {
-    await renderThemed(<ToastHost />, scheme);
-    await act(() => showToast({ message: 'Nothing to restore' }));
-    type Host = { type?: unknown; parent?: Host | null };
-    let n: Host | null | undefined = screen.getByTestId('toast') as unknown as Host;
-    let inOverlay = false;
-    while (n) {
-      if (n.type === 'RNSFullWindowOverlay') inOverlay = true;
-      n = n.parent;
-    }
-    expect(inOverlay).toBe(Platform.OS === 'ios');
   });
 
   it('ToastHost shows, announces and auto-hides', async () => {
