@@ -84,6 +84,18 @@
     If `screen-quiz-goal` never appears even after a re-tap, treat it as an iOS app bug in onboarding navigation and fix it in the app.
     Use opus for this task from now on.
 
+  - OWNER REQUEST (21 Nov, 20:50 UTC): add background music to the final video: "nice, motivating gym music".
+    - **Licence:** use ONLY a track whose licence you have verified on its own page: CC0 / public domain preferred, CC-BY 4.0 acceptable with attribution. No commercial or copyrighted songs, and nothing from YouTube.
+      - Good sources: Free Music Archive (filter by CC0 or CC-BY), OpenGameArt (CC0), or incompetech.com (Kevin MacLeod, CC-BY 4.0; check the licence on the track page).
+      - Style: upbeat, energetic electronic or hip-hop workout beat, about 110–130 BPM, instrumental, not aggressive.
+    - **Repo:** save the track as `assets-dev/music/<slug>.mp3`, with `assets-dev/music/LICENSE.md` giving the title, artist, source URL, licence and attribution text.
+    - **Mix with ffmpeg** (the simulator video has no audio):
+      - loop or trim the track to the video length;
+      - 1.5 s fade-in, 3 s fade-out;
+      - loudness-normalise to about -16 LUFS (`loudnorm=I=-16:TP=-1.5:LRA=11`);
+      - `-c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart`.
+    - **Upload:** both files as release assets: `repwise-ios-dark-tour-music.mp4` (main) and `repwise-ios-dark-tour.mp4` (silent). Put any CC-BY attribution in the release notes.
+
 - [ ] (sonnet) **Final green run on main and the final report to the owner.**
   - Steps:
     1. Use the latest e2e-ios and e2e-android runs on main, if their head SHA equals the current main. Otherwise dispatch both on main and wait (via `.claude-run/wait`).
