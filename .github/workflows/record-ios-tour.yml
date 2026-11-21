@@ -8,6 +8,10 @@ name: Record iOS tour (dark)
 # Artifacts: repwise-ios-dark-tour (tour.mp4), repwise-ios-dark-tour-frames (stills for review),
 # repwise-ios-dark-tour-debug (Maestro log, failure screenshots, raw video if trimming failed).
 on:
+  # TEMP (tour iteration): registers the workflow from this branch; removed before merge.
+  push:
+    branches: [feat/tour-video]
+    paths: ['.github/workflows/record-ios-tour.yml', 'e2e/tour/**']
   workflow_dispatch:
     inputs:
       ref:
@@ -23,7 +27,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: record-ios-tour-${{ inputs.ref }}
+  group: record-ios-tour-${{ inputs.ref || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -45,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.ref }}
 
       # ---------- build: same steps as e2e-ios.yml ----------
       - name: Select the newest stable Xcode
