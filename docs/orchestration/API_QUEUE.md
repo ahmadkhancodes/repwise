@@ -61,7 +61,7 @@
     3. Otherwise fix, push the branch, re-dispatch both E2E runs, and write `.claude-run/wait`.
   - status (21 Nov 06:50 UTC, API run 1): (a) and (d) were already closed on the branch (PROGRESS r3-fix line: Eat tick was a flow issue; all 36 animated files on `motionSafe`). e2e-ios on bdf13a0 (run 44864469120) failed every flow at launch: the FullWindowOverlay toast host hid the app from accessibility, and 506cfa6 removed it. On 506cfa6, e2e-android passed (run 44870322115). e2e-ios run 44870320265 was still in progress, so this run only waited for it and made no code changes. Next run: read run 44870320265. If it is green, do step 2. If it is red, check (b) `CustomExerciseScreen.tsx` ~153 first.
 
-- [ ] (sonnet) **Merge `feat/tour-video` into main and record the Dark Mode iPhone tour.**
+- [ ] (opus) **Merge `feat/tour-video` into main and record the Dark Mode iPhone tour.**
   - The branch adds `.github/workflows/record-ios-tour.yml` and `e2e/tour/ios_dark_full_tour.yaml`: a natural-paced Maestro walk through the WHOLE app in Dark Mode on an iPhone 16-class simulator, starting at fresh-install onboarding.
   - Owner request (21 Nov): "a full video recording on Apple iPhone of entire app. just simple plain natural recorded video, making sure onboarding and all must cover, and app must be in Dark Mode."
   - Steps:
@@ -74,6 +74,15 @@
     6. When good: create the GitHub Release `app-tour-dark` and upload the mp4 as a release asset (`gh api` uploads to `uploads.github.com`). Tick this task with the download URL.
   - status (21 Nov, API run 3): steps 1–2 done. Merged `feat/tour-video` into main (4f987c4, test:all green: 3129 app + 757 engine + server 150). Dispatched record-ios-tour, e2e-ios and e2e-android on main; waiting via `.claude-run/wait`. Next run: do steps 3–6 (find the tour run with `gh api "repos/$REPO/actions/workflows/record-ios-tour.yml/runs?branch=main&per_page=1"`).
   - status (API run 4): first tour run failed at swap-option-0 (flow timing, fixed with a retry tap in 8afdb42). e2e-ios on 4f987c4 failed only `today/05_tick_meal` (flake, no app change). Re-dispatched record-ios-tour + e2e-ios on main; waiting. Next run: if the tour is green do steps 3–6; if e2e-ios 05_tick_meal fails again, investigate the Undo toast on iOS (src/ui Toast) as an app bug.
+
+  - OWNER PRIORITY (21 Nov, 20:45 UTC): Ahmad wants the full video above all. Make the tour flow ROBUST so one slow screen can't abort the whole recording:
+    - every `extendedWaitUntil` gets a timeout of at least 20 s;
+    - each tap that moves to a new screen is retried once if the next screen hasn't appeared (as done for the dinner swap);
+    - steps that aren't essential get `optional: true`;
+    - the onboarding quiz start ("Get started" → `screen-quiz-goal`, which failed on 8afdb42) waits up to 30 s and re-taps.
+
+    If `screen-quiz-goal` never appears even after a re-tap, treat it as an iOS app bug in onboarding navigation and fix it in the app.
+    Use opus for this task from now on.
 
 - [ ] (sonnet) **Final green run on main and the final report to the owner.**
   - Steps:
