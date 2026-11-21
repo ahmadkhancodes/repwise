@@ -20,3 +20,4 @@
 | a40e5c39fb2ebdcb7 | r2-perf fix (Opus) (MERGED) | /home/user/repwise-r2-perf |
 | ac63d437e6f073c62 | r2-native build fix (Opus) | /home/user/repwise-r2-native | — MERGED e038e0e (21 Nov)
 - r3-fix (Opus, worktree /home/user/repwise-r3-fix, branch feat/r3-fix): 4 iOS-only bugs (Eat tick, cook Next, custom-exercise nav, cold-start toast) + 5th iOS fail, Android notif-permission-off flow, reduced-motion-safe entering animations. RUNNING.
+- tour-video (Opus, worktree /home/user/repwise-tour, branch feat/tour-video): iOS dark-mode full app tour recording (workflow record-ios-tour.yml + e2e/tour). Owner request 21 Nov: deliver mp4 after final merge. RUNNING.
