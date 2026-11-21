@@ -813,7 +813,25 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "swap-option-0"
-          timeout: 8000
+          timeout: 5000
+          optional: true
+      # The first tap can land while the lunch toast/list is still settling: tap once more if the sheet is not up.
+      - runFlow:
+          when:
+            notVisible:
+              id: "swap-option-0"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: "swap-dinner"
+                direction: DOWN
+                centerElement: true
+            - tapOn:
+                id: "swap-dinner"
+      - extendedWaitUntil:
+          visible:
+            id: "swap-option-0"
+          timeout: 10000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
