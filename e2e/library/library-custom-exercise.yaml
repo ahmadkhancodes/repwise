@@ -52,6 +52,9 @@ tags:
     element:
       id: custom-delete
     direction: DOWN
+    # The edit form is 4 screens tall; on the iOS simulator each swipe + hierarchy read takes
+    # ~3 s, so Maestro's 20 s default ran out one swipe short of the button.
+    timeout: 60000
 - tapOn:
     id: custom-delete
 - tapOn:
