@@ -1,0 +1,126 @@
+name: Claude agent (API)
+
+# Runs the remaining Repwise work with Claude Code on the owner's Anthropic API key
+# (secret ANTHROPIC_API_KEY), so nothing uses the owner's Claude subscription limit.
+#
+# One run = one step of the top open task in docs/orchestration/API_QUEUE.md.
+#   1. Claude works on that task (fix, test, push, dispatch E2E, or merge).
+#   2. If Claude dispatched E2E/recording runs, a plain shell step waits for them (no tokens used).
+#   3. If open tasks remain and `chain` > 0, the workflow starts the next run itself.
+# Start it once from the Actions tab; it then continues by itself until the queue is done.
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Extra instruction for this run (empty = continue the queue)'
+        type: string
+        default: ''
+      model:
+        description: 'Model (empty = the model tagged on the next queue task)'
+        type: string
+        default: ''
+      chain:
+        description: 'How many more runs this may start automatically'
+        type: number
+        default: 10
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: claude-agent
+  cancel-in-progress: false
+
+env:
+  CI: '1'
+  EXPO_NO_TELEMETRY: '1'
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REPO: ${{ github.repository }}
+
+jobs:
+  agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Pick model
+        id: pick
+        run: |
+          m="${{ inputs.model }}"
+          if [ -z "$m" ]; then
+            tag=$(grep -m1 -E '^- \[ \]' docs/orchestration/API_QUEUE.md | grep -oE '\((opus|sonnet)\)' | tr -d '()' || true)
+            case "$tag" in opus) m=claude-opus-5-5 ;; *) m=claude-sonnet-5-5 ;; esac
+          fi
+          echo "model=$m" >> "$GITHUB_OUTPUT"
+          git config user.name "repwise-claude-agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p .claude-run
+
+      - name: Claude works on the next task
+        uses: anthropics/claude-code-action@v1
+        env:
+          BASH_DEFAULT_TIMEOUT_MS: '1800000'
+          BASH_MAX_TIMEOUT_MS: '3600000'
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: >-
+            --model ${{ steps.pick.outputs.model }}
+            --max-turns 120
+            --allowedTools "Bash,Read,Edit,Write,Glob,Grep,TodoWrite"
+          prompt: |
+            You are the Repwise build agent, running in GitHub Actions on the owner's API key.
+            Spend tokens carefully: read only what you need, and never paste long logs.
+            Quality must not drop: UI, speed and a gym-ready feel are non-negotiable.
+
+            Before you start, read:
+            - CLAUDE.md;
+            - docs/orchestration/API_QUEUE.md, which holds the task queue and all rules for these runs;
+            - docs/PROGRESS.md (only its last ~40 lines).
+
+            Then do the FIRST open task (`- [ ]`) in API_QUEUE.md, following the rules there.
+            Extra instruction from the owner for this run (may be empty): ${{ inputs.task }}
+
+      - name: Wait for dispatched E2E / recording runs (no tokens used)
+        if: always()
+        run: |
+          [ -f .claude-run/wait ] || { echo "nothing to wait for"; exit 0; }
+          sleep 90
+          deadline=$(( $(date +%s) + 270*60 ))
+          while read -r wf branch; do
+            [ -z "$wf" ] && continue
+            while :; do
+              s=$(gh api "repos/$REPO/actions/workflows/$wf/runs?branch=$branch&per_page=1" --jq '.workflow_runs[0].status // "none"')
+              echo "$(date -u +%H:%M) $wf@$branch: $s"
+              [ "$s" = completed ] && break
+              [ "$(date +%s)" -gt "$deadline" ] && { echo "wait deadline reached"; break; }
+              sleep 120
+            done
+          done < .claude-run/wait
+
+      - name: Start the next run if tasks remain
+        if: always()
+        run: |
+          git fetch -q origin main
+          open=$(git show origin/main:docs/orchestration/API_QUEUE.md | grep -cE '^- \[ \]' || true)
+          left=${{ inputs.chain }}
+          echo "open tasks: $open, chain left: $left"
+          if [ "$open" -gt 0 ] && [ "$left" -gt 0 ]; then
+            gh api -X POST "repos/$REPO/actions/workflows/claude-agent.yml/dispatches" \
+              -f ref=main -f "inputs[chain]=$(( left - 1 ))"
+          fi
