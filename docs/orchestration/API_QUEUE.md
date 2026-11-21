@@ -85,6 +85,11 @@
     If `screen-quiz-goal` never appears even after a re-tap, treat it as an iOS app bug in onboarding navigation and fix it in the app.
     Use opus for this task from now on.
 
+  - MUSIC CHOSEN (21 Nov, 22:50 UTC): use `assets-dev/music/raving-energy.mp3`. Its licence is verified; see `assets-dev/music/LICENSE.md`. Mix it as described below, looping with `-stream_loop -1`.
+  - SENT TO OWNER (22:50 UTC): a 13.4 min partial video (tour 44947606784 on bcf6c9e, which failed at `swap-dinner` after Eat). It already covers onboarding, Today, the workout, the rest timer, the finish and Eat.
+    - The final video only needs the tour to run end to end. Fix the `swap-dinner` step (sheet or retry timing, or `optional: true`).
+    - Make the rest timer shorter in the tour: tap Skip / -15 after about 5 s, so the video doesn't sit through 2-minute rests.
+    - Then record again.
   - OWNER REQUEST (21 Nov, 20:50 UTC): add background music to the final video: "nice, motivating gym music".
     - **Licence:** use ONLY a track whose licence you have verified on its own page: CC0 / public domain preferred, CC-BY 4.0 acceptable with attribution. No commercial or copyrighted songs, and nothing from YouTube.
       - Good sources: Free Music Archive (filter by CC0 or CC-BY), OpenGameArt (CC0), or incompetech.com (Kevin MacLeod, CC-BY 4.0; check the licence on the track page).
