@@ -23,11 +23,6 @@ tags:
       true: ${typeof TOUR_RECORDING !== 'undefined' && TOUR_RECORDING === 'true'}
     commands:
       # ---------- start: mark the video, first launch with notifications not yet decided ----------
-      - runScript:
-          file: stub.js
-          env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=start
       - launchApp:
           clearState: true
           permissions:
@@ -37,7 +32,13 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "screen-welcome"
-          timeout: 20000
+          timeout: 60000
+      # Mark the video start once the app is up (the reinstall before it shows the home screen for ~1 min).
+      - runScript:
+          file: stub.js
+          env:
+            STUB_URL: ${STUB_URL}
+            ACTION: mark?name=start
       - waitForAnimationToEnd:
           timeout: 3000
       - extendedWaitUntil:
@@ -69,11 +70,12 @@ tags:
           optional: true
       - tapOn:
           id: "welcome-start"
+          optional: true
       # The tap can be lost right after the carousel swipes: tap once more if the quiz did not open.
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-goal"
-          timeout: 3000
+          timeout: 30000
           optional: true
       - runFlow:
           when:
@@ -82,12 +84,13 @@ tags:
           commands:
             - tapOn:
                 id: "welcome-start"
+                optional: true
 
       # ---------- Quiz: goal (auto-advances) ----------
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-goal"
-          timeout: 8000
+          timeout: 30000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -95,11 +98,12 @@ tags:
           optional: true
       - tapOn:
           id: "option-fat_loss"
+          optional: true
       # about: sex + year of birth
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-about"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -107,6 +111,7 @@ tags:
           optional: true
       - tapOn:
           id: "option-male"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -114,11 +119,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
       # body: height + weight wheels (prefilled)
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-body"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -126,11 +132,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
       # target weight (optional for fat loss): decide later
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-target"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -138,11 +145,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-skip"
+          optional: true
       # experience (auto-advances)
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-experience"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -150,11 +158,12 @@ tags:
           optional: true
       - tapOn:
           id: "option-intermediate"
+          optional: true
       # training days: 4 a week, spread from today
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-days"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -162,6 +171,7 @@ tags:
           optional: true
       - tapOn:
           id: "days-count-4"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -169,11 +179,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
       # session length (auto-advances)
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-length"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -181,13 +192,15 @@ tags:
           optional: true
       - tapOn:
           id: "option-60"
+          optional: true
       # equipment: a full gym
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-equipment"
-          timeout: 5000
+          timeout: 20000
       - tapOn:
           id: "option-gym"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -195,11 +208,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
       # injuries: none
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-injuries"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -207,11 +221,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-skip"
+          optional: true
       # daily activity (auto-advances)
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-activity"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -219,11 +234,12 @@ tags:
           optional: true
       - tapOn:
           id: "option-moderate"
+          optional: true
       # diet (auto-advances)
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-diet"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -231,11 +247,12 @@ tags:
           optional: true
       - tapOn:
           id: "option-omnivore"
+          optional: true
       # foods to avoid: no mushrooms
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-avoid"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -257,11 +274,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
       # cuisines: a few favourites
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-cuisines"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -286,11 +304,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
       # kitchen: budget + cooking time (defaults)
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-kitchen"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -298,11 +317,12 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
       # meals per day → Build my plan
       - extendedWaitUntil:
           visible:
             id: "screen-quiz-meals"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -310,12 +330,13 @@ tags:
           optional: true
       - tapOn:
           id: "quiz-next"
+          optional: true
 
       # ---------- S06 reminders primer → the real iOS permission dialog ----------
       - extendedWaitUntil:
           visible:
             id: "screen-notify"
-          timeout: 8000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -323,6 +344,7 @@ tags:
           optional: true
       - tapOn:
           id: "notify-allow"
+          optional: true
       - extendedWaitUntil:
           visible: "Allow"
           timeout: 6000
@@ -353,7 +375,7 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "reveal-targets"
-          timeout: 15000
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 3000
       - extendedWaitUntil:
@@ -381,6 +403,7 @@ tags:
           optional: true
       - tapOn:
           id: "plan-continue"
+          optional: true
       # Paywall only when payments are on (off at this point of the tour).
       - tapOn:
           id: "paywall-close"
@@ -390,7 +413,7 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "screen-today"
-          timeout: 15000
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 3000
       - extendedWaitUntil:
@@ -446,6 +469,7 @@ tags:
           commands:
             - tapOn:
                 id: "start-workout"
+                optional: true
       - runFlow:
           # Rest day (no Start on Today): start from Train instead.
           when:
@@ -454,16 +478,32 @@ tags:
           commands:
             - tapOn:
                 id: "tab-train"
+                optional: true
+            # Retry once if the next screen has not appeared (a lost tap must not end the video).
             - extendedWaitUntil:
                 visible:
                   id: "train-start"
                 timeout: 10000
+                optional: true
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "train-start"
+                commands:
+                  - tapOn:
+                      id: "tab-train"
+                      optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "train-start"
+                timeout: 20000
             - tapOn:
                 id: "train-start"
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "screen-workout"
-          timeout: 15000
+          timeout: 20000
       - runFlow:
           when:
             visible:
@@ -476,6 +516,7 @@ tags:
                 optional: true
             - tapOn:
                 id: "player-start"
+                optional: true
       - runFlow:
           # Empty workout (rest day): add an exercise from the bundled catalogue.
           when:
@@ -484,15 +525,18 @@ tags:
           commands:
             - tapOn:
                 id: "player-empty-action"
+                optional: true
             - tapOn:
                 id: "pick-search"
+                optional: true
             - inputText: "bench press"
             - tapOn:
                 id: "exercise-row-barbell-bench-press"
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "player-clock"
-          timeout: 10000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -506,10 +550,25 @@ tags:
           commands:
             - tapOn:
                 id: "exercise-0-open"
+                optional: true
+            # Retry once if the next screen has not appeared (a lost tap must not end the video).
             - extendedWaitUntil:
                 visible:
                   id: "screen-exercise"
-                timeout: 8000
+                timeout: 10000
+                optional: true
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "screen-exercise"
+                commands:
+                  - tapOn:
+                      id: "exercise-0-open"
+                      optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-exercise"
+                timeout: 20000
             - waitForAnimationToEnd:
                 timeout: 2000
             - extendedWaitUntil:
@@ -533,6 +592,7 @@ tags:
                 commands:
                   - tapOn:
                       id: "ex-back"
+                      optional: true
             - runFlow:
                 when:
                   visible:
@@ -540,6 +600,7 @@ tags:
                 commands:
                   - tapOn:
                       id: "exercise-back"
+                      optional: true
             - runFlow:
                 when:
                   visible:
@@ -549,10 +610,11 @@ tags:
                 commands:
                   - tapOn:
                       id: "back"
+                      optional: true
             - extendedWaitUntil:
                 visible:
                   id: "player-clock"
-                timeout: 8000
+                timeout: 20000
       # Set 1: weight and reps with the stepper editor, then log.
       - runFlow:
           when:
@@ -561,10 +623,25 @@ tags:
           commands:
             - tapOn:
                 id: "exercise-0-set-0-weight"
+                optional: true
+            # Retry once if the next screen has not appeared (a lost tap must not end the video).
             - extendedWaitUntil:
                 visible:
                   id: "set-editor-weight"
-                timeout: 5000
+                timeout: 10000
+                optional: true
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "set-editor-weight"
+                commands:
+                  - tapOn:
+                      id: "exercise-0-set-0-weight"
+                      optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "set-editor-weight"
+                timeout: 20000
             - extendedWaitUntil:
                 visible:
                   id: "tour-pause"
@@ -572,10 +649,13 @@ tags:
                 optional: true
             - tapOn:
                 id: "set-editor-weight-inc"
+                optional: true
             - tapOn:
                 id: "set-editor-weight-inc"
+                optional: true
             - tapOn:
                 id: "set-editor-reps-inc"
+                optional: true
             - extendedWaitUntil:
                 visible:
                   id: "tour-pause"
@@ -583,6 +663,7 @@ tags:
                 optional: true
             - tapOn:
                 id: "set-editor-log"
+                optional: true
       - runFlow:
           when:
             visible:
@@ -592,55 +673,94 @@ tags:
           commands:
             - tapOn:
                 id: "player-log"
-      # Rest timer: open the big timer, add 15 s, watch it a moment, skip.
+                optional: true
+      # Rest timer: open the big timer, take 15 s off, skip. About 5 s per rest so the video never sits
+      # through a real 2-minute rest. A ticking countdown never "settles", so every tap while a rest runs
+      # uses a short settle wait (Maestro would otherwise wait many seconds per tap).
       - extendedWaitUntil:
           visible:
             id: "rest-bar"
-          timeout: 5000
+          timeout: 20000
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 2200
-          optional: true
-      - runFlow:
-          when:
-            visible:
-              id: "rest-bar-open"
-          commands:
-            - tapOn:
-                id: "rest-bar-open"
-            - extendedWaitUntil:
-                visible:
-                  id: "rest-time"
-                timeout: 5000
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 2000
-                optional: true
-            - tapOn:
-                id: "rest-plus"
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 3000
-                optional: true
-            - tapOn:
-                id: "rest-skip"
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
           timeout: 1500
           optional: true
-      # Set 2: one tap on the row tick (or the thumb-zone button), rest a moment, skip.
+      - tapOn:
+          id: "rest-bar-open"
+          waitToSettleTimeoutMs: 400
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "rest-time"
+          timeout: 5000
+          optional: true
       - runFlow:
           when:
             visible:
-              id: "exercise-0-set-1-check"
+              id: "rest-time"
+          commands:
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "rest-minus"
+                waitToSettleTimeoutMs: 400
+                optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "tour-pause"
+                timeout: 1500
+                optional: true
+            - tapOn:
+                id: "rest-skip"
+                waitToSettleTimeoutMs: 400
+                optional: true
+      # A lost Skip tap: try once more, then close the sheet; the rest bar is skipped below either way.
+      - runFlow:
+          when:
+            visible:
+              id: "rest-skip"
           commands:
             - tapOn:
-                id: "exercise-0-set-1-check"
+                id: "rest-skip"
+                waitToSettleTimeoutMs: 400
+                optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "rest-sheet-close"
+          commands:
+            - tapOn:
+                id: "rest-sheet-close"
+                waitToSettleTimeoutMs: 400
+                optional: true
+      - tapOn:
+          id: "rest-bar-skip"
+          waitToSettleTimeoutMs: 400
+          optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "rest-bar-skip"
+          commands:
+            - tapOn:
+                id: "rest-bar-skip"
+                waitToSettleTimeoutMs: 400
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 1200
+          optional: true
+      # Set 2: one tap on the row tick (or the thumb-zone button), rest a moment, skip.
+      - tapOn:
+          id: "exercise-0-set-1-check"
+          waitToSettleTimeoutMs: 400
+          optional: true
       - runFlow:
           when:
             notVisible:
@@ -650,38 +770,59 @@ tags:
           commands:
             - tapOn:
                 id: "player-log"
+                waitToSettleTimeoutMs: 400
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
-          timeout: 3000
+          timeout: 3500
           optional: true
       - tapOn:
           id: "rest-bar-skip"
+          waitToSettleTimeoutMs: 400
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 1500
-          optional: true
-      # Set 3: the thumb-zone "Log set" button.
       - runFlow:
           when:
             visible:
-              id: "player-log"
+              id: "rest-bar-skip"
           commands:
             - tapOn:
-                id: "player-log"
+                id: "rest-bar-skip"
+                waitToSettleTimeoutMs: 400
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
-          timeout: 2500
+          timeout: 1200
+          optional: true
+      # Set 3: the thumb-zone "Log set" button.
+      - tapOn:
+          id: "player-log"
+          waitToSettleTimeoutMs: 400
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "tour-pause"
+          timeout: 3500
           optional: true
       - tapOn:
           id: "rest-bar-skip"
+          waitToSettleTimeoutMs: 400
           optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "rest-bar-skip"
+          commands:
+            - tapOn:
+                id: "rest-bar-skip"
+                waitToSettleTimeoutMs: 400
+                optional: true
       # Finish (confirm: the other exercises are not done) → summary.
       - tapOn:
           id: "player-finish"
+          waitToSettleTimeoutMs: 400
+          optional: true
       - runFlow:
           when:
             visible:
@@ -694,10 +835,11 @@ tags:
                 optional: true
             - tapOn:
                 id: "finish-confirm"
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "screen-summary"
-          timeout: 10000
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 3000
       - extendedWaitUntil:
@@ -716,18 +858,34 @@ tags:
           optional: true
       - tapOn:
           id: "summary-done"
+          optional: true
 
       # ---------- Train: week strip, today's session, history ----------
       - extendedWaitUntil:
           visible:
             id: "tab-train"
-          timeout: 8000
+          timeout: 20000
       - tapOn:
           id: "tab-train"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "train-week-strip"
           timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "train-week-strip"
+          commands:
+            - tapOn:
+                id: "tab-train"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "train-week-strip"
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -741,6 +899,7 @@ tags:
           commands:
             - tapOn:
                 id: "day-${output.today}"
+                optional: true
             - extendedWaitUntil:
                 visible:
                   id: "tour-pause"
@@ -748,6 +907,7 @@ tags:
                 optional: true
             - tapOn:
                 id: "day-${output.today}"
+                optional: true
       - swipe:
           start: 50%, 70%
           end: 50%, 40%
@@ -764,10 +924,11 @@ tags:
           optional: true
       - tapOn:
           id: "train-tabs-history"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "history-0"
-          timeout: 8000
+          timeout: 20000
           optional: true
       - extendedWaitUntil:
           visible:
@@ -776,18 +937,34 @@ tags:
           optional: true
       - tapOn:
           id: "train-tabs-week"
+          optional: true
 
       # ---------- Eat: rings, tick a meal, swap, recipe, cook mode, week ----------
       - tapOn:
           id: "tab-eat"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "meal-lunch"
-          timeout: 15000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "meal-lunch"
+          commands:
+            - tapOn:
+                id: "tab-eat"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "meal-lunch"
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "eat-rings"
-          timeout: 5000
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 2000
       - extendedWaitUntil:
@@ -800,6 +977,7 @@ tags:
             id: "tick-lunch"
           direction: DOWN
           centerElement: true
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -807,6 +985,7 @@ tags:
           optional: true
       - tapOn:
           id: "tick-lunch"
+          optional: true
       - extendedWaitUntil:
           visible: ".*logged"
           timeout: 4000
@@ -821,41 +1000,62 @@ tags:
             id: "swap-dinner"
           direction: DOWN
           centerElement: true
+          optional: true
       - tapOn:
           id: "swap-dinner"
+          optional: true
       - extendedWaitUntil:
           visible:
-            id: "swap-option-0"
-          timeout: 5000
+            id: "swap-sheet"
+          timeout: 10000
           optional: true
       # The first tap can land while the lunch toast/list is still settling: tap once more if the sheet is not up.
       - runFlow:
           when:
             notVisible:
-              id: "swap-option-0"
+              id: "swap-sheet"
           commands:
             - scrollUntilVisible:
                 element:
                   id: "swap-dinner"
                 direction: DOWN
                 centerElement: true
+                optional: true
             - tapOn:
                 id: "swap-dinner"
+                optional: true
+      # Options appear once the engine has looked (a skeleton shows first).
       - extendedWaitUntil:
           visible:
             id: "swap-option-0"
-          timeout: 10000
+          timeout: 20000
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
           timeout: 2200
           optional: true
-      - tapOn:
-          id: "swap-option-0"
-      - extendedWaitUntil:
-          visible: "Swapped to.*"
-          timeout: 4000
-          optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "swap-option-0"
+          commands:
+            - tapOn:
+                id: "swap-option-0"
+                optional: true
+            - extendedWaitUntil:
+                visible: "Swapped to.*"
+                timeout: 4000
+                optional: true
+      # Never leave the sheet open over the rest of the tour.
+      - runFlow:
+          when:
+            visible:
+              id: "swap-sheet-close"
+          commands:
+            - tapOn:
+                id: "swap-sheet-close"
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -867,12 +1067,28 @@ tags:
             id: "meal-dinner"
           direction: DOWN
           centerElement: true
+          optional: true
       - tapOn:
           id: "meal-dinner"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-recipe"
-          timeout: 8000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-recipe"
+          commands:
+            - tapOn:
+                id: "meal-dinner"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-recipe"
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 2000
       - extendedWaitUntil:
@@ -885,6 +1101,7 @@ tags:
             id: "recipe-ingredients"
           direction: DOWN
           centerElement: true
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -903,8 +1120,10 @@ tags:
           element:
             id: "servings-inc"
           direction: UP
+          optional: true
       - tapOn:
           id: "servings-inc"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -912,6 +1131,7 @@ tags:
           optional: true
       - tapOn:
           id: "start-cook"
+          optional: true
       - extendedWaitUntil:
           visible: "Step 1 of .*"
           timeout: 8000
@@ -922,6 +1142,7 @@ tags:
           optional: true
       - tapOn:
           id: "cook-next"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -934,6 +1155,7 @@ tags:
           commands:
             - tapOn:
                 id: "cook-next"
+                optional: true
             - extendedWaitUntil:
                 visible:
                   id: "tour-pause"
@@ -941,26 +1163,57 @@ tags:
                 optional: true
       - tapOn:
           id: "cook-close"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "start-cook"
-          timeout: 5000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "start-cook"
+          commands:
+            - tapOn:
+                id: "cook-close"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "start-cook"
+          timeout: 20000
       - tapOn:
           id: "back"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-eat"
-          timeout: 8000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-eat"
+          commands:
+            - tapOn:
+                id: "back"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-eat"
+          timeout: 20000
       # The week view, then back to the day.
       - scrollUntilVisible:
           element:
             text: "Week"
           direction: UP
+          optional: true
       - tapOn: "Week"
       - extendedWaitUntil:
           visible:
             id: "week-days"
-          timeout: 5000
+          timeout: 20000
           optional: true
       - extendedWaitUntil:
           visible:
@@ -972,10 +1225,25 @@ tags:
       # ---------- Progress: log today's weight, body, heatmap ----------
       - tapOn:
           id: "tab-progress"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-progress"
           timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-progress"
+          commands:
+            - tapOn:
+                id: "tab-progress"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-progress"
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 2000
       - extendedWaitUntil:
@@ -985,14 +1253,31 @@ tags:
           optional: true
       - tapOn:
           id: "progress-log-weight"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-progress-log"
-          timeout: 5000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-progress-log"
+          commands:
+            - tapOn:
+                id: "progress-log-weight"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-progress-log"
+          timeout: 20000
       - tapOn:
           id: "log-day-today"
+          optional: true
       - tapOn:
           id: "log-weight"
+          optional: true
       - inputText: "82.4"
       - extendedWaitUntil:
           visible:
@@ -1001,6 +1286,7 @@ tags:
           optional: true
       - tapOn:
           id: "log-save"
+          optional: true
       - extendedWaitUntil:
           visible: "Weight saved"
           timeout: 5000
@@ -1008,7 +1294,7 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "screen-progress"
-          timeout: 5000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1019,6 +1305,7 @@ tags:
             id: "nav-body"
           direction: DOWN
           centerElement: true
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1026,10 +1313,25 @@ tags:
           optional: true
       - tapOn:
           id: "nav-body"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "weight-chart"
-          timeout: 8000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "weight-chart"
+          commands:
+            - tapOn:
+                id: "nav-body"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "weight-chart"
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 2000
       - extendedWaitUntil:
@@ -1039,17 +1341,34 @@ tags:
           optional: true
       - tapOn:
           id: "back"
+          optional: true
       - scrollUntilVisible:
           element:
             id: "nav-heatmap"
           direction: DOWN
           centerElement: true
+          optional: true
       - tapOn:
           id: "nav-heatmap"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "body-map"
-          timeout: 8000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "body-map"
+          commands:
+            - tapOn:
+                id: "nav-heatmap"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "body-map"
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1057,6 +1376,7 @@ tags:
           optional: true
       - tapOn:
           id: "heatmap-view-back"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1064,18 +1384,48 @@ tags:
           optional: true
       - tapOn:
           id: "back"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-progress"
-          timeout: 5000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-progress"
+          commands:
+            - tapOn:
+                id: "back"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-progress"
+          timeout: 20000
 
       # ---------- Library: muscle chip, an exercise with its muscle map ----------
       - tapOn:
           id: "tab-library"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-library"
           timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-library"
+          commands:
+            - tapOn:
+                id: "tab-library"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-library"
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 2000
       - extendedWaitUntil:
@@ -1085,6 +1435,7 @@ tags:
           optional: true
       - tapOn:
           id: "muscle-chip-chest"
+          optional: true
       - extendedWaitUntil:
           visible: "Results"
           timeout: 5000
@@ -1097,10 +1448,11 @@ tags:
       - tapOn:
           id: "exercise-row-.*"
           index: 0
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "exercise-media"
-          timeout: 8000
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 2000
       - extendedWaitUntil:
@@ -1127,10 +1479,25 @@ tags:
           optional: true
       - tapOn:
           id: "exercise-back"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-library"
-          timeout: 5000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-library"
+          commands:
+            - tapOn:
+                id: "exercise-back"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-library"
+          timeout: 20000
       - tapOn:
           id: "muscle-chip-chest"
           optional: true
@@ -1153,7 +1520,7 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "checkin-progress"
-          timeout: 15000
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1166,6 +1533,7 @@ tags:
           commands:
             - tapOn:
                 id: "checkin-skip-weight"
+                optional: true
       - runFlow:
           when:
             visible:
@@ -1173,14 +1541,17 @@ tags:
           commands:
             - tapOn:
                 id: "checkin-next"
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "energy-ok"
-          timeout: 5000
+          timeout: 20000
       - tapOn:
           id: "energy-ok"
+          optional: true
       - tapOn:
           id: "sleep-good"
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1188,10 +1559,25 @@ tags:
           optional: true
       - tapOn:
           id: "checkin-next"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "checkin-summary"
-          timeout: 5000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "checkin-summary"
+          commands:
+            - tapOn:
+                id: "checkin-next"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "checkin-summary"
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1199,10 +1585,25 @@ tags:
           optional: true
       - tapOn:
           id: "checkin-next"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "checkin-volume"
-          timeout: 5000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "checkin-volume"
+          commands:
+            - tapOn:
+                id: "checkin-next"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "checkin-volume"
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1210,6 +1611,7 @@ tags:
           optional: true
       - tapOn:
           id: "checkin-approve"
+          optional: true
       - extendedWaitUntil:
           visible: "Next week is planned around you"
           timeout: 8000
@@ -1220,10 +1622,25 @@ tags:
           optional: true
       - tapOn:
           id: "checkin-finish"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-today"
-          timeout: 8000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-today"
+          commands:
+            - tapOn:
+                id: "checkin-finish"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-today"
+          timeout: 20000
 
       # ---------- Assistant card on Today (only when a rule fired today) ----------
       - runFlow:
@@ -1249,7 +1666,7 @@ tags:
             - extendedWaitUntil:
                 visible:
                   id: "card-detail-text"
-                timeout: 4000
+                timeout: 20000
                 optional: true
             - extendedWaitUntil:
                 visible:
@@ -1268,10 +1685,25 @@ tags:
       # ---------- Settings, scrolled end to end ----------
       - tapOn:
           id: "open-settings"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-settings"
-          timeout: 8000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-settings"
+          commands:
+            - tapOn:
+                id: "open-settings"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-settings"
+          timeout: 20000
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1315,6 +1747,7 @@ tags:
             id: "app-version"
           direction: DOWN
           centerElement: true
+          optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-pause"
@@ -1324,12 +1757,28 @@ tags:
           element:
             id: "open-profile"
           direction: UP
+          optional: true
       - tapOn:
           id: "back"
+          optional: true
+      # Retry once if the next screen has not appeared (a lost tap must not end the video).
       - extendedWaitUntil:
           visible:
             id: "screen-today"
-          timeout: 8000
+          timeout: 10000
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-today"
+          commands:
+            - tapOn:
+                id: "back"
+                optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-today"
+          timeout: 20000
 
       # ---------- Paywall: payments switched on at the stub, reopen, Settings → Subscription ----------
       - runScript:
@@ -1346,7 +1795,7 @@ tags:
             - extendedWaitUntil:
                 visible:
                   id: "screen-today"
-                timeout: 15000
+                timeout: 20000
             - extendedWaitUntil:
                 visible:
                   id: "tour-pause"
@@ -1354,15 +1803,31 @@ tags:
                 optional: true
             - tapOn:
                 id: "open-settings"
+                optional: true
+            # Retry once if the next screen has not appeared (a lost tap must not end the video).
             - extendedWaitUntil:
                 visible:
                   id: "screen-settings"
-                timeout: 8000
+                timeout: 10000
+                optional: true
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "screen-settings"
+                commands:
+                  - tapOn:
+                      id: "open-settings"
+                      optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-settings"
+                timeout: 20000
             - scrollUntilVisible:
                 element:
                   id: "open-subscription"
                 direction: DOWN
                 centerElement: true
+                optional: true
             - extendedWaitUntil:
                 visible:
                   id: "tour-pause"
@@ -1370,10 +1835,25 @@ tags:
                 optional: true
             - tapOn:
                 id: "open-subscription"
+                optional: true
+            # Retry once if the next screen has not appeared (a lost tap must not end the video).
             - extendedWaitUntil:
                 visible:
                   id: "subscription-see-plans"
-                timeout: 8000
+                timeout: 10000
+                optional: true
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "subscription-see-plans"
+                commands:
+                  - tapOn:
+                      id: "open-subscription"
+                      optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "subscription-see-plans"
+                timeout: 20000
             - extendedWaitUntil:
                 visible:
                   id: "tour-pause"
@@ -1381,10 +1861,25 @@ tags:
                 optional: true
             - tapOn:
                 id: "subscription-see-plans"
+                optional: true
+            # Retry once if the next screen has not appeared (a lost tap must not end the video).
             - extendedWaitUntil:
                 visible:
                   id: "screen-paywall"
                 timeout: 10000
+                optional: true
+            - runFlow:
+                when:
+                  notVisible:
+                    id: "screen-paywall"
+                commands:
+                  - tapOn:
+                      id: "subscription-see-plans"
+                      optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-paywall"
+                timeout: 20000
             - waitForAnimationToEnd:
                 timeout: 3000
             - extendedWaitUntil:
@@ -1419,10 +1914,11 @@ tags:
                 optional: true
             - tapOn:
                 id: "paywall-close"
+                optional: true
             - extendedWaitUntil:
                 visible:
                   id: "screen-subscription"
-                timeout: 5000
+                timeout: 20000
                 optional: true
             - tapOn:
                 id: "back"
@@ -1430,7 +1926,7 @@ tags:
             - extendedWaitUntil:
                 visible:
                   id: "screen-settings"
-                timeout: 5000
+                timeout: 20000
                 optional: true
             - tapOn:
                 id: "back"
@@ -1448,7 +1944,7 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "screen-today"
-          timeout: 10000
+          timeout: 20000
       - waitForAnimationToEnd:
           timeout: 2000
       - extendedWaitUntil:

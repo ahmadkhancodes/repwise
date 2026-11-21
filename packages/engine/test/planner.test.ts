@@ -12,6 +12,8 @@ import {
   sessionFingerprint,
   swapExercise,
   swapMeal,
+  SWAP_TIERS,
+  withinSwapTier,
   weekdayMon0,
   type HistoryInput,
   type ProfileInput,
@@ -337,14 +339,40 @@ describe('planDay + swaps', () => {
     expect(alts.length).toBeLessThanOrEqual(3);
     for (const a of alts) {
       const r = recipeById.get(a.recipeId)!;
-      expect(Math.abs(a.kcal - meal.kcal)).toBeLessThanOrEqual(meal.kcal * 0.1);
-      expect(Math.abs(a.protein - meal.protein)).toBeLessThanOrEqual(Math.max(meal.protein * 0.1, 3));
+      // Every option fits at least the loosest swap tier (kcal ±15%, protein −10%…+35%).
+      expect(withinSwapTier(SWAP_TIERS[2], a, meal)).toBe(true);
       expect(r.allergens).not.toContain('nuts');
       expect(r.allergens).not.toContain('shellfish');
       expect(r.dietTags).toContain('halal');
       expect(day.meals.map((m) => m.recipeId)).not.toContain(a.recipeId);
       expect(a.servings).toBeGreaterThanOrEqual(r.scalable.min);
     }
+  });
+
+  test('swapMeal: every option fits a tier and the sheet is never empty for a planned meal', () => {
+    const tierOf = (a: { kcal: number; protein: number }, ref: { kcal: number; protein: number }) =>
+      SWAP_TIERS.findIndex((t) => withinSwapTier(t, a, ref));
+    for (const profile of [cutFemale, gymMale]) {
+      const plan = planWeek(profile, {}, catalogues, { now: NOW, weekStart: WEEK });
+      for (const day of plan.days) {
+        day.meals.forEach((meal, index) => {
+          const alts = swapMeal({ profile, history: {}, catalogues, day, index, now: NOW });
+          expect(alts.length).toBeGreaterThanOrEqual(1);
+          const tiers = alts.map((a) => tierOf(a, meal));
+          for (const t of tiers) expect(t).toBeGreaterThanOrEqual(0);
+          expect(new Set(alts.map((a) => a.recipeId)).size).toBe(alts.length);
+        });
+      }
+    }
+  });
+
+  test('withinSwapTier: protein may run high but not low', () => {
+    const ref = { kcal: 1000, protein: 40 };
+    expect(withinSwapTier(SWAP_TIERS[0], { kcal: 1090, protein: 43 }, ref)).toBe(true);
+    expect(withinSwapTier(SWAP_TIERS[0], { kcal: 1000, protein: 50 }, ref)).toBe(false);
+    expect(withinSwapTier(SWAP_TIERS[1], { kcal: 1140, protein: 53 }, ref)).toBe(true);
+    expect(withinSwapTier(SWAP_TIERS[1], { kcal: 1000, protein: 35 }, ref)).toBe(false);
+    expect(withinSwapTier(SWAP_TIERS[1], { kcal: 1200, protein: 40 }, ref)).toBe(false);
   });
 });
 

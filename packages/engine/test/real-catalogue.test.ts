@@ -17,6 +17,7 @@ import {
   exercisePatternKey,
   injuryOk,
   planWeek,
+  swapMeal,
   type Catalogues,
   type HistoryInput,
   type ProfileInput,
@@ -219,5 +220,36 @@ describe('real data: 100+ generated days pass macro, allergen, diet and protein-
 
   test('halal profiles never get pork; halal tag = content halal_friendly', () => {
     for (const d of days.filter((x) => x.profile.dietType === 'halal')) for (const m of d.day.meals) expect(recipeById.get(m.recipeId)!.proteinSource).not.toBe('pork');
+  });
+});
+
+describe('real data: meal swaps (RW-33)', () => {
+  // Tour profile (fat loss, omnivore, no mushrooms) plus the diet edge cases.
+  // Vegan: only 19 vegan breakfasts, so one big breakfast in 56 meals may have no match within ±15% kcal.
+  const profiles: [string, ProfileInput, number][] = [
+    ['fat-loss male omnivore', person({ goal: 'fat_loss', dislikes: ['mushrooms'] }), 0],
+    ['muscle-gain male', person({}), 0],
+    ['fat-loss female 3 meals', person({ goal: 'fat_loss', sex: 'female', weightKg: 68, heightCm: 165, mealsPerDay: 3 }), 0],
+    ['vegan', person({ dietType: 'vegan' }), 1],
+  ];
+  test.each(profiles)('%s: planned meals over two weeks have a swap (≤ %d without)', (_name, profile, maxEmpty) => {
+    const plans = simulate(profile, 2);
+    let empty = 0;
+    let total = 0;
+    const misses: string[] = [];
+    for (const plan of plans) {
+      for (const day of plan.days) {
+        day.meals.forEach((meal, index) => {
+          total++;
+          const alts = swapMeal({ profile, history: {}, catalogues, day, index, now: NOW });
+          if (alts.length === 0) {
+            empty++;
+            misses.push(`${day.date} ${meal.slot} ${meal.recipeId} ${meal.kcal}kcal ${Math.round(meal.protein)}g`);
+          }
+        });
+      }
+    }
+    expect(total).toBeGreaterThan(40);
+    if (empty > maxEmpty) throw new Error(`${empty}/${total} meals without a swap:\n${misses.join('\n')}`);
   });
 });

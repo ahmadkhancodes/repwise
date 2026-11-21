@@ -90,6 +90,7 @@
     - The final video only needs the tour to run end to end. Fix the `swap-dinner` step (sheet or retry timing, or `optional: true`).
     - Make the rest timer shorter in the tour: tap Skip / -15 after about 5 s, so the video doesn't sit through 2-minute rests.
     - Then record again.
+  - status (API run 6): swap-dinner failed because the sheet had NO options (app gap, not timing): engine swaps now fall back in tiers (D-SWAP-TIERS). Tour flow made robust (all OWNER PRIORITY items + ~5 s rests, D-TOUR-ROBUST); the video now starts at the welcome screen. today/05 Undo tap fixed (settle wait). e2e-ios on bcf6c9e also failed eat/04, notifications-settings, today/01 (not-visible, no app change since green 506cfa6: CI timing). Dispatched record-ios-tour + e2e-ios + e2e-android on main; waiting. Next run: if the tour is green, do steps 3–6 plus the music mix. Local ffmpeg: `pip install imageio-ffmpeg` (no system ffmpeg on the runner).
   - OWNER REQUEST (21 Nov, 20:50 UTC): add background music to the final video: "nice, motivating gym music".
     - **Licence:** use ONLY a track whose licence you have verified on its own page: CC0 / public domain preferred, CC-BY 4.0 acceptable with attribution. No commercial or copyrighted songs, and nothing from YouTube.
       - Good sources: Free Music Archive (filter by CC0 or CC-BY), OpenGameArt (CC0), or incompetech.com (Kevin MacLeod, CC-BY 4.0; check the licence on the track page).

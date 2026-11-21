@@ -34,9 +34,13 @@ tags:
     centerElement: true
 - tapOn:
     id: "today-tick-lunch"
+    waitToSettleTimeoutMs: 500
 # The Undo toast lasts 5 s and each assertion costs seconds on a CI simulator, so tap Undo straight
 # after the tick (it also proves the tick logged); the count assertion after it proves the restore.
-- tapOn: "Undo"
+# Short settle waits: the tick's ring animation kept Maestro "settling" past the 5 s toast on iOS.
+- tapOn:
+    text: "Undo"
+    waitToSettleTimeoutMs: 500
 - assertVisible:
     id: "meals-count"
     text: "0 of .* eaten"

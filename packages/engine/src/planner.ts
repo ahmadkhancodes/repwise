@@ -952,20 +952,51 @@ export function swapMeal(args: SwapMealArgs): PlannedMeal[] {
   );
   args.day.meals.forEach((m) => blocked.add(m.recipeId));
   const { pool } = recipeCandidates(ctx.catalogues.recipes, ctx.recConstraints, meal.slot, blocked, 1);
-  const options: PlannedMeal[] = [];
+  const count = args.count ?? 3;
+  const tiers: PlannedMeal[][] = SWAP_TIERS.map(() => []);
   const byId = new Map<string, Recipe>();
   for (const r of pool) {
-    if (countsAsProteinSource(r.proteinSource) && otherSources.has(r.proteinSource)) continue;
     if (r.perServing.kcal <= 0) continue;
+    const sameSource = countsAsProteinSource(r.proteinSource) && otherSources.has(r.proteinSource);
     const s = Math.min(r.scalable.max, Math.max(r.scalable.min, roundToIncrement(meal.kcal / r.perServing.kcal, 0.25)));
     const m = mealFromRecipe(r, meal.slot, s);
-    if (Math.abs(m.kcal - meal.kcal) > meal.kcal * 0.1) continue;
-    if (Math.abs(m.protein - meal.protein) > Math.max(meal.protein * 0.1, 3)) continue;
-    options.push(m);
+    const tier = SWAP_TIERS.findIndex((t) => (t.sameSourceOk || !sameSource) && withinSwapTier(t, m, meal));
+    if (tier < 0) continue;
+    tiers[tier]!.push(m);
     byId.set(r.id, r);
   }
+  // Strict matches first; looser tiers only fill the remaining places, so the sheet is never empty
+  // when anything reasonable exists.
   const rng = createRng(`${ctx.seed}/swapmeal/${args.day.date}/${args.index}`);
-  return sampleWithoutReplacement(rng, options, (m) => recipeWeight(byId.get(m.recipeId) as Recipe, { moreLike: ctx.moreLike }), args.count ?? 3);
+  const weight = (m: PlannedMeal) => recipeWeight(byId.get(m.recipeId) as Recipe, { moreLike: ctx.moreLike });
+  const out: PlannedMeal[] = [];
+  for (const options of tiers) {
+    if (out.length >= count) break;
+    out.push(...sampleWithoutReplacement(rng, options, weight, count - out.length));
+  }
+  return out;
+}
+
+/**
+ * Swap match tiers, tried in order. Tier 0 is RW-33 (kcal and protein ±10%, a different protein
+ * source from the rest of the day). Tier 1 allows kcal ±15% and protein −10%…+35% or +8 g, whichever
+ * is larger (more protein never hurts the day). Tier 2 also allows the day's protein sources again.
+ */
+export const SWAP_TIERS = [
+  { kcal: 0.1, proteinLow: 0.1, proteinHigh: 0.1, proteinHighMinG: 3, sameSourceOk: false },
+  { kcal: 0.15, proteinLow: 0.1, proteinHigh: 0.35, proteinHighMinG: 8, sameSourceOk: false },
+  { kcal: 0.15, proteinLow: 0.1, proteinHigh: 0.35, proteinHighMinG: 8, sameSourceOk: true },
+] as const;
+
+export function withinSwapTier(
+  t: (typeof SWAP_TIERS)[number],
+  m: { kcal: number; protein: number },
+  ref: { kcal: number; protein: number },
+): boolean {
+  if (Math.abs(m.kcal - ref.kcal) > ref.kcal * t.kcal) return false;
+  const d = m.protein - ref.protein;
+  if (d < -Math.max(ref.protein * t.proteinLow, 3)) return false;
+  return d <= Math.max(ref.protein * t.proteinHigh, t.proteinHighMinG);
 }
 
 // ---------------------------------------------------------------------------
