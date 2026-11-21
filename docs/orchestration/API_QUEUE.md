@@ -64,7 +64,8 @@
   - Owner request (21 Nov): "a full video recording on Apple iPhone of entire app. just simple plain natural recorded video, making sure onboarding and all must cover, and app must be in Dark Mode."
   - Steps:
     1. Merge the branch into main (test:all green) and push.
-    2. Dispatch `record-ios-tour.yml` on main and write `.claude-run/wait` with `record-ios-tour.yml main`.
+    2. To save time, start the recording AND the final E2E together on main: dispatch `record-ios-tour.yml`, `e2e-ios.yml` and `e2e-android.yml` on main, then write all three lines to `.claude-run/wait`.
+       The final-report task then reuses those E2E results; it only re-dispatches if main changed after them.
     3. Next run: download the artifact (`gh api .../actions/runs/<id>/artifacts`, then `.../actions/artifacts/<aid>/zip`).
     4. Extract about 12 frames with ffmpeg and LOOK at them. Check: dark mode applied; onboarding, Today, the workout with sets and rest timer, Train, Eat (tick, recipe, cook mode, swap), Progress, Library, Settings and the paywall all appear; nothing is stuck on a spinner or error.
     5. If anything is wrong, fix the tour flow (or the app bug it reveals) and re-record.
@@ -72,7 +73,8 @@
 
 - [ ] (sonnet) **Final green run on main and the final report to the owner.**
   - Steps:
-    1. Dispatch e2e-ios and e2e-android on main and wait (via `.claude-run/wait`).
+    1. Use the latest e2e-ios and e2e-android runs on main, if their head SHA equals the current main. Otherwise dispatch both on main and wait (via `.claude-run/wait`).
+       Also: if the newest e2e run on main is still in progress, write it to `.claude-run/wait` and end the run.
     2. If anything is red, add a new opus fix task ABOVE this one, then continue.
     3. When both are green, write `docs/FINAL_REPORT.md`, short and plain: what the app does; test counts (app, engine, server, content, E2E per platform, with run URLs); device bugs found and fixed; known limits; the Dark Mode tour video link.
     4. Open a GitHub issue titled "Repwise: tested app ready" with the report and video link, mentioning @ahmadkhancodes. End the issue body with the attribution footer:
