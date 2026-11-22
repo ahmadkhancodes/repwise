@@ -20,6 +20,13 @@ module.exports = defineConfig([
     ],
   },
   {
+    // One-off media scripts run by hand with Node; `@vercel/blob` is installed ad hoc for the run
+    // (scripts/media/pull-exercisedb.mjs), not an app dependency.
+    files: ['scripts/media/**/*.mjs'],
+    languageOptions: { globals: { Buffer: 'readonly', process: 'readonly', console: 'readonly' } },
+    rules: { 'import/no-unresolved': ['error', { ignore: ['^@vercel/blob$'] }] },
+  },
+  {
     // Perf audit r2 N1: the `@repwise/content` barrel evaluates ~1 MB of JSON and every zod schema.
     // App code imports only its types; values come from the data-free subpaths or the lazy catalogue.
     files: ['app/**/*.{ts,tsx}', 'src/**/*.{ts,tsx}'],
