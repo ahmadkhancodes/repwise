@@ -130,7 +130,14 @@ tags:
 - assertVisible: "Turn on reminders"
 - tapOn:
     id: "notify-later"
-# S07 plan build → W1 reveal (real planner output)
+# S07 "Building your plan": 3–5 s of status lines (≈1.2 s static with reduced motion / animations off)
+- extendedWaitUntil:
+    visible:
+      id: "build-status"
+    timeout: 5000
+- assertVisible:
+    id: "screen-plan-building"
+# → W1 reveal (real planner output)
 - extendedWaitUntil:
     visible:
       id: "screen-plan"

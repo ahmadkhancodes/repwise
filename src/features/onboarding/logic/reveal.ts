@@ -2,33 +2,127 @@
  * View-model helpers for the S07 plan reveal (W1). Pure: the numbers come from the saved plan; these
  * only shape them for display.
  */
-import { WEEKDAY_SHORT } from './options';
+import type { Cuisine, DietType, Goal } from '@/features/planner/engine';
 
-/** The build sequence; each line ticks when that part of the real computation is done. */
+import type { Location } from './answers';
+import {
+  CUISINE_OPTIONS,
+  DIET_OPTIONS,
+  GOAL_OPTIONS,
+  labelOf,
+  LOCATION_OPTIONS,
+  WEEKDAY_SHORT,
+} from './options';
+
+/** One status line of the build screen: what is happening, plus the user's own answer. */
+export type BuildLine = { text: string; detail: string | null };
+
+/** The answers the build lines quote back (a subset of the quiz `Answers`). */
+export type BuildAnswers = {
+  goal: Goal | null;
+  daysPerWeek: number | null;
+  sessionMin: number | null;
+  location: Location | null;
+  dietType: DietType | null;
+  cuisines: readonly Cuisine[];
+  mealsPerDay: number | null;
+};
+
+/** The real work behind the build screen, in plain words (no medical or AI claims). */
 export const BUILD_STEPS = [
-  'Calculating your calories and macros',
-  'Choosing your training split',
-  'Picking exercises for your equipment',
-  'Planning meals around your diet',
-  'Checking allergens and variety',
+  'Reading your goals…',
+  'Picking exercises for your kit…',
+  'Balancing your sets and rest…',
+  'Cooking up your meals…',
+  'Hitting your protein target…',
 ] as const;
-
-/** Minimum time on the build screen so the sequence is readable (the work itself is faster). */
-export const BUILD_MIN_MS = 2400;
-export const BUILD_TICK_MS = 420;
+export const BUILD_READY = 'Your plan is ready';
 
 /**
- * How many build lines are ticked after `elapsed` ms. Lines tick on a timer, but the last one waits
- * for the real plan (`done`), so the screen never claims work that has not happened.
+ * Timeline (owner, 22 Nov): every work line holds {@link BUILD_LINE_MS}, then "Your plan is ready"
+ * holds {@link BUILD_READY_HOLD_MS}: 5 × 680 + 700 = 4.1 s, inside the 3–5 s window. If the real
+ * plan takes longer, the last work line stays until it is saved (the screen never claims work that
+ * has not happened). Reduce motion: one static screen for {@link BUILD_REDUCED_MS}.
  */
-export function ticksAt(elapsed: number, done: boolean): number {
-  const byTime = Math.floor(elapsed / BUILD_TICK_MS);
-  const cap = done ? BUILD_STEPS.length : BUILD_STEPS.length - 1;
-  return Math.max(0, Math.min(cap, byTime));
+export const BUILD_LINE_MS = 680;
+export const BUILD_READY_HOLD_MS = 700;
+export const BUILD_MIN_MS = 3000;
+export const BUILD_MAX_MS = 5000;
+export const BUILD_REDUCED_MS = 1200;
+const WORK_MS = BUILD_STEPS.length * BUILD_LINE_MS;
+
+/** "4 days a week · 60 min" */
+export function scheduleLine(days: number | null, minutes: number | null): string | null {
+  const parts = [
+    days ? `${days} ${days === 1 ? 'day' : 'days'} a week` : null,
+    minutes ? `${minutes} min` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(' · ') : null;
 }
 
-export function revealReady(elapsed: number, done: boolean): boolean {
-  return done && elapsed >= BUILD_MIN_MS;
+/** "American & British meals"; no pick = the US/UK default (D-CUISINE-DEFAULT). */
+export function cuisineLine(cuisines: readonly Cuisine[], diet: DietType | null): string {
+  const picked = cuisines.filter((c) => c !== 'global');
+  const names = (picked.length ? picked : cuisines.length ? [] : (['american', 'british'] as const))
+    .map((c) => labelOf(CUISINE_OPTIONS, c))
+    .filter(Boolean);
+  const food =
+    names.length === 0
+      ? 'Meals from everywhere'
+      : names.length <= 2
+        ? `${names.join(' & ')} meals`
+        : `${names.slice(0, 2).join(', ')} & ${names.length - 2} more`;
+  const dietLabel = diet && diet !== 'omnivore' ? labelOf(DIET_OPTIONS, diet) : '';
+  return dietLabel ? `${dietLabel} · ${food}` : food;
+}
+
+/** The five work lines with the user's answers, then "Your plan is ready". Pure. */
+export function buildLines(a: BuildAnswers): BuildLine[] {
+  const location = LOCATION_OPTIONS.find((o) => o.value === a.location);
+  const meals = a.mealsPerDay ? `${a.mealsPerDay} meals a day` : null;
+  const details = [
+    labelOf(GOAL_OPTIONS, a.goal) || null,
+    location ? `${location.label} · ${location.detail ?? ''}`.replace(/ · $/, '') : null,
+    scheduleLine(a.daysPerWeek, a.sessionMin),
+    cuisineLine(a.cuisines, a.dietType),
+    meals,
+  ];
+  return [
+    ...BUILD_STEPS.map((text, i) => ({ text, detail: details[i] ?? null })),
+    { text: BUILD_READY, detail: null },
+  ];
+}
+
+/**
+ * Index of the line on screen after `elapsed` ms (0..5; 5 = "Your plan is ready"). Lines move on a
+ * timer, but "ready" waits for the saved plan (`done`).
+ */
+export function lineAt(elapsed: number, done: boolean): number {
+  const byTime = Math.max(0, Math.floor(elapsed / BUILD_LINE_MS));
+  return Math.min(byTime, done ? BUILD_STEPS.length : BUILD_STEPS.length - 1);
+}
+
+/** Ring progress 0..1: smooth with time, holds at the last work line until the plan is saved. */
+export function buildProgress(elapsed: number, done: boolean): number {
+  const p = Math.max(0, elapsed) / WORK_MS;
+  const cap = done ? 1 : (BUILD_STEPS.length - 1) / BUILD_STEPS.length;
+  return Math.min(cap, p);
+}
+
+/** When the reveal may show: after the full sequence (or the short static one) AND the real plan. */
+export function revealAt(reduced: boolean): number {
+  return reduced ? BUILD_REDUCED_MS : WORK_MS + BUILD_READY_HOLD_MS;
+}
+
+/**
+ * The reveal may show after the full sequence (or the short static one) AND once the real plan is
+ * saved (`doneAt`, ms since start; null = still working). A slow save still gets a beat on
+ * "Your plan is ready" before the reveal.
+ */
+export function revealReady(elapsed: number, doneAt: number | null, reduced = false): boolean {
+  if (doneAt === null) return false;
+  const hold = reduced ? 0 : BUILD_READY_HOLD_MS;
+  return elapsed >= Math.max(revealAt(reduced), doneAt + hold);
 }
 
 /** Share of the day's calories from each macro (4/4/9 kcal per g), each 0..1. */

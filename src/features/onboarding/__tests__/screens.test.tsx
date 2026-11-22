@@ -7,9 +7,12 @@ import { migrateDb } from '@/db/migrate';
 import { saveProfile } from '@/features/settings/repo';
 import { resetAnalyticsForTests, trackedEvents } from '@/services/analytics';
 import { useBillingStore } from '@/services/billing';
+import { haptics } from '@/services/haptics';
+import * as Reanimated from 'react-native-reanimated';
 
 import { fullAnswers } from '../__fixtures__/answers';
 import { saveQuiz } from '../actions';
+import { BUILD_LINE_MS, BUILD_REDUCED_MS, revealAt } from '../logic/reveal';
 import { NotifyScreen } from '../screens/NotifyScreen';
 import { PlanScreen } from '../screens/PlanScreen';
 import { QuizScreen } from '../screens/QuizScreen';
@@ -106,6 +109,71 @@ describe.each(SCHEMES)('onboarding screens (%s)', (scheme) => {
     );
     expect(screen.getAllByTestId(/^day-\d{4}-/)).toHaveLength(7);
     expect(screen.getByTestId('reveal-meals')).toBeTruthy();
+  });
+});
+
+/** A clock the test moves by hand. */
+function manualClock() {
+  const c = { now: 0, read: () => c.now };
+  return c;
+}
+
+describe.each(SCHEMES)('building your plan (%s)', (scheme) => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('rotates personal status lines for 3–5 s, then a light haptic and the reveal', async () => {
+    const light = jest.spyOn(haptics, 'light');
+    const success = jest.spyOn(haptics, 'success');
+    saveQuiz(fullAnswers({ daysPerWeek: 4, sessionMin: 60, cuisines: ['american', 'british'] }));
+    useOnboarding.getState().setAnswers(
+      fullAnswers({ daysPerWeek: 4, sessionMin: 60, cuisines: ['american', 'british'] }),
+    );
+    const clock = manualClock();
+    await renderThemed(<PlanScreen clock={clock.read} />, scheme);
+
+    expect(screen.getByTestId('build-status-text').props.children).toBe('Reading your goals…');
+    expect(screen.getByText('Lose fat')).toBeTruthy();
+
+    clock.now = BUILD_LINE_MS * 2 + 1;
+    await waitFor(() =>
+      expect(screen.getByTestId('build-status-text').props.children).toBe(
+        'Balancing your sets and rest…',
+      ),
+    );
+    expect(screen.getByText('4 days a week · 60 min')).toBeTruthy();
+
+    clock.now = BUILD_LINE_MS * 3 + 1;
+    await waitFor(() => expect(screen.getByText('American & British meals')).toBeTruthy());
+
+    clock.now = BUILD_LINE_MS * 5 + 1;
+    await waitFor(() =>
+      expect(screen.getByTestId('build-status-text').props.children).toBe('Your plan is ready'),
+    );
+    expect(screen.getByTestId('screen-plan-building')).toBeTruthy();
+    expect(light).not.toHaveBeenCalled();
+
+    clock.now = revealAt(false);
+    expect(await screen.findByTestId('screen-plan', {}, { timeout: 5000 })).toBeTruthy();
+    expect(light).toHaveBeenCalledTimes(1);
+    expect(success).not.toHaveBeenCalled();
+  });
+
+  it('reduce motion: one short static line', async () => {
+    jest.spyOn(Reanimated, 'useReducedMotion').mockReturnValue(true);
+    saveQuiz(fullAnswers());
+    useOnboarding.getState().setAnswers(fullAnswers());
+    const clock = manualClock();
+    await renderThemed(<PlanScreen clock={clock.read} />, scheme);
+    expect(screen.getByTestId('build-status-text').props.children).toBe('Putting it together…');
+    expect(screen.getByText('3 days a week · 45 min')).toBeTruthy();
+
+    clock.now = BUILD_REDUCED_MS - 1;
+    // Static: the line never rotates.
+    await new Promise((r) => setTimeout(r, 300));
+    expect(screen.getByTestId('build-status-text').props.children).toBe('Putting it together…');
+
+    clock.now = BUILD_REDUCED_MS;
+    expect(await screen.findByTestId('screen-plan', {}, { timeout: 5000 })).toBeTruthy();
   });
 });
 
