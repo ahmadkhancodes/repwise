@@ -136,7 +136,16 @@
 
 - [ ] (opus) **Animated exercise demos as the main exercise visual (owner, 22 Nov).**
   - What the owner wants: animated 3D demos (GIFs) of each exercise with the target muscles highlighted in red — the ExerciseDB style, e.g. a seated pec-deck GIF. The current green muscle maps stay, but as a SECONDARY visual: a "Muscles worked" section on the exercise detail, and a small chip or filter in the Library.
-  - **Licensing (do not skip).** Read the official terms before using any media and record what they say in `docs/DECISIONS.md`:
+  - **LICENCE CONFIRMED (owner, 22 Nov 2026).** Ahmad bought the ExerciseDB V1 licence, and the maintainer approved pulling and storing all the data. Log this as a decision (D-EXDB-LICENCE).
+    - **Pull ALL the V1 data:** every exercise's metadata (id, name, body part, target and secondary muscles, equipment, instructions) and every GIF, from the V1 endpoint (https://exercisedb.dev/, about 1,500 exercises).
+      - Write a script `scripts/media/pull-exercisedb.ts`: polite, with a concurrency of 4 and retries. Commit it.
+      - Save the metadata as `packages/content/exercisedb_v1.json`.
+    - **Store the media so it always loads fast, offline-first:**
+      1. BUNDLE in the app: animated WebP (convert with ffmpeg/libwebp; about 360 px, q≈70, loop) for every exercise our engine uses (the 283 in our catalogue, mapped by the media map), plus the ~150 most common extra ones. Store them under `assets/exercises/<exdbId>.webp` with a generated require-map module. Keep the added app size under about 40 MB; report the exact size.
+      2. Every OTHER V1 exercise: loaded remotely from the provider's GIF URL, using the `expo-image` memory-disk cache and prefetch. A bundled asset ALWAYS wins over remote.
+    - **Library:** show ALL ~1,500 exercises (search plus body-part and equipment filters, FlashList or virtualised, 60 fps). Exercises outside our 283 are browse-only; the planner uses only our curated set. Each detail page shows the GIF hero, the instructions, target and secondary muscles, and our muscle map as "Muscles worked".
+    - Commit the media in batches (keep each commit under about 100 MB). Put any long-term remote mirror (Cloudflare R2) under "Owner steps" for later; it isn't needed now.
+  - **Licensing (superseded by the confirmation above; kept for the record).** Read the official terms before using any media and record what they say in `docs/DECISIONS.md`:
     - https://exercisedb.dev/
     - https://go.exercisedb.dev/shop (V1 dataset: about 1,500 exercises with GIFs, a single-payment option)
     - https://exercisedb.notion.site/ExerciseDB-API-Terms-of-Use-226983b728ca8090bf7be79564e4b356
