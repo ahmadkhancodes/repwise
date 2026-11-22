@@ -224,7 +224,8 @@
   - Pure logic for the stats maths, with unit tests. Component tests on both platforms. Update the Maestro flows.
   - Native change: it needs a new dev/prod build later. E2E builds run prebuild in CI, so they cover it.
 
-- [ ] (opus) **Paywalls everywhere the workbook says, plus a DEMO purchase flow for the client video (owner, 22 Nov).**
+- [x] (opus) **Paywalls everywhere the workbook says, plus a DEMO purchase flow for the client video (owner, 22 Nov).**
+  - result (22 Nov, API run 13): 0484738 on feat/client-demo, E2E pending. F-S5 gate sheet for every Free vs Pro gate (new: meal swap, ate out, adaptive AI plan after week 1; existing gates now open the sheet), `paywall_view{source:'gate:<feature>'}`; DEMO checkout (D-DEMO-PAY, compile-time off in production, tests prove it): TEST MODE sheet •••• 4444 → 1.2 s → Payment complete → local demo Pro → Settings "Repwise Pro · Yearly (test)" + reset; Maestro e2e/billing/02_gate_demo_checkout.yaml; test:all green (3363 app tests).
   - **Follow the workbook exactly:**
     - `docs/build-bible/05-Pricing-Trial.md`: plans, wording, and the Free vs Pro table.
     - `09-User-Flows.md`: F1 (onboarding → building plan → plan preview → paywall), F-S3 and F-S5 (contextual "Hit a Pro limit" bottom sheet: the exact benefit + preview, "Start free trial" / "Not now", never a dead end).
@@ -267,6 +268,7 @@
   - Small change on `feat/client-demo`: unit tests plus `npm run test:all`. Do it BEFORE the tour task, in the same batch (no separate E2E).
 
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
+  - status (run 13): demo payments are OFF in the E2E/tour builds until the flow opens `repwise://demo-payments?on=1&reset=1` (tap "Open" on iOS). Then the paywall shows after the plan reveal and gates work. IDs: `paywall-close`, `plan-weekly|monthly|quarterly|yearly`, `paywall-cta`, `gate-title`, `gate-cta`, `gate-not-now`, `demo-checkout`, `demo-confirm`, `demo-payment-complete`, `demo-continue`, `screen-subscription`, `subscription-plan`. A free user's `swap-dinner` opens the gate sheet. See e2e/billing/02_gate_demo_checkout.yaml. Switch it on BEFORE onboarding ends so the onboarding paywall (step 4) is shown. The stub's payments-on is no longer needed.
   - Rewrite `e2e/tour/ios_dark_full_tour.yaml` for pace:
     - no fixed waits longer than about 1 s; wait only for the next screen to appear;
     - skip the rest timer straight away (show it for about 2 s);
