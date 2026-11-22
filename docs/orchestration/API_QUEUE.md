@@ -241,6 +241,10 @@
     - Add a unit test proving the demo checkout can't render when the flag is off.
     - Log D-DEMO-PAY.
   - Tests: gating logic as pure functions with tests; component tests for the paywall, the checkout sheet, the success screen and gates (both `Platform.OS`); Maestro flows for gate → paywall → test checkout → payment complete.
+  - **OWNER (22 Nov): the payment part of the video is a MUST.** The client must clearly see the paywall and a test payment going through.
+    - Hold the paywall on screen for about 2.5 s; tap Weekly → Monthly → Yearly so every price is visible.
+    - Hold the test checkout (•••• 4444, TEST MODE) and the "Payment complete" screen for about 2 s each. Do NOT speed these up or cut them in post: protect these segments from mpdecimate/speed-up, or re-insert them at 1×.
+    - Show Settings → Subscription "Repwise Pro · Yearly (test)" near the end.
   - **Tour video sequence (for the client):**
     1. Onboarding.
     2. Building your plan.
