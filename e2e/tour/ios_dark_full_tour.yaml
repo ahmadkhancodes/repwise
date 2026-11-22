@@ -1989,6 +1989,15 @@ tags:
       - tapOn:
           id: "open-subscription"
           optional: true
+      # iOS did not always register the id tap on the row (video stayed on Settings): retry by label.
+      - runFlow:
+          when:
+            notVisible:
+              id: "screen-subscription"
+          commands:
+            - tapOn:
+                text: "Subscription"
+                optional: true
       - runScript:
           file: stub.js
           env:

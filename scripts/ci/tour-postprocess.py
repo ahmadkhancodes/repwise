@@ -62,7 +62,14 @@ tmp = tempfile.mkdtemp()
 files = []
 for i, (kind, a, b) in enumerate(segs):
     f = os.path.join(tmp, f's{i}.mp4')
-    vf = 'mpdecimate,setpts=N/FRAME_RATE/TB,fps=30' if kind == 'fast' else 'fps=30'
+    if kind == 'fast':
+        vf = 'mpdecimate,setpts=N/FRAME_RATE/TB,fps=30'
+    elif b - a > 8:
+        # Long keep segment (paywall, checkout, Payment complete): moving video stays 1x, but a static
+        # run plays at 3x at most (max=2 drops 2 of every 3 identical frames), so no screen sits for 15 s.
+        vf = 'mpdecimate=max=2,setpts=N/FRAME_RATE/TB,fps=30'
+    else:
+        vf = 'fps=30'  # short keep (Subscription row): untouched, 1x
     run('ffmpeg', '-nostdin', '-y', '-loglevel', 'error', '-ss', str(a), '-to', str(b), '-i', raw, '-vf', vf, *ENC, f)
     files.append((kind, f, dur(f)))
 fast = sum(d for k, _, d in files if k == 'fast')
