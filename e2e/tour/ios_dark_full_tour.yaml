@@ -457,6 +457,16 @@ tags:
       - tapOn:
           id: "paywall-close"
           optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "demo-checkout"
+          commands:
+            - tapOn:
+                id: "demo-cancel"
+            - tapOn:
+                id: "paywall-close"
+                optional: true
       - runScript:
           file: stub.js
           env:

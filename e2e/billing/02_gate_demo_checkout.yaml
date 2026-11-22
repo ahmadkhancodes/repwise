@@ -59,8 +59,10 @@ onFlowComplete:
     id: "plan-weekly"
 - tapOn:
     id: "plan-weekly"
-- assertVisible:
-    id: "paywall-price-line"
+- extendedWaitUntil:
+    visible:
+      id: "paywall-price-line"
+    timeout: 5000
 - tapOn:
     id: "plan-monthly"
 - tapOn:
