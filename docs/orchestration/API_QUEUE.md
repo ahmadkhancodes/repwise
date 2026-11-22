@@ -61,7 +61,8 @@
     3. Otherwise fix, push the branch, re-dispatch both E2E runs, and write `.claude-run/wait`.
   - status (21 Nov 06:50 UTC, API run 1): (a) and (d) were already closed on the branch (PROGRESS r3-fix line: Eat tick was a flow issue; all 36 animated files on `motionSafe`). e2e-ios on bdf13a0 (run 44864469120) failed every flow at launch: the FullWindowOverlay toast host hid the app from accessibility, and 506cfa6 removed it. On 506cfa6, e2e-android passed (run 44870322115). e2e-ios run 44870320265 was still in progress, so this run only waited for it and made no code changes. Next run: read run 44870320265. If it is green, do step 2. If it is red, check (b) `CustomExerciseScreen.tsx` ~153 first.
 
-- [ ] (opus) **Merge `feat/tour-video` into main and record the Dark Mode iPhone tour.**
+- [x] (opus) **Merge `feat/tour-video` into main and record the Dark Mode iPhone tour.**
+  - result (22 Nov, API run 7): tour 44962549472 green end to end on 26fb53a (21:54, every required screen checked in 32 frames, dark mode throughout). Release https://github.com/ahmadkhancodes/repwise/releases/tag/app-tour-dark — main https://github.com/ahmadkhancodes/repwise/releases/download/app-tour-dark/repwise-ios-dark-tour-music.mp4 (CC BY music, -16 LUFS, 48 kHz), silent https://github.com/ahmadkhancodes/repwise/releases/download/app-tour-dark/repwise-ios-dark-tour.mp4. E2E on the same SHA green: iOS 44962551228, Android 44962552794 (the final-report task can reuse them).
   - The branch adds `.github/workflows/record-ios-tour.yml` and `e2e/tour/ios_dark_full_tour.yaml`: a natural-paced Maestro walk through the WHOLE app in Dark Mode on an iPhone 16-class simulator, starting at fresh-install onboarding.
   - Owner request (21 Nov): "a full video recording on Apple iPhone of entire app. just simple plain natural recorded video, making sure onboarding and all must cover, and app must be in Dark Mode."
   - Steps:
