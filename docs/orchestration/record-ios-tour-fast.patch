@@ -1,0 +1,42 @@
+diff --git a/.github/workflows/record-ios-tour.yml b/.github/workflows/record-ios-tour.yml
+index 6b7f6e7..1c70b37 100644
+--- a/.github/workflows/record-ios-tour.yml
++++ b/.github/workflows/record-ios-tour.yml
+@@ -213,21 +213,12 @@ jobs:
+             echo "::warning::ffmpeg missing: uploading the untrimmed video, no frames"
+             cp "$RAW" tour.mp4; exit 0
+           fi
+-          ARGS=()
+-          if [ -n "$REC" ] && [ -n "$START" ]; then
+-            SS=$(python3 -c "print(max(0, ($START - $REC - 800) / 1000))")
+-            ARGS+=(-ss "$SS")
+-            if [ -n "$END" ]; then
+-              ARGS+=(-t "$(python3 -c "print(($END - $START + 2800) / 1000)")")
+-            fi
+-          fi
+-          echo "trim: ${ARGS[*]:-none}"
+-          # Constant 30 fps H.264 with faststart: plays everywhere (phones, Drive, Slack).
+-          if ffmpeg -nostdin -y -loglevel error -i "$RAW" ${ARGS[@]+"${ARGS[@]}"} \
+-              -r 30 -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -movflags +faststart -an tour.mp4; then
+-            echo "trimmed ok"
++          # D-TOUR-FAST: decimate idle frames, speed up to ~3 min, keep paywall/checkout holds at 1x, add music.
++          if [ -n "$REC" ] && [ -n "$START" ] && python3 -I scripts/ci/tour-postprocess.py "$RAW" "$OUT/marks.txt" tour-silent.mp4 tour-music.mp4 assets-dev/music/raving-energy.mp3 195; then
++            mv tour-silent.mp4 tour.mp4
+           else
+-            echo "::warning::trim failed, uploading the raw video"; cp "$RAW" tour.mp4
++            echo "::warning::fast post-process failed, plain trim"
++            ffmpeg -nostdin -y -loglevel error -i "$RAW" -r 30 -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -movflags +faststart -an tour.mp4 || cp "$RAW" tour.mp4
+           fi
+           ffprobe -v error -show_entries format=duration:stream=width,height,codec_name -of default=nw=1 tour.mp4 | tee "$OUT/tour-info.txt"
+           DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 tour.mp4)
+@@ -245,7 +236,9 @@ jobs:
+         uses: actions/upload-artifact@v4
+         with:
+           name: repwise-ios-dark-tour
+-          path: tour.mp4
++          path: |
++            tour.mp4
++            tour-music.mp4
+           if-no-files-found: warn
+           retention-days: 30
+ 
