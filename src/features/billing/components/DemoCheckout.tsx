@@ -93,9 +93,9 @@ function DemoCheckoutSheet({ offer, onCancel, onComplete }: DemoCheckoutProps) {
     [],
   );
 
-  const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: rise.value * height }],
-  }));
+  // Fade, never translate: on iOS (Fabric) a Reanimated transform can leave the shadow-tree hit
+  // area off-screen, so Confirm/Continue ignored taps (Maestro and the tour got stuck here).
+  const sheetStyle = useAnimatedStyle(() => ({ opacity: 1 - rise.value }));
   const tickStyle = useAnimatedStyle(() => ({
     opacity: tick.value,
     transform: [{ scale: 0.6 + 0.4 * tick.value }],
