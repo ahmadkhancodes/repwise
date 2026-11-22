@@ -39,6 +39,13 @@
 
 ## Tasks
 
+> **SPEED RULE for the client demo (owner deadline, 22 Nov).** Six owner tasks (US/UK meals, exercise GIFs, building-plan screen, dashboard + steps, paywalls + demo checkout, fast tour) share ONE branch: `feat/client-demo`.
+> - Do them in order, one per run. After each: `npm run test:all` green, push the branch, tick the task with "(on feat/client-demo, E2E pending)", and chain straight to the next run. Do NOT dispatch E2E between them.
+> - Last code task done: dispatch e2e-ios, e2e-android AND record-ios-tour on `feat/client-demo` together, and wait.
+> - On all green: merge to main, publish the release `app-tour-dark-v2`, and comment on issue #1.
+> - Any red: fix on the branch and re-run only what failed, plus the tour.
+
+
 - [x] (opus) **Finish `feat/r3-fix` until E2E is green on both platforms, then merge to main.**
   - result (21 Nov, API run 2): 506cfa6 green on both — e2e-ios https://github.com/ahmadkhancodes/repwise/actions/runs/44870320265 (all flows passed, 0 failed; (b) custom exercise passes), e2e-android https://github.com/ahmadkhancodes/repwise/actions/runs/44870322115. Merged into main as cc4fc7b (PROGRESS/DECISIONS conflicts kept both sides); test:all green (app 3129 tests, engine/content/server checks pass).
   - Already done on the branch (last commit 506cfa6):
