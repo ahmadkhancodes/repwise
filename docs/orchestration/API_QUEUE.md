@@ -186,7 +186,8 @@
   - Steps: push to `feat/exercise-gifs`; dispatch e2e-ios and e2e-android; on green, merge to main.
   - Add to Owner steps: "Buy the ExerciseDB V1 licence at https://go.exercisedb.dev/shop before store launch" (or whatever the terms require).
 
-- [ ] (opus) **"Building your plan" screen after onboarding (owner, 22 Nov).** After the last onboarding step, show a beautiful 3–5 s screen, even though the plan is ready in milliseconds. It should feel like the app is working for you.
+- [x] (opus) **"Building your plan" screen after onboarding (owner, 22 Nov).** After the last onboarding step, show a beautiful 3–5 s screen, even though the plan is ready in milliseconds. It should feel like the app is working for you.
+  - result (22 Nov, API run 11): 85a1423 on feat/client-demo, E2E pending. Five personal cross-fading status lines + "Your plan is ready", 4.1 s (ready waits for the saved plan), light haptic, reduce motion = 1.2 s static line; unit + component tests (both schemes/platforms), Maestro step in onboarding/01; test:all green.
   - Rotating status lines with a smooth cross-fade / typewriter feel and a subtle progress ring or bar. Example lines:
     - "Reading your goals…"
     - "Picking exercises for your kit…"
