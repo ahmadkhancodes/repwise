@@ -150,9 +150,50 @@
       - the current-exercise card in the workout player;
       - Library list thumbnails (first frame or small GIF).
     - Offline or error: fall back to the muscle map at once. Never a spinner wall, never block the workout.
+    - Loading speed (owner, 22 Nov: "pull all the data and store it so it loads properly"):
+      - Now: pull the V1 dataset METADATA (ids, names, target muscles, equipment) into `packages/content/exercise_media.json` for the mapping only.
+      - Use the `expo-image` disk cache (`cachePolicy="memory-disk"`). When a plan is built or Today opens, prefetch the GIFs for today's and tomorrow's exercises, so the workout never waits.
+      - After the owner buys the V1 licence: if its terms allow storage, mirror ALL licensed GIFs to our own storage and CDN (Cloudflare R2 behind the Worker), and switch the provider base URL in config. Write `scripts/media/mirror-exercisedb.ts`, ready to run.
+      - Until the licence is confirmed, never mirror or bundle the GIFs.
   - Tests: the service (mapping, fallback), components (render, loading, error, offline) on both `Platform.OS` values, and Maestro flows updated. `npm run test:all` green.
   - Steps: push to `feat/exercise-gifs`; dispatch e2e-ios and e2e-android; on green, merge to main.
   - Add to Owner steps: "Buy the ExerciseDB V1 licence at https://go.exercisedb.dev/shop before store launch" (or whatever the terms require).
+
+- [ ] (opus) **"Building your plan" screen after onboarding (owner, 22 Nov).** After the last onboarding step, show a beautiful 3–5 s screen, even though the plan is ready in milliseconds. It should feel like the app is working for you.
+  - Rotating status lines with a smooth cross-fade / typewriter feel and a subtle progress ring or bar. Example lines:
+    - "Reading your goals…"
+    - "Picking exercises for your kit…"
+    - "Balancing your sets and rest…"
+    - "Cooking up your meals…"
+    - "Hitting your protein target…"
+    - "Your plan is ready"
+  - Personalise lines with the user's answers where possible: "4 days a week · 60 min", "American & British meals".
+  - Light haptic at the end, then the plan reveal.
+  - Minimum 3 s, maximum 5 s. If the real work takes longer, wait for it.
+  - Honest copy: no fake medical or AI claims. With reduce-motion on, keep it short and static.
+  - Tokens only, light and dark. Component tests, a Maestro step, and Platform tests.
+
+- [ ] (opus) **Home dashboard with stats, including steps (owner, 22 Nov).**
+  - "A home screen with all the stats like any fitness app: calories, steps and everything. It must look like a GYM app, not a step-counter app; stats sit around the corner."
+  - Make the Today tab the home dashboard:
+    - Hero: today's workout card with Start (gym-first; the primary action).
+    - Under it, a compact stats grid of glanceable tiles:
+      - calories eaten vs target (ring);
+      - protein vs target;
+      - **steps today** vs goal (default 8,000, editable in Settings);
+      - workouts this week vs plan;
+      - streak;
+      - weekly volume;
+      - weight trend sparkline.
+    - Then the meal timeline.
+    - Uber-calm styling, tabular numbers, 48dp targets, works at 130% font scale, light and dark.
+  - **Steps:**
+    - iOS: `Pedometer.getStepCountAsync` from `expo-sensors` (CoreMotion; add `NSMotionUsageDescription`).
+    - Android: daily totals from Health Connect (pick the maintained Expo-compatible library and config plugin, with only the read permission for Steps), falling back to `expo-sensors` `watchStepCount` while the app is open.
+    - The owner explicitly asked for steps on 22 Nov, so these additions are approved. Log them in `DECISIONS.md` as an override of the earlier "no hardware SDK" rule, for step READ only. Ask for permission in context: a tile saying "Turn on steps", never at launch.
+    - If steps are denied or unavailable, the tile shows "Turn on steps". Never block. Store daily steps in SQLite for the history.
+  - Pure logic for the stats maths, with unit tests. Component tests on both platforms. Update the Maestro flows.
+  - Native change: it needs a new dev/prod build later. E2E builds run prebuild in CI, so they cover it.
 
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
   - Rewrite `e2e/tour/ios_dark_full_tour.yaml` for pace:
@@ -161,7 +202,7 @@
     - log 2 sets, not all of them;
     - pick **American + British** cuisines in onboarding;
     - show the new exercise GIF hero (detail plus player) and the "Muscles worked" section.
-  - Keep the coverage: onboarding, plan reveal, Today, workout with GIF, rest, finish, Eat (tick, recipe, cook step, swap), Progress, Library, check-in, Settings, paywall (close).
+  - Keep the coverage: onboarding, the "building your plan" screen, plan reveal, home dashboard stats (steps tile), Today, workout with GIF, rest, finish, Eat (tick, recipe, cook step, swap), Progress, Library, check-in, Settings, paywall (close).
   - Post-process in `record-ios-tour.yml`:
     - `ffmpeg mpdecimate,setpts=N/FRAME_RATE/TB` removes idle frames;
     - if the result is still over 3:30, speed it up (`setpts`) so it lands at 2:45–3:30.
