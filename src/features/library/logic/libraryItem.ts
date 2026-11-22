@@ -27,6 +27,11 @@ export type LibraryItem = {
   alternatives: string[];
   unilateral: boolean;
   custom: boolean;
+  /**
+   * ExerciseDB V1 exercise outside our curated catalogue: shown in the library with its GIF and
+   * steps, but the planner never uses it and it cannot be added to a workout.
+   */
+  browseOnly?: boolean;
 };
 
 /** The columns of a custom exercise row this module reads (see src/db/schema.ts `exercises`). */
@@ -124,6 +129,7 @@ export function searchLibrary(
   query: string,
   filters: LibraryFilters,
   limit = 500,
+  extras: readonly IndexedItem[] = [],
 ): LibraryItem[] {
   const q = normalise(query);
   const qWords = q.split(' ');
@@ -143,7 +149,29 @@ export function searchLibrary(
     limit,
     filter: (e) => matchesFilters(e, filters),
   }).map(fromCatalog);
-  return [...mine, ...(q ? catalog : sortByName(catalog))].slice(0, limit);
+  // Browse-only V1 exercises come last, so curated ones always win the top of the list.
+  const more = extras
+    .filter((x) => matchesFilters(x.item, filters))
+    .map((x) => ({ x, s: q ? score(x.entry, q, qWords) : 1 }))
+    .filter((h) => h.s > 0);
+  if (q) more.sort((a, b) => b.s - a.s);
+  return [...mine, ...(q ? catalog : sortByName(catalog)), ...more.map((h) => h.x.item)].slice(
+    0,
+    limit,
+  );
+}
+
+/** A library item with its search entry precomputed (built once, not per keystroke). */
+export type IndexedItem = {
+  item: LibraryItem;
+  entry: { name: string; words: string[]; hay: string };
+};
+
+export function indexItem(item: LibraryItem): IndexedItem {
+  const name = normalise(item.name);
+  const extra = [...item.primaryMuscles, ...item.equipment].map(normalise);
+  const hay = [name, ...extra].join(' ');
+  return { item, entry: { name, words: [...new Set(hay.split(' ').filter(Boolean))], hay } };
 }
 
 /** Alphabetical when there is no query (the catalogue JSON is grouped by pattern). */

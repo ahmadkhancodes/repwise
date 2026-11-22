@@ -539,6 +539,9 @@ describe.each(SCHEMES)(`workout screens (%s, ${Platform.OS})`, (scheme) => {
       expect(screen.queryByTestId('ex-media') ?? screen.queryByTestId('ex-media-placeholder')).toBeTruthy();
       // The hero gets the exercise, so its muscle map names the muscles.
       expect(screen.getByTestId('ex-media-map', { includeHiddenElements: true }).props.accessibilityLabel).toMatch(/Main: /);
+      // The animated ExerciseDB demo plays in the player when the exercise has one (prefetched on Today).
+      const gif = screen.getByTestId('ex-media-gif-image', { includeHiddenElements: true });
+      expect(gif.props.source[0].uri).toMatch(/\/exercisedb\/v1\/gifs\/qXTaZnJ\.gif$/);
       // Gym footer (N6/N21): 56dp chevrons and a one-line "Log set N" with the target below.
       for (const id of ['ex-prev', 'ex-next']) {
         expect(StyleSheet.flatten(screen.getByTestId(id).props.style)).toMatchObject({ width: 56, height: 56 });

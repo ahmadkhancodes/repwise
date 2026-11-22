@@ -47,22 +47,29 @@ export function resolveItem(
   id: string,
   catalog: Catalog | null,
   customs: readonly LibraryItem[],
+  extras?: ReadonlyMap<string, LibraryItem>,
 ): LibraryItem | undefined {
   const ex = catalog?.exerciseById.get(id);
-  return ex ? fromCatalog(ex) : customs.find((c) => c.id === id);
+  return ex ? fromCatalog(ex) : (customs.find((c) => c.id === id) ?? extras?.get(id));
 }
 
 /** Favourites and recently used, resolved to items (unknown/deleted ids are skipped). */
-export function useShelves(catalog: Catalog | null, customs: readonly LibraryItem[]) {
+export function useShelves(
+  catalog: Catalog | null,
+  customs: readonly LibraryItem[],
+  extras?: ReadonlyMap<string, LibraryItem>,
+) {
   const favouriteIds = useLibraryPrefs((s) => s.favourites);
   const viewed = useLibraryPrefs((s) => s.viewed);
   const logged = useRecentlyLogged();
   return useMemo(() => {
     const resolve = (ids: string[]) =>
-      ids.map((id) => resolveItem(id, catalog, customs)).filter((x): x is LibraryItem => !!x);
+      ids
+        .map((id) => resolveItem(id, catalog, customs, extras))
+        .filter((x): x is LibraryItem => !!x);
     return {
       favourites: resolve(favouriteIds),
       recent: resolve(mergeRecent(logged, viewed, 10)),
     };
-  }, [catalog, customs, favouriteIds, viewed, logged]);
+  }, [catalog, customs, extras, favouriteIds, viewed, logged]);
 }

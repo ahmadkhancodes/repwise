@@ -4,6 +4,7 @@ import { ensureWeekMeals } from '@/features/meals';
 import { addDays, startOfWeek } from '@/features/meals/logic/dates';
 import { customRecipesRepo } from '@/features/meals/repo';
 import { useCatalogFor, type Catalog } from '@/services/catalog';
+import { prefetchExerciseMedia } from '@/services/exerciseMedia';
 
 import { localDate, localHour, minutesOfDay, tomorrowOf } from '../logic/day';
 import { buildTodayView, type MusclesLookup, type RecipeLookup, type TodayView } from '../logic/view';
@@ -84,6 +85,18 @@ export function useToday(nowOverride?: number): TodayModel {
     }, PLAN_DELAY_MS);
     return () => clearTimeout(id);
   }, [catalog, date, profileStamp, mealsMissing, nowOverride]);
+  // Warm the GIF cache for today's and tomorrow's exercises, so the player never waits on a demo.
+  // After first paint and the first taps; fire-and-forget (offline → the muscle map shows).
+  const exerciseKey = data
+    ? [...data.today.exercises, ...data.tomorrow.exercises].map((e) => e.exerciseId).join(',')
+    : '';
+  useEffect(() => {
+    if (!exerciseKey) return;
+    const id = setTimeout(() => {
+      void prefetchExerciseMedia(exerciseKey.split(','));
+    }, PLAN_DELAY_MS);
+    return () => clearTimeout(id);
+  }, [exerciseKey]);
   const minutes = minutesOfDay(now);
 
   const view = useMemo(

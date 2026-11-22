@@ -11,7 +11,10 @@ import { MuscleLegend } from '../components/BodyMap';
 import { ExerciseHero } from '../components/ExerciseMedia';
 import { ExerciseRecords } from '../components/ExerciseRecords';
 import { ExerciseRow } from '../components/ExerciseRow';
+import { isExerciseDbItemId, useExerciseDb } from '../hooks/useExerciseDb';
 import { resolveItem, useCatalogState, useCustomItems } from '../hooks/useLibrary';
+import { gifForMediaId } from '@/services/exerciseMedia';
+
 import { bodyPalette } from '../logic/bodyPalette';
 import { EQUIPMENT_LABEL, MUSCLE_LABEL } from '../logic/labels';
 import type { LibraryItem } from '../logic/libraryItem';
@@ -109,6 +112,8 @@ function Detail({ item, alternatives }: { item: LibraryItem; alternatives: Libra
       .map((e) => EQUIPMENT_LABEL[e]),
     item.unilateral ? 'One side at a time' : null,
   ].filter((x): x is string => Boolean(x));
+  // With a demo GIF the hero is the GIF, so the muscle map moves to "Muscles worked".
+  const hasDemo = Boolean(gifForMediaId(item.mediaId));
 
   return (
     <>
@@ -118,6 +123,12 @@ function Detail({ item, alternatives }: { item: LibraryItem; alternatives: Libra
         exercise={item}
         testID="exercise-media"
       />
+      {item.browseOnly ? (
+        <Text variant="callout" color="textSecondary" testID="exercise-browse-only">
+          From the full exercise library. Your plans use the core exercises, so this one is for
+          reference.
+        </Text>
+      ) : null}
       {tags.length ? (
         <View
           style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}
@@ -128,7 +139,17 @@ function Detail({ item, alternatives }: { item: LibraryItem; alternatives: Libra
           ))}
         </View>
       ) : null}
-      <Section title="Muscles">
+      <Section title="Muscles worked">
+        {hasDemo ? (
+          <ExerciseHero
+            mediaId={item.mediaId}
+            name={item.name}
+            exercise={item}
+            variant="map"
+            aspectRatio={16 / 9}
+            testID="exercise-muscles-map"
+          />
+        ) : null}
         <View
           style={{ gap: t.spacing.xs }}
           testID="body-map"
@@ -145,9 +166,11 @@ function Detail({ item, alternatives }: { item: LibraryItem; alternatives: Libra
           ) : null}
         </View>
       </Section>
-      <Section title="Your records">
-        <ExerciseRecords exerciseId={item.id} />
-      </Section>
+      {item.browseOnly ? null : (
+        <Section title="Your records">
+          <ExerciseRecords exerciseId={item.id} />
+        </Section>
+      )}
       {item.instructions.length ? (
         <Section title="How to do it">
           <Lines items={item.instructions} numbered testID="exercise-steps" />
@@ -186,7 +209,9 @@ export function ExerciseDetailScreen({ id }: { id: string }) {
   const t = useTheme();
   const { catalog, error, retry } = useCatalogState();
   const { items: customs } = useCustomItems();
-  const item = resolveItem(id, catalog, customs);
+  const v1 = isExerciseDbItemId(id);
+  const exdb = useExerciseDb(v1);
+  const item = resolveItem(id, catalog, customs, exdb?.byId);
   const fav = useIsFavourite(id);
   const toggleFavourite = useLibraryPrefs((s) => s.toggleFavourite);
   const markViewed = useLibraryPrefs((s) => s.markViewed);
@@ -213,7 +238,7 @@ export function ExerciseDetailScreen({ id }: { id: string }) {
         testID="exercise-error"
       />
     );
-  } else if (!catalog) {
+  } else if (!catalog || (v1 && !exdb)) {
     content = <DetailSkeleton />;
   } else if (!item) {
     content = (
@@ -281,13 +306,13 @@ export function ExerciseDetailScreen({ id }: { id: string }) {
         ) : null
       }
       footer={
-        item ? (
+        item && !item.browseOnly ? (
           <Button label="Add to workout" onPress={() => setAdding(true)} testID="exercise-add" />
         ) : undefined
       }
     >
       {content}
-      {item ? (
+      {item && !item.browseOnly ? (
         <AddToWorkoutSheet
           open={adding}
           onClose={() => setAdding(false)}

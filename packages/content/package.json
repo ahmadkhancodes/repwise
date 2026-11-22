@@ -14,6 +14,8 @@
     "./exercises.json": "./exercises.json",
     "./recipes.json": "./recipes.json",
     "./foods.json": "./foods.json",
+    "./exercise_media.json": "./exercise_media.json",
+    "./exercisedb_v1.json": "./exercisedb_v1.json",
     "./media/*": "./media/*",
     "./package.json": "./package.json"
   },
@@ -23,6 +25,8 @@
     "exercises.json",
     "recipes.json",
     "foods.json",
+    "exercise_media.json",
+    "exercisedb_v1.json",
     "README.md",
     "SOURCES.md",
     "MEDIA.md",

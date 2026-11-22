@@ -22,6 +22,7 @@ import {
 import { ExerciseRow } from '../components/ExerciseRow';
 import { FilterSheet } from '../components/FilterSheet';
 import { Shelf } from '../components/Shelf';
+import { useExerciseDb } from '../hooks/useExerciseDb';
 import { useCatalogState, useCustomItems, useShelves } from '../hooks/useLibrary';
 import {
   EMPTY_FILTERS,
@@ -34,6 +35,9 @@ import {
 } from '../logic/filters';
 import { LEVEL_LABEL, PATTERN_LABEL } from '../logic/labels';
 import { searchLibrary, type LibraryItem } from '../logic/libraryItem';
+
+/** Every exercise fits (curated ~283 + own + ~1,300 browse-only V1); the list is virtualised. */
+const RESULT_LIMIT = 2500;
 
 /** Rows that stagger in on first paint (one screenful); the rest render plain. */
 const STAGGER_ROWS = 10;
@@ -86,7 +90,9 @@ export function LibraryScreen() {
   const reduceMotion = useReducedMotion();
   const { catalog, error, retry } = useCatalogState();
   const { items: customs } = useCustomItems();
-  const shelves = useShelves(catalog, customs);
+  const exdb = useExerciseDb();
+  const extras = exdb?.indexed;
+  const shelves = useShelves(catalog, customs, exdb?.byId);
   const [text, setText] = useState('');
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<LibraryFilters>(EMPTY_FILTERS);
@@ -95,18 +101,22 @@ export function LibraryScreen() {
   const searching = query.length > 0 || filterCount > 0;
 
   const results = useMemo(
-    () => (catalog ? searchLibrary(searchExercises, customs, query, filters) : []),
-    [catalog, customs, query, filters],
+    () =>
+      catalog
+        ? searchLibrary(searchExercises, customs, query, filters, RESULT_LIMIT, extras)
+        : [],
+    [catalog, customs, query, filters, extras],
   );
   const countFor = useCallback(
-    (f: LibraryFilters) => (catalog ? searchLibrary(searchExercises, customs, query, f).length : 0),
-    [catalog, customs, query],
+    (f: LibraryFilters) =>
+      catalog ? searchLibrary(searchExercises, customs, query, f, RESULT_LIMIT, extras).length : 0,
+    [catalog, customs, query, extras],
   );
   const otherChips = activeFilterChips(filters, {
     pattern: PATTERN_LABEL,
     level: LEVEL_LABEL,
   }).filter((c) => !c.key.startsWith('m:'));
-  const total = (catalog?.exercises.length ?? 0) + customs.length;
+  const total = (catalog?.exercises.length ?? 0) + customs.length + (exdb?.items.length ?? 0);
   const clearAll = useCallback(() => {
     setText('');
     setQuery('');
