@@ -87,23 +87,25 @@ describe.each(SCHEMES)('TodayScreen (%s)', (scheme) => {
     expect(router.push).toHaveBeenCalledWith('/(onboarding)/welcome');
   });
 
-  it('training day: brief, rings, workout and meals from SQLite', async () => {
+  it('training day: the home dashboard — workout hero, stats, meals from SQLite', async () => {
     seedTrainingDay();
     await renderToday(MORNING, scheme);
     expect(screen.getByText('Good morning, Sam')).toBeTruthy();
     expect(screen.getByTestId('today-date')).toHaveTextContent('Thursday 19 November');
-    const brief = screen.getByTestId('today-brief');
-    expect(within(brief).getByText('Leg day')).toBeTruthy();
-    expect(within(brief).getByText('Masala omelette with wholewheat paratha')).toBeTruthy();
-    expect(screen.getByTestId('today-rings')).toBeTruthy();
-    expect(screen.getByTestId('today-macros-kcal-value').props.defaultValue).toBe('2,300');
-    expect(screen.getByTestId('kcal-eaten')).toHaveTextContent('0 of 2,300 kcal eaten');
+    expect(screen.getByTestId('stat-calories-value')).toHaveTextContent('0');
+    expect(screen.getByTestId('stat-calories-detail')).toHaveTextContent('of 2,300 kcal');
+    expect(screen.getByTestId('stat-protein-value')).toHaveTextContent('0 g');
+    expect(screen.getByTestId('stat-workouts-value')).toHaveTextContent('0/1');
+    expect(screen.getByTestId('stat-streak-value')).toHaveTextContent('0');
+    expect(screen.getByTestId('stat-volume-value')).toHaveTextContent('0 kg');
+    // Steps never prompt at launch: the tile offers "Turn on steps".
+    expect(screen.getByTestId('stat-steps-enable')).toBeTruthy();
     expect(screen.getByTestId('workout-title')).toHaveTextContent('Leg day');
     expect(screen.getByText('Chicken karahi')).toBeTruthy();
     expect(screen.getByTestId('meals-count')).toHaveTextContent('0 of 2 eaten');
     expect(screen.getByTestId('today-water')).toBeTruthy();
-    // Hierarchy: brief → primary action (workout) → meals → rings → water.
-    const order = ['today-brief', 'today-workout', 'today-meals', 'today-rings', 'today-water'];
+    // Hierarchy (gym first): date → workout hero → stats → meals → water.
+    const order = ['today-date', 'today-workout', 'today-stats', 'today-meals', 'today-water'];
     const json = JSON.stringify(screen.toJSON());
     const at = order.map((id) => json.indexOf(`"testID":"${id}"`));
     expect(at.every((v) => v >= 0)).toBe(true);
@@ -139,7 +141,7 @@ describe('TodayScreen core loop', () => {
     expect(mealsRepo.get(meals[1]!.id)?.status).toBe('eaten');
     expect(logsForDate(TODAY)).toHaveLength(1);
     await waitFor(() => expect(screen.getByTestId('meals-count')).toHaveTextContent('1 of 2 eaten'));
-    expect(screen.getByTestId('today-macros-kcal-value').props.defaultValue).toBe('1,656'); // 2,300 − 644
+    expect(screen.getByTestId('stat-calories-value')).toHaveTextContent('644');
     expect(screen.getByTestId('today-tick-lunch')).toBeChecked();
     expect(events).toContainEqual(['meal_logged', { slot: 'lunch', from_plan: true, partial: false }]);
     const toast = await screen.findByTestId('toast');
@@ -224,7 +226,7 @@ describe('TodayScreen with the system clock on another day (R2-7)', () => {
       expect(mealPlanForDate('2026-11-20')).toBeDefined();
       expect(mealPlanForDate('2031-03-03')).toBeUndefined();
       expect(sessionsRepo.list().some((s) => (s.date ?? '').startsWith('2031'))).toBe(false);
-      expect(screen.getByTestId('today-brief')).toBeTruthy();
+      expect(screen.getByTestId('today-stats')).toBeTruthy();
     } finally {
       real.mockRestore();
     }
@@ -239,7 +241,9 @@ describe('TodayScreen states', () => {
     await renderToday();
     expect(screen.getByTestId('today-rest')).toBeTruthy();
     expect(screen.queryByTestId('start-workout')).toBeNull();
-    expect(within(screen.getByTestId('today-brief')).getByText('Rest day')).toBeTruthy();
+    // The rest-day card is the hero, above the stats.
+    const json = JSON.stringify(screen.toJSON());
+    expect(json.indexOf('"testID":"today-rest"')).toBeLessThan(json.indexOf('"testID":"today-stats"'));
   });
 
   it('onboarded without a plan (body fields missing, so meals cannot be planned yet)', async () => {
@@ -262,13 +266,13 @@ describe('TodayScreen states', () => {
     await waitFor(() => expect(screen.getByTestId('today-no-plan')).toBeTruthy());
   });
 
-  it('evening: progress and tomorrow preview replace the brief', async () => {
+  it('evening: progress and tomorrow preview under the stats', async () => {
     seedTrainingDay();
     seedSession('2026-11-20', { title: 'Upper body' });
     await renderToday(EVENING);
     expect(screen.getByText('Good evening, Sam')).toBeTruthy();
     expect(screen.getByTestId('today-evening')).toBeTruthy();
-    expect(screen.queryByTestId('today-brief')).toBeNull();
+    expect(screen.getByTestId('today-date')).toHaveTextContent('Thursday 19 November');
     expect(within(screen.getByTestId('today-tomorrow')).getByText('Upper body')).toBeTruthy();
     expect(screen.getByTestId('evening-meals')).toHaveTextContent('0 of 2 meals eaten');
   });

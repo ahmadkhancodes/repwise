@@ -29,6 +29,13 @@
       "when": 1795172817135,
       "tag": "0003_sets_done_at_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1795334611656,
+      "tag": "0004_daily_steps",
+      "breakpoints": true
     }
   ]
 }

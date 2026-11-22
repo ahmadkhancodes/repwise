@@ -132,6 +132,9 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
 
 // Native notification + widget modules (src/services/notifications.ts, src/widgets): in-memory doubles.
 jest.mock('expo-notifications', () => require('./test/mocks/expoNotifications'));
+jest.mock('expo-sensors', () => ({ Pedometer: require('./test/mocks/steps').Pedometer }));
+jest.mock('react-native-health-connect', () => require('./test/mocks/steps').healthConnect);
+beforeEach(() => require('./test/mocks/steps').resetStepsFake());
 jest.mock('react-native-android-widget', () => require('./test/mocks/androidWidget'));
 jest.mock('@bacons/apple-targets', () => ({
   ExtensionStorage: Object.assign(

@@ -24,6 +24,8 @@ import { useBilling } from '@/features/billing/hooks/useBilling';
 import { usePro } from '@/features/billing/hooks/usePro';
 import { restoreMessage } from '@/features/billing/screens/PaywallScreen';
 import { ToggleRow } from '@/features/notifications/components/ToggleRow';
+import { STEPS_GOAL_MAX, STEPS_GOAL_MIN, STEPS_GOAL_STEP } from '@/features/today/logic/stats';
+import { setStepsGoal, useStepsGoal } from '@/features/today/stepsGoal';
 import { useAuth } from '@/services/auth';
 import { useShareUsageData } from '@/services/privacy';
 import { useTheme, useThemeStore, type ThemePreference } from '@/theme';
@@ -35,6 +37,7 @@ import {
   Screen,
   Segmented,
   showToast,
+  Stepper,
   Text,
 } from '@/ui';
 
@@ -148,6 +151,7 @@ export function SettingsScreen() {
   const restSound = useAppPrefs((s) => s.restSound);
   const restVibration = useAppPrefs((s) => s.restVibration);
   const setPref = useAppPrefs((s) => s.setPref);
+  const stepsGoal = useStepsGoal((s) => s.goal);
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const links = helpLinks();
@@ -223,6 +227,22 @@ export function SettingsScreen() {
           onChange={(v) => setPref('restVibration', v)}
           testID="toggle-rest-vibration"
         />
+      </ListGroup>
+
+      <ListGroup title="Activity" footnote="Shown on the steps tile on Today." testID="group-activity">
+        <SegmentRow title="Daily steps goal">
+          <Stepper
+            label="Daily steps goal"
+            value={stepsGoal}
+            onChange={setStepsGoal}
+            min={STEPS_GOAL_MIN}
+            max={STEPS_GOAL_MAX}
+            step={STEPS_GOAL_STEP}
+            format={(v) => Math.round(v).toLocaleString('en-US')}
+            unit="steps"
+            testID="steps-goal"
+          />
+        </SegmentRow>
       </ListGroup>
 
       <ListGroup title="Reminders">

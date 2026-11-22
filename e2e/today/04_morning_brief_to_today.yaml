@@ -23,18 +23,17 @@ tags:
     timeout: 15000
 - assertVisible:
     id: "today-date"
-# Morning: the brief card (W2) with today's workout and next meal. Evening: progress + tomorrow.
-- runFlow:
-    when:
-      visible:
-        id: "today-brief"
-    commands:
-      - assertVisible:
-          id: "today-brief-row-0"
-- runFlow:
-    when:
-      notVisible:
-        id: "today-brief"
-    commands:
-      - assertVisible:
-          id: "today-evening"
+# Home dashboard (owner 22 Nov): the brief card was replaced by the workout hero + stats grid,
+# so this flow now checks the dashboard the notification opens onto.
+- scrollUntilVisible:
+    element:
+      id: "today-stats"
+    direction: DOWN
+- assertVisible:
+    id: "stat-calories"
+# Steps never prompt at launch: "Turn on steps" (or "Not on this phone" on a simulator).
+- scrollUntilVisible:
+    element:
+      id: "stat-steps(-enable)?"
+    direction: DOWN
+    centerElement: true

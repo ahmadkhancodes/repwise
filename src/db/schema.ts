@@ -309,6 +309,21 @@ export const cards = sqliteTable(
   (t) => [index('cards_date_idx').on(t.date), dirtyIdx('cards', t)],
 );
 
+/**
+ * One row per local day with the phone's step total (Home dashboard steps tile). Read-only from
+ * CoreMotion (iOS) / Health Connect or the pedometer (Android); never written to any health store.
+ */
+export const dailySteps = sqliteTable(
+  'daily_steps',
+  {
+    ...common,
+    date: text('date').notNull(),
+    steps: integer('steps').notNull().default(0),
+    source: text('source'),
+  },
+  (t) => [index('daily_steps_date_idx').on(t.date), dirtyIdx('daily_steps', t)],
+);
+
 /** Every synced table by its SQL name, in the server's TABLE_NAMES order. */
 export const syncTables = {
   profile,
@@ -325,6 +340,7 @@ export const syncTables = {
   body_metrics: bodyMetrics,
   photos,
   cards,
+  daily_steps: dailySteps,
 } as const;
 
 export type SyncTableName = keyof typeof syncTables;

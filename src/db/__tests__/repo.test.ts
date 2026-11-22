@@ -50,6 +50,7 @@ describe('migrations', () => {
       [
         'body_metrics',
         'cards',
+        'daily_steps',
         'exercises',
         'food_logs',
         'meal_plans',

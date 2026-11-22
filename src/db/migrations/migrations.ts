@@ -30,6 +30,13 @@ const journal = {
       "when": 1795172817135,
       "tag": "0003_sets_done_at_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1795334611656,
+      "tag": "0004_daily_steps",
+      "breakpoints": true
     }
   ]
 };
@@ -41,6 +48,7 @@ export const migrations = {
     m0001: "ALTER TABLE `food_logs` ADD `meal_id` text;--> statement-breakpoint\n-- Backfill: before this column a 'plan' log was matched to its meal by (date, slot). Give each\n-- existing one the eaten meal of that slot on that date (local only; not re-synced).\nUPDATE `food_logs` SET `meal_id` = (\n\tSELECT `m`.`id` FROM `meals` `m`\n\tJOIN `meal_plans` `mp` ON `mp`.`id` = `m`.`meal_plan_id`\n\tWHERE `mp`.`date` = `food_logs`.`date`\n\t\tAND `m`.`slot` = `food_logs`.`slot`\n\t\tAND `m`.`status` = 'eaten'\n\t\tAND `m`.`deleted_at` IS NULL\n\t\tAND `mp`.`deleted_at` IS NULL\n\t\tAND `m`.`id` NOT IN (SELECT `meal_id` FROM `food_logs` WHERE `meal_id` IS NOT NULL)\n\tORDER BY `m`.`eaten_at` DESC, `m`.`created_at` DESC\n\tLIMIT 1\n)\nWHERE `source` = 'plan' AND `meal_id` IS NULL AND `deleted_at` IS NULL;\n",
     m0002: "DROP INDEX `meal_plans_date_idx`;--> statement-breakpoint\nCREATE INDEX `meal_plans_date_updated_idx` ON `meal_plans` (`date`,`updated_at`);--> statement-breakpoint\nCREATE INDEX `meal_plans_dirty_idx` ON `meal_plans` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nDROP INDEX `meals_meal_plan_idx`;--> statement-breakpoint\nCREATE INDEX `meals_plan_created_idx` ON `meals` (`meal_plan_id`,`created_at`);--> statement-breakpoint\nCREATE INDEX `meals_dirty_idx` ON `meals` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nDROP INDEX `session_exercises_session_idx`;--> statement-breakpoint\nCREATE INDEX `session_exercises_session_pos_idx` ON `session_exercises` (`session_id`,`position`);--> statement-breakpoint\nCREATE INDEX `session_exercises_exercise_idx` ON `session_exercises` (`exercise_id`);--> statement-breakpoint\nCREATE INDEX `session_exercises_dirty_idx` ON `session_exercises` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nDROP INDEX `sets_session_exercise_idx`;--> statement-breakpoint\nCREATE INDEX `sets_session_exercise_idx_idx` ON `sets` (`session_exercise_id`,`idx`);--> statement-breakpoint\nCREATE INDEX `sets_dirty_idx` ON `sets` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `body_metrics_dirty_idx` ON `body_metrics` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `cards_dirty_idx` ON `cards` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `exercises_dirty_idx` ON `exercises` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `food_logs_meal_idx` ON `food_logs` (`meal_id`);--> statement-breakpoint\nCREATE INDEX `food_logs_dirty_idx` ON `food_logs` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `photos_dirty_idx` ON `photos` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `plans_dirty_idx` ON `plans` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `recipes_dirty_idx` ON `recipes` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `routines_dirty_idx` ON `routines` (`dirty`) WHERE dirty = 1;--> statement-breakpoint\nCREATE INDEX `sessions_status_ended_idx` ON `sessions` (`status`,`ended_at`);--> statement-breakpoint\nCREATE INDEX `sessions_status_started_idx` ON `sessions` (`status`,`started_at`);--> statement-breakpoint\nCREATE INDEX `sessions_user_date_idx` ON `sessions` (`user_id`,`date`);--> statement-breakpoint\nCREATE INDEX `sessions_dirty_idx` ON `sessions` (`dirty`) WHERE dirty = 1;",
     m0003: "CREATE INDEX `sets_done_at_idx` ON `sets` (`done_at`) WHERE \"sets\".\"done_at\" IS NOT NULL AND \"sets\".\"deleted_at\" IS NULL;",
+    m0004: "CREATE TABLE `daily_steps` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`user_id` text,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL,\n\t`deleted_at` integer,\n\t`dirty` integer DEFAULT 1 NOT NULL,\n\t`date` text NOT NULL,\n\t`steps` integer DEFAULT 0 NOT NULL,\n\t`source` text\n);\n--> statement-breakpoint\nCREATE INDEX `daily_steps_date_idx` ON `daily_steps` (`date`);--> statement-breakpoint\nCREATE INDEX `daily_steps_dirty_idx` ON `daily_steps` (`dirty`) WHERE dirty = 1;",
   },
 };
 

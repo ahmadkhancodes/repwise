@@ -42,6 +42,7 @@ export const USER_TABLES = [
   'body_metrics',
   'photos',
   'cards',
+  'daily_steps',
 ] as const;
 
 /** Per-device MMKV keys that hold personal data (not theme, reminders or purchases). */

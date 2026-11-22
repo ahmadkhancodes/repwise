@@ -11,6 +11,8 @@ import colors from './src/theme/colors.json';
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID;
 const BUNDLE_ID = 'com.client.repwise';
 const APP_GROUP = 'group.com.client.repwise';
+const MOTION_USAGE =
+  'Repwise reads your step count to show today\'s steps on your home screen. Steps stay on your phone unless you turn on backup.';
 /** Android widgets (names match src/widgets/android/widgets.tsx WIDGET_NAMES). */
 const INTER = './node_modules/@expo-google-fonts/inter';
 const ANDROID_WIDGETS = {
@@ -108,6 +110,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         'Repwise saves a progress photo or comparison image to your library only when you tap Save.',
       NSFaceIDUsageDescription:
         'Repwise uses Face ID only if you turn on App lock, to keep your workouts and meals private.',
+      // Home dashboard steps tile (D-STEPS): CoreMotion step count, read only, asked from the tile.
+      NSMotionUsageDescription: MOTION_USAGE,
       // Notifications have no Info.plist string on iOS; the in-app primer (S06)
       // explains meal and workout reminders before the system prompt.
       // W5 rest-timer Live Activity (targets/widget + modules/repwise-timer).
@@ -169,7 +173,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/images/adaptive-icon-monochrome.png',
       backgroundColor: colors.light.inverse,
     },
-    permissions: ['android.permission.POST_NOTIFICATIONS'],
+    permissions: [
+      'android.permission.POST_NOTIFICATIONS',
+      // Home dashboard steps tile (D-STEPS, owner 22 Nov): read today's steps from Health Connect,
+      // or count with the phone's pedometer while the app is open. Asked from the tile only.
+      'android.permission.health.READ_STEPS',
+      'android.permission.ACTIVITY_RECOGNITION',
+    ],
     // Nothing else (sheet 13): no location, contacts, mic, ad ID or overlays.
     blockedPermissions: [
       'android.permission.ACCESS_FINE_LOCATION',
@@ -209,6 +219,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-updates',
     'expo-sqlite',
     'expo-secure-store',
+    // Steps (D-STEPS): CoreMotion string on iOS; Health Connect (Steps READ only) on Android,
+    // which needs minSdk 26 (androidx.health.connect:connect-client).
+    ['expo-sensors', { motionPermission: MOTION_USAGE }],
+    'react-native-health-connect',
+    ['expo-build-properties', { android: { minSdkVersion: 26 } }],
     'expo-apple-authentication',
     // Local notifications (sheet 17). Small icon = monochrome adaptive icon, tinted with the accent.
     [
