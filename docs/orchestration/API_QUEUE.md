@@ -126,7 +126,8 @@
        ```
     5. Tick this task.
 
-- [ ] (opus) **US/UK meals first (owner, 22 Nov: "not Pakistani meals; put American and UK meals").** Repwise targets the US, UK and Canada.
+- [x] (opus) **US/UK meals first (owner, 22 Nov: "not Pakistani meals; put American and UK meals").** Repwise targets the US, UK and Canada.
+  - result (22 Nov, API run 9; on feat/client-demo, E2E pending): code in 8ac4383, merged into `feat/client-demo` (b7860e8, head 3fd21dc). Engine D-CUISINE-DEFAULT: no pick / "Anything" → american, british, mediterranean, italian, mexican, global; Pakistani, Indian, Gulf, Middle Eastern and North African dishes only when picked (hard filter in `recipeSafe`, so plans, all swap tiers and AI pools follow it). Onboarding reordered. +148 recipes (611 → 759; american 124, british 122). test:all green on the branch (app 3131, engine 775, content 56, server 150); golden fixtures unchanged. E2E runs dispatched on `feat/us-uk-meals` before the batching rule landed were cancelled. Also fixed main's lint (scripts/media Node globals).
   - Today the catalogue is 611 recipes: pakistani 87, indian 70, middle_eastern 59, american 57, british 49, mediterranean 49, global 48, gulf 43, east_asian 34, mexican 33, italian 33, north_african 27, southeast_asian 22.
   - Onboarding: reorder `CUISINE_OPTIONS` (`src/features/onboarding/logic/options.ts`) to American, British, Mediterranean, Italian, Mexican, Anything, then the rest. Pakistani, Indian, Gulf and the other regional cuisines go last.
   - Planner default when the user picks no cuisine, or "Anything": draw only from american, british, mediterranean, italian, mexican and global. South Asian, Gulf, Middle Eastern and North African recipes appear ONLY when the user picks them.
