@@ -77,6 +77,9 @@ import {
   type WeekRows,
 } from './logic/planRows';
 import { spreadWeekdays, toEngineProfile } from './logic/profile';
+import { canAdaptPlan } from '@/features/billing/logic/gates';
+import { isProNow } from '@/services/billing';
+
 import { plansRepo, type Plan } from './repo';
 
 // ---------------------------------------------------------------------------
@@ -166,7 +169,9 @@ function currentWeekdays(
   today: string,
   picked?: readonly number[],
 ): number[] {
-  const chosen = [...new Set((picked ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))];
+  const chosen = [
+    ...new Set((picked ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6)),
+  ];
   if (chosen.length === profile.daysPerWeek) return chosen.sort((a, b) => a - b);
   const saved = latestTrainingPayload()?.trainingWeekdays;
   if (saved && saved.length === profile.daysPerWeek) return saved;
@@ -462,7 +467,10 @@ export async function regenerateWeek(opts: GenerateOptions = {}): Promise<PlanRe
   await yieldToUi();
   const out = generateSync(opts);
   // The Worker accepts `deload` too, so a deload week gets the same AI variety (validated the same).
-  if (opts.ai !== false) {
+  // The adaptive (AI) weekly plan is free for the first plan week only (sheet 05); after that free
+  // users keep the rules plan.
+  const weekStart = startOfWeek(opts.date ?? localToday(opts.now ?? Date.now()));
+  if (opts.ai !== false && canAdaptPlan(isProNow(opts.now), weekStart, firstPlanWeekStart())) {
     void upgradeWithAi(out.result, out.profile, out.history, out.weekdays, opts);
   }
   return out.result;
@@ -538,11 +546,13 @@ export function dedupePlannedSessions(
   return removed;
 }
 
+/** The week the user's first training plan started (sheet 05 "first week only"), or null. */
+export function firstPlanWeekStart(): string | null {
+  return plansRepo.first(eq(plans.type, 'training'), plans.weekStart)?.weekStart ?? null;
+}
+
 /** Make sure the week containing `date` has a plan (no-op when one exists). */
-export function ensureWeekPlanned(
-  day?: string,
-  now: number = Date.now(),
-): PlanResult | null {
+export function ensureWeekPlanned(day?: string, now: number = Date.now()): PlanResult | null {
   const date = day ?? localToday(now); // the injected clock, never the real one (R2-7)
   const weekStart = startOfWeek(date);
   if (plansRepo.first(and(eq(plans.type, 'training'), eq(plans.weekStart, weekStart)))) return null;

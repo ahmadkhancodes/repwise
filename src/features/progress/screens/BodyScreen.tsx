@@ -3,8 +3,23 @@ import { CircleAlert, Plus, Ruler, Scale, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
+import { openGate } from '@/features/billing';
 import { usePro } from '@/features/billing/hooks/usePro';
-import { BackButton, BigNumber, Button, Card, EmptyState, Enter, IconButton, ListRow, Screen, SectionHeader, Segmented, showToast, Text } from '@/ui';
+import {
+  BackButton,
+  BigNumber,
+  Button,
+  Card,
+  EmptyState,
+  Enter,
+  IconButton,
+  ListRow,
+  Screen,
+  SectionHeader,
+  Segmented,
+  showToast,
+  Text,
+} from '@/ui';
 import { useTheme } from '@/theme';
 
 import { LineChart } from '../components/LineChart';
@@ -159,7 +174,7 @@ export function BodyScreen() {
                 value={effective}
                 onChange={setRange}
                 isPro={isPro}
-                onLocked={() => router.push({ pathname: '/paywall', params: { source: 'body' } })}
+                onLocked={() => openGate('body')}
               />
             </View>
           </Enter>
@@ -177,7 +192,7 @@ export function BodyScreen() {
             value={effective}
             onChange={setRange}
             isPro={isPro}
-            onLocked={() => router.push({ pathname: '/paywall', params: { source: 'body' } })}
+            onLocked={() => openGate('body')}
           />
           {measures.map((m, i) => {
             const unit = m.kind === 'percent' ? '%' : lu;

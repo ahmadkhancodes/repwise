@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 
-import { useBillingStore } from '@/services/billing';
+import { usePro } from '@/features/billing';
 import { track } from '@/services/analytics';
 import { haptics } from '@/services/haptics';
 import { startOfWeek } from '@/features/planner/engine';
@@ -71,7 +71,7 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
   // The user's own answers, quoted back on the status lines (read once; the quiz is over).
   const lines = useMemo(() => buildLines(useOnboarding.getState().answers), []);
   const preview = usePlanPreview(ctx.today);
-  const paymentsEnabled = useBillingStore((s) => s.paymentsEnabled);
+  const { paymentsEnabled } = usePro();
 
   useFocusEffect(
     useCallback(() => {
@@ -213,19 +213,23 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
       testID="screen-plan"
       footer={
         <Animated.View
-          entering={safe(FadeInDown.delay(revealDelay(t.motion, 'cta'))
-            .springify()
-            .damping(t.motion.spring.damping)
-            .stiffness(t.motion.spring.stiffness))}
+          entering={safe(
+            FadeInDown.delay(revealDelay(t.motion, 'cta'))
+              .springify()
+              .damping(t.motion.spring.damping)
+              .stiffness(t.motion.spring.stiffness),
+          )}
         >
           <Button label="Start my plan" onPress={finish} testID="plan-continue" />
         </Animated.View>
       }
     >
       <Animated.View
-        entering={safe(FadeInDown.springify()
-          .damping(t.motion.spring.damping)
-          .stiffness(t.motion.spring.stiffness))}
+        entering={safe(
+          FadeInDown.springify()
+            .damping(t.motion.spring.damping)
+            .stiffness(t.motion.spring.stiffness),
+        )}
         style={{ gap: t.spacing.xs, paddingTop: t.spacing.lg }}
       >
         <Text variant="eyebrow" color="accentText">

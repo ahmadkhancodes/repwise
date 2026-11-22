@@ -1,9 +1,9 @@
-import { router } from 'expo-router';
 import { Camera, CircleAlert, ImagePlus, Images, Lock, Share2, Trash2 } from 'lucide-react-native';
 import { useMemo, useRef, useState } from 'react';
 import { Image, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { openGate } from '@/features/billing';
 import { usePro } from '@/features/billing/hooks/usePro';
 import { haptics } from '@/services/haptics';
 import {
@@ -93,7 +93,7 @@ export function PhotosScreen() {
           title="Progress photos are part of Pro"
           body="Private photos that stay on your phone, with a side-by-side compare."
           actionLabel="See Pro"
-          onAction={() => router.push({ pathname: '/paywall', params: { source: 'photos' } })}
+          onAction={() => openGate('photos')}
           testID="photos-locked"
         />
       </Screen>

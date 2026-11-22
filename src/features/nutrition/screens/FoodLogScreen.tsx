@@ -11,7 +11,25 @@ import { nextSlotIndex, slotLabel } from '@/features/meals/logic/slots';
 import { logOffPlan } from '@/features/meals/service';
 import { searchFoods, type Food } from '@/services/catalog';
 import { useTheme } from '@/theme';
-import { BackButton, BigNumber, Button, Checkbox, Chip, EmptyState, ListRow, Screen, SearchBar, Segmented, Sheet, showToast, SkeletonCard, SkeletonGroup, Text, WheelPicker } from '@/ui';
+import { canLogAteOut, openGate, usePro } from '@/features/billing';
+import {
+  BackButton,
+  BigNumber,
+  Button,
+  Checkbox,
+  Chip,
+  EmptyState,
+  ListRow,
+  Screen,
+  SearchBar,
+  Segmented,
+  Sheet,
+  showToast,
+  SkeletonCard,
+  SkeletonGroup,
+  Text,
+  WheelPicker,
+} from '@/ui';
 
 import {
   QUICK_ESTIMATES,
@@ -43,7 +61,13 @@ export function FoodLogScreen() {
   const params = useLocalSearchParams<{ date?: string; mode?: string }>();
   const date = isISODate(params.date) ? params.date : todayISO();
   const day = useEatDay(date);
-  const [mode, setMode] = useState<'out' | 'food'>(params.mode === 'food' ? 'food' : 'out');
+  // 'Ate out' + rebalance is Pro (sheet 05); free users log food and meet the gate on 'Ate out'.
+  const ateOutOk = canLogAteOut(usePro().isPro);
+  const [mode, setMode] = useState<'out' | 'food'>(
+    params.mode === 'food' || !ateOutOk ? 'food' : 'out',
+  );
+  const onMode = (m: 'out' | 'food') =>
+    m === 'out' && !ateOutOk ? openGate('ate_out') : setMode(m);
   const next = nextSlotIndex(day.meals, nowHHMM(), day.profile?.mealTimes ?? []);
   const [slotPick, setSlotPick] = useState<string | null>(null);
   const slot = slotPick ?? day.meals[next]?.slot ?? 'lunch';
@@ -57,7 +81,10 @@ export function FoodLogScreen() {
   const recentLogs = useRecentSearchLogs();
   const cat = day.catalog;
 
-  const results = useMemo(() => (cat && query.trim() ? searchFoods(query, { limit: 30 }) : []), [cat, query]);
+  const results = useMemo(
+    () => (cat && query.trim() ? searchFoods(query, { limit: 30 }) : []),
+    [cat, query],
+  );
   const recent = useMemo(() => {
     if (!cat) return [];
     const byName = new Map(cat.foods.map((f) => [f.name, f]));
@@ -67,7 +94,10 @@ export function FoodLogScreen() {
   // Core action: the success toast owns the one success buzz.
   const done = (rebalanced: number, what: string) => {
     showToast({
-      message: rebalanced > 0 ? `${what} logged. ${rebalanced} meal${rebalanced === 1 ? '' : 's'} adjusted.` : `${what} logged`,
+      message:
+        rebalanced > 0
+          ? `${what} logged. ${rebalanced} meal${rebalanced === 1 ? '' : 's'} adjusted.`
+          : `${what} logged`,
       tone: 'success',
     });
     if (router.canGoBack()) router.back();
@@ -91,7 +121,10 @@ export function FoodLogScreen() {
   const openFood = (f: Food) => {
     const last = recentLogs.find((l) => l.name === f.name);
     // Re-use the last portion of a recent food (stored kcal ÷ per-100 g), else a typical default.
-    const g = last && f.per100g.kcal > 0 ? nearestGram((last.kcal / f.per100g.kcal) * 100) : defaultGrams(f.category);
+    const g =
+      last && f.per100g.kcal > 0
+        ? nearestGram((last.kcal / f.per100g.kcal) * 100)
+        : defaultGrams(f.category);
     setGrams(nearestGram(g));
     setFood(f);
   };
@@ -99,7 +132,14 @@ export function FoodLogScreen() {
   const logFoodItem = () => {
     if (!food) return;
     const m = macrosForGrams(food, grams);
-    const res = logOffPlan({ date, slot, name: food.name, ...m, source: 'search', replaceMealId: replacing ? planned?.id : null });
+    const res = logOffPlan({
+      date,
+      slot,
+      name: food.name,
+      ...m,
+      source: 'search',
+      replaceMealId: replacing ? planned?.id : null,
+    });
     setFood(null);
     done(res.rebalanced, food.name);
   };
@@ -111,7 +151,14 @@ export function FoodLogScreen() {
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
         {SLOTS.map((s) => (
-          <Chip key={s} role="radio" label={slotLabel(s)} selected={slot === s} onPress={() => setSlotPick(s)} testID={`log-slot-${s}`} />
+          <Chip
+            key={s}
+            role="radio"
+            label={slotLabel(s)}
+            selected={slot === s}
+            onPress={() => setSlotPick(s)}
+            testID={`log-slot-${s}`}
+          />
         ))}
       </View>
       {planned ? (
@@ -132,15 +179,29 @@ export function FoodLogScreen() {
         title="Log food"
         headerLeft={<BackButton fallback="/eat" />}
         testID="screen-log"
-        footer={mode === 'out' ? <Button label={`Log ${estimate.label.toLowerCase()} out`} onPress={logOut} testID="log-out-save" /> : undefined}
+        footer={
+          mode === 'out' ? (
+            <Button
+              label={`Log ${estimate.label.toLowerCase()} out`}
+              onPress={logOut}
+              testID="log-out-save"
+            />
+          ) : undefined
+        }
       >
-        <Segmented options={MODES} value={mode} onChange={setMode} accessibilityLabel="Log type" testID="log-mode" />
+        <Segmented
+          options={MODES}
+          value={mode}
+          onChange={onMode}
+          accessibilityLabel="Log type"
+          testID="log-mode"
+        />
         {!cat ? (
           <SkeletonGroup testID="log-loading" style={{ gap: t.spacing.sm }}>
-          {Array.from({ length: 3 }, (_, i) => (
-            <SkeletonCard key={i} lines={2} />
-          ))}
-        </SkeletonGroup>
+            {Array.from({ length: 3 }, (_, i) => (
+              <SkeletonCard key={i} lines={2} />
+            ))}
+          </SkeletonGroup>
         ) : mode === 'out' ? (
           <>
             {slotChips}
@@ -149,7 +210,11 @@ export function FoodLogScreen() {
             </Text>
             <View
               accessibilityRole="radiogroup"
-              style={{ backgroundColor: t.colors.surface, borderRadius: t.radius.card, paddingHorizontal: t.spacing.card }}
+              style={{
+                backgroundColor: t.colors.surface,
+                borderRadius: t.radius.card,
+                paddingHorizontal: t.spacing.card,
+              }}
             >
               {QUICK_ESTIMATES.map((e, i) => (
                 <Animated.View key={e.id} entering={enterAt(i, reduce)}>
@@ -193,7 +258,12 @@ export function FoodLogScreen() {
                   ))}
                 </View>
               ) : (
-                <EmptyState icon={Search} title="No matches" body="Try a simpler word, like 'rice' or 'yogurt'." testID="food-none" />
+                <EmptyState
+                  icon={Search}
+                  title="No matches"
+                  body="Try a simpler word, like 'rice' or 'yogurt'."
+                  testID="food-none"
+                />
               )
             ) : recent.length ? (
               <View testID="food-recent">
@@ -201,24 +271,56 @@ export function FoodLogScreen() {
                   Recent
                 </Text>
                 {recent.map((f) => (
-                  <ListRow key={f.id} title={f.name} icon={Clock} onPress={() => openFood(f)} chevron testID={`recent-${f.id}`} />
+                  <ListRow
+                    key={f.id}
+                    title={f.name}
+                    icon={Clock}
+                    onPress={() => openFood(f)}
+                    chevron
+                    testID={`recent-${f.id}`}
+                  />
                 ))}
               </View>
             ) : (
-              <EmptyState icon={UtensilsCrossed} title={`Search ${cat.foods.length} everyday foods`} body="Nutrition from USDA FoodData Central." testID="food-hint" />
+              <EmptyState
+                icon={UtensilsCrossed}
+                title={`Search ${cat.foods.length} everyday foods`}
+                body="Nutrition from USDA FoodData Central."
+                testID="food-hint"
+              />
             )}
           </>
         )}
 
-        <Sheet open={food !== null} onClose={() => setFood(null)} title={food?.name} testID="portion-sheet">
+        <Sheet
+          open={food !== null}
+          onClose={() => setFood(null)}
+          title={food?.name}
+          testID="portion-sheet"
+        >
           {food ? (
             <>
-              <BigNumber value={macrosForGrams(food, grams).kcal} unit="kcal" testID="portion-kcal" />
+              <BigNumber
+                value={macrosForGrams(food, grams).kcal}
+                unit="kcal"
+                testID="portion-kcal"
+              />
               <Text variant="caption" color="textSecondary" tabular>
-                P {macrosForGrams(food, grams).p} g · C {macrosForGrams(food, grams).c} g · F {macrosForGrams(food, grams).f} g
+                P {macrosForGrams(food, grams).p} g · C {macrosForGrams(food, grams).c} g · F{' '}
+                {macrosForGrams(food, grams).f} g
               </Text>
-              <WheelPicker items={GRAMS} value={grams} onChange={setGrams} accessibilityLabel="Portion in grams" testID="portion-wheel" />
-              <Button label={`Add to ${slotLabel(slot).toLowerCase()}`} onPress={logFoodItem} testID="portion-add" />
+              <WheelPicker
+                items={GRAMS}
+                value={grams}
+                onChange={setGrams}
+                accessibilityLabel="Portion in grams"
+                testID="portion-wheel"
+              />
+              <Button
+                label={`Add to ${slotLabel(slot).toLowerCase()}`}
+                onPress={logFoodItem}
+                testID="portion-add"
+              />
             </>
           ) : null}
         </Sheet>

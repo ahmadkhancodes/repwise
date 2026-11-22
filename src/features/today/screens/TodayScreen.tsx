@@ -7,15 +7,31 @@ import { AssistantCard } from '@/features/assistant/components/AssistantCard';
 import { CardDetailSheet } from '@/features/assistant/components/CardDetailSheet';
 import { useAssistant } from '@/features/assistant/hooks/useAssistant';
 import type { ShownCard } from '@/features/assistant/logic/cardState';
-import { usePro } from '@/features/billing';
-import { openMeal, quickAddWater, SwapSheet, toggleMeal, toMealView, type MealView as EatMealView } from '@/features/meals';
+import { canSwapMeal, openGate, usePro } from '@/features/billing';
+import {
+  openMeal,
+  quickAddWater,
+  SwapSheet,
+  toggleMeal,
+  toMealView,
+  type MealView as EatMealView,
+} from '@/features/meals';
 import { getWaterGoal } from '@/features/nutrition';
 import { WaterCard } from '@/features/nutrition/components/WaterCard';
 import { trainHref } from '@/features/workout';
 import { useCatalogFor } from '@/services/catalog';
 import { maybeAskForReview, REVIEW_DELAY_MS } from '@/services/review';
 import { useTheme } from '@/theme';
-import { Button, EmptyState, IconButton, Screen, Skeleton, SkeletonGroup, Text, UNDO_TOAST_MS } from '@/ui';
+import {
+  Button,
+  EmptyState,
+  IconButton,
+  Screen,
+  Skeleton,
+  SkeletonGroup,
+  Text,
+  UNDO_TOAST_MS,
+} from '@/ui';
 
 import { EveningCard } from '../components/EveningCard';
 import { MealsCard } from '../components/MealsCard';
@@ -25,7 +41,12 @@ import { useDashboard } from '../hooks/useDashboard';
 import { useToday } from '../hooks/useToday';
 import { localHour } from '../logic/day';
 import type { MealView } from '../logic/meals';
-import { currentWeekStreak, isWeekComplete, reviewMoment, type DayMomentState } from '../logic/moments';
+import {
+  currentWeekStreak,
+  isWeekComplete,
+  reviewMoment,
+  type DayMomentState,
+} from '../logic/moments';
 import { doneWorkoutDates } from '../repo';
 
 /** Undo window for the core action (P5 acceptance: undo toast, 5 s). */
@@ -132,16 +153,25 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
 
   const weekComplete = isWeekComplete(model.snapshot?.week);
   const ready = view?.state === 'ready';
-  const moments = useMemo<DayMomentState | null>(() => (ready ? { weekComplete } : null), [ready, weekComplete]);
+  const moments = useMemo<DayMomentState | null>(
+    () => (ready ? { weekComplete } : null),
+    [ready, weekComplete],
+  );
   useReviewMoments(moments, view?.date ?? '');
 
   // Meal writes go through the meals domain (same action, copy and undo as Eat). The row owns the
   // one haptic; the undo toast is silent.
   const dayMeals = view?.meals;
-  const onToggle = useCallback((meal: MealView) => {
-    toggleMeal(meal, dayMeals ?? []);
-  }, [dayMeals]);
-  const onSwap = useCallback((meal: MealView) => setSwapId(meal.id), []);
+  const onToggle = useCallback(
+    (meal: MealView) => {
+      toggleMeal(meal, dayMeals ?? []);
+    },
+    [dayMeals],
+  );
+  const onSwap = useCallback(
+    (meal: MealView) => (canSwapMeal(isPro) ? setSwapId(meal.id) : openGate('meal_swap')),
+    [isPro],
+  );
   const onOpenMeal = useCallback((meal: MealView) => {
     openMeal(meal);
   }, []);
@@ -287,7 +317,12 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
   }
 
   return (
-    <Screen title={view?.greeting ?? 'Today'} edges={['top']} testID="screen-today" headerRight={header}>
+    <Screen
+      title={view?.greeting ?? 'Today'}
+      edges={['top']}
+      testID="screen-today"
+      headerRight={header}
+    >
       <View style={{ gap: t.spacing.md }}>{body}</View>
       <SwapSheet meal={swapMeal} onClose={() => setSwapId(null)} />
       <CardDetailSheet

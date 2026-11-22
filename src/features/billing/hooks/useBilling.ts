@@ -7,15 +7,26 @@ import {
   type RestoreOutcome,
 } from '@/services/billing';
 import type { PlanId } from '@/services/billingApi';
+import { demoCheckoutActive, useDemoPayments } from '@/services/demoPayments';
+
+import type { PlanOffer } from '../logic/offers';
+
+/** Demo checkout: the USD plans are buyable as-is (no store to localise them). Pure. */
+export function demoOffers(offers: readonly PlanOffer[]): PlanOffer[] {
+  return offers.map((o) => (o.localised ? o : { ...o, localised: true }));
+}
 
 /** Paywall + subscription screen state and actions. UI never touches the service directly. */
 export function useBilling() {
-  const offers = useBillingStore((s) => s.offers);
+  const storeOffers = useBillingStore((s) => s.offers);
+  const demoState = useDemoPayments();
+  const demoCheckout = demoCheckoutActive(demoState);
   const productsStatus = useBillingStore((s) => s.productsStatus);
   const storeStatus = useBillingStore((s) => s.storeStatus);
   const purchasing = useBillingStore((s) => s.purchasing);
   const restoring = useBillingStore((s) => s.restoring);
-  const paymentsEnabled = useBillingStore((s) => s.paymentsEnabled);
+  const paymentsEnabled = useBillingStore((s) => s.paymentsEnabled) || demoCheckout;
+  const offers = demoCheckout ? demoOffers(storeOffers) : storeOffers;
   const pendingVerifications = useBillingStore((s) => s.queue.length);
 
   const purchase = useCallback(
@@ -34,6 +45,8 @@ export function useBilling() {
     purchasing,
     restoring,
     paymentsEnabled,
+    /** Demo builds only: "Start free trial" opens the TEST checkout instead of the store. */
+    demoCheckout,
     pendingVerifications,
     purchase,
     restore,
@@ -44,5 +57,5 @@ export function useBilling() {
 
 /** Open the paywall only when payments are on (otherwise it is a no-op). */
 export function canOpenPaywall(): boolean {
-  return useBillingStore.getState().paymentsEnabled;
+  return useBillingStore.getState().paymentsEnabled || demoCheckoutActive();
 }

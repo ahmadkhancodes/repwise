@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { closeGate, useGateSheet } from '@/features/billing/components/GateSheet';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
@@ -167,9 +168,9 @@ describe('Progress home gating', () => {
     await fireEvent.press(screen.getByTestId('progress-calendar-prev'));
     expect(screen.getByText('September 2026')).toBeTruthy();
     expect(screen.getByTestId('progress-month-locked')).toBeTruthy();
-    expect(mockRouter.push).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
+    expect(useGateSheet.getState().feature).toBeNull();
     await fireEvent.press(screen.getByTestId('progress-month-unlock'));
-    expect(mockRouter.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
+    expect(useGateSheet.getState().feature).toBe('progress');
     await fireEvent.press(screen.getByTestId('progress-calendar-next'));
     expect(screen.queryByTestId('progress-month-locked')).toBeNull();
   });
@@ -269,7 +270,7 @@ describe('Body states', () => {
     await renderThemed(<BodyScreen />);
     await screen.findByTestId('weight-chart');
     await fireEvent.press(screen.getByTestId('range-picker-6M'));
-    expect(mockRouter.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
+    expect(useGateSheet.getState().feature).toBe('body');
   });
 });
 
@@ -413,7 +414,7 @@ describe('Photos gating and delete', () => {
     useBillingStore.setState({ paymentsEnabled: true });
     await renderThemed(<PhotosScreen />);
     await fireEvent.press(screen.getByText('See Pro'));
-    expect(mockRouter.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
+    expect(useGateSheet.getState().feature).toBe('photos');
   });
 
   it('opens a photo and deletes it', async () => {
@@ -519,3 +520,5 @@ describe('History states', () => {
     expect(screen.queryByTestId('history-w-old')).toBeNull();
   });
 });
+
+beforeEach(() => closeGate());

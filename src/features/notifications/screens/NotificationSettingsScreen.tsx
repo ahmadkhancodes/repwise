@@ -1,4 +1,3 @@
-import { router, type Href } from 'expo-router';
 import {
   Bell,
   BellOff,
@@ -15,6 +14,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
+import { openGate } from '@/features/billing';
 import { usePro } from '@/features/billing/hooks/usePro';
 import { useProfile } from '@/features/settings/repo';
 import { haptics } from '@/services/haptics';
@@ -73,9 +73,11 @@ function NextUpCard() {
   return (
     <Animated.View
       key={next.key}
-      entering={safe(FadeInDown.springify()
-        .damping(t.motion.spring.damping)
-        .stiffness(t.motion.spring.stiffness))}
+      entering={safe(
+        FadeInDown.springify()
+          .damping(t.motion.spring.damping)
+          .stiffness(t.motion.spring.stiffness),
+      )}
     >
       <Card testID="next-up" accessibilityLabel={`Next up, ${when}: ${next.title}. ${next.body}`}>
         <View style={{ gap: t.spacing.xxs }}>
@@ -119,8 +121,7 @@ export function NotificationSettingsScreen() {
   const time = (hm: string) => displayTime(hm, h12);
   const toggle = (key: keyof NotificationPrefs) => (v: boolean) => setPref(key, v as never);
   const proLock = pro.isPro ? undefined : 'Pro';
-  const openPaywall = () =>
-    router.push({ pathname: '/paywall', params: { source: 'notifications' } } as Href);
+  const openPaywall = () => openGate('notifications');
   const editTime = (title: string, value: string, onSave: (hm: string) => void) => () => {
     setSheet({ type: 'time', title, value, onSave });
   };

@@ -24,6 +24,7 @@ import { useTheme } from '@/theme';
 // Direct import, not the '@/ui' barrel: the root must not evaluate Skia, sheets and pickers.
 import { holdToasts, ToastHost } from '@/ui/Toast';
 import { SheetHost } from '@/ui/Sheet';
+import { GateSheetHost } from '@/features/billing/components/GateSheet';
 
 /*
  * Module load stays tiny (perf audit A7/A8): hold the splash, start crash reporting (so a startup
@@ -110,6 +111,7 @@ function RootLayout() {
             </Stack>
           </DatabaseProvider>
           {/* Sheets draw over every screen; toasts stay above them. */}
+          <GateSheetHost />
           <SheetHost />
           <ToastHost />
         </BottomSheetModalProvider>

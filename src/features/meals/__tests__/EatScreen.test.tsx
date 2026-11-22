@@ -12,6 +12,7 @@ import { mealPlanForDate, mealsForPlan } from '../repo';
 import * as service from '../service';
 import { EatScreen } from '../screens/EatScreen';
 import { freshDb, lockPro, onboard } from './helpers';
+import { closeGate, useGateSheet } from '@/features/billing/components/GateSheet';
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), setParams: jest.fn(), canGoBack: jest.fn(() => true) },
@@ -168,5 +169,37 @@ describe('EatScreen interactions', () => {
     await waitFor(() => expect(screen.getByTestId('water-total')).toHaveTextContent('250 ml of 2 L'));
     await fireEvent.press(screen.getByTestId('open-water'));
     expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/meal/water' }));
+  });
+});
+
+describe('EatScreen Pro gates (sheet 05, F-S5)', () => {
+  beforeEach(() => {
+    onboard();
+    closeGate();
+  });
+
+  it('free users meet the meal-swap gate sheet instead of the swap sheet', async () => {
+    lockPro();
+    await renderThemed(<EatScreen />);
+    await fireEvent.press(await screen.findByTestId('swap-dinner'));
+    expect(useGateSheet.getState().feature).toBe('meal_swap');
+    expect(screen.queryByTestId('swap-option-0')).toBeNull();
+  });
+
+  it('a notification "Swap" deep link also meets the gate for free users', async () => {
+    lockPro();
+    service.ensureWeekMeals(todayISO());
+    const plan = mealPlanForDate(todayISO())!;
+    const dinner = mealsForPlan(plan.id).find((m) => m.slot === 'dinner')!;
+    jest.mocked(useLocalSearchParams).mockReturnValue({ mealId: dinner.id, swap: '1' });
+    await renderThemed(<EatScreen />);
+    await waitFor(() => expect(useGateSheet.getState().feature).toBe('meal_swap'));
+  });
+
+  it('opening Eat never pops a gate by itself', async () => {
+    lockPro();
+    await renderThemed(<EatScreen />);
+    await screen.findByTestId('meal-lunch');
+    expect(useGateSheet.getState().feature).toBeNull();
   });
 });

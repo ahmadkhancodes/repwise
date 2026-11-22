@@ -1,10 +1,19 @@
 import { router, type Href } from 'expo-router';
-import { ArrowRight, CalendarCheck, ChevronLeft, CircleAlert, CircleCheck, Dumbbell, Lock, UtensilsCrossed } from 'lucide-react-native';
+import {
+  ArrowRight,
+  CalendarCheck,
+  ChevronLeft,
+  CircleAlert,
+  CircleCheck,
+  Dumbbell,
+  Lock,
+  UtensilsCrossed,
+} from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BackHandler, Platform, View } from 'react-native';
 import Animated, { FadeInRight, ZoomIn } from 'react-native-reanimated';
 
-import { usePro } from '@/features/billing';
+import { openGate, usePro } from '@/features/billing';
 import { latestWeight } from '@/features/progress/repo';
 import { getProfile } from '@/features/settings/repo';
 import { localDate } from '@/features/today/logic/day';
@@ -14,7 +23,25 @@ import { getPlanner } from '@/features/today/plannerBridge';
 import { track } from '@/services/analytics';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { Badge, BigNumber, Button, Card, Chip, EmptyState, goBack, IconButton, ProgressRing, Screen, Skeleton, SkeletonGroup, SkeletonText, Sparkline, Stepper, StepProgress, Text } from '@/ui';
+import {
+  Badge,
+  BigNumber,
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  goBack,
+  IconButton,
+  ProgressRing,
+  Screen,
+  Skeleton,
+  SkeletonGroup,
+  SkeletonText,
+  Sparkline,
+  Stepper,
+  StepProgress,
+  Text,
+} from '@/ui';
 
 import {
   appliesFrom,
@@ -159,7 +186,12 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
   }, [result, energy, sleep, data?.kcal, weighed, shownWeight, imperial, today]);
 
   const headerLeft = (
-    <IconButton icon={ChevronLeft} accessibilityLabel={step > 0 && !done ? 'Previous step' : 'Back'} onPress={back} testID="checkin-back" />
+    <IconButton
+      icon={ChevronLeft}
+      accessibilityLabel={step > 0 && !done ? 'Previous step' : 'Back'}
+      onPress={back}
+      testID="checkin-back"
+    />
   );
 
   if (!isPro) {
@@ -170,7 +202,7 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
           title="Weekly check-in is part of Pro"
           body="Each week Repwise tunes your calories, training volume and menus from your own progress."
           actionLabel="See Repwise Pro"
-          onAction={() => router.push({ pathname: '/paywall', params: { source: 'checkin' } } as Href)}
+          onAction={() => openGate('checkin')}
           testID="checkin-pro"
         />
       </Screen>
@@ -180,7 +212,14 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
   if (error) {
     return (
       <Screen title="Weekly check-in" headerLeft={headerLeft} testID="screen-checkin">
-        <EmptyState icon={CircleAlert} title="Couldn’t load your week" body="Your data is safe on this phone." actionLabel="Try again" onAction={reload} testID="checkin-error" />
+        <EmptyState
+          icon={CircleAlert}
+          title="Couldn’t load your week"
+          body="Your data is safe on this phone."
+          actionLabel="Try again"
+          onAction={reload}
+          testID="checkin-error"
+        />
       </Screen>
     );
   }
@@ -188,7 +227,11 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
   if (!data) {
     return (
       <Screen title="Weekly check-in" headerLeft={headerLeft} testID="screen-checkin">
-        <SkeletonGroup label="Loading your week" testID="checkin-loading" style={{ gap: t.spacing.md }}>
+        <SkeletonGroup
+          label="Loading your week"
+          testID="checkin-loading"
+          style={{ gap: t.spacing.md }}
+        >
           <Skeleton height={t.spacing.xxs} radius={t.radius.pill} />
           <SkeletonText variant="title2" lines={2} lastLineWidth="50%" />
           <Skeleton height={t.sizes.button * 2} radius={t.radius.card} />
@@ -217,12 +260,36 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
       <Screen
         title="You’re set"
         testID="screen-checkin"
-        footer={<Button label="Back to Today" onPress={() => router.back()} testID="checkin-finish" />}
+        footer={
+          <Button label="Back to Today" onPress={() => router.back()} testID="checkin-finish" />
+        }
       >
-        <View style={{ alignItems: 'center', gap: t.spacing.md, paddingTop: t.spacing.xxl }} testID="checkin-done">
-          <Animated.View entering={safe(ZoomIn.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness))}>
-            <View style={{ width: t.sizes.ring, height: t.sizes.ring, borderRadius: t.radius.pill, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-              <CircleCheck color={t.colors.accentText} size={t.sizes.touch} strokeWidth={t.sizes.iconStroke} />
+        <View
+          style={{ alignItems: 'center', gap: t.spacing.md, paddingTop: t.spacing.xxl }}
+          testID="checkin-done"
+        >
+          <Animated.View
+            entering={safe(
+              ZoomIn.springify()
+                .damping(t.motion.spring.damping)
+                .stiffness(t.motion.spring.stiffness),
+            )}
+          >
+            <View
+              style={{
+                width: t.sizes.ring,
+                height: t.sizes.ring,
+                borderRadius: t.radius.pill,
+                backgroundColor: t.colors.accentSoft,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CircleCheck
+                color={t.colors.accentText}
+                size={t.sizes.touch}
+                strokeWidth={t.sizes.iconStroke}
+              />
             </View>
           </Animated.View>
           <Text variant="title2" align="center">
@@ -237,7 +304,12 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
   }
 
   const current = CHECKIN_STEPS[step] ?? 'weigh';
-  const canNext = current === 'feel' ? energy !== null && sleep !== null : current === 'weigh' ? !weighed || shownWeight !== null : result !== null;
+  const canNext =
+    current === 'feel'
+      ? energy !== null && sleep !== null
+      : current === 'weigh'
+        ? !weighed || shownWeight !== null
+        : result !== null;
   const footer =
     current === 'adjust' ? (
       <Button label="Approve" onPress={approve} disabled={!result} testID="checkin-approve" />
@@ -275,7 +347,15 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
         accessibilityLabel={`Step ${step + 1} of ${CHECKIN_STEPS.length}`}
         testID="checkin-progress"
       />
-      <Animated.View key={current} entering={safe(FadeInRight.springify().damping(t.motion.spring.damping).stiffness(t.motion.spring.stiffness))} style={{ gap: t.spacing.md }}>
+      <Animated.View
+        key={current}
+        entering={safe(
+          FadeInRight.springify()
+            .damping(t.motion.spring.damping)
+            .stiffness(t.motion.spring.stiffness),
+        )}
+        style={{ gap: t.spacing.md }}
+      >
         {current === 'weigh' ? (
           <View style={{ gap: t.spacing.md }} testID="checkin-step-weigh">
             <Text variant="title2">Weigh-in</Text>
@@ -302,7 +382,12 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
                 />
               </>
             ) : (
-              <Button label="Add today’s weight" variant="secondary" onPress={() => setWeight(startWeight(data?.profile?.weightKg ?? null, imperial))} testID="checkin-add-weight" />
+              <Button
+                label="Add today’s weight"
+                variant="secondary"
+                onPress={() => setWeight(startWeight(data?.profile?.weightKg ?? null, imperial))}
+                testID="checkin-add-weight"
+              />
             )}
           </View>
         ) : null}
@@ -312,17 +397,37 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
             <Text variant="title2">How did the week feel?</Text>
             <View style={{ gap: t.spacing.xs }}>
               <Text variant="headline">Energy</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }} accessibilityRole="radiogroup">
+              <View
+                style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}
+                accessibilityRole="radiogroup"
+              >
                 {ENERGY_OPTIONS.map((o) => (
-                  <Chip key={o.value} role="radio" label={o.label} selected={energy === o.value} onPress={() => setEnergy(o.value)} testID={`energy-${o.value}`} />
+                  <Chip
+                    key={o.value}
+                    role="radio"
+                    label={o.label}
+                    selected={energy === o.value}
+                    onPress={() => setEnergy(o.value)}
+                    testID={`energy-${o.value}`}
+                  />
                 ))}
               </View>
             </View>
             <View style={{ gap: t.spacing.xs }}>
               <Text variant="headline">Sleep</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }} accessibilityRole="radiogroup">
+              <View
+                style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}
+                accessibilityRole="radiogroup"
+              >
                 {SLEEP_OPTIONS.map((o) => (
-                  <Chip key={o.value} role="radio" label={o.label} selected={sleep === o.value} onPress={() => setSleep(o.value)} testID={`sleep-${o.value}`} />
+                  <Chip
+                    key={o.value}
+                    role="radio"
+                    label={o.label}
+                    selected={sleep === o.value}
+                    onPress={() => setSleep(o.value)}
+                    testID={`sleep-${o.value}`}
+                  />
                 ))}
               </View>
             </View>
@@ -337,7 +442,14 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
                 Weight trend
               </Text>
               {result.trend.length > 0 ? (
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: t.spacing.md, marginTop: t.spacing.xs }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'flex-end',
+                    gap: t.spacing.md,
+                    marginTop: t.spacing.xs,
+                  }}
+                >
                   <View style={{ flex: 1 }}>
                     <BigNumber
                       value={displayWeight(result.trend[result.trend.length - 1]!.avgKg, imperial)}
@@ -346,13 +458,22 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
                       label="7-day average"
                       testID="checkin-trend"
                     />
-                    <Text variant="callout" color="textSecondary" tabular testID="checkin-trend-change">
+                    <Text
+                      variant="callout"
+                      color="textSecondary"
+                      tabular
+                      testID="checkin-trend-change"
+                    >
                       {result.adjustment.trendKgPerWeek == null
                         ? 'More weigh-ins needed for a trend'
                         : `${result.adjustment.trendKgPerWeek <= 0 ? '−' : '+'}${displayWeight(Math.abs(result.adjustment.trendKgPerWeek), imperial).toFixed(1)} ${unit} vs last week`}
                     </Text>
                   </View>
-                  <Sparkline values={result.trend.map((p) => p.avgKg)} width={t.sizes.ring} height={t.sizes.touch} />
+                  <Sparkline
+                    values={result.trend.map((p) => p.avgKg)}
+                    width={t.sizes.ring}
+                    height={t.sizes.touch}
+                  />
                 </View>
               ) : (
                 <Text variant="body" color="textSecondary" testID="checkin-no-weights">
@@ -362,11 +483,30 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
             </Card>
             <View style={{ flexDirection: 'row', gap: t.spacing.md }}>
               {[
-                { key: 'workouts', label: 'Workouts', done: result.adherence.workoutsDone, of: result.adherence.workoutsPlanned },
-                { key: 'meals', label: 'Meals', done: result.adherence.mealsEaten, of: result.adherence.mealsPlanned },
+                {
+                  key: 'workouts',
+                  label: 'Workouts',
+                  done: result.adherence.workoutsDone,
+                  of: result.adherence.workoutsPlanned,
+                },
+                {
+                  key: 'meals',
+                  label: 'Meals',
+                  done: result.adherence.mealsEaten,
+                  of: result.adherence.mealsPlanned,
+                },
               ].map((a) => (
-                <Card key={a.key} style={{ flex: 1, alignItems: 'center', gap: t.spacing.xs }} testID={`checkin-${a.key}`}>
-                  <ProgressRing progress={share(a.done, a.of) ?? 0} size={t.sizes.touch + t.spacing.lg} strokeWidth={t.spacing.xs} accessibilityLabel={`${a.label} done`}>
+                <Card
+                  key={a.key}
+                  style={{ flex: 1, alignItems: 'center', gap: t.spacing.xs }}
+                  testID={`checkin-${a.key}`}
+                >
+                  <ProgressRing
+                    progress={share(a.done, a.of) ?? 0}
+                    size={t.sizes.touch + t.spacing.lg}
+                    strokeWidth={t.spacing.xs}
+                    accessibilityLabel={`${a.label} done`}
+                  >
                     <Text variant="callout" tabular>
                       {a.of > 0 ? `${Math.round((share(a.done, a.of) ?? 0) * 100)}%` : '—'}
                     </Text>
@@ -393,11 +533,32 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
               {kcalKnown ? (
                 <>
                   {/* Wraps at 130% font on 360dp instead of overflowing (P2-20). */}
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: t.spacing.sm, rowGap: t.spacing.xxs, marginTop: t.spacing.xs }}>
-                    <Text variant="title2" color="textSecondary" tabular style={{ textDecorationLine: result.adjustment.deltaKcal ? 'line-through' : 'none' }} testID="kcal-before">
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      alignItems: 'center',
+                      columnGap: t.spacing.sm,
+                      rowGap: t.spacing.xxs,
+                      marginTop: t.spacing.xs,
+                    }}
+                  >
+                    <Text
+                      variant="title2"
+                      color="textSecondary"
+                      tabular
+                      style={{
+                        textDecorationLine: result.adjustment.deltaKcal ? 'line-through' : 'none',
+                      }}
+                      testID="kcal-before"
+                    >
                       {fmt(result.before.kcal)}
                     </Text>
-                    <ArrowRight color={t.colors.textSecondary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
+                    <ArrowRight
+                      color={t.colors.textSecondary}
+                      size={t.sizes.icon}
+                      strokeWidth={t.sizes.iconStroke}
+                    />
                     <BigNumber value={result.after.kcal} unit="kcal" testID="kcal-after" />
                   </View>
                   <Badge
@@ -415,7 +576,11 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
             </Card>
             <Card testID="checkin-volume">
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-                <Dumbbell color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
+                <Dumbbell
+                  color={t.colors.textPrimary}
+                  size={t.sizes.icon}
+                  strokeWidth={t.sizes.iconStroke}
+                />
                 <View style={{ flex: 1 }}>
                   <Text variant="eyebrow" color="textSecondary">
                     Training
@@ -429,7 +594,11 @@ export function CheckinScreen({ now: nowOverride }: { now?: number } = {}) {
             </Card>
             <Card testID="checkin-menus">
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-                <UtensilsCrossed color={t.colors.textPrimary} size={t.sizes.icon} strokeWidth={t.sizes.iconStroke} />
+                <UtensilsCrossed
+                  color={t.colors.textPrimary}
+                  size={t.sizes.icon}
+                  strokeWidth={t.sizes.iconStroke}
+                />
                 <View style={{ flex: 1 }}>
                   <Text variant="eyebrow" color="textSecondary">
                     Menus

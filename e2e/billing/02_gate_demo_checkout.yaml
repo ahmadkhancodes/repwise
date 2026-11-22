@@ -1,0 +1,111 @@
+# F-S5 + D-DEMO-PAY: a free user hits a Pro gate (meal swap) → contextual sheet → paywall (all 4
+# plans) → TEST checkout (•••• 4444, TEST MODE) → "Payment complete" → Pro unlocked locally → the
+# swap now works → Settings → Subscription shows "Repwise Pro · Yearly (test)" → reset.
+# Demo payments are switched on by the demo-only deep link (production builds ignore it).
+appId: com.client.repwise
+tags:
+  - billing
+---
+- runFlow: ../onboarding/01_f1_happy_path.yaml
+- openLink: repwise://demo-payments?on=1&reset=1
+- runFlow:
+    # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it so it cannot block later steps.
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
+- extendedWaitUntil:
+    visible:
+      id: "screen-today"
+    timeout: 15000
+- tapOn:
+    id: "tab-eat"
+- extendedWaitUntil:
+    visible:
+      id: "meal-lunch"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "swap-dinner"
+    direction: DOWN
+    centerElement: true
+# Free user: the swap opens the gate sheet, never the swap list.
+- tapOn:
+    id: "swap-dinner"
+- extendedWaitUntil:
+    visible:
+      id: "gate-title"
+    timeout: 5000
+- assertVisible: "Swap any meal"
+- assertVisible:
+    id: "gate-not-now"
+- tapOn:
+    id: "gate-cta"
+- extendedWaitUntil:
+    visible:
+      id: "screen-paywall"
+    timeout: 10000
+- assertVisible:
+    id: "paywall-close"
+- assertVisible:
+    id: "plan-weekly"
+- tapOn:
+    id: "plan-weekly"
+- assertVisible: ".*\\$4\\.99.*"
+- tapOn:
+    id: "plan-monthly"
+- tapOn:
+    id: "plan-yearly"
+- assertVisible:
+    id: "paywall-timeline"
+- tapOn:
+    id: "paywall-cta"
+- extendedWaitUntil:
+    visible:
+      id: "demo-checkout"
+    timeout: 5000
+- assertVisible: "TEST MODE"
+- assertVisible: "Card •••• 4444"
+- assertVisible:
+    id: "demo-total"
+- tapOn:
+    id: "demo-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "demo-payment-complete"
+    timeout: 8000
+- assertVisible: "Payment complete"
+- tapOn:
+    id: "demo-continue"
+# Back where the user was, now Pro: the swap works.
+- extendedWaitUntil:
+    visible:
+      id: "swap-dinner"
+    timeout: 10000
+- tapOn:
+    id: "swap-dinner"
+- extendedWaitUntil:
+    visible:
+      id: "swap-option-0"
+    timeout: 8000
+- tapOn:
+    id: "swap-option-0"
+- assertVisible: "Swapped to.*"
+- openLink: repwise://settings/subscription
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Open"
+          optional: true
+- extendedWaitUntil:
+    visible:
+      id: "screen-subscription"
+    timeout: 10000
+- assertVisible: "Repwise Pro · Yearly \\(test\\)"
+- tapOn:
+    id: "subscription-reset-test"
+- assertVisible: "Repwise Free"
