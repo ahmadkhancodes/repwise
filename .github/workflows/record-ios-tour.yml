@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Branch, tag or SHA to record
+        description: Branch, tag or SHA to record (empty = the branch this run was started on)
         type: string
-        default: main
+        default: ''
       maestro_version:
         description: Maestro CLI version (empty = latest)
         type: string
@@ -239,6 +239,25 @@ jobs:
           ls frames
           # Keep the raw recording only when it was not trimmed.
           [ -n "$START" ] && rm -f "$RAW" || true
+
+      - name: Fast cut (~3 min, payment holds at 1x) + music
+        if: always()
+        run: |
+          set -u
+          test -s tour.mp4 || exit 0
+          TOUR_TRIMMED=1 python3 scripts/ci/tour-postprocess.py tour.mp4 "$OUT/marks.txt" \
+            tour-fast.mp4 tour-fast-music.mp4 assets-dev/music/raving-energy.mp3 195 \
+            || echo "::warning::post-process failed; the plain tour.mp4 still uploads"
+          ls -la tour-fast*.mp4 || true
+
+      - name: Upload the fast tour (silent + music)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repwise-ios-dark-tour-fast
+          path: tour-fast*.mp4
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Upload the tour video
         if: always()
