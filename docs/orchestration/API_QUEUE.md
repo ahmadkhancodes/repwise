@@ -269,6 +269,7 @@
   - result (22 Nov): 1ce62b2 on feat/client-demo, library 1,427 items with GIF, planner pool via preferAnimated; test:all green (E2E pending).
 
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
+  - status (API run 14): code done on feat/client-demo 030d248 (flow rewritten, scripts/ci/tour-postprocess.py). Pushing workflow files is blocked for the App token, so record-ios-tour.yml is unchanged and uploads the plain trimmed tour.mp4 (marks incl. keep-start/keep-end are in the debug artifact marks.txt). Dispatched e2e-ios, e2e-android, record-ios-tour on the branch; waiting. Next run: read all three; red → fix on the branch; green → download tour.mp4 + debug marks, run `TOUR_TRIMMED=1 python3 scripts/ci/tour-postprocess.py tour.mp4 marks.txt silent.mp4 music.mp4 assets-dev/music/raving-energy.mp3 195` (ffmpeg via imageio-ffmpeg, put ffmpeg/ffprobe on PATH), review a 12-frame grid, publish release app-tour-dark-v2, comment on issue #1, merge to main.
   - status (run 13): demo payments are OFF in the E2E/tour builds until the flow opens `repwise://demo-payments?on=1&reset=1` (tap "Open" on iOS). Then the paywall shows after the plan reveal and gates work. IDs: `paywall-close`, `plan-weekly|monthly|quarterly|yearly`, `paywall-cta`, `gate-title`, `gate-cta`, `gate-not-now`, `demo-checkout`, `demo-confirm`, `demo-payment-complete`, `demo-continue`, `screen-subscription`, `subscription-plan`. A free user's `swap-dinner` opens the gate sheet. See e2e/billing/02_gate_demo_checkout.yaml. Switch it on BEFORE onboarding ends so the onboarding paywall (step 4) is shown. The stub's payments-on is no longer needed.
   - Rewrite `e2e/tour/ios_dark_full_tour.yaml` for pace:
     - no fixed waits longer than about 1 s; wait only for the next screen to appear;
@@ -286,6 +287,7 @@
   - Then comment on issue #1 with the link (attribution footer included), mentioning @ahmadkhancodes.
 
 ## Owner steps (only what the agent cannot do)
+- Optional: apply docs/orchestration/record-ios-tour-fast.patch (`git apply`) to .github/workflows/record-ios-tour.yml and push it with a token that has the workflows permission (the Claude App token cannot); it moves the fast post-process into CI.
 - After the final report: set the repo private at https://github.com/ahmadkhancodes/repwise/settings → Change visibility → Private. Private repos use paid Actions minutes; keep it public until E2E work is finished.
 - Later (optional): mirror the exercise GIFs from Vercel Blob to Cloudflare R2 and set `EXPO_PUBLIC_MEDIA_BASE` to it (no code change).
 - Later, for launch: Worker secrets (ANTHROPIC_API_KEY etc.), Cloudflare Workers Paid, `eas init` / EAS_PROJECT_ID, `ios.appleTeamId`, store products, the registered business address for the legal pages, and a new Cloudinary account for photos.
