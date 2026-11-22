@@ -1145,6 +1145,16 @@ tags:
       - tapOn:
           id: "demo-confirm"
           optional: true
+      # Session QA 22 Nov: on iOS the id tap never registered (the checkout sat 15 s, then timed out),
+      # so fall back to the visible "Confirm" label, then wait for the success screen.
+      - runFlow:
+          when:
+            visible:
+              text: "Confirm"
+          commands:
+            - tapOn:
+                text: "Confirm"
+                optional: true
       - extendedWaitUntil:
           visible:
             id: "demo-payment-complete"
@@ -1158,6 +1168,14 @@ tags:
       - tapOn:
           id: "demo-continue"
           optional: true
+      - runFlow:
+          when:
+            visible:
+              id: "demo-payment-complete"
+          commands:
+            - tapOn:
+                text: "Continue"
+                optional: true
       - runScript:
           file: stub.js
           env:
