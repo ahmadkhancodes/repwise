@@ -2,6 +2,10 @@
 
 Owner: `packages/content`. Sheet 29 targets 600 recipes at launch. This file records each audit, what was fixed and what still needs a human.
 
+## 22 Nov 2026: US/UK meals first (611 → 759 recipes)
+
+148 everyday American, British and Canadian-friendly recipes (american 124, british 122 in total) via the normal pipeline (authored fields only, `npm run build` computes macros, allergens, tags and main protein from foods.json). Overnight oats, egg-white scrambles, Greek yogurt bowls, porridges, protein pancakes, veggie full English; turkey clubs, Caesar wraps, jacket potatoes, BLT, chicken and avocado sandwiches; grilled chicken with sweet potato, steak with roast veg, salmon traybakes, cottage and shepherd's pies, chilli, turkey meatballs, fish pie, roast chicken dinner; protein shakes, cottage cheese with fruit, jerky, rice cakes with peanut butter; maple salmon and poutine bowl for Canada. Gap fillers for the new regional opt-in rule (D-CUISINE-DEFAULT): about 20 keto, 43 vegan (23 with ≥ 30 g protein), large breakfasts, gluten-free egg-free vegetarian. Four drafts were dropped or changed by QA (duplicate ingredient list, Atwater mismatch over 8 %, a 539 kcal snack). Content QA 56/56 green. Needs the usual 10 % human spot-check.
+
 ## 20 Nov 2026: audit of 325 recipes, 283 exercises, 282 foods; expansion to 611 recipes
 
 | | Before | After |

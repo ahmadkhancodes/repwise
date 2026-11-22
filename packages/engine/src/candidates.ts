@@ -122,6 +122,33 @@ export function cuisinePreferred(preferred: readonly Cuisine[], recipe: Cuisine)
   return preferred.some((p) => cuisineMatches(p, recipe));
 }
 
+/**
+ * Repwise targets the US, UK and Canada (owner, 22 Nov 2026; D-CUISINE-DEFAULT). With no cuisine
+ * picked, or only "Anything" (`global` / `other`), the planner prefers these familiar cuisines.
+ */
+export const DEFAULT_CUISINES: readonly Cuisine[] = ['american', 'british', 'mediterranean', 'italian', 'mexican', 'global'];
+
+/**
+ * Regional cuisines that appear ONLY when the user picks them (or a group containing them). This is
+ * a hard filter: cuisine relaxation never brings them back.
+ */
+export const OPT_IN_CUISINES: readonly Cuisine[] = ['pakistani', 'indian', 'middle_eastern', 'gulf', 'north_african', 'arab', 'turkish', 'persian'];
+
+const ANYTHING: readonly Cuisine[] = ['global', 'other'];
+
+/** The preference the soft cuisine filter uses: the picks, with "Anything" (or nothing) → the defaults. */
+export function effectiveCuisines(picked: readonly Cuisine[]): Cuisine[] {
+  const specific = picked.filter((c) => !ANYTHING.includes(c));
+  const anything = specific.length === 0 || specific.length < picked.length;
+  return [...new Set([...specific, ...(anything ? DEFAULT_CUISINES : [])])];
+}
+
+/** False for an opt-in regional recipe the user did not pick. */
+export function cuisineAllowed(recipe: Pick<Recipe, 'cuisine'>, picked: readonly Cuisine[]): boolean {
+  if (!OPT_IN_CUISINES.includes(recipe.cuisine)) return true;
+  return picked.some((p) => !ANYTHING.includes(p) && cuisineMatches(p, recipe.cuisine));
+}
+
 export function dietOk(recipe: Pick<Recipe, 'dietTags'>, diet: DietType): boolean {
   const t = recipe.dietTags;
   switch (diet) {
@@ -165,10 +192,16 @@ export interface RecipeConstraints {
   dietType: DietType;
   allergies: readonly Allergen[];
   dislikes: readonly string[];
+  /** Soft preference (relaxes when a pool is small): `effectiveCuisines(profile.cuisines)`. */
   cuisines: readonly Cuisine[];
   budget: 1 | 2 | 3;
   cookMin: number;
   neverShow?: ReadonlySet<string>;
+  /**
+   * The user's own picks. When set, opt-in regional cuisines not picked are a HARD filter
+   * (`cuisineAllowed`). `recipeConstraints` always sets it.
+   */
+  pickedCuisines?: readonly Cuisine[];
 }
 
 export function recipeConstraints(
@@ -179,16 +212,21 @@ export function recipeConstraints(
     dietType: profile.dietType,
     allergies: profile.allergies,
     dislikes: profile.dislikes,
-    cuisines: profile.cuisines,
+    cuisines: effectiveCuisines(profile.cuisines),
     budget: profile.budget,
     cookMin: profile.cookMin,
     neverShow: new Set(neverShow ?? []),
+    pickedCuisines: profile.cuisines,
   };
 }
 
-/** Hard safety filters only (diet, allergens, dislikes, never-show). Never relaxed. */
-export function recipeSafe(recipe: Recipe, c: Pick<RecipeConstraints, 'dietType' | 'allergies' | 'dislikes' | 'neverShow'>): boolean {
+/** Hard filters (diet, allergens, dislikes, never-show, unpicked regional cuisines). Never relaxed. */
+export function recipeSafe(
+  recipe: Recipe,
+  c: Pick<RecipeConstraints, 'dietType' | 'allergies' | 'dislikes' | 'neverShow' | 'pickedCuisines'>,
+): boolean {
   return (
+    (c.pickedCuisines === undefined || cuisineAllowed(recipe, c.pickedCuisines)) &&
     dietOk(recipe, c.dietType) &&
     allergenOk(recipe, c.allergies) &&
     dislikedIngredients(recipe, c.dislikes).length === 0 &&

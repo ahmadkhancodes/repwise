@@ -1,5 +1,8 @@
 import {
+  DEFAULT_CUISINES,
   FULL_GYM,
+  cuisineAllowed,
+  effectiveCuisines,
   allergenOk,
   dietOk,
   dislikedIngredients,
@@ -12,6 +15,7 @@ import {
   recipeSafe,
   slotCandidates,
   ProfileSchema,
+  type Cuisine,
   type DietType,
 } from '../src';
 import { exercises } from './fixtures/exercises';
@@ -109,5 +113,62 @@ describe('recipe candidates', () => {
     const { pool, relaxed } = recipeCandidates(recipes, c, 'dinner');
     expect(relaxed).toEqual([]);
     pool.forEach((r) => expect(r.cuisine).toBe('arab'));
+  });
+});
+
+describe('cuisine defaults and opt-in regional cuisines (D-CUISINE-DEFAULT)', () => {
+  const r = (cuisine: Cuisine) => ({ cuisine });
+
+  test('no pick, or only "Anything", means the US/UK defaults', () => {
+    expect(effectiveCuisines([])).toEqual([...DEFAULT_CUISINES]);
+    expect(effectiveCuisines(['global'])).toEqual([...DEFAULT_CUISINES]);
+    expect(effectiveCuisines(['other'])).toEqual([...DEFAULT_CUISINES]);
+    expect(DEFAULT_CUISINES).toEqual(['american', 'british', 'mediterranean', 'italian', 'mexican', 'global']);
+  });
+
+  test('specific picks stand alone; "Anything" alongside them adds the defaults', () => {
+    expect(effectiveCuisines(['pakistani'])).toEqual(['pakistani']);
+    expect(effectiveCuisines(['italian', 'mexican'])).toEqual(['italian', 'mexican']);
+    expect(effectiveCuisines(['indian', 'global'])).toEqual(['indian', ...DEFAULT_CUISINES]);
+  });
+
+  test('South Asian, Gulf, Middle Eastern and North African dishes need a pick', () => {
+    for (const c of ['pakistani', 'indian', 'gulf', 'middle_eastern', 'north_african'] as const) {
+      expect(cuisineAllowed(r(c), [])).toBe(false);
+      expect(cuisineAllowed(r(c), ['global'])).toBe(false);
+      expect(cuisineAllowed(r(c), ['american', 'british'])).toBe(false);
+      expect(cuisineAllowed(r(c), [c])).toBe(true);
+    }
+    // Group picks open their members.
+    expect(cuisineAllowed(r('gulf'), ['arab'])).toBe(true);
+    expect(cuisineAllowed(r('middle_eastern'), ['turkish'])).toBe(true);
+    expect(cuisineAllowed(r('indian'), ['pakistani'])).toBe(false);
+  });
+
+  test('other cuisines are never hard-filtered', () => {
+    for (const c of ['american', 'british', 'italian', 'mexican', 'mediterranean', 'global', 'east_asian', 'southeast_asian'] as const) {
+      expect(cuisineAllowed(r(c), [])).toBe(true);
+    }
+  });
+
+  test('recipeConstraints keeps the picks for the hard filter and the effective preference for the soft one', () => {
+    const c = recipeConstraints(profile({ cuisines: ['global'] }));
+    expect(c.pickedCuisines).toEqual(['global']);
+    expect(c.cuisines).toEqual([...DEFAULT_CUISINES]);
+  });
+
+  test('recipeSafe drops an unpicked regional recipe even when the pool must relax', () => {
+    const base = recipes[0]!;
+    const desi = { ...base, id: 'desi', cuisine: 'pakistani' as const };
+    const uk = { ...base, id: 'uk', cuisine: 'british' as const };
+    const c = recipeConstraints(profile({ cuisines: [] }));
+    expect(recipeSafe(desi, c)).toBe(false);
+    expect(recipeSafe(uk, c)).toBe(true);
+    // minPool far above the catalogue forces every soft relaxation; the regional recipe still never appears.
+    const { pool, relaxed } = recipeCandidates([desi, uk], c, base.slots[0]!, new Set(), 50);
+    expect(relaxed).toContain('cuisine');
+    expect(pool.map((x) => x.id)).not.toContain('desi');
+    const picked = recipeConstraints(profile({ cuisines: ['pakistani'] }));
+    expect(recipeSafe(desi, picked)).toBe(true);
   });
 });
