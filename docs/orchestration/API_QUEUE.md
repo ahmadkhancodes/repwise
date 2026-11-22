@@ -204,6 +204,39 @@
   - Pure logic for the stats maths, with unit tests. Component tests on both platforms. Update the Maestro flows.
   - Native change: it needs a new dev/prod build later. E2E builds run prebuild in CI, so they cover it.
 
+- [ ] (opus) **Paywalls everywhere the workbook says, plus a DEMO purchase flow for the client video (owner, 22 Nov).**
+  - **Follow the workbook exactly:**
+    - `docs/build-bible/05-Pricing-Trial.md`: plans, wording, and the Free vs Pro table.
+    - `09-User-Flows.md`: F1 (onboarding → building plan → plan preview → paywall), F-S3 and F-S5 (contextual "Hit a Pro limit" bottom sheet: the exact benefit + preview, "Start free trial" / "Not now", never a dead end).
+    - `10-Screens.md` S37, `11-Design-System.md` (paywall: 4 plan rows, yearly pre-selected, trial line, close X), and `16-Payments.md` (verbatim copy, Restore, Terms, Privacy, auto-renew text).
+  - **Plans:** weekly $4.99, monthly $12.99, 3-month $24.99, yearly $59.99 (pre-selected, 7-day free trial, "$1.15/week").
+  - **Gates (Free vs Pro table):** each gate opens the contextual sheet (`source: gate:<feature>`), with `paywall_view` analytics.
+    - meal swaps and 'ate out' rebalance (Pro);
+    - meal plan beyond today;
+    - week 2+ adaptive workout plan / auto-progression;
+    - more than 3 custom routines;
+    - grocery list;
+    - more than 1 assistant card a day, and the weekly check-in auto-adjust;
+    - progress history beyond 30 days, photos, measurements;
+    - full notification schedule.
+  - **DEMO purchase mode** (staging/preview builds ONLY: `EXPO_PUBLIC_DEMO_PAYMENTS=1` or app variant ≠ production; on by default in the E2E/tour and preview builds):
+    - Tapping "Start free trial" / "Continue" opens a native-looking checkout sheet with a clear **"TEST MODE"** badge: plan summary, "Card •••• 4444" (test card prefilled, editable fields 4444 4444 4444 4444, 12/34, 123), and the total today ($0.00 with trial, else the price).
+    - "Confirm" → a short processing spinner (~1.2 s) → a **"Payment complete"** success screen with a check animation and success haptic → "Continue" → Pro unlocked LOCALLY (a demo entitlement stored in MMKV, clearly marked demo) and back to where the user was.
+    - Settings → Subscription shows "Repwise Pro · Yearly (test)", with "Reset test purchase" in a debug section.
+    - NO Stripe and no network.
+  - **Production builds:** the demo path must be IMPOSSIBLE (compile-time flag). The real path stays react-native-iap (StoreKit 2 / Play Billing), per CLAUDE.md "never Stripe for in-app subscriptions".
+    - Add a unit test proving the demo checkout can't render when the flag is off.
+    - Log D-DEMO-PAY.
+  - Tests: gating logic as pure functions with tests; component tests for the paywall, the checkout sheet, the success screen and gates (both `Platform.OS`); Maestro flows for gate → paywall → test checkout → payment complete.
+  - **Tour video sequence (for the client):**
+    1. Onboarding.
+    2. Building your plan.
+    3. Plan preview.
+    4. Paywall: show the 4 plans, including weekly; close it with X → Free mode.
+    5. Use the app as a free user.
+    6. Hit a Pro gate, e.g. meal swap → contextual sheet → paywall → pick Yearly (trial) → test checkout •••• 4444 → Payment complete → Pro unlocked.
+    7. The swap now works.
+
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
   - Rewrite `e2e/tour/ios_dark_full_tour.yaml` for pace:
     - no fixed waits longer than about 1 s; wait only for the next screen to appear;
@@ -211,7 +244,7 @@
     - log 2 sets, not all of them;
     - pick **American + British** cuisines in onboarding;
     - show the new exercise GIF hero (detail plus player) and the "Muscles worked" section.
-  - Keep the coverage: onboarding, the "building your plan" screen, plan reveal, home dashboard stats (steps tile), Today, workout with GIF, rest, finish, Eat (tick, recipe, cook step, swap), Progress, Library, check-in, Settings, paywall (close).
+  - Keep the coverage: onboarding, the "building your plan" screen, plan reveal, home dashboard stats (steps tile), Today, workout with GIF, rest, finish, Eat (tick, recipe, cook step, swap), Progress, Library, check-in, Settings, and the paywall sequence from the paywall task (close on first view, a later gate → test checkout → Payment complete).
   - Post-process in `record-ios-tour.yml`:
     - `ffmpeg mpdecimate,setpts=N/FRAME_RATE/TB` removes idle frames;
     - if the result is still over 3:30, speed it up (`setpts`) so it lands at 2:45–3:30.
