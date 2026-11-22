@@ -422,8 +422,10 @@ tags:
             id: "tour-hold"
           timeout: 2500
           optional: true
+      # Plans are tapped only once they are on screen: Weekly sits below the fold, behind the sticky
+      # "Start free trial" button, and a blind tap there opened the checkout (session QA, 22 Nov).
       - tapOn:
-          id: "plan-weekly"
+          id: "plan-quarterly"
           optional: true
       - extendedWaitUntil:
           visible:
@@ -438,13 +440,27 @@ tags:
             id: "tour-hold"
           timeout: 900
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: "plan-weekly"
+          direction: DOWN
+          centerElement: true
+          timeout: 4000
+          optional: true
       - tapOn:
-          id: "plan-quarterly"
+          id: "plan-weekly"
           optional: true
       - extendedWaitUntil:
           visible:
             id: "tour-hold"
-          timeout: 900
+          timeout: 1200
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "plan-yearly"
+          direction: UP
+          centerElement: true
+          timeout: 4000
           optional: true
       - tapOn:
           id: "plan-yearly"
@@ -452,21 +468,36 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "tour-hold"
-          timeout: 900
+          timeout: 1200
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: "paywall-close"
+          direction: UP
+          timeout: 3000
           optional: true
       - tapOn:
           id: "paywall-close"
           optional: true
-      - runFlow:
-          when:
-            visible:
-              id: "demo-checkout"
+      # Safety net: if a checkout opened anyway, cancel it and close the paywall (checked 3 times).
+      - repeat:
+          times: 3
           commands:
-            - tapOn:
-                id: "demo-cancel"
-            - tapOn:
-                id: "paywall-close"
-                optional: true
+            - runFlow:
+                when:
+                  visible:
+                    id: "demo-checkout"
+                commands:
+                  - tapOn:
+                      id: "demo-cancel"
+                      optional: true
+                  - waitForAnimationToEnd:
+                      timeout: 1500
+                  - tapOn:
+                      id: "paywall-close"
+                      optional: true
+                  - waitForAnimationToEnd:
+                      timeout: 1500
       - runScript:
           file: stub.js
           env:
