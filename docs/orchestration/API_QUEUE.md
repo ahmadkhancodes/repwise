@@ -142,7 +142,8 @@
   - Re-record the golden fixtures if they change: `GOLDEN_RECORD=1 npx vitest run test/golden.test.ts` in `server/`.
   - Steps: `npm run test:all` green; push to the branch `feat/us-uk-meals`; dispatch e2e-ios and e2e-android on it; on green, merge to main.
 
-- [ ] (opus) **Animated exercise demos as the main exercise visual (owner, 22 Nov).**
+- [x] (opus) **Animated exercise demos as the main exercise visual (owner, 22 Nov).**
+  - result (22 Nov, API run 10; on feat/client-demo, E2E pending): 0a5af61. `exercise_media.json` maps 192/283 engine exercises to V1 GIFs (all hand-checked; overrides in `scripts/media/exercisedb-overrides.json`; the rest are stretches/carries/isometrics/home variants → muscle map). `src/services/exerciseMedia.ts` (`mediaFor`, `EXPO_PUBLIC_MEDIA_BASE`, prefetch of today + tomorrow from Today). GIF hero on detail + player (light `mediaStage` card, Reduce Motion = still), first-frame list thumbs, muscle map under "Muscles worked", instant map fallback. Library = 1,604 exercises (1,321 browse-only V1). Maestro library flow updated (flip moved to the Muscles worked map; browse-only step). test:all green (app 3205, engine 775, content 56, server 150). D-EXDB-MEDIA.
   - What the owner wants: animated 3D demos (GIFs) of each exercise with the target muscles highlighted in red — the ExerciseDB style, e.g. a seated pec-deck GIF. The current green muscle maps stay, but as a SECONDARY visual: a "Muscles worked" section on the exercise detail, and a small chip or filter in the Library.
   - **LICENCE CONFIRMED (owner, 22 Nov 2026).** Ahmad bought the ExerciseDB V1 licence, and the maintainer approved pulling and storing all the data. Log this as a decision (D-EXDB-LICENCE).
     - **Pull ALL the V1 data:** every exercise's metadata (id, name, body part, target and secondary muscles, equipment, instructions) and every GIF, from the V1 endpoint (https://exercisedb.dev/, about 1,500 exercises).
@@ -276,4 +277,5 @@
 
 ## Owner steps (only what the agent cannot do)
 - After the final report: set the repo private at https://github.com/ahmadkhancodes/repwise/settings → Change visibility → Private. Private repos use paid Actions minutes; keep it public until E2E work is finished.
+- Later (optional): mirror the exercise GIFs from Vercel Blob to Cloudflare R2 and set `EXPO_PUBLIC_MEDIA_BASE` to it (no code change).
 - Later, for launch: Worker secrets (ANTHROPIC_API_KEY etc.), Cloudflare Workers Paid, `eas init` / EAS_PROJECT_ID, `ios.appleTeamId`, store products, the registered business address for the legal pages, and a new Cloudinary account for photos.
