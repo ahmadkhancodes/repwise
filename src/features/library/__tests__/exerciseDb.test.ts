@@ -66,11 +66,20 @@ describe(`ExerciseDB V1 → library (${Platform.OS})`, () => {
     expect(items.map((i) => i.id)).toEqual(['exercisedb-c2d']);
   });
 
+  it('hides V1 records without a GIF', () => {
+    const items = exerciseDbItems(
+      [raw({ exerciseId: 'a1b', gifUrl: null }), raw({ exerciseId: 'c2d', name: 'apple' })],
+      new Set(),
+    );
+    expect(items.map((i) => i.id)).toEqual(['exercisedb-c2d']);
+  });
+
   it('the real dataset: every item is valid, ids are unique, nothing raw leaks', () => {
     __resetExerciseDbForTests();
     const db = loadExerciseDb();
     const covered = new Set(Object.values(mediaMap.exercises).filter(Boolean));
-    expect(db.items.length).toBe((v1 as unknown[]).length - covered.size);
+    expect(db.items.length).toBeLessThanOrEqual((v1 as unknown[]).length - covered.size);
+    expect(db.items.every((i) => i.mediaId)).toBe(true);
     expect(new Set(db.items.map((i) => i.id)).size).toBe(db.items.length);
     for (const i of db.items) {
       for (const m of [...i.primaryMuscles, ...i.secondaryMuscles]) expect(MUSCLE_LABEL[m]).toBeTruthy();

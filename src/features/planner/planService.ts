@@ -61,6 +61,7 @@ import {
 import { bodyMetricsRepo } from '@/features/progress/repo';
 import { track } from '@/services/analytics';
 import { api } from '@/services/api';
+import { v1IdForExercise } from '@/services/exerciseMedia';
 import { ensureSession } from '@/services/auth';
 import { getCatalog } from '@/services/catalog';
 
@@ -86,6 +87,15 @@ import { plansRepo, type Plan } from './repo';
 // Inputs
 // ---------------------------------------------------------------------------
 
+/** Below this many animated exercises we keep the full pool, so a plan can always be built. */
+const MIN_ANIMATED_POOL = 30;
+
+/** Owner, 22 Nov: never plan an exercise with a blank hero. Keeps the full pool if too few have a GIF. */
+export function preferAnimated<T extends { id: string }>(pool: readonly T[]): T[] {
+  const animated = pool.filter((e) => v1IdForExercise(e.id) !== null);
+  return animated.length >= MIN_ANIMATED_POOL ? animated : [...pool];
+}
+
 let engineCatalogues: { src: unknown; never: readonly string[]; cat: Catalogues } | null = null;
 
 /**
@@ -102,7 +112,7 @@ export function getEngineCatalogues(): Catalogues {
       src: c,
       never,
       cat: {
-        exercises: ruledOut.size ? exercises.filter((e) => !ruledOut.has(e.id)) : exercises,
+        exercises: preferAnimated(ruledOut.size ? exercises.filter((e) => !ruledOut.has(e.id)) : exercises),
         recipes,
       },
     };

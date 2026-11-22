@@ -143,7 +143,7 @@ export function fromExerciseDb(raw: ExerciseDbRaw): LibraryItem {
 }
 
 /**
- * All V1 records not already covered by an engine exercise, as items sorted by name.
+ * All V1 records WITH a GIF (owner, 22 Nov: no-animation ones are hidden) not already covered by an engine exercise, as items sorted by name.
  * `covered` = V1 ids used by our map (exercise_media.json values).
  */
 export function exerciseDbItems(
@@ -153,7 +153,7 @@ export function exerciseDbItems(
   const seen = new Set<string>();
   const out: LibraryItem[] = [];
   for (const r of raws) {
-    if (covered.has(r.exerciseId) || seen.has(r.exerciseId)) continue;
+    if (!r.gifUrl || covered.has(r.exerciseId) || seen.has(r.exerciseId)) continue;
     seen.add(r.exerciseId);
     out.push(fromExerciseDb(r));
   }

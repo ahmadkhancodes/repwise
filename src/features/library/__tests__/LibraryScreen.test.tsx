@@ -37,7 +37,7 @@ describe.each(SCHEMES)(`LibraryScreen (%s, ${Platform.OS})`, (scheme) => {
     expect(await screen.findByPlaceholderText(`Search ${total()} exercises`)).toBeTruthy();
     expect(screen.getByText('All exercises')).toBeTruthy();
     expect(screen.getByTestId('library-count').props.children).toBe(total());
-    expect(total()).toBeGreaterThan(1500);
+    expect(total()).toBeGreaterThan(1350);
     expect(await screen.findByTestId('exercise-row-ab-wheel-rollout')).toBeTruthy();
   });
 });
