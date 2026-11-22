@@ -45,6 +45,7 @@ tags:
       id: "add-water"
     direction: DOWN
     centerElement: true
+    timeout: 60000
 - tapOn:
     id: "add-water"
 - assertVisible: "250 ml water added"

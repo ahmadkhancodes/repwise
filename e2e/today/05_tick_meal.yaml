@@ -20,13 +20,19 @@ tags:
     centerElement: true
 - scrollUntilVisible:
     element:
+      id: "meals-count"
+    direction: DOWN
+    centerElement: true
+    timeout: 60000
+- assertVisible:
+    id: "meals-count"
+    text: "0 of .* eaten"
+- scrollUntilVisible:
+    element:
       id: "today-meal-lunch"
     direction: DOWN
     centerElement: true
     timeout: 15000
-- assertVisible:
-    id: "meals-count"
-    text: "0 of .* eaten"
 - scrollUntilVisible:
     element:
       id: "today-tick-lunch"
