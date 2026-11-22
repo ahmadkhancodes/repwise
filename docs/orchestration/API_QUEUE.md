@@ -262,10 +262,11 @@
     6. Hit a Pro gate, e.g. meal swap → contextual sheet → paywall → pick Yearly (trial) → test checkout •••• 4444 → Payment complete → Pro unlocked.
     7. The swap now works.
 
-- [ ] (sonnet) **Hide exercises that have no animation (owner, 22 Nov: "if some exercises are missing, skip them in the app").**
+- [x] (sonnet) **Hide exercises that have no animation (owner, 22 Nov: "if some exercises are missing, skip them in the app").**
   - Library and search: list only ExerciseDB exercises with a non-null `gifUrl` (1,324). The 176 without one are hidden.
   - Planner and swaps: prefer exercises whose mapped media has a GIF. Never show an engine exercise with a blank hero; the muscle-map fallback stays only for offline or load errors.
   - Small change on `feat/client-demo`: unit tests plus `npm run test:all`. Do it BEFORE the tour task, in the same batch (no separate E2E).
+  - result (22 Nov): 1ce62b2 on feat/client-demo, library 1,427 items with GIF, planner pool via preferAnimated; test:all green (E2E pending).
 
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
   - status (run 13): demo payments are OFF in the E2E/tour builds until the flow opens `repwise://demo-payments?on=1&reset=1` (tap "Open" on iOS). Then the paywall shows after the plan reveal and gates work. IDs: `paywall-close`, `plan-weekly|monthly|quarterly|yearly`, `paywall-cta`, `gate-title`, `gate-cta`, `gate-not-now`, `demo-checkout`, `demo-confirm`, `demo-payment-complete`, `demo-continue`, `screen-subscription`, `subscription-plan`. A free user's `swap-dinner` opens the gate sheet. See e2e/billing/02_gate_demo_checkout.yaml. Switch it on BEFORE onboarding ends so the onboarding paywall (step 4) is shown. The stub's payments-on is no longer needed.
