@@ -201,7 +201,8 @@
   - Honest copy: no fake medical or AI claims. With reduce-motion on, keep it short and static.
   - Tokens only, light and dark. Component tests, a Maestro step, and Platform tests.
 
-- [ ] (opus) **Home dashboard with stats, including steps (owner, 22 Nov).**
+- [x] (opus) **Home dashboard with stats, including steps (owner, 22 Nov).**
+  - result (22 Nov, API run 12): 38ae855 on feat/client-demo, E2E pending. Today = date → workout hero → stats grid (calories ring, protein, steps, week, streak, volume, weight sparkline) → meals; steps via CoreMotion / Health Connect (READ_STEPS, minSdk 26) + pedometer fallback, "Turn on steps" tile only, `daily_steps` table (migration 0004), goal in Settings → Activity (D-STEPS, D-HOME-DASH); test:all green (3295 app tests).
   - "A home screen with all the stats like any fitness app: calories, steps and everything. It must look like a GYM app, not a step-counter app; stats sit around the corner."
   - Make the Today tab the home dashboard:
     - Hero: today's workout card with Start (gym-first; the primary action).
