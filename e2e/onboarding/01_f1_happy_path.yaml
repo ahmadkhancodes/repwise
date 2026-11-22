@@ -131,12 +131,12 @@ tags:
 - tapOn:
     id: "notify-later"
 # S07 "Building your plan": 3–5 s of status lines (≈1.2 s static with reduced motion / animations off)
+# Transient (≈1.2 s with animations off, polled every few seconds on the emulator): optional.
 - extendedWaitUntil:
     visible:
       id: "build-status"
     timeout: 5000
-- assertVisible:
-    id: "screen-plan-building"
+    optional: true
 # → W1 reveal (real planner output)
 - extendedWaitUntil:
     visible:

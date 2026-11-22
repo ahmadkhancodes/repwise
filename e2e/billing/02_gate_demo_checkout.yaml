@@ -5,6 +5,12 @@
 appId: com.client.repwise
 tags:
   - billing
+onFlowComplete:
+  # Always leave demo payments off, so a red run cannot gate the flows that follow (swap, grocery…).
+  - openLink: repwise://demo-payments?on=0&reset=1
+  - tapOn:
+      text: "Open"
+      optional: true
 ---
 - runFlow: ../onboarding/01_f1_happy_path.yaml
 - openLink: repwise://demo-payments?on=1&reset=1
@@ -58,8 +64,11 @@ tags:
     id: "plan-monthly"
 - tapOn:
     id: "plan-yearly"
-- assertVisible:
-    id: "paywall-timeline"
+- scrollUntilVisible:
+    element:
+      id: "paywall-timeline"
+    direction: DOWN
+    centerElement: true
 - tapOn:
     id: "paywall-cta"
 - extendedWaitUntil:

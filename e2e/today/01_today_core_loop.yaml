@@ -17,7 +17,7 @@ tags:
 # Home dashboard stats under the workout hero (calories ring, steps, week, streak, volume, weight).
 - scrollUntilVisible:
     element:
-      id: "stat-workouts"
+      id: "stat-calories"
     direction: DOWN
     centerElement: true
 - assertVisible:

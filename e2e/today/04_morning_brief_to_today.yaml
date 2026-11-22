@@ -27,8 +27,9 @@ tags:
 # so this flow now checks the dashboard the notification opens onto.
 - scrollUntilVisible:
     element:
-      id: "today-stats"
+      id: "stat-calories"
     direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "stat-calories"
 # Steps never prompt at launch: "Turn on steps" (or "Not on this phone" on a simulator).
