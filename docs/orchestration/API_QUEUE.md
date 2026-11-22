@@ -261,6 +261,11 @@
     6. Hit a Pro gate, e.g. meal swap → contextual sheet → paywall → pick Yearly (trial) → test checkout •••• 4444 → Payment complete → Pro unlocked.
     7. The swap now works.
 
+- [ ] (sonnet) **Hide exercises that have no animation (owner, 22 Nov: "if some exercises are missing, skip them in the app").**
+  - Library and search: list only ExerciseDB exercises with a non-null `gifUrl` (1,324). The 176 without one are hidden.
+  - Planner and swaps: prefer exercises whose mapped media has a GIF. Never show an engine exercise with a blank hero; the muscle-map fallback stays only for offline or load errors.
+  - Small change on `feat/client-demo`: unit tests plus `npm run test:all`. Do it BEFORE the tour task, in the same batch (no separate E2E).
+
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
   - Rewrite `e2e/tour/ios_dark_full_tour.yaml` for pace:
     - no fixed waits longer than about 1 s; wait only for the next screen to appear;
