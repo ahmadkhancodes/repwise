@@ -119,6 +119,57 @@
        ```
     5. Tick this task.
 
+- [ ] (opus) **US/UK meals first (owner, 22 Nov: "not Pakistani meals; put American and UK meals").** Repwise targets the US, UK and Canada.
+  - Today the catalogue is 611 recipes: pakistani 87, indian 70, middle_eastern 59, american 57, british 49, mediterranean 49, global 48, gulf 43, east_asian 34, mexican 33, italian 33, north_african 27, southeast_asian 22.
+  - Onboarding: reorder `CUISINE_OPTIONS` (`src/features/onboarding/logic/options.ts`) to American, British, Mediterranean, Italian, Mexican, Anything, then the rest. Pakistani, Indian, Gulf and the other regional cuisines go last.
+  - Planner default when the user picks no cuisine, or "Anything": draw only from american, british, mediterranean, italian, mexican and global. South Asian, Gulf, Middle Eastern and North African recipes appear ONLY when the user picks them.
+    - Put this in the engine's candidate pool, as pure logic with unit and property tests.
+    - Check that `SwapChooser` and the meal-swap tiers follow the same rule.
+  - Content: add at least 120 new American and British recipes (target ≥ 110 each in total), plus some Canadian-friendly dishes. They must be everyday, familiar and macro-friendly:
+    - breakfasts: overnight oats, egg-white omelette, Greek yoghurt parfait, porridge, protein pancakes, full English (lighter);
+    - lunches: turkey club wrap, chicken Caesar salad, jacket potato with tuna, BLT, chicken & avocado sandwich;
+    - dinners: grilled chicken with sweet potato, steak with roasted veg, salmon traybake, shepherd's pie (lean), chilli con carne, turkey meatballs, cottage pie, fish pie, roast chicken dinner, burrito bowl;
+    - snacks: protein shake, cottage cheese with berries, beef jerky, rice cakes with peanut butter.
+  - Use the existing content pipeline and schemas in `packages/content`: nutrition computed from `foods` (USDA/CoFID-style data already in the package), allergens tagged, UK and US units and names via the localisation rules. Content QA tests must stay green.
+  - Re-record the golden fixtures if they change: `GOLDEN_RECORD=1 npx vitest run test/golden.test.ts` in `server/`.
+  - Steps: `npm run test:all` green; push to the branch `feat/us-uk-meals`; dispatch e2e-ios and e2e-android on it; on green, merge to main.
+
+- [ ] (opus) **Animated exercise demos as the main exercise visual (owner, 22 Nov).**
+  - What the owner wants: animated 3D demos (GIFs) of each exercise with the target muscles highlighted in red — the ExerciseDB style, e.g. a seated pec-deck GIF. The current green muscle maps stay, but as a SECONDARY visual: a "Muscles worked" section on the exercise detail, and a small chip or filter in the Library.
+  - **Licensing (do not skip).** Read the official terms before using any media and record what they say in `docs/DECISIONS.md`:
+    - https://exercisedb.dev/
+    - https://go.exercisedb.dev/shop (V1 dataset: about 1,500 exercises with GIFs, a single-payment option)
+    - https://exercisedb.notion.site/ExerciseDB-API-Terms-of-Use-226983b728ca8090bf7be79564e4b356
+    - The free V1 endpoint (no key) may be used for development and the internal demo video. Production needs the licence the owner buys.
+    - Never scrape images from Google or GitHub. Never bundle media the terms forbid storing.
+  - **Build:**
+    - A content map `packages/content/exercise_media.json` (our exercise id → ExerciseDB id), made by a script that name-matches against the V1 dataset. Hand-check at least the 120 most-used exercises (presses, rows, squats, deadlifts, curls, cable and machine moves).
+    - A media service `src/services/exerciseMedia.ts`: `mediaFor(exerciseId)` returns `{ gifUrl | null, muscles }`. The provider base URL is in config, so we can later switch to our own CDN without code changes.
+    - Display it with `expo-image` (animated GIF, memory-cache, fixed aspect, light background card that looks right in both light and dark themes):
+      - the hero on the exercise detail;
+      - the current-exercise card in the workout player;
+      - Library list thumbnails (first frame or small GIF).
+    - Offline or error: fall back to the muscle map at once. Never a spinner wall, never block the workout.
+  - Tests: the service (mapping, fallback), components (render, loading, error, offline) on both `Platform.OS` values, and Maestro flows updated. `npm run test:all` green.
+  - Steps: push to `feat/exercise-gifs`; dispatch e2e-ios and e2e-android; on green, merge to main.
+  - Add to Owner steps: "Buy the ExerciseDB V1 licence at https://go.exercisedb.dev/shop before store launch" (or whatever the terms require).
+
+- [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
+  - Rewrite `e2e/tour/ios_dark_full_tour.yaml` for pace:
+    - no fixed waits longer than about 1 s; wait only for the next screen to appear;
+    - skip the rest timer straight away (show it for about 2 s);
+    - log 2 sets, not all of them;
+    - pick **American + British** cuisines in onboarding;
+    - show the new exercise GIF hero (detail plus player) and the "Muscles worked" section.
+  - Keep the coverage: onboarding, plan reveal, Today, workout with GIF, rest, finish, Eat (tick, recipe, cook step, swap), Progress, Library, check-in, Settings, paywall (close).
+  - Post-process in `record-ios-tour.yml`:
+    - `ffmpeg mpdecimate,setpts=N/FRAME_RATE/TB` removes idle frames;
+    - if the result is still over 3:30, speed it up (`setpts`) so it lands at 2:45–3:30.
+    - Mix `assets-dev/music/raving-energy.mp3` (fade in 1 s, fade out 2 s, `loudnorm I=-16`).
+  - Check a 12-frame grid: dark mode applied, GIFs visible, US/UK meals showing.
+  - Upload to a NEW release `app-tour-dark-v2`: `repwise-ios-dark-tour-fast-music.mp4` plus the silent version, with the CC BY credit in the notes.
+  - Then comment on issue #1 with the link (attribution footer included), mentioning @ahmadkhancodes.
+
 ## Owner steps (only what the agent cannot do)
 - After the final report: set the repo private at https://github.com/ahmadkhancodes/repwise/settings → Change visibility → Private. Private repos use paid Actions minutes; keep it public until E2E work is finished.
 - Later, for launch: Worker secrets (ANTHROPIC_API_KEY etc.), Cloudflare Workers Paid, `eas init` / EAS_PROJECT_ID, `ios.appleTeamId`, store products, the registered business address for the legal pages, and a new Cloudinary account for photos.
