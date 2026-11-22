@@ -104,7 +104,8 @@
       - `-c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart`.
     - **Upload:** both files as release assets: `repwise-ios-dark-tour-music.mp4` (main) and `repwise-ios-dark-tour.mp4` (silent). Put any CC-BY attribution in the release notes.
 
-- [ ] (sonnet) **Final green run on main and the final report to the owner.**
+- [x] (sonnet) **Final green run on main and the final report to the owner.**
+  - result (22 Nov, API run 8): E2E green on 26fb53a (main differs only in docs): iOS 44962551228, Android 44962552794. `docs/FINAL_REPORT.md` written; issue https://github.com/ahmadkhancodes/repwise/issues/1.
   - Steps:
     1. Use the latest e2e-ios and e2e-android runs on main, if their head SHA equals the current main. Otherwise dispatch both on main and wait (via `.claude-run/wait`).
        Also: if the newest e2e run on main is still in progress, write it to `.claude-run/wait` and end the run.
