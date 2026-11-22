@@ -153,6 +153,9 @@
       - The app loads GIFs from those URLs with the `expo-image` memory-disk cache plus prefetch of today's and tomorrow's exercises. If a GIF fails, show the muscle map.
       - Keep the base URL in config (`EXPO_PUBLIC_MEDIA_BASE`) so the host can change later.
       - IGNORE the bundling step below. Do not re-pull from ExerciseDB.
+      - DONE by the session (22 Nov): `packages/content/exercisedb_v1.json` has 1,500 exercises. 1,324 have a `gifUrl` on our Blob CDN (126 MB); 176 have `gifUrl: null` because ExerciseDB's own CDN returns 404 for them. Those show the muscle map plus the instructions.
+      - When mapping our 283 engine exercises, prefer a match that HAS a GIF.
+      - Script for re-runs: `scripts/media/pull-exercisedb.mjs`. The token goes in a file passed as `BLOB_TOKEN_FILE`; never commit it.
     - (superseded) **Store the media so it always loads fast, offline-first:**
       1. BUNDLE in the app: animated WebP (convert with ffmpeg/libwebp; about 360 px, q≈70, loop) for every exercise our engine uses (the 283 in our catalogue, mapped by the media map), plus the ~150 most common extra ones. Store them under `assets/exercises/<exdbId>.webp` with a generated require-map module. Keep the added app size under about 40 MB; report the exact size.
       2. Every OTHER V1 exercise: loaded remotely from the provider's GIF URL, using the `expo-image` memory-disk cache and prefetch. A bundled asset ALWAYS wins over remote.
