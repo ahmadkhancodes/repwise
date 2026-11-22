@@ -269,6 +269,12 @@
   - result (22 Nov): 1ce62b2 on feat/client-demo, library 1,427 items with GIF, planner pool via preferAnimated; test:all green (E2E pending).
 
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
+  - SESSION QA 2 (22 Nov 20:00 UTC), tour 45055372104 on 5bb3504. This was the FIRST green tour on the branch (3:00 with music, sent to the owner as a preview). It shows: the building-plan screen (19 / 57 / 90 %), the plan reveal, the paywall, the dashboard tiles, the workout and rest, the American swap list, the Library (1,427), the check-in and Settings.
+    - Remaining problems, all to fix:
+      - (a) "Payment complete" never shows. The checkout sat about 15 s, which is the `demo-payment-complete` wait timing out, so the `tapOn id demo-confirm` did not register on iOS. The session added a text-tap fallback in e7be0c2 and re-recorded. If it is still missing, make the Confirm `Button` expose its `testID` as accessibilityIdentifier on iOS, and check the E2E iOS 02_gate_demo_checkout flow.
+      - (b) The post-process keeps static frames inside keep segments at 1×, so the dashboard and the swap list sit still for 10–20 s. Cap any static run inside a keep segment at about 2.5 s (mpdecimate with `max≈75` inside keeps).
+      - (c) The paywall never shows Weekly in the video: scroll it into view (done in 5bb3504 only for onboarding; do the same in the gate paywall section).
+      - (d) Settings "Repwise Pro · Yearly (test)" was not in the frames.
   - SESSION QA (22 Nov 16:40 UTC) of tour 45036947739 on 84d54cc (frames checked). GOOD: the branch is now recorded; American + British come first; the 4-plan paywall shows; the TEST MODE checkout shows •••• 4444.
     - BUG: the video sits on the Checkout screen for the last ~2 min. "Confirm" never reaches "Payment complete"; the flow then fails at `screen-today`. iOS E2E 02_gate_demo_checkout also fails (`paywall-price-line`).
     - Fix the checkout so Confirm works on iOS (keyboard covering the button? Confirm disabled? the processing promise never resolving?). Check the debug `last-screen.png`. Add a component test that Confirm leads to success on both platforms.
