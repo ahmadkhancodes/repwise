@@ -269,6 +269,10 @@
   - result (22 Nov): 1ce62b2 on feat/client-demo, library 1,427 items with GIF, planner pool via preferAnimated; test:all green (E2E pending).
 
 - [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
+  - SESSION QA (22 Nov 16:40 UTC) of tour 45036947739 on 84d54cc (frames checked). GOOD: the branch is now recorded; American + British come first; the 4-plan paywall shows; the TEST MODE checkout shows •••• 4444.
+    - BUG: the video sits on the Checkout screen for the last ~2 min. "Confirm" never reaches "Payment complete"; the flow then fails at `screen-today`. iOS E2E 02_gate_demo_checkout also fails (`paywall-price-line`).
+    - Fix the checkout so Confirm works on iOS (keyboard covering the button? Confirm disabled? the processing promise never resolving?). Check the debug `last-screen.png`. Add a component test that Confirm leads to success on both platforms.
+    - Also check that the "Building your plan" screen is visible in the video: it wasn't caught in the frames.
   - SESSION FIX (22 Nov 14:40 UTC): ROOT CAUSE of the old-looking tour: `record-ios-tour.yml` defaulted `inputs.ref` to `main`, so the "green" tour 45008032037 recorded MAIN, without the GIFs, dashboard or demo payments.
     - Fixed on `feat/client-demo` in 1d65d0d: the default is now empty, so the run records the dispatched branch.
     - That commit also adds a "Fast cut + music" step, which uploads the artifact `repwise-ios-dark-tour-fast` (`tour-fast.mp4`, `tour-fast-music.mp4`) via `scripts/ci/tour-postprocess.py`.
