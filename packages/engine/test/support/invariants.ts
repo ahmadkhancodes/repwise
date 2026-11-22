@@ -4,7 +4,9 @@
  * own context, so a bug shared by planner and validator still shows up here.
  */
 import {
+  type Cuisine,
   KCAL_CEILING,
+  cuisineMatches,
   MAX_LEVEL,
   TEMPLATES,
   VOLUME_GROUPS,
@@ -86,6 +88,14 @@ export function checkNutrition(profileIn: ProfileInput, plan: WeekPlan): string[
   return out;
 }
 
+/** Regional cuisines shown only when picked (D-CUISINE-DEFAULT), listed here independently of the engine. */
+const OPT_IN_ONLY: ReadonlySet<Cuisine> = new Set<Cuisine>(['pakistani', 'indian', 'middle_eastern', 'gulf', 'north_african', 'arab', 'turkish', 'persian']);
+
+export function regionalPicked(picked: readonly Cuisine[], recipeCuisine: Cuisine): boolean {
+  if (!OPT_IN_ONLY.has(recipeCuisine)) return true;
+  return picked.some((c) => c !== 'global' && c !== 'other' && cuisineMatches(c, recipeCuisine));
+}
+
 export function checkMeals(profileIn: ProfileInput, plan: WeekPlan, ix: Indexed, neverShow: ReadonlySet<string> = new Set()): string[] {
   const p = ProfileSchema.parse(profileIn);
   const out: string[] = [];
@@ -103,6 +113,7 @@ export function checkMeals(profileIn: ProfileInput, plan: WeekPlan, ix: Indexed,
       if (p.dietType === 'halal' && r.proteinSource === 'pork') out.push(`${d.date}: pork on halal`);
       if (dislikedIngredients(r, p.dislikes).length) out.push(`${d.date}: ${r.id} has a disliked ingredient`);
       if (neverShow.has(r.id)) out.push(`${d.date}: never-show recipe ${r.id}`);
+      if (!regionalPicked(p.cuisines, r.cuisine)) out.push(`${d.date}: ${r.id} is ${r.cuisine}, which the user did not pick`);
       if (!r.slots.includes(m.slot)) out.push(`${d.date}: ${r.id} in wrong slot ${m.slot}`);
       if (m.servings < r.scalable.min - 1e-9 || m.servings > r.scalable.max + 1e-9) out.push(`${d.date}: ${r.id} servings ${m.servings}`);
       if (Math.abs(m.kcal - r.perServing.kcal * m.servings) > 1) out.push(`${d.date}: ${r.id} kcal ${m.kcal} ≠ perServing × servings`);

@@ -6,6 +6,8 @@
  */
 import { engineCatalogues } from '@repwise/content';
 import {
+  DEFAULT_CUISINES,
+  OPT_IN_CUISINES,
   EQUIPMENT_PRESETS,
   ExerciseCatalogueSchema,
   RecipeCatalogueSchema,
@@ -251,5 +253,39 @@ describe('real data: meal swaps (RW-33)', () => {
     }
     expect(total).toBeGreaterThan(40);
     if (empty > maxEmpty) throw new Error(`${empty}/${total} meals without a swap:\n${misses.join('\n')}`);
+  });
+});
+
+describe('real data: US/UK meals first (D-CUISINE-DEFAULT)', () => {
+  const recipeById = new Map(catalogues.recipes.map((r) => [r.id, r]));
+  const cuisinesOf = (plans: WeekPlan[]) => plans.flatMap((p) => p.days.flatMap((d) => d.meals.map((m) => recipeById.get(m.recipeId)!.cuisine)));
+
+  test.each([
+    ['no pick', [] as const],
+    ['"Anything"', ['global'] as const],
+  ])('%s: an omnivore draws only from the default cuisines over 3 weeks', (_name, cuisines) => {
+    const used = new Set(cuisinesOf(simulate(person({ cuisines: [...cuisines] }), 3)));
+    expect([...used].filter((c) => !DEFAULT_CUISINES.includes(c))).toEqual([]);
+    expect(used.has('american') && used.has('british')).toBe(true);
+  });
+
+  test.each([
+    ['vegan', person({ dietType: 'vegan', mealsPerDay: 3 })],
+    ['keto', person({ dietType: 'keto', goal: 'fat_loss', mealsPerDay: 3 })],
+    ['halal', person({ dietType: 'halal', budget: 1 })],
+  ])('%s with no pick: no regional dish in plans or swaps', (_name, profile) => {
+    const plans = simulate(profile, 2);
+    expect(cuisinesOf(plans).filter((c) => OPT_IN_CUISINES.includes(c))).toEqual([]);
+    for (const day of plans[0]!.days) {
+      day.meals.forEach((_m, index) => {
+        const alts = swapMeal({ profile, history: {}, catalogues, day, index, now: NOW });
+        expect(alts.map((a) => recipeById.get(a.recipeId)!.cuisine).filter((c) => OPT_IN_CUISINES.includes(c))).toEqual([]);
+      });
+    }
+  });
+
+  test('a user who picks Pakistani gets Pakistani dishes', () => {
+    const used = cuisinesOf(simulate(person({ cuisines: ['pakistani'] }), 1));
+    expect(used.filter((c) => c === 'pakistani').length).toBeGreaterThan(used.length / 2);
   });
 });

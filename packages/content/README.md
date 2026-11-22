@@ -5,7 +5,7 @@ Validated content catalogues for the Repwise planner, exercise library and meal 
 | File | Records | What it is |
 |---|---|---|
 | `exercises.json` | 283 | Exercise library. Original text, placeholder Cloudinary media ids. Cardio carries Compendium MET values. |
-| `recipes.json` | 611 | Recipes across 13 cuisines. Nutrition, allergens, diet tags and main protein are **computed**. |
+| `recipes.json` | 759 | Recipes across 13 cuisines (US/UK first: american 124, british 122). Nutrition, allergens, diet tags and main protein are **computed**. |
 | `foods.json` | 294 | Ingredients with per-100 g nutrients from USDA FoodData Central (public domain). |
 
 The JSON files are the source of truth. `src/schemas.ts` holds the zod schemas and enums, `src/compute.ts` holds the pure derivation logic, and `src/index.ts` re-exports both plus the typed data.

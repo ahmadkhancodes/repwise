@@ -170,20 +170,24 @@ export const DISLIKE_OPTIONS: Option<string>[] = [
 ];
 
 /** The content catalogue's cuisine groups (engine values since D26). */
+/**
+ * US/UK/Canada first (owner, 22 Nov 2026; D-CUISINE-DEFAULT): the familiar cuisines and "Anything"
+ * lead; regional cuisines come last and their dishes appear only when picked.
+ */
 export const CUISINE_OPTIONS: Option<Cuisine>[] = [
-  { value: 'pakistani', label: 'Pakistani' },
-  { value: 'indian', label: 'Indian' },
-  { value: 'middle_eastern', label: 'Middle Eastern' },
-  { value: 'gulf', label: 'Gulf' },
-  { value: 'north_african', label: 'North African' },
+  { value: 'american', label: 'American' },
+  { value: 'british', label: 'British' },
   { value: 'mediterranean', label: 'Mediterranean' },
   { value: 'italian', label: 'Italian' },
-  { value: 'british', label: 'British' },
-  { value: 'american', label: 'American' },
   { value: 'mexican', label: 'Mexican' },
+  { value: 'global', label: 'Anything' },
   { value: 'east_asian', label: 'East Asian' },
   { value: 'southeast_asian', label: 'Southeast Asian' },
-  { value: 'global', label: 'Anything' },
+  { value: 'middle_eastern', label: 'Middle Eastern' },
+  { value: 'north_african', label: 'North African' },
+  { value: 'gulf', label: 'Gulf' },
+  { value: 'indian', label: 'Indian' },
+  { value: 'pakistani', label: 'Pakistani' },
 ];
 
 export const BUDGET_OPTIONS: Option<'1' | '2' | '3'>[] = [

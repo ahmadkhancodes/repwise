@@ -16,7 +16,7 @@ import {
   shiftMealTime,
   toMinutes,
 } from '../logic/mealTimes';
-import { DISLIKE_OPTIONS, QUESTIONS } from '../logic/options';
+import { CUISINE_OPTIONS, DISLIKE_OPTIONS, QUESTIONS } from '../logic/options';
 import {
   BUILD_MIN_MS,
   BUILD_STEPS,
@@ -319,5 +319,14 @@ describe('dislike options', () => {
   it('every dislike matches a food in the catalogue', () => {
     const foods = require('@repwise/content/foods.json') as { id: string }[];
     for (const o of DISLIKE_OPTIONS) expect(foods.some((f) => f.id.includes(o.value))).toBe(true);
+  });
+});
+
+describe('cuisine options (D-CUISINE-DEFAULT)', () => {
+  it('lists US/UK-familiar cuisines and "Anything" first, regional cuisines last', () => {
+    const values = CUISINE_OPTIONS.map((o) => o.value);
+    expect(values.slice(0, 6)).toEqual(['american', 'british', 'mediterranean', 'italian', 'mexican', 'global']);
+    expect(values.slice(-5)).toEqual(['middle_eastern', 'north_african', 'gulf', 'indian', 'pakistani']);
+    expect(CUISINE_OPTIONS.find((o) => o.value === 'global')?.label).toBe('Anything');
   });
 });
