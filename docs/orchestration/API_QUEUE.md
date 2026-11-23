@@ -268,7 +268,7 @@
   - Small change on `feat/client-demo`: unit tests plus `npm run test:all`. Do it BEFORE the tour task, in the same batch (no separate E2E).
   - result (22 Nov): 1ce62b2 on feat/client-demo, library 1,427 items with GIF, planner pool via preferAnimated; test:all green (E2E pending).
 
-- [ ] (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
+- [x] (superseded 23 Nov by the DAY-IN-THE-LIFE task; the 3:05 cut was delivered to the owner) (sonnet) **FAST tour video, about 3 minutes (owner, 22 Nov: "the 21-minute video is too slow; make it about 3 minutes").**
   - SESSION QA 2 (22 Nov 20:00 UTC), tour 45055372104 on 5bb3504. This was the FIRST green tour on the branch (3:00 with music, sent to the owner as a preview). It shows: the building-plan screen (19 / 57 / 90 %), the plan reveal, the paywall, the dashboard tiles, the workout and rest, the American swap list, the Library (1,427), the check-in and Settings.
     - Remaining problems, all to fix:
       - (a) "Payment complete" never shows. The checkout sat about 15 s, which is the `demo-payment-complete` wait timing out, so the `tapOn id demo-confirm` did not register on iOS. The session added a text-tap fallback in e7be0c2 and re-recorded. If it is still missing, make the Confirm `Button` expose its `testID` as accessibilityIdentifier on iOS, and check the E2E iOS 02_gate_demo_checkout flow.
