@@ -62,12 +62,33 @@ onFlowComplete:
     visible:
       id: "paywall-cta"
     timeout: 5000
+# iOS: the paywall slides in; a tap during the slide misses (same as the checkout sheet before 45d1161).
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn:
     id: "paywall-cta"
 - extendedWaitUntil:
     visible:
       id: "demo-checkout"
-    timeout: 5000
+    timeout: 4000
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: "demo-checkout"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - tapOn:
+          text: "Start free trial"
+          optional: true
+      - tapOn:
+          id: "paywall-cta"
+          optional: true
+- extendedWaitUntil:
+    visible:
+      id: "demo-checkout"
+    timeout: 6000
 - assertVisible: "TEST MODE"
 - assertVisible: "Card •••• 4444"
 - assertVisible:
