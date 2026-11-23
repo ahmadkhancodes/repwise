@@ -310,6 +310,7 @@
   - The session fixed it in e2460da and ran `e2e-ios` with `flows=billing` on the branch.
   - If that run is green: run a full e2e-ios on the branch head once more; if green, merge into main (CI green), push, and tick this task.
   - If billing/02 is still red: make the paywall CTA tappable on iOS in the APP (the same fade-instead-of-translate fix as the checkout in 45d1161), not by loosening the flow.
+  - status (API run 19, 23 Nov 09:13 UTC): e2e-ios billing-only run 45141383805 on e2460da still in progress (started 08:46); no code changes. Queued a wait. Next run: read it; green → full e2e-ios on the branch head (e423aeb, CI-only change) → merge.
 
 - [ ] (opus) **DAY-IN-THE-LIFE VIDEO (owner, 23 Nov, top priority).**
   - Owner feedback on the 3:05 cut: "speed not consistent, too fast in places, looks stuck in places; exercises only 5% of the video; show every page; follow a complete one-day user journey with meals AND exercises; up to 10 min is fine; make it smooth and make it make sense."
