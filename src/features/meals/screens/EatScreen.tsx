@@ -1,9 +1,19 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Check, ChevronLeft, ChevronRight, CircleAlert, Lock, ShoppingBasket, Utensils, UtensilsCrossed } from 'lucide-react-native';
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  Lock,
+  ShoppingBasket,
+  Utensils,
+  UtensilsCrossed,
+} from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
+import { canSwapMeal, openGate } from '@/features/billing';
 import { WaterCard } from '@/features/nutrition/components/WaterCard';
 import { getWaterGoal } from '@/features/nutrition/waterGoal';
 import { usePro } from '@/features/billing/hooks/usePro';
@@ -33,7 +43,16 @@ import { openMeal } from '../navigation';
 import { MealTile } from '../components/MealTile';
 import { SwapSheet } from '../components/SwapSheet';
 import { useEatDay, useEatWeek, type MealView } from '../hooks/useEat';
-import { addDays, dayLabel, dayOfMonth, shortDate, shortWeekday, startOfWeek, todayISO, weekDates } from '../logic/dates';
+import {
+  addDays,
+  dayLabel,
+  dayOfMonth,
+  shortDate,
+  shortWeekday,
+  startOfWeek,
+  todayISO,
+  weekDates,
+} from '../logic/dates';
 
 const VIEWS = [
   { value: 'day', label: 'Day' },
@@ -49,7 +68,12 @@ export function EatScreen() {
   const t = useTheme();
   // Deep links: widget quick log `/eat?log=1`; meal notification `/eat?mealId=…[&swap=1]`;
   // widget "Ate it" `/eat?mealId=…&tick=1`.
-  const params = useLocalSearchParams<{ log?: string; mealId?: string; swap?: string; tick?: string }>();
+  const params = useLocalSearchParams<{
+    log?: string;
+    mealId?: string;
+    swap?: string;
+    tick?: string;
+  }>();
   const tickMealId = params.tick === '1' && params.mealId ? params.mealId : null;
   const handledTick = useRef<string | null>(null);
   useEffect(() => {
@@ -86,7 +110,13 @@ export function EatScreen() {
         />
       }
     >
-      <Segmented options={VIEWS} value={view} onChange={setView} accessibilityLabel="Meal plan view" testID="eat-view" />
+      <Segmented
+        options={VIEWS}
+        value={view}
+        onChange={setView}
+        accessibilityLabel="Meal plan view"
+        testID="eat-view"
+      />
       <View style={{ gap: t.spacing.md }}>
         {view === 'day' ? (
           <DayView date={date} today={today} onDate={setDate} swapMealId={swapMealId} />
@@ -99,7 +129,11 @@ export function EatScreen() {
 }
 
 /** Seven days for the shared WeekStrip (Pro-locked days say so). Pure. */
-export function eatWeekDays(dates: readonly string[], today: string, locked: (d: string) => boolean): WeekDay[] {
+export function eatWeekDays(
+  dates: readonly string[],
+  today: string,
+  locked: (d: string) => boolean,
+): WeekDay[] {
   return dates.map((d) => ({
     key: d,
     weekday: shortWeekday(d),
@@ -138,12 +172,17 @@ function DayView({
   const { isPro } = usePro();
   const [swap, setSwap] = useState<MealView | null>(null);
   const handledSwap = useRef<string | null>(null);
+  // Meal swaps are Pro (sheet 05): free users meet the gate sheet instead.
+  const onSwap = useCallback(
+    (m: MealView) => (canSwapMeal(isPro) ? setSwap(m) : openGate('meal_swap')),
+    [isPro],
+  );
   const linked = swapMealId ? day.meals.find((m) => m.id === swapMealId) : undefined;
   useEffect(() => {
     if (!linked || handledSwap.current === linked.id) return;
     handledSwap.current = linked.id;
-    setSwap(linked);
-  }, [linked]);
+    onSwap(linked);
+  }, [linked, onSwap]);
   const weekDays = useMemo(
     () => eatWeekDays(weekDates(startOfWeek(date)), today, (d) => !isPro && d !== today),
     [date, today, isPro],
@@ -153,20 +192,30 @@ function DayView({
 
   // Stable handlers (MealTile is memoised); the toggle changes only when the day's meals do.
   const dayMeals = day.meals;
-  const onToggle = useCallback((m: MealView) => {
-    toggleMeal(m, dayMeals);
-  }, [dayMeals]);
-  const onSwap = useCallback((m: MealView) => setSwap(m), []);
+  const onToggle = useCallback(
+    (m: MealView) => {
+      toggleMeal(m, dayMeals);
+    },
+    [dayMeals],
+  );
   const onOpen = useCallback((m: MealView) => {
     openMeal(m);
   }, []);
 
   const header = (
     <>
-      <WeekStrip days={weekDays} selectedKey={date} todayKey={today} onSelect={onDate} testID="week-strip" />
+      <WeekStrip
+        days={weekDays}
+        selectedKey={date}
+        todayKey={today}
+        onSelect={onDate}
+        testID="week-strip"
+      />
       <Text variant="callout" color="textSecondary" testID="eat-day-label">
         {dayLabel(date, today)}
-        {day.plan?.dayType ? ` · ${day.plan.dayType === 'training' ? 'Training day' : 'Rest day'}` : ''}
+        {day.plan?.dayType
+          ? ` · ${day.plan.dayType === 'training' ? 'Training day' : 'Rest day'}`
+          : ''}
       </Text>
     </>
   );
@@ -218,7 +267,12 @@ function DayView({
           testID="eat-rings"
         >
           <MacroRings
-            eaten={{ kcal: day.intake.kcal, protein: day.intake.p, carbs: day.intake.c, fat: day.intake.f }}
+            eaten={{
+              kcal: day.intake.kcal,
+              protein: day.intake.p,
+              carbs: day.intake.c,
+              fat: day.intake.f,
+            }}
             target={target}
             testID="eat-macros"
           />
@@ -241,7 +295,7 @@ function DayView({
           title="Plan ahead with Pro"
           body="Today’s meals are free. Pro shows the whole week, swaps and the grocery list."
           actionLabel="See Pro"
-          onAction={() => router.push({ pathname: '/paywall', params: { source: 'eat_week' } })}
+          onAction={() => openGate('meal_week')}
           testID="eat-locked"
         />
       ) : day.meals.length === 0 ? (
@@ -260,7 +314,14 @@ function DayView({
       ) : (
         <View style={{ gap: t.spacing.sm }} testID="eat-meals">
           {day.meals.map((m, i) => (
-            <MealTile key={m.id} meal={m} index={i} onOpen={onOpen} onToggle={onToggle} onSwap={onSwap} />
+            <MealTile
+              key={m.id}
+              meal={m}
+              index={i}
+              onOpen={onOpen}
+              onToggle={onToggle}
+              onSwap={onSwap}
+            />
           ))}
         </View>
       )}
@@ -288,7 +349,15 @@ function DayView({
   );
 }
 
-function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string; onOpenDay: (d: string) => void }) {
+function WeekView({
+  anchor,
+  today,
+  onOpenDay,
+}: {
+  anchor: string;
+  today: string;
+  onOpenDay: (d: string) => void;
+}) {
   const t = useTheme();
   const reduce = useReducedMotion();
   const [start, setStart] = useState(startOfWeek(anchor));
@@ -296,7 +365,12 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
   const { isPro } = usePro();
   const thisWeek = startOfWeek(today);
   const end = addDays(start, 6);
-  const label = start === thisWeek ? 'This week' : start === addDays(thisWeek, 7) ? 'Next week' : `Week of ${shortDate(start)}`;
+  const label =
+    start === thisWeek
+      ? 'This week'
+      : start === addDays(thisWeek, 7)
+        ? 'Next week'
+        : `Week of ${shortDate(start)}`;
   const icon = { size: t.sizes.iconSmall, strokeWidth: t.sizes.iconStrokeBold };
 
   return (
@@ -368,10 +442,16 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
                     <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>
                       {dayLabel(d.date, today)}
                     </Text>
-                    {isToday ? <Badge label="Today" tone="accent" testID="week-today-badge" /> : null}
+                    {isToday ? (
+                      <Badge label="Today" tone="accent" testID="week-today-badge" />
+                    ) : null}
                     <View style={{ flex: 1 }} />
                     {lockedDay ? (
-                      <Lock color={t.colors.textSecondary} size={t.sizes.iconSmall} strokeWidth={t.sizes.iconStroke} />
+                      <Lock
+                        color={t.colors.textSecondary}
+                        size={t.sizes.iconSmall}
+                        strokeWidth={t.sizes.iconStroke}
+                      />
                     ) : (
                       <Text variant="caption" color="textSecondary" tabular>
                         {d.meals.length
@@ -391,9 +471,20 @@ function WeekView({ anchor, today, onOpenDay }: { anchor: string; today: string;
                       {d.meals.map((m) => {
                         const ate = m.status === 'eaten';
                         return (
-                          <View key={m.id} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+                          <View
+                            key={m.id}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: t.spacing.xs,
+                            }}
+                          >
                             {ate ? (
-                              <Check color={t.colors.accentText} {...icon} testID={`week-eaten-${m.id}`} />
+                              <Check
+                                color={t.colors.accentText}
+                                {...icon}
+                                testID={`week-eaten-${m.id}`}
+                              />
                             ) : (
                               <View style={{ width: t.sizes.iconSmall }} />
                             )}

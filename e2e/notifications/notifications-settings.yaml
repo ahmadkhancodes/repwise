@@ -9,6 +9,11 @@ tags:
       notifications: allow
 - tapOn:
     id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-notifications
+    direction: DOWN
+    centerElement: true
 - tapOn:
     id: open-notifications
 - assertVisible:

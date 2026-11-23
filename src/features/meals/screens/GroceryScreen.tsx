@@ -1,13 +1,26 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Lock, RotateCcw, Share2, ShoppingBasket } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Share, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
+import { openGate } from '@/features/billing';
 import { usePro } from '@/features/billing/hooks/usePro';
 import { haptics } from '@/services/haptics';
 import { useTheme } from '@/theme';
-import { BackButton, BigNumber, Button, Checkbox, EmptyState, IconButton, Screen, SectionHeader, SkeletonCard, SkeletonGroup, Text } from '@/ui';
+import {
+  BackButton,
+  BigNumber,
+  Button,
+  Checkbox,
+  EmptyState,
+  IconButton,
+  Screen,
+  SectionHeader,
+  SkeletonCard,
+  SkeletonGroup,
+  Text,
+} from '@/ui';
 
 import { enterAt } from '@/ui/listMotion';
 import { useEatWeek } from '../hooks/useEat';
@@ -53,18 +66,24 @@ export function GroceryScreen() {
   };
 
   const share = () => {
-    Share.share({ message: groceryText(list, checked, `Repwise grocery list · ${range}`, units) }).catch(() => undefined);
+    Share.share({
+      message: groceryText(list, checked, `Repwise grocery list · ${range}`, units),
+    }).catch(() => undefined);
   };
 
   if (!isPro) {
     return (
-      <Screen title="Grocery list" headerLeft={<BackButton fallback="/eat" />} testID="screen-grocery">
+      <Screen
+        title="Grocery list"
+        headerLeft={<BackButton fallback="/eat" />}
+        testID="screen-grocery"
+      >
         <EmptyState
           icon={Lock}
           title="Your week’s shopping in one tap"
           body="Pro builds the grocery list from your meal plan, grouped by aisle, with amounts merged."
           actionLabel="See Pro"
-          onAction={() => router.push({ pathname: '/paywall', params: { source: 'grocery' } })}
+          onAction={() => openGate('grocery')}
           testID="grocery-locked"
         />
       </Screen>
@@ -76,9 +95,22 @@ export function GroceryScreen() {
     <Screen
       title="Grocery list"
       headerLeft={<BackButton fallback="/eat" />}
-      headerRight={checked.size ? <IconButton icon={RotateCcw} accessibilityLabel="Untick all" onPress={clear} testID="grocery-clear" /> : undefined}
+      headerRight={
+        checked.size ? (
+          <IconButton
+            icon={RotateCcw}
+            accessibilityLabel="Untick all"
+            onPress={clear}
+            testID="grocery-clear"
+          />
+        ) : undefined
+      }
       testID="screen-grocery"
-      footer={total > 0 ? <Button label="Share list" icon={Share2} onPress={share} testID="grocery-share" /> : undefined}
+      footer={
+        total > 0 ? (
+          <Button label="Share list" icon={Share2} onPress={share} testID="grocery-share" />
+        ) : undefined
+      }
     >
       {loading ? (
         <SkeletonGroup testID="grocery-loading" style={{ gap: t.spacing.sm }}>
@@ -90,14 +122,27 @@ export function GroceryScreen() {
         <EmptyState
           icon={ShoppingBasket}
           title="Nothing to buy yet"
-          body={week.state === 'no_profile' ? 'Finish setting up and your meal plan builds the list.' : 'No meals are planned for the rest of this week.'}
+          body={
+            week.state === 'no_profile'
+              ? 'Finish setting up and your meal plan builds the list.'
+              : 'No meals are planned for the rest of this week.'
+          }
           testID="grocery-empty"
         />
       ) : (
         <>
-          <BigNumber value={left} unit={left === 1 ? 'item left' : 'items left'} label={range} testID="grocery-left" />
+          <BigNumber
+            value={left}
+            unit={left === 1 ? 'item left' : 'items left'}
+            label={range}
+            testID="grocery-left"
+          />
           {list.map((aisle, ai) => (
-            <Animated.View key={aisle.aisle} entering={enterAt(ai, reduce)} style={{ gap: t.spacing.xxs }}>
+            <Animated.View
+              key={aisle.aisle}
+              entering={enterAt(ai, reduce)}
+              style={{ gap: t.spacing.xxs }}
+            >
               <View style={{ marginTop: t.spacing.xs }}>
                 <SectionHeader title={aisle.label} level="card" />
               </View>

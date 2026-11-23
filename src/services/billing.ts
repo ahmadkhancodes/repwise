@@ -44,6 +44,7 @@ import {
   type StoreError,
   type StorePurchase,
 } from './iap';
+import { DEMO_PAYMENTS_AVAILABLE, demoProActive, useDemoPayments } from './demoPayments';
 import { kv } from './storage';
 
 /* ------------------------------------------------------------------ state */
@@ -334,6 +335,11 @@ export class BillingService {
     this.track('paywall_view', { source });
   }
 
+  /** Demo builds only (D-DEMO-PAY): the TEST checkout finished; marked `demo` so it never counts as revenue. */
+  trackDemoPurchase(plan: PlanId, trial: boolean): void {
+    this.track(trial ? 'trial_start' : 'purchase', { plan, demo: true });
+  }
+
   /* ------------------------------------------------------------ internals */
 
   private startStore(): Promise<void> {
@@ -552,7 +558,28 @@ export function billing(): BillingService {
 /** Pro gate for non-React code: true for everyone while payments are off. */
 export function isProNow(now = Date.now()): boolean {
   const s = get();
-  return !s.paymentsEnabled || cachedProActive(s.entitlement, now);
+  const demo = useDemoPayments.getState();
+  return proGate(s.paymentsEnabled, s.entitlement, demo.on, demo.entitlement, now).isPro;
+}
+
+/**
+ * The one Pro rule, shared by `usePro` and {@link isProNow}. Pure. Payments are on when the
+ * Worker says so or (demo builds only) demo payments are on; Pro = the Worker entitlement, or
+ * (demo builds only) the local TEST entitlement. In production the demo inputs are always off.
+ */
+export function proGate(
+  paymentsEnabled: boolean,
+  entitlement: CachedEntitlement | null,
+  demoOn: boolean,
+  demoEntitlement: Parameters<typeof demoProActive>[0],
+  now: number,
+): { paymentsOn: boolean; subscribed: boolean; demo: boolean; isPro: boolean } {
+  const demoPayments = DEMO_PAYMENTS_AVAILABLE && demoOn;
+  const paymentsOn = paymentsEnabled || demoPayments;
+  const real = paymentsEnabled && cachedProActive(entitlement, now);
+  const demo = demoPayments && demoProActive(demoEntitlement);
+  const subscribed = real || demo;
+  return { paymentsOn, subscribed, demo: demo && !real, isPro: !paymentsOn || subscribed };
 }
 
 /** Tests only: fresh state from storage. */

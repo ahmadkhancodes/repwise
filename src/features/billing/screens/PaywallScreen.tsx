@@ -14,10 +14,12 @@ import { AccessibilityInfo, Linking, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { billing, type PurchaseOutcome, type RestoreOutcome } from '@/services/billing';
+import { grantDemoEntitlement } from '@/services/demoPayments';
 import { useTheme } from '@/theme';
 import { Badge, Button, IconButton, PressableScale, Screen, showToast, Text, TickMark } from '@/ui';
 import { enterAt } from '@/ui/listMotion';
 
+import { DemoCheckout } from '../components/DemoCheckout';
 import { LEGAL_URLS } from '../config';
 import { useBilling } from '../hooks/useBilling';
 import { paywallHeadline } from '../logic/headline';
@@ -225,10 +227,12 @@ function TrialTimeline({ steps }: { steps: TimelineStep[] }) {
  */
 export function PaywallScreen() {
   const t = useTheme();
-  const params = useLocalSearchParams<{ source?: string; name?: string }>();
+  const params = useLocalSearchParams<{ source?: string; name?: string; via?: string }>();
   const reduceMotion = useReducedMotion();
   const b = useBilling();
   const [selected, setSelected] = useState<PlanId>(DEFAULT_PLAN);
+  /** Demo builds only: the TEST checkout sheet is open over the paywall. */
+  const [checkout, setCheckout] = useState(false);
   // Outcomes that keep the paywall open are said inline, above the CTA. A toast would draw behind
   // the paywall on iOS (a native modal covers the root toast host).
   const [notice, setNotice] = useState<{ message: string; tone?: 'success' | 'danger' } | null>(
@@ -239,9 +243,12 @@ export function PaywallScreen() {
     AccessibilityInfo.announceForAccessibility(n.message);
   };
 
+  // Opened from the gate sheet: that sheet already sent paywall_view for this gate (F-S5).
   useEffect(() => {
-    if (b.paymentsEnabled) billing().trackPaywallView(params.source ?? 'direct');
-  }, [b.paymentsEnabled, params.source]);
+    if (b.paymentsEnabled && params.via !== 'sheet') {
+      billing().trackPaywallView(params.source ?? 'direct');
+    }
+  }, [b.paymentsEnabled, params.source, params.via]);
 
   // Payments off: the paywall never opens.
   if (!b.paymentsEnabled) return <Redirect href="/" />;
@@ -256,6 +263,10 @@ export function PaywallScreen() {
 
   const onBuy = async () => {
     setNotice(null);
+    if (b.demoCheckout) {
+      setCheckout(true);
+      return;
+    }
     const out = await b.purchase(selected);
     const msg = purchaseMessage(out);
     if (!msg) return;
@@ -276,168 +287,184 @@ export function PaywallScreen() {
     } else say(msg);
   };
 
+  const onDemoComplete = () => {
+    grantDemoEntitlement(offer.plan, offer.trialDays);
+    billing().trackDemoPurchase(offer.plan, offer.trialDays > 0);
+    setCheckout(false);
+    close();
+  };
+
   const header = paywallHeadline(params.source, params.name);
 
   return (
-    // One hero title (N7): no Screen title above it; the eyebrow names the product.
-    <Screen
-      testID="screen-paywall"
-      headerLeft={
-        <IconButton icon={X} accessibilityLabel="Close" onPress={close} testID="paywall-close" />
-      }
-      footer={
-        <View style={{ gap: t.spacing.xs }}>
-          {notice ? (
+    <View style={{ flex: 1 }}>
+      {/* One hero title (N7): no Screen title above it; the eyebrow names the product. */}
+      <Screen
+        testID="screen-paywall"
+        headerLeft={
+          <IconButton icon={X} accessibilityLabel="Close" onPress={close} testID="paywall-close" />
+        }
+        footer={
+          <View style={{ gap: t.spacing.xs }}>
+            {notice ? (
+              <Text
+                variant="callout"
+                color={notice.tone === 'danger' ? 'danger' : 'textSecondary'}
+                align="center"
+                accessibilityRole="alert"
+                accessibilityLiveRegion="polite"
+                testID="paywall-notice"
+              >
+                {notice.message}
+              </Text>
+            ) : null}
+            <Button
+              label={ctaLabel(offer.trialDays)}
+              accent
+              onPress={onBuy}
+              loading={b.purchasing !== null || loading}
+              disabled={!offer.localised || busy}
+              accessibilityHint={priceLine(offer)}
+              testID="paywall-cta"
+            />
             <Text
               variant="callout"
-              color={notice.tone === 'danger' ? 'danger' : 'textSecondary'}
+              color="textPrimary"
               align="center"
-              accessibilityRole="alert"
-              accessibilityLiveRegion="polite"
-              testID="paywall-notice"
+              tabular
+              testID="paywall-price-line"
             >
-              {notice.message}
+              {priceLine(offer)}
             </Text>
-          ) : null}
-          <Button
-            label={ctaLabel(offer.trialDays)}
-            accent
-            onPress={onBuy}
-            loading={b.purchasing !== null || loading}
-            disabled={!offer.localised || busy}
-            accessibilityHint={priceLine(offer)}
-            testID="paywall-cta"
-          />
-          <Text
-            variant="callout"
-            color="textPrimary"
-            align="center"
-            tabular
-            testID="paywall-price-line"
-          >
-            {priceLine(offer)}
-          </Text>
-        </View>
-      }
-    >
-      <Animated.View entering={enterAt(0, reduceMotion)} style={{ gap: t.spacing.sm }}>
-        <View style={{ gap: t.spacing.xxs }}>
-          <Text variant="eyebrow" color="accentText" testID="paywall-eyebrow">
-            Repwise Pro
-          </Text>
-          <Text variant="title1" accessibilityRole="header" testID="paywall-title">
-            {header}
-          </Text>
-        </View>
-        <View style={{ gap: t.spacing.xs }}>
-          {BENEFITS.map(({ icon: Icon, text }) => (
-            <View
-              key={text}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}
-            >
-              <View
-                style={{
-                  width: t.spacing.xxxl,
-                  height: t.spacing.xxxl,
-                  borderRadius: t.radius.pill,
-                  backgroundColor: t.colors.accentSoft,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Icon
-                  color={t.colors.accentText}
-                  size={t.sizes.iconSmall}
-                  strokeWidth={t.sizes.iconStrokeBold}
-                />
-              </View>
-              <Text variant="body" style={{ flex: 1 }}>
-                {text}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </Animated.View>
-
-      {b.productsStatus === 'error' ? (
-        <View style={{ gap: t.spacing.xs }} testID="paywall-store-error">
-          <Text variant="callout" color="textSecondary">
-            {`Couldn't load prices from ${storeName(b.platform)}. Check your connection.`}
-          </Text>
-          <Button label="Try again" variant="secondary" onPress={() => void b.reloadProducts()} />
-        </View>
-      ) : null}
-
-      <Animated.View entering={enterAt(1, reduceMotion)}>
-        <View
-          style={{ gap: t.spacing.xs }}
-          accessibilityRole="radiogroup"
-          accessibilityLabel="Plans"
-        >
-          {b.offers.map((o) => (
-            <PlanRow
-              key={o.plan}
-              offer={o}
-              selected={o.plan === selected}
-              onSelect={() => setSelected(o.plan)}
-            />
-          ))}
-        </View>
-      </Animated.View>
-      {loading ? (
-        <Text variant="caption" color="textSecondary" testID="paywall-loading">
-          {`Loading prices from ${storeName(b.platform)}…`}
-        </Text>
-      ) : null}
-
-      {timeline.length ? (
-        <Animated.View entering={enterAt(2, reduceMotion)} style={{ gap: t.spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
-            <CalendarDays
-              color={t.colors.textPrimary}
-              size={t.sizes.iconMedium}
-              strokeWidth={t.sizes.iconStroke}
-            />
-            <Text variant="headline">How your free trial works</Text>
           </View>
-          <TrialTimeline steps={timeline} />
+        }
+      >
+        <Animated.View entering={enterAt(0, reduceMotion)} style={{ gap: t.spacing.sm }}>
+          <View style={{ gap: t.spacing.xxs }}>
+            <Text variant="eyebrow" color="accentText" testID="paywall-eyebrow">
+              Repwise Pro
+            </Text>
+            <Text variant="title1" accessibilityRole="header" testID="paywall-title">
+              {header}
+            </Text>
+          </View>
+          <View style={{ gap: t.spacing.xs }}>
+            {BENEFITS.map(({ icon: Icon, text }) => (
+              <View
+                key={text}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}
+              >
+                <View
+                  style={{
+                    width: t.spacing.xxxl,
+                    height: t.spacing.xxxl,
+                    borderRadius: t.radius.pill,
+                    backgroundColor: t.colors.accentSoft,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Icon
+                    color={t.colors.accentText}
+                    size={t.sizes.iconSmall}
+                    strokeWidth={t.sizes.iconStrokeBold}
+                  />
+                </View>
+                <Text variant="body" style={{ flex: 1 }}>
+                  {text}
+                </Text>
+              </View>
+            ))}
+          </View>
         </Animated.View>
-      ) : null}
 
-      <View style={{ gap: t.spacing.xs, paddingTop: t.spacing.sm }}>
-        {offer.trialDays > 0 ? (
-          <Text variant="caption" color="textSecondary" align="center">
-            {"We'll remind you 2 days before your trial ends."}
+        {b.productsStatus === 'error' ? (
+          <View style={{ gap: t.spacing.xs }} testID="paywall-store-error">
+            <Text variant="callout" color="textSecondary">
+              {`Couldn't load prices from ${storeName(b.platform)}. Check your connection.`}
+            </Text>
+            <Button label="Try again" variant="secondary" onPress={() => void b.reloadProducts()} />
+          </View>
+        ) : null}
+
+        <Animated.View entering={enterAt(1, reduceMotion)}>
+          <View
+            style={{ gap: t.spacing.xs }}
+            accessibilityRole="radiogroup"
+            accessibilityLabel="Plans"
+          >
+            {b.offers.map((o) => (
+              <PlanRow
+                key={o.plan}
+                offer={o}
+                selected={o.plan === selected}
+                onSelect={() => setSelected(o.plan)}
+              />
+            ))}
+          </View>
+        </Animated.View>
+        {loading ? (
+          <Text variant="caption" color="textSecondary" testID="paywall-loading">
+            {`Loading prices from ${storeName(b.platform)}…`}
           </Text>
         ) : null}
-        <Text variant="caption" color="textSecondary" align="center" testID="paywall-cancel">
-          {cancelInstructions(b.platform)}
-        </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Button
-            label="Restore purchases"
-            variant="tertiary"
-            onPress={onRestore}
-            loading={b.restoring}
-            disabled={busy}
-            testID="paywall-restore"
-          />
-          <Button
-            label="Terms"
-            variant="tertiary"
-            onPress={() => void Linking.openURL(LEGAL_URLS.terms)}
-            accessibilityHint="Opens the terms of use in your browser"
-            testID="paywall-terms"
-          />
-          <Button
-            label="Privacy"
-            variant="tertiary"
-            onPress={() => void Linking.openURL(LEGAL_URLS.privacy)}
-            accessibilityHint="Opens the privacy policy in your browser"
-            testID="paywall-privacy"
-          />
+
+        {timeline.length ? (
+          <Animated.View entering={enterAt(2, reduceMotion)} style={{ gap: t.spacing.xs }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.xs }}>
+              <CalendarDays
+                color={t.colors.textPrimary}
+                size={t.sizes.iconMedium}
+                strokeWidth={t.sizes.iconStroke}
+              />
+              <Text variant="headline">How your free trial works</Text>
+            </View>
+            <TrialTimeline steps={timeline} />
+          </Animated.View>
+        ) : null}
+
+        <View style={{ gap: t.spacing.xs, paddingTop: t.spacing.sm }}>
+          {offer.trialDays > 0 ? (
+            <Text variant="caption" color="textSecondary" align="center">
+              {"We'll remind you 2 days before your trial ends."}
+            </Text>
+          ) : null}
+          <Text variant="caption" color="textSecondary" align="center" testID="paywall-cancel">
+            {cancelInstructions(b.platform)}
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Button
+              label="Restore purchases"
+              variant="tertiary"
+              onPress={onRestore}
+              loading={b.restoring}
+              disabled={busy}
+              testID="paywall-restore"
+            />
+            <Button
+              label="Terms"
+              variant="tertiary"
+              onPress={() => void Linking.openURL(LEGAL_URLS.terms)}
+              accessibilityHint="Opens the terms of use in your browser"
+              testID="paywall-terms"
+            />
+            <Button
+              label="Privacy"
+              variant="tertiary"
+              onPress={() => void Linking.openURL(LEGAL_URLS.privacy)}
+              accessibilityHint="Opens the privacy policy in your browser"
+              testID="paywall-privacy"
+            />
+          </View>
         </View>
-      </View>
-    </Screen>
+      </Screen>
+      {checkout ? (
+        <DemoCheckout
+          offer={offer}
+          onCancel={() => setCheckout(false)}
+          onComplete={onDemoComplete}
+        />
+      ) : null}
+    </View>
   );
 }

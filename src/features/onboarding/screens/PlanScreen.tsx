@@ -2,9 +2,9 @@ import { router, useFocusEffect } from 'expo-router';
 import { CalendarCheck, TriangleAlert } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 
-import { useBillingStore } from '@/services/billing';
+import { usePro } from '@/features/billing';
 import { track } from '@/services/analytics';
 import { haptics } from '@/services/haptics';
 import { startOfWeek } from '@/features/planner/engine';
@@ -28,8 +28,8 @@ import {
 
 import { completeOnboarding, deviceContext, trackStep } from '../actions';
 import {
-  BuildLine,
   BuildRing,
+  BuildStatus,
   MealsList,
   TargetsHero,
   WeekStrip,
@@ -39,13 +39,14 @@ import { usePlanPreview } from '../hooks/usePlanPreview';
 import { GOAL_OPTIONS, labelOf } from '../logic/options';
 import {
   BUILD_POLL_UNITS,
-  BUILD_STEPS,
+  buildLines,
+  buildProgress,
   formatDay,
+  lineAt,
   macroShares,
   revealDelay,
   revealReady,
   shortTitle,
-  ticksAt,
 } from '../logic/reveal';
 import { formatWeight } from '../logic/units';
 import { useOnboarding } from '../store';
@@ -61,11 +62,16 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
   const safe = useMotionSafe();
   const ctx = useMemo(() => deviceContext(), []);
   const [status, setStatus] = useState<Status>('building');
-  const [ticks, setTicks] = useState(0);
+  const reduced = useReducedMotion();
+  const [elapsed, setElapsed] = useState(0);
   const [attempt, setAttempt] = useState(0);
-  const done = useRef(false);
+  /** ms since the build started when the plan was saved; null while working. */
+  const doneAt = useRef<number | null>(null);
+  const [saved, setSaved] = useState(false);
+  // The user's own answers, quoted back on the status lines (read once; the quiz is over).
+  const lines = useMemo(() => buildLines(useOnboarding.getState().answers), []);
   const preview = usePlanPreview(ctx.today);
-  const paymentsEnabled = useBillingStore((s) => s.paymentsEnabled);
+  const { paymentsEnabled } = usePro();
 
   useFocusEffect(
     useCallback(() => {
@@ -74,22 +80,19 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
     }, []),
   );
 
-  // Build: start the timer-driven lines, then run the real planner after the first frame.
+  // Build: run the real planner after the first frame while the lines play for 3–5 s (owner,
+  // 22 Nov). The reveal waits for both; reduce motion gets a short static screen.
   useEffect(() => {
     let cancelled = false;
-    done.current = false;
+    doneAt.current = null;
     const started = clock();
     const timer = setInterval(() => {
-      const elapsed = clock() - started;
-      setTicks((prev) => {
-        const next = ticksAt(elapsed, done.current);
-        if (next > prev) haptics.selection();
-        return next;
-      });
-      if (revealReady(elapsed, done.current)) {
+      const now = clock() - started;
+      setElapsed(now);
+      if (revealReady(now, doneAt.current, reduced)) {
         clearInterval(timer);
         if (!cancelled) {
-          haptics.success();
+          haptics.light();
           setStatus('ready');
         }
       }
@@ -110,7 +113,8 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
             diet_type: p?.dietType ?? null,
           });
         }
-        done.current = true;
+        doneAt.current = clock() - started;
+        if (!cancelled) setSaved(true);
       } catch {
         clearInterval(timer);
         if (!cancelled) setStatus('error');
@@ -121,7 +125,7 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [attempt, ctx.today, clock, t.motion.listStagger]);
+  }, [attempt, ctx.today, clock, reduced, t.motion.listStagger]);
 
   const finish = () => {
     completeOnboarding();
@@ -138,7 +142,8 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
           body="Your answers are saved on this phone. Try again, or go back and check them."
           actionLabel="Try again"
           onAction={() => {
-            setTicks(0);
+            setElapsed(0);
+            setSaved(false);
             setStatus('building');
             setAttempt((a) => a + 1);
           }}
@@ -149,7 +154,9 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
   }
 
   if (status === 'building') {
-    const progress = ticks / BUILD_STEPS.length;
+    const done = saved;
+    const progress = reduced ? (done ? 1 : 0) : buildProgress(elapsed, done);
+    const index = lineAt(elapsed, done);
     return (
       <Screen testID="screen-plan-building" scroll={false}>
         <View style={{ flex: 1, justifyContent: 'center', gap: t.spacing.xxl }}>
@@ -165,23 +172,20 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
               />
             </View>
           </BuildRing>
-          <View style={{ gap: t.spacing.xs }}>
-            <Text variant="title1" align="center" accessibilityRole="header">
+          <View style={{ gap: t.spacing.lg }}>
+            <Text variant="eyebrow" color="textSecondary" align="center" accessibilityRole="header">
               Building your plan
             </Text>
-            <Text variant="body" color="textSecondary" align="center">
-              From your answers, on this phone.
-            </Text>
-          </View>
-          <View style={{ gap: t.spacing.xxs }} accessibilityLiveRegion="polite">
-            {BUILD_STEPS.map((label, i) => (
-              <BuildLine
-                key={label}
-                label={label}
-                state={i < ticks ? 'done' : i === ticks ? 'active' : 'todo'}
-                testID={`build-step-${i}`}
+            {reduced ? (
+              // Reduce motion: short and static, one line with the user's schedule.
+              <BuildStatus
+                line={{ text: 'Putting it together…', detail: lines[2]?.detail ?? null }}
+                index={0}
+                testID="build-status"
               />
-            ))}
+            ) : (
+              <BuildStatus line={lines[index]!} index={index} testID="build-status" />
+            )}
           </View>
         </View>
       </Screen>
@@ -209,19 +213,23 @@ export function PlanScreen({ clock = wallClock }: { clock?: () => number }) {
       testID="screen-plan"
       footer={
         <Animated.View
-          entering={safe(FadeInDown.delay(revealDelay(t.motion, 'cta'))
-            .springify()
-            .damping(t.motion.spring.damping)
-            .stiffness(t.motion.spring.stiffness))}
+          entering={safe(
+            FadeInDown.delay(revealDelay(t.motion, 'cta'))
+              .springify()
+              .damping(t.motion.spring.damping)
+              .stiffness(t.motion.spring.stiffness),
+          )}
         >
           <Button label="Start my plan" onPress={finish} testID="plan-continue" />
         </Animated.View>
       }
     >
       <Animated.View
-        entering={safe(FadeInDown.springify()
-          .damping(t.motion.spring.damping)
-          .stiffness(t.motion.spring.stiffness))}
+        entering={safe(
+          FadeInDown.springify()
+            .damping(t.motion.spring.damping)
+            .stiffness(t.motion.spring.stiffness),
+        )}
         style={{ gap: t.spacing.xs, paddingTop: t.spacing.lg }}
       >
         <Text variant="eyebrow" color="accentText">

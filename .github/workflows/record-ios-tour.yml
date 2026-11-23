@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Branch, tag or SHA to record
+        description: Branch, tag or SHA to record (empty = the branch this run was started on)
         type: string
-        default: main
+        default: ''
       maestro_version:
         description: Maestro CLI version (empty = latest)
         type: string
@@ -45,7 +45,7 @@ jobs:
   record:
     name: Simulator build + recorded Maestro tour
     runs-on: macos-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:
@@ -239,6 +239,50 @@ jobs:
           ls frames
           # Keep the raw recording only when it was not trimmed.
           [ -n "$START" ] && rm -f "$RAW" || true
+
+      - name: Fast cut (~3 min, payment holds at 1x) + music
+        if: always()
+        run: |
+          set -u
+          test -s tour.mp4 || exit 0
+          TOUR_TRIMMED=1 python3 scripts/ci/tour-postprocess.py tour.mp4 "$OUT/marks.txt" \
+            tour-fast.mp4 tour-fast-music.mp4 assets-dev/music/raving-energy.mp3 195 \
+            || echo "::warning::post-process failed; the plain tour.mp4 still uploads"
+          ls -la tour-fast*.mp4 || true
+
+      - name: Natural cut (1x, no speed changes) + music + freeze report
+        if: always()
+        run: |
+          set -u
+          test -s tour.mp4 || exit 0
+          D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 tour.mp4)
+          FO=$(python3 -c "print(max(0, round($D - 3, 2)))")
+          ffmpeg -nostdin -y -loglevel error -i tour.mp4 -stream_loop -1 -i assets-dev/music/raving-energy.mp3 \
+            -map 0:v -map 1:a -c:v copy \
+            -af "afade=t=in:d=1.5,afade=t=out:st=$FO:d=3,loudnorm=I=-16:TP=-1.5:LRA=11" \
+            -c:a aac -b:a 192k -shortest -movflags +faststart tour-natural-music.mp4 || true
+          # Any still stretch over 4 s is a pacing bug in the flow (owner: consistent speed, nothing stuck).
+          ffmpeg -nostdin -hide_banner -i tour.mp4 -vf "freezedetect=n=-55dB:d=4" -map 0:v -f null - 2>&1 \
+            | grep -E "freeze_(start|duration)" | tee "$OUT/freezes.txt" || true
+          echo "freezes over 4 s: $(grep -c freeze_duration "$OUT/freezes.txt" 2>/dev/null || echo 0)"
+
+      - name: Upload the natural tour (music)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repwise-ios-dark-tour-natural
+          path: tour-natural-music.mp4
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload the fast tour (silent + music)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repwise-ios-dark-tour-fast
+          path: tour-fast*.mp4
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Upload the tour video
         if: always()

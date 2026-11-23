@@ -2,6 +2,7 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Share } from 'react-native';
+import { closeGate, useGateSheet } from '@/features/billing/components/GateSheet';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
@@ -172,7 +173,7 @@ describe('GroceryScreen', () => {
     await renderThemed(<GroceryScreen />);
     expect(screen.getByTestId('grocery-locked')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'See Pro' }));
-    expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
+    expect(useGateSheet.getState().feature).toBe('grocery');
   });
 });
 
@@ -205,3 +206,5 @@ describe('TargetsScreen', () => {
     expect(screen.getByTestId('targets-empty')).toBeTruthy();
   });
 });
+
+beforeEach(() => closeGate());

@@ -63,6 +63,11 @@ export type ColorTokens = {
   macroFat: string;
   /** Sheet backdrop */
   scrim: string;
+  /**
+   * Stage behind exercise demo GIFs. ExerciseDB art is drawn on white, so the stage is white in
+   * both themes (letterboxing blends in). In dark it reads as a lit card with rounded corners.
+   */
+  mediaStage: string;
   /** Android ripple / pressed overlay */
   ripple: string;
 };

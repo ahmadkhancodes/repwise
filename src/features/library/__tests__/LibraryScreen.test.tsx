@@ -12,13 +12,15 @@ import { getCatalog, resetCatalogForTests } from '@/services/catalog';
 import { EMPTY_DRAFT } from '../logic/customExercise';
 import { useLibraryPrefs } from '../prefs';
 import { createCustomExercise } from '../repo';
+import { loadExerciseDb } from '../hooks/useExerciseDb';
 import { LibraryScreen } from '../screens/LibraryScreen';
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
 }));
 
-const total = () => getCatalog().exercises.length;
+/** Curated catalogue + browse-only ExerciseDB V1 exercises (the full library, owner 22 Nov). */
+const total = () => getCatalog().exercises.length + loadExerciseDb().items.length;
 
 beforeEach(async () => {
   resetDbForTests();
@@ -32,9 +34,10 @@ describe.each(SCHEMES)(`LibraryScreen (%s, ${Platform.OS})`, (scheme) => {
   it('renders search, count and the catalogue list', async () => {
     await renderThemed(<LibraryScreen />, scheme);
     expect(screen.getByTestId('screen-library')).toBeTruthy();
-    expect(screen.getByPlaceholderText(`Search ${total()} exercises`)).toBeTruthy();
+    expect(await screen.findByPlaceholderText(`Search ${total()} exercises`)).toBeTruthy();
     expect(screen.getByText('All exercises')).toBeTruthy();
     expect(screen.getByTestId('library-count').props.children).toBe(total());
+    expect(total()).toBeGreaterThan(1350);
     expect(await screen.findByTestId('exercise-row-ab-wheel-rollout')).toBeTruthy();
   });
 });
@@ -159,8 +162,23 @@ describe('LibraryScreen', () => {
       });
     });
     await waitFor(() => expect(screen.getByText('Yours')).toBeTruthy());
-    expect(screen.getByTestId('library-count').props.children).toBe(total() + 1);
+    await waitFor(() =>
+      expect(screen.getByTestId('library-count').props.children).toBe(total() + 1),
+    );
     await fireEvent.press(screen.getByTestId('library-create'));
     expect(router.push).toHaveBeenCalledWith('/exercise/custom');
+  });
+});
+
+describe('LibraryScreen · full ExerciseDB library', () => {
+  it('finds browse-only V1 exercises by name, after our own', async () => {
+    await renderThemed(<LibraryScreen />);
+    const v1 = loadExerciseDb().items.find((i) => /^Barbell guillotine bench press$/i.test(i.name));
+    expect(v1).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByTestId('library-count').props.children).toBe(total()),
+    );
+    await fireEvent.changeText(screen.getByTestId('library-search'), 'guillotine');
+    expect(await screen.findByTestId(`exercise-row-${v1!.id}`)).toBeTruthy();
   });
 });

@@ -61,6 +61,7 @@ import {
 import { bodyMetricsRepo } from '@/features/progress/repo';
 import { track } from '@/services/analytics';
 import { api } from '@/services/api';
+import { v1IdForExercise } from '@/services/exerciseMedia';
 import { ensureSession } from '@/services/auth';
 import { getCatalog } from '@/services/catalog';
 
@@ -77,11 +78,23 @@ import {
   type WeekRows,
 } from './logic/planRows';
 import { spreadWeekdays, toEngineProfile } from './logic/profile';
+import { canAdaptPlan } from '@/features/billing/logic/gates';
+import { isProNow } from '@/services/billing';
+
 import { plansRepo, type Plan } from './repo';
 
 // ---------------------------------------------------------------------------
 // Inputs
 // ---------------------------------------------------------------------------
+
+/** Below this many animated exercises we keep the full pool, so a plan can always be built. */
+const MIN_ANIMATED_POOL = 30;
+
+/** Owner, 22 Nov: never plan an exercise with a blank hero. Keeps the full pool if too few have a GIF. */
+export function preferAnimated<T extends { id: string }>(pool: readonly T[]): T[] {
+  const animated = pool.filter((e) => v1IdForExercise(e.id) !== null);
+  return animated.length >= MIN_ANIMATED_POOL ? animated : [...pool];
+}
 
 let engineCatalogues: { src: unknown; never: readonly string[]; cat: Catalogues } | null = null;
 
@@ -99,7 +112,7 @@ export function getEngineCatalogues(): Catalogues {
       src: c,
       never,
       cat: {
-        exercises: ruledOut.size ? exercises.filter((e) => !ruledOut.has(e.id)) : exercises,
+        exercises: preferAnimated(ruledOut.size ? exercises.filter((e) => !ruledOut.has(e.id)) : exercises),
         recipes,
       },
     };
@@ -166,7 +179,9 @@ function currentWeekdays(
   today: string,
   picked?: readonly number[],
 ): number[] {
-  const chosen = [...new Set((picked ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))];
+  const chosen = [
+    ...new Set((picked ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6)),
+  ];
   if (chosen.length === profile.daysPerWeek) return chosen.sort((a, b) => a - b);
   const saved = latestTrainingPayload()?.trainingWeekdays;
   if (saved && saved.length === profile.daysPerWeek) return saved;
@@ -462,7 +477,10 @@ export async function regenerateWeek(opts: GenerateOptions = {}): Promise<PlanRe
   await yieldToUi();
   const out = generateSync(opts);
   // The Worker accepts `deload` too, so a deload week gets the same AI variety (validated the same).
-  if (opts.ai !== false) {
+  // The adaptive (AI) weekly plan is free for the first plan week only (sheet 05); after that free
+  // users keep the rules plan.
+  const weekStart = startOfWeek(opts.date ?? localToday(opts.now ?? Date.now()));
+  if (opts.ai !== false && canAdaptPlan(isProNow(opts.now), weekStart, firstPlanWeekStart())) {
     void upgradeWithAi(out.result, out.profile, out.history, out.weekdays, opts);
   }
   return out.result;
@@ -538,11 +556,13 @@ export function dedupePlannedSessions(
   return removed;
 }
 
+/** The week the user's first training plan started (sheet 05 "first week only"), or null. */
+export function firstPlanWeekStart(): string | null {
+  return plansRepo.first(eq(plans.type, 'training'), plans.weekStart)?.weekStart ?? null;
+}
+
 /** Make sure the week containing `date` has a plan (no-op when one exists). */
-export function ensureWeekPlanned(
-  day?: string,
-  now: number = Date.now(),
-): PlanResult | null {
+export function ensureWeekPlanned(day?: string, now: number = Date.now()): PlanResult | null {
   const date = day ?? localToday(now); // the injected clock, never the real one (R2-7)
   const weekStart = startOfWeek(date);
   if (plansRepo.first(and(eq(plans.type, 'training'), eq(plans.weekStart, weekStart)))) return null;

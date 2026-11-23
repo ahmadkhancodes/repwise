@@ -12,6 +12,11 @@ tags:
     timeout: 10000
 - tapOn:
     id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-notifications
+    direction: DOWN
+    centerElement: true
 - tapOn:
     id: open-notifications
 - assertVisible: Notifications are off

@@ -1,10 +1,22 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Dumbbell, Trophy } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
+import { openGate } from '@/features/billing';
 import { usePro } from '@/features/billing/hooks/usePro';
-import { BackButton, BigNumber, Card, EmptyState, Enter, ListRow, Screen, SectionHeader, Segmented, Text } from '@/ui';
+import {
+  BackButton,
+  BigNumber,
+  Card,
+  EmptyState,
+  Enter,
+  ListRow,
+  Screen,
+  SectionHeader,
+  Segmented,
+  Text,
+} from '@/ui';
 import { useTheme } from '@/theme';
 
 import { LineChart } from '../components/LineChart';
@@ -119,7 +131,7 @@ export function ExerciseRecordsScreen() {
             value={effective}
             onChange={setRange}
             isPro={isPro}
-            onLocked={() => router.push({ pathname: '/paywall', params: { source: 'records' } })}
+            onLocked={() => openGate('records')}
           />
 
           <SectionHeader title="Records" />

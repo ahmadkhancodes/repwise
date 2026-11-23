@@ -169,6 +169,20 @@ describe(`SettingsScreen interactions (${Platform.OS})`, () => {
     expect(JSON.parse(kv.getString('settings.prefs.v1')!).state.keepAwake).toBe(false);
   });
 
+  it('daily steps goal: 8,000 by default, ±500 per tap, saved on the device', async () => {
+    const { setStepsGoal, useStepsGoal } = require('@/features/today/stepsGoal');
+    setStepsGoal(8000);
+    await renderThemed(<SettingsScreen />);
+    expect(await screen.findByTestId('group-activity')).toBeTruthy();
+    expect(screen.getByTestId('steps-goal-value')).toHaveTextContent('8,000');
+    await fireEvent.press(screen.getByTestId('steps-goal-inc'));
+    expect(useStepsGoal.getState().goal).toBe(8500);
+    expect(kv.getString('steps.goal')).toBe('8500');
+    await fireEvent.press(screen.getByTestId('steps-goal-dec'));
+    await fireEvent.press(screen.getByTestId('steps-goal-dec'));
+    expect(useStepsGoal.getState().goal).toBe(7500);
+  });
+
   it('units and theme', async () => {
     seedProfile();
     await renderThemed(<SettingsScreen />);

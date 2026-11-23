@@ -1,4 +1,6 @@
-# Media pipeline (Cloudinary) — plan
+# Media pipeline — plan
+
+> **Exercises (22 Nov 2026, D-EXDB-MEDIA):** demos are ExerciseDB V1 GIFs on our CDN (`EXPO_PUBLIC_MEDIA_BASE`, default the Vercel Blob store), mapped by `exercise_media.json` (`node scripts/media/build-exercisedb-map.mjs --review`). The Cloudinary exercise frames below are retired; recipes still use Cloudinary.
 
 Implements build bible sheet 29 ("Exercise media pipeline"). **No media files live in this repo.** Current state, counts and the owner's to-do: `docs/MEDIA_STATUS.md`.
 

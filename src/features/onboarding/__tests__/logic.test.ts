@@ -16,18 +16,27 @@ import {
   shiftMealTime,
   toMinutes,
 } from '../logic/mealTimes';
-import { DISLIKE_OPTIONS, QUESTIONS } from '../logic/options';
+import { CUISINE_OPTIONS, DISLIKE_OPTIONS, QUESTIONS } from '../logic/options';
 import {
   BUILD_MIN_MS,
   BUILD_STEPS,
-  BUILD_TICK_MS,
+  BUILD_LINE_MS,
+  BUILD_MAX_MS,
+  BUILD_READY,
+  BUILD_READY_HOLD_MS,
+  BUILD_REDUCED_MS,
+  buildLines,
+  buildProgress,
+  cuisineLine,
+  lineAt,
+  revealAt,
+  scheduleLine,
   formatDay,
   macroShares,
   mealKcal,
   nextTraining,
   revealReady,
   shortTitle,
-  ticksAt,
   weekStrip,
 } from '../logic/reveal';
 import {
@@ -258,15 +267,86 @@ describe('flow', () => {
 });
 
 describe('reveal', () => {
-  it('ticks build lines on a timer but waits for the real plan for the last one', () => {
+  it('plays the build lines for 3–5 s, but "ready" waits for the real plan', () => {
     expect(BUILD_STEPS).toHaveLength(5);
-    expect(ticksAt(0, false)).toBe(0);
-    expect(ticksAt(BUILD_TICK_MS * 2, false)).toBe(2);
-    expect(ticksAt(10_000, false)).toBe(4);
-    expect(ticksAt(10_000, true)).toBe(5);
-    expect(revealReady(BUILD_MIN_MS, false)).toBe(false);
-    expect(revealReady(BUILD_MIN_MS - 1, true)).toBe(false);
-    expect(revealReady(BUILD_MIN_MS, true)).toBe(true);
+    expect(revealAt(false)).toBeGreaterThanOrEqual(BUILD_MIN_MS);
+    expect(revealAt(false)).toBeLessThanOrEqual(BUILD_MAX_MS);
+    expect(revealAt(true)).toBe(BUILD_REDUCED_MS);
+    expect(revealAt(true)).toBeLessThan(BUILD_MIN_MS);
+
+    expect(lineAt(0, false)).toBe(0);
+    expect(lineAt(-5, false)).toBe(0);
+    expect(lineAt(BUILD_LINE_MS * 2, true)).toBe(2);
+    expect(lineAt(10_000, false)).toBe(4);
+    expect(lineAt(10_000, true)).toBe(5);
+
+    expect(buildProgress(0, true)).toBe(0);
+    expect(buildProgress(10_000, false)).toBeCloseTo(0.8);
+    expect(buildProgress(10_000, true)).toBe(1);
+    expect(buildProgress(BUILD_LINE_MS * 2.5, true)).toBeCloseTo(0.5);
+
+    // Plan saved at once: reveal exactly at the end of the sequence.
+    expect(revealReady(revealAt(false) - 1, 40)).toBe(false);
+    expect(revealReady(revealAt(false), 40)).toBe(true);
+    expect(revealReady(10_000, null)).toBe(false);
+    // Slow phone: the plan lands at 6 s; "ready" still shows for its hold before the reveal.
+    expect(revealReady(6_000, 6_000)).toBe(false);
+    expect(revealReady(6_000 + BUILD_READY_HOLD_MS, 6_000)).toBe(true);
+    // Reduce motion: short, no hold.
+    expect(revealReady(BUILD_REDUCED_MS, 10, true)).toBe(true);
+    expect(revealReady(BUILD_REDUCED_MS - 1, 10, true)).toBe(false);
+  });
+
+  it('build lines quote the user\'s answers back', () => {
+    const lines = buildLines({
+      goal: 'muscle_gain',
+      daysPerWeek: 4,
+      sessionMin: 60,
+      location: 'gym',
+      dietType: 'omnivore',
+      cuisines: [],
+      mealsPerDay: 3,
+    });
+    expect(lines.map((l) => l.text)).toEqual([...BUILD_STEPS, BUILD_READY]);
+    expect(lines.map((l) => l.detail)).toEqual([
+      'Build muscle',
+      'Gym · Barbells, machines, cables',
+      '4 days a week · 60 min',
+      'American & British meals',
+      '3 meals a day',
+      null,
+    ]);
+    const empty = buildLines({
+      goal: null,
+      daysPerWeek: null,
+      sessionMin: null,
+      location: null,
+      dietType: null,
+      cuisines: [],
+      mealsPerDay: null,
+    });
+    expect(empty.map((l) => l.detail)).toEqual([
+      null,
+      null,
+      null,
+      'American & British meals',
+      null,
+      null,
+    ]);
+    // No medical or AI claims in the copy.
+    for (const l of lines) expect(`${l.text} ${l.detail ?? ''}`).not.toMatch(/cure|treat|diagnos|AI\b/i);
+  });
+
+  it('schedule and cuisine lines', () => {
+    expect(scheduleLine(1, null)).toBe('1 day a week');
+    expect(scheduleLine(null, 45)).toBe('45 min');
+    expect(scheduleLine(null, null)).toBeNull();
+    expect(cuisineLine(['italian'], 'vegan')).toBe('Vegan · Italian meals');
+    expect(cuisineLine(['global'], null)).toBe('Meals from everywhere');
+    expect(cuisineLine(['global', 'mexican'], 'omnivore')).toBe('Mexican meals');
+    expect(cuisineLine(['american', 'british', 'indian', 'mexican'], 'halal')).toBe(
+      'Halal · American, British & 2 more',
+    );
   });
 
   it('macro shares sum to about the whole day', () => {
@@ -319,5 +399,14 @@ describe('dislike options', () => {
   it('every dislike matches a food in the catalogue', () => {
     const foods = require('@repwise/content/foods.json') as { id: string }[];
     for (const o of DISLIKE_OPTIONS) expect(foods.some((f) => f.id.includes(o.value))).toBe(true);
+  });
+});
+
+describe('cuisine options (D-CUISINE-DEFAULT)', () => {
+  it('lists US/UK-familiar cuisines and "Anything" first, regional cuisines last', () => {
+    const values = CUISINE_OPTIONS.map((o) => o.value);
+    expect(values.slice(0, 6)).toEqual(['american', 'british', 'mediterranean', 'italian', 'mexican', 'global']);
+    expect(values.slice(-5)).toEqual(['middle_eastern', 'north_african', 'gulf', 'indian', 'pakistani']);
+    expect(CUISINE_OPTIONS.find((o) => o.value === 'global')?.label).toBe('Anything');
   });
 });

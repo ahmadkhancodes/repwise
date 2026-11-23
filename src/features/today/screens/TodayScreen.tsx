@@ -7,25 +7,46 @@ import { AssistantCard } from '@/features/assistant/components/AssistantCard';
 import { CardDetailSheet } from '@/features/assistant/components/CardDetailSheet';
 import { useAssistant } from '@/features/assistant/hooks/useAssistant';
 import type { ShownCard } from '@/features/assistant/logic/cardState';
-import { usePro } from '@/features/billing';
-import { openMeal, quickAddWater, SwapSheet, toggleMeal, toMealView, type MealView as EatMealView } from '@/features/meals';
+import { canSwapMeal, openGate, usePro } from '@/features/billing';
+import {
+  openMeal,
+  quickAddWater,
+  SwapSheet,
+  toggleMeal,
+  toMealView,
+  type MealView as EatMealView,
+} from '@/features/meals';
 import { getWaterGoal } from '@/features/nutrition';
 import { WaterCard } from '@/features/nutrition/components/WaterCard';
 import { trainHref } from '@/features/workout';
 import { useCatalogFor } from '@/services/catalog';
 import { maybeAskForReview, REVIEW_DELAY_MS } from '@/services/review';
 import { useTheme } from '@/theme';
-import { Button, EmptyState, IconButton, Screen, Skeleton, SkeletonGroup, UNDO_TOAST_MS } from '@/ui';
+import {
+  Button,
+  EmptyState,
+  IconButton,
+  Screen,
+  Skeleton,
+  SkeletonGroup,
+  Text,
+  UNDO_TOAST_MS,
+} from '@/ui';
 
 import { EveningCard } from '../components/EveningCard';
 import { MealsCard } from '../components/MealsCard';
-import { MorningBrief } from '../components/MorningBrief';
-import { RingsCard } from '../components/RingsCard';
+import { StatsGrid } from '../components/StatsGrid';
 import { RestDayCard, WorkoutCard } from '../components/WorkoutCard';
+import { useDashboard } from '../hooks/useDashboard';
 import { useToday } from '../hooks/useToday';
 import { localHour } from '../logic/day';
 import type { MealView } from '../logic/meals';
-import { currentWeekStreak, isWeekComplete, reviewMoment, type DayMomentState } from '../logic/moments';
+import {
+  currentWeekStreak,
+  isWeekComplete,
+  reviewMoment,
+  type DayMomentState,
+} from '../logic/moments';
 import { doneWorkoutDates } from '../repo';
 
 /** Undo window for the core action (P5 acceptance: undo toast, 5 s). */
@@ -35,6 +56,8 @@ export const ROUTES = {
   onboarding: '/(onboarding)/welcome' as Href,
   train: '/train' as Href,
   eat: '/eat' as Href,
+  progress: '/progress' as Href,
+  logWeight: '/progress/log' as Href,
   settings: '/settings' as Href,
   checkin: '/checkin' as Href,
   /** The workout slice's deep link: Train starts (or resumes) the session and opens the player. */
@@ -76,10 +99,11 @@ function useReviewMoments(state: DayMomentState | null, today: string) {
 }
 
 /**
- * S11 Today (home). Order is the hierarchy (UI audit T1, sheet 11 stacked action cards):
- * brief (premium trip card) → the primary action (Start workout; or, once the workout is done or
- * on a rest day, the meal timeline whose next meal is one tap) → meals → at most one assistant
- * card → rings → water. The primary action lands above the fold and in the thumb zone at 360×640.
+ * S11 Today = the Home dashboard (owner 22 Nov). Order is the hierarchy, gym first: date → the
+ * hero (today's workout with Start; the done card or the rest day otherwise) → the stats grid
+ * (calories ring, protein, steps, workouts this week, streak, weekly volume, weight trend) → the
+ * meal timeline → at most one assistant card → evening recap → water. Start lands above the fold
+ * and in the thumb zone at 360×640.
  */
 export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
   const t = useTheme();
@@ -99,6 +123,18 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
     protein: view?.targets ? { eaten: view.eaten.p, target: view.targets.p } : null,
   });
 
+  const dashboard = useDashboard({
+    now: model.now,
+    eaten: view?.state === 'ready' ? view.eaten : null,
+    targets: view?.state === 'ready' ? (view.targets ?? null) : null,
+    week: model.snapshot?.week ?? null,
+    units: model.snapshot?.profile?.units,
+  });
+  const openProgress = useCallback(() => router.push(ROUTES.progress), []);
+  const openLogWeight = useCallback(() => router.push(ROUTES.logWeight), []);
+  const enableSteps = dashboard.enableSteps;
+  const onEnableSteps = useCallback(() => void enableSteps(), [enableSteps]);
+
   const [swapId, setSwapId] = useState<string | null>(null);
   const [openCard, setOpenCard] = useState<ShownCard | null>(null);
   const [moreCards, setMoreCards] = useState(false);
@@ -117,16 +153,25 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
 
   const weekComplete = isWeekComplete(model.snapshot?.week);
   const ready = view?.state === 'ready';
-  const moments = useMemo<DayMomentState | null>(() => (ready ? { weekComplete } : null), [ready, weekComplete]);
+  const moments = useMemo<DayMomentState | null>(
+    () => (ready ? { weekComplete } : null),
+    [ready, weekComplete],
+  );
   useReviewMoments(moments, view?.date ?? '');
 
   // Meal writes go through the meals domain (same action, copy and undo as Eat). The row owns the
   // one haptic; the undo toast is silent.
   const dayMeals = view?.meals;
-  const onToggle = useCallback((meal: MealView) => {
-    toggleMeal(meal, dayMeals ?? []);
-  }, [dayMeals]);
-  const onSwap = useCallback((meal: MealView) => setSwapId(meal.id), []);
+  const onToggle = useCallback(
+    (meal: MealView) => {
+      toggleMeal(meal, dayMeals ?? []);
+    },
+    [dayMeals],
+  );
+  const onSwap = useCallback(
+    (meal: MealView) => (canSwapMeal(isPro) ? setSwapId(meal.id) : openGate('meal_swap')),
+    [isPro],
+  );
   const onOpenMeal = useCallback((meal: MealView) => {
     openMeal(meal);
   }, []);
@@ -206,18 +251,25 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
     const cards = first ? [first, ...(moreCards ? rest : [])] : [];
     body = (
       <>
-        {view.evening ? (
-          <EveningCard
-            dateLabel={view.dateLabel}
-            headline={view.evening.headline}
-            items={view.evening.items}
-            tomorrow={view.evening.tomorrow}
-            index={0}
-          />
-        ) : (
-          <MorningBrief rows={view.brief} dateLabel={view.dateLabel} index={0} />
-        )}
-        {pending ? <WorkoutCard workout={pending} onStart={onStart} onOpen={onStart} index={1} /> : null}
+        <Text variant="eyebrow" color="textSecondary" testID="today-date">
+          {view.dateLabel}
+        </Text>
+        {pending ? (
+          <WorkoutCard workout={pending} onStart={onStart} onOpen={onStart} index={0} />
+        ) : view.workout?.done ? (
+          <WorkoutCard workout={view.workout} onStart={onStart} onOpen={onStart} index={0} />
+        ) : view.restDay ? (
+          <RestDayCard index={0} />
+        ) : null}
+        <StatsGrid
+          tiles={dashboard.tiles}
+          weightValues={dashboard.weightValues}
+          onOpenEat={openEat}
+          onOpenProgress={openProgress}
+          onLogWeight={openLogWeight}
+          onEnableSteps={onEnableSteps}
+          index={1}
+        />
         <MealsCard
           meals={view.meals}
           nextId={view.next?.id}
@@ -245,11 +297,13 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
             testID="today-more-cards"
           />
         ) : null}
-        {view.targets ? <RingsCard eaten={view.eaten} targets={view.targets} onOpen={openEat} index={4} /> : null}
-        {view.workout?.done ? (
-          <WorkoutCard workout={view.workout} onStart={onStart} onOpen={onStart} index={5} />
-        ) : !view.workout && view.restDay ? (
-          <RestDayCard index={5} />
+        {view.evening ? (
+          <EveningCard
+            headline={view.evening.headline}
+            items={view.evening.items}
+            tomorrow={view.evening.tomorrow}
+            index={4}
+          />
         ) : null}
         <WaterCard
           totalMl={view.waterMl}
@@ -263,7 +317,12 @@ export function TodayScreen({ now: nowOverride }: { now?: number } = {}) {
   }
 
   return (
-    <Screen title={view?.greeting ?? 'Today'} edges={['top']} testID="screen-today" headerRight={header}>
+    <Screen
+      title={view?.greeting ?? 'Today'}
+      edges={['top']}
+      testID="screen-today"
+      headerRight={header}
+    >
       <View style={{ gap: t.spacing.md }}>{body}</View>
       <SwapSheet meal={swapMeal} onClose={() => setSwapId(null)} />
       <CardDetailSheet

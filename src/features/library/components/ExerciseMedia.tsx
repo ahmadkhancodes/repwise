@@ -2,20 +2,18 @@ import type { Muscle } from '@repwise/content';
 import { BlurMask, Canvas, Circle, Group } from '@shopify/react-native-skia';
 import { Image } from 'expo-image';
 import { RotateCcw } from 'lucide-react-native';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { View, type ViewStyle } from 'react-native';
 import Animated, {
-  Easing,
-  cancelAnimation,
   useAnimatedStyle,
   useDerivedValue,
   useReducedMotion,
   useSharedValue,
-  withRepeat,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
+import { gifForMediaId } from '@/services/exerciseMedia';
 import { useTheme } from '@/theme';
 import { Badge, PressableScale, Text } from '@/ui';
 
@@ -24,12 +22,6 @@ import { bestView, type BodyView } from '../logic/bodyMap';
 import { bodyPalette } from '../logic/bodyPalette';
 import { EQUIPMENT_GLYPH, LEVEL_GLYPH } from '../logic/glyphs';
 import { heroLabel, heroLayout, heroOverlay, type HeroExercise } from '../logic/hero';
-import {
-  crossfadeCycleMs,
-  crossfadeOpacity,
-  exerciseMediaUrls,
-  type MediaUrls,
-} from '../logic/media';
 
 import { BodyFigure, MuscleThumb, useMuscleMotion } from './BodyMap';
 
@@ -63,7 +55,8 @@ export type ExerciseThumbProps = MediaProps & {
 
 /**
  * List thumbnail: a muscle-map crop zoomed onto the main muscles (always drawn, so the list never
- * shows grey tiles). When a licensed demo exists it fades in over the map from the ≤ 15 KB thumb.
+ * shows grey tiles). When the exercise has an ExerciseDB demo, its first frame (still, no
+ * autoplay: a list of moving GIFs is noise and battery) covers the map once loaded.
  */
 export const ExerciseThumb = memo(function ExerciseThumb({
   mediaId,
@@ -74,8 +67,10 @@ export const ExerciseThumb = memo(function ExerciseThumb({
 }: ExerciseThumbProps) {
   const t = useTheme();
   const size = sizeProp ?? t.sizes.row;
-  const urls = exerciseMediaUrls(mediaId);
-  const [failed, setFailed] = useState(false);
+  const gif = gifForMediaId(mediaId);
+  // Keyed by URL, so a recycled row with another exercise retries instead of staying failed.
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+  const failed = failedUri !== null && failedUri === gif;
   const primary = meta?.primaryMuscles ?? EMPTY;
   const secondary = meta?.secondaryMuscles ?? EMPTY;
   const view = useMemo(() => bestView(primary, secondary), [primary, secondary]);
@@ -94,17 +89,23 @@ export const ExerciseThumb = memo(function ExerciseThumb({
       accessibilityElementsHidden
     >
       <MuscleThumb primary={primary} secondary={secondary} view={view} size={size} />
-      {urls && !failed ? (
+      {gif && !failed ? (
         <Image
           testID={testID ? `${testID}-image` : undefined}
-          source={urls.thumb}
+          source={gif}
           recyclingKey={mediaId ?? undefined}
           cachePolicy="memory-disk"
           contentFit="cover"
+          autoplay={false}
           transition={0}
           accessibilityLabel={`${name} demo`}
-          onError={() => setFailed(true)}
-          style={{ position: 'absolute', width: '100%', height: '100%' }}
+          onError={() => setFailedUri(gif)}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundColor: t.colors.mediaStage,
+          }}
         />
       ) : null}
     </View>
@@ -120,6 +121,11 @@ export type ExerciseHeroProps = MediaProps & {
   exerciseId?: string;
   /** Width / height (default 4:3). */
   aspectRatio?: number;
+  /**
+   * `demo` (default): the animated ExerciseDB GIF when there is one, else the muscle map.
+   * `map`: always the muscle map ("Muscles worked" on the detail page).
+   */
+  variant?: 'demo' | 'map';
 };
 
 function HeroById(props: ExerciseHeroProps & { exerciseId: string }) {
@@ -128,11 +134,12 @@ function HeroById(props: ExerciseHeroProps & { exerciseId: string }) {
 }
 
 /**
- * Exercise hero. Without media (Cloudinary off, or no licensed demo) it is a designed muscle map:
- * the side that shows the main muscles (auto-picked, tap to turn), main muscles in the accent,
- * secondary in a soft tint, with the kit glyph, movement pattern and difficulty overlaid. When a
- * demo exists, its two frames crossfade over the map (the map is the placeholder) and a small
- * muscle inset stays in the corner.
+ * Exercise hero. The main visual is the animated ExerciseDB demo (GIF from our CDN, memory-disk
+ * cache, prefetched for today and tomorrow) on a light stage, with a small muscle inset in the
+ * corner. Without a demo (no match, custom exercise) or when the GIF fails or is offline, it is a
+ * designed muscle map at once: the side that shows the main muscles (auto-picked, tap to turn),
+ * main muscles in the accent, secondary in a soft tint, with the kit glyph, pattern and level.
+ * The map is also the placeholder while the GIF loads, so there is never a spinner.
  */
 export function ExerciseHero(props: ExerciseHeroProps) {
   const { exercise, exerciseId } = props;
@@ -143,18 +150,28 @@ export function ExerciseHero(props: ExerciseHeroProps) {
   );
 }
 
-function Hero({ mediaId, name, testID, exercise: meta, aspectRatio = 4 / 3 }: ExerciseHeroProps) {
+function Hero({
+  mediaId,
+  name,
+  testID,
+  exercise: meta,
+  aspectRatio = 4 / 3,
+  variant = 'demo',
+}: ExerciseHeroProps) {
   const t = useTheme();
-  const urls = exerciseMediaUrls(mediaId);
-  const [failed, setFailed] = useState(false);
-  const [demoReady, setDemoReady] = useState(false);
+  const gif = variant === 'demo' ? gifForMediaId(mediaId) : null;
+  // Keyed by URL: the player moving to the next exercise starts clean (map until its GIF is in).
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+  const [readyUri, setReadyUri] = useState<string | null>(null);
+  const failed = gif !== null && failedUri === gif;
+  const demoReady = gif !== null && readyUri === gif;
   const [width, setWidth] = useState(0);
   const primary = meta?.primaryMuscles ?? EMPTY;
   const secondary = meta?.secondaryMuscles ?? EMPTY;
   const auto = useMemo(() => bestView(primary, secondary), [primary, secondary]);
   const [picked, setPicked] = useState<BodyView | null>(null);
   const view = picked ?? auto;
-  const showMedia = Boolean(urls) && !failed;
+  const showMedia = Boolean(gif) && !failed;
   const demo = showMedia && demoReady;
 
   return (
@@ -186,13 +203,14 @@ function Hero({ mediaId, name, testID, exercise: meta, aspectRatio = 4 / 3 }: Ex
           />
         ) : null}
       </View>
-      {urls && showMedia ? (
-        <DemoFrames
-          urls={urls}
+      {gif && showMedia ? (
+        <DemoGif
+          key={gif}
+          uri={gif}
           name={name}
-          onReady={() => setDemoReady(true)}
-          onError={() => setFailed(true)}
-          testID={testID ? `${testID}-frames` : undefined}
+          onReady={() => setReadyUri(gif)}
+          onError={() => setFailedUri(gif)}
+          testID={testID ? `${testID}-gif` : undefined}
         />
       ) : null}
       {demo ? (
@@ -427,18 +445,17 @@ function HeroOverlays({
 }
 
 /**
- * Two still frames (start / end) crossfading as a slow demo loop (CROSSFADE timing, pure
- * `crossfadeOpacity` run as a worklet). The start frame fades in over the muscle map once loaded;
- * the loop starts only when both frames are in. Reduce Motion: the start frame, still.
+ * The animated demo on the light stage. It fades in over the muscle map once the first frame is
+ * decoded (instant from the disk cache). Reduce Motion: the first frame, still.
  */
-function DemoFrames({
-  urls,
+function DemoGif({
+  uri,
   name,
   onReady,
   onError,
   testID,
 }: {
-  urls: MediaUrls;
+  uri: string;
   name: string;
   onReady: () => void;
   onError: () => void;
@@ -446,67 +463,41 @@ function DemoFrames({
 }) {
   const t = useTheme();
   const reduceMotion = useReducedMotion();
-  const [loaded, setLoaded] = useState({ start: false, end: false });
-  const startIn = useSharedValue(0);
-  const elapsed = useSharedValue(0);
-  const both = loaded.start && loaded.end;
+  const [loaded, setLoaded] = useState(false);
+  const fadeIn = useSharedValue(0);
 
   useEffect(() => {
-    if (!loaded.start) return;
+    if (!loaded) return;
     // Reduced motion: shown at once (never left at opacity 0 waiting on an animation).
-    startIn.set(reduceMotion ? 1 : withTiming(1, { duration: t.motion.duration.base }));
-  }, [loaded.start, startIn, t.motion.duration.base, reduceMotion]);
+    fadeIn.set(reduceMotion ? 1 : withTiming(1, { duration: t.motion.duration.base }));
+  }, [loaded, fadeIn, t.motion.duration.base, reduceMotion]);
 
-  useEffect(() => {
-    if (!both || reduceMotion) return;
-    const cycle = crossfadeCycleMs();
-    elapsed.set(0);
-    elapsed.set(withRepeat(withTiming(cycle, { duration: cycle, easing: Easing.linear }), -1));
-    return () => cancelAnimation(elapsed);
-  }, [both, reduceMotion, elapsed]);
-
-  const startStyle = useAnimatedStyle(() => ({ opacity: startIn.value }));
-  const endStyle = useAnimatedStyle(() => ({ opacity: crossfadeOpacity(elapsed.value) }));
-  const markStart = useCallback(() => {
-    setLoaded((s) => ({ ...s, start: true }));
-    onReady();
-  }, [onReady]);
-  const markEnd = useCallback(() => setLoaded((s) => ({ ...s, end: true })), []);
+  const style = useAnimatedStyle(() => ({ opacity: fadeIn.value }));
   const fill = { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 } as const;
 
   return (
-    <View
-      style={fill}
+    <Animated.View
+      style={[fill, { backgroundColor: t.colors.mediaStage }, style]}
       pointerEvents="none"
       testID={testID}
       importantForAccessibility="no-hide-descendants"
       accessibilityElementsHidden
     >
-      <Animated.View style={[fill, { backgroundColor: t.colors.surface }, startStyle]}>
-        <Image
-          source={urls.frames[0]}
-          placeholder={{ uri: urls.poster }}
-          cachePolicy="memory-disk"
-          contentFit="contain"
-          transition={0}
-          accessibilityLabel={`${name} demonstration`}
-          onLoad={markStart}
-          onError={onError}
-          style={{ width: '100%', height: '100%' }}
-        />
-      </Animated.View>
-      {reduceMotion ? null : (
-        <Animated.View style={[fill, endStyle]}>
-          <Image
-            source={urls.frames[1]}
-            cachePolicy="memory-disk"
-            contentFit="contain"
-            transition={0}
-            onLoad={markEnd}
-            style={{ width: '100%', height: '100%' }}
-          />
-        </Animated.View>
-      )}
-    </View>
+      <Image
+        testID={testID ? `${testID}-image` : undefined}
+        source={uri}
+        cachePolicy="memory-disk"
+        contentFit="contain"
+        autoplay={!reduceMotion}
+        transition={0}
+        accessibilityLabel={`${name} demonstration`}
+        onLoad={() => {
+          setLoaded(true);
+          onReady();
+        }}
+        onError={onError}
+        style={{ width: '100%', height: '100%' }}
+      />
+    </Animated.View>
   );
 }

@@ -1,8 +1,15 @@
 import { router } from 'expo-router';
-import { ChevronRight, Dumbbell, Lock, UtensilsCrossed, type LucideIcon } from 'lucide-react-native';
+import {
+  ChevronRight,
+  Dumbbell,
+  Lock,
+  UtensilsCrossed,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { memo } from 'react';
 import { View } from 'react-native';
 
+import { openGate } from '@/features/billing';
 import { useTheme } from '@/theme';
 import { Button, PressableScale, Text } from '@/ui';
 
@@ -67,7 +74,11 @@ export const HistoryRow = memo(function HistoryRow({
           justifyContent: 'center',
         }}
       >
-        <Icon color={t.colors.textPrimary} size={t.sizes.iconMedium} strokeWidth={t.sizes.iconStroke} />
+        <Icon
+          color={t.colors.textPrimary}
+          size={t.sizes.iconMedium}
+          strokeWidth={t.sizes.iconStroke}
+        />
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: t.spacing.xxs / 2 }}>
         {when ? (
@@ -87,17 +98,32 @@ export const HistoryRow = memo(function HistoryRow({
           {item.value}
         </Text>
       ) : null}
-      <ChevronRight color={t.colors.textTertiary} size={t.sizes.iconMedium} strokeWidth={t.sizes.iconStroke} />
+      <ChevronRight
+        color={t.colors.textTertiary}
+        size={t.sizes.iconMedium}
+        strokeWidth={t.sizes.iconStroke}
+      />
     </PressableScale>
   );
 });
 
 /** Footer under a gated history: how much Pro keeps, one button to the paywall. */
-export function HistoryProFooter({ hidden, noun, testID = 'history-more' }: { hidden: number; noun: 'day' | 'workout'; testID?: string }) {
+export function HistoryProFooter({
+  hidden,
+  noun,
+  testID = 'history-more',
+}: {
+  hidden: number;
+  noun: 'day' | 'workout';
+  testID?: string;
+}) {
   const t = useTheme();
   if (hidden <= 0) return null;
   return (
-    <View style={{ marginTop: t.spacing.lg, gap: t.spacing.sm, alignItems: 'center' }} testID={testID}>
+    <View
+      style={{ marginTop: t.spacing.lg, gap: t.spacing.sm, alignItems: 'center' }}
+      testID={testID}
+    >
       <Lock size={t.sizes.icon} color={t.colors.textSecondary} strokeWidth={t.sizes.iconStroke} />
       <Text variant="callout" color="textSecondary" align="center">
         {`${hidden} older ${hidden === 1 ? noun : `${noun}s`} ${hidden === 1 ? 'is' : 'are'} kept safe. See all your history with Pro.`}
@@ -105,7 +131,7 @@ export function HistoryProFooter({ hidden, noun, testID = 'history-more' }: { hi
       <Button
         label="See Pro"
         variant="secondary"
-        onPress={() => router.push({ pathname: '/paywall', params: { source: 'history' } })}
+        onPress={() => openGate('history')}
         testID="history-pro"
       />
     </View>

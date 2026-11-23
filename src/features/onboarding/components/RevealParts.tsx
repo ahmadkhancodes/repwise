@@ -1,17 +1,14 @@
-import { Check } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
   FadeInUp,
+  FadeOut,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withRepeat,
-  withSequence,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated';
 
 import { useTheme, type ColorToken } from '@/theme';
@@ -29,7 +26,8 @@ import { WorkoutCard as TodayWorkoutCard } from '@/features/today/components/Wor
 
 import type { PreviewMeal } from '../hooks/usePlanPreview';
 import {
-  BUILD_TICK_MS,
+  BUILD_READY,
+  type BuildLine as BuildLineModel,
   revealDelay,
   SLOT_LABEL,
   type RevealPart,
@@ -54,83 +52,56 @@ const useSpringIn = () => {
 /** Small macro ring size: one gym hit box plus a spacing step (three fit 320dp). */
 const macroRing = (t: ReturnType<typeof useTheme>) => t.sizes.hitGymLarge + t.spacing.md;
 
-/** One line of the build sequence: a pulsing dot while working, a check when done. */
-export function BuildLine({
-  label,
-  state,
+/**
+ * The build screen's status: one line at a time, cross-fading (the old line fades out where it
+ * stood while the new one rises in), with the user's own answer under it. Reduced motion: the
+ * lines swap without animation (the screen is short and static then anyway).
+ */
+export function BuildStatus({
+  line,
+  index,
   testID,
 }: {
-  label: string;
-  state: 'todo' | 'active' | 'done';
+  line: BuildLineModel;
+  index: number;
   testID?: string;
 }) {
   const t = useTheme();
   const safe = useMotionSafe();
-  const reduceMotion = useReducedMotion();
-  const pulse = useSharedValue(1);
-  useEffect(() => {
-    if (state === 'active' && !reduceMotion) {
-      pulse.set(
-        withRepeat(
-          withSequence(
-            withTiming(0.35, { duration: BUILD_TICK_MS }),
-            withTiming(1, { duration: BUILD_TICK_MS }),
-          ),
-          -1,
-        ),
-      );
-    } else {
-      pulse.set(1);
-    }
-  }, [state, pulse, reduceMotion]);
-  const dot = useAnimatedStyle(() => ({ opacity: pulse.value }));
-  const done = state === 'done';
+  const ready = line.text === BUILD_READY;
   return (
     <View
       testID={testID}
       accessible
-      accessibilityLabel={`${label}${done ? ', done' : state === 'active' ? ', in progress' : ''}`}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: t.spacing.sm,
-        minHeight: t.sizes.touch - t.spacing.xs,
-      }}
+      accessibilityLiveRegion="polite"
+      accessibilityLabel={line.detail ? `${line.text} ${line.detail}` : line.text}
+      // Two lines of title2 + callout at 130% font scale, so the ring never jumps between lines.
+      style={{ minHeight: t.sizes.touch * 2 + t.spacing.lg, alignItems: 'center' }}
     >
       <Animated.View
-        style={[
-          {
-            width: t.sizes.icon,
-            height: t.sizes.icon,
-            borderRadius: t.radius.pill,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: done
-              ? t.colors.accent
-              : state === 'active'
-                ? t.colors.textPrimary
-                : t.colors.surface2,
-          },
-          state === 'active' ? dot : null,
-        ]}
+        key={index}
+        entering={safe(FadeInDown.duration(t.motion.duration.slow))}
+        exiting={safe(FadeOut.duration(t.motion.duration.fast))}
+        style={{ alignItems: 'center', gap: t.spacing.xs, width: '100%' }}
       >
-        {done ? (
-          <Animated.View entering={safe(FadeIn.duration(t.motion.duration.fast))}>
-            <Check
-              size={t.sizes.iconSmall}
-              strokeWidth={t.sizes.iconStrokeBold}
-              color={t.colors.onAccent}
-            />
+        <Text
+          variant="title2"
+          align="center"
+          color={ready ? 'accentText' : 'textPrimary'}
+          testID={testID ? `${testID}-text` : undefined}
+        >
+          {line.text}
+        </Text>
+        {line.detail ? (
+          <Animated.View
+            entering={safe(FadeIn.delay(t.motion.duration.fast).duration(t.motion.duration.base))}
+          >
+            <Text variant="callout" color="textSecondary" align="center" numberOfLines={2}>
+              {line.detail}
+            </Text>
           </Animated.View>
         ) : null}
       </Animated.View>
-      <Text
-        variant="body"
-        color={state === 'todo' ? 'textTertiary' : 'textPrimary'}
-        style={{ flex: 1 }}
-      >
-        {label}
-      </Text>
     </View>
   );
 }

@@ -14,7 +14,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
 
-import { usePro } from '@/features/billing';
+import { openGate, usePro } from '@/features/billing';
 import { routinesRepo, useRoutines } from '@/features/library/repo';
 import { ensurePlannedAhead } from '@/features/planner/bridge';
 import { loadCatalogParts, useCatalogFor } from '@/services/catalog';
@@ -352,7 +352,7 @@ export function TrainScreen() {
   };
   const newRoutine = () => {
     if (!canAddRoutine(routines.length, isPro)) {
-      router.push('/paywall?source=gate:routines');
+      openGate('routines');
       return;
     }
     const r = routinesRepo.insert({ name: `Routine ${routines.length + 1}`, items: [] });

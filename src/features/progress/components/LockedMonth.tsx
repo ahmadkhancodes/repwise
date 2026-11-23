@@ -1,7 +1,7 @@
-import { router } from 'expo-router';
 import { Lock } from 'lucide-react-native';
 import { View } from 'react-native';
 
+import { openGate } from '@/features/billing';
 import { useTheme } from '@/theme';
 import { Button, Text } from '@/ui';
 
@@ -42,7 +42,7 @@ export function LockedMonth({
       <Button
         label="See Pro"
         variant="secondary"
-        onPress={() => router.push({ pathname: '/paywall', params: { source: 'progress' } })}
+        onPress={() => openGate('progress')}
         testID="progress-month-unlock"
       />
     </View>

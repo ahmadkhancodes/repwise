@@ -3,7 +3,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
-import { freshDb, onboard } from '@/features/meals/__tests__/helpers';
+import { closeGate, useGateSheet } from '@/features/billing/components/GateSheet';
+import { freshDb, lockPro, onboard } from '@/features/meals/__tests__/helpers';
 import { todayISO } from '@/features/meals/logic/dates';
 import { mealPlanForDate, mealsForPlan } from '@/features/meals/repo';
 import { ensureWeekMeals } from '@/features/meals/service';
@@ -119,5 +120,20 @@ describe('WaterScreen (S27)', () => {
     await renderThemed(<WaterScreen />);
     await fireEvent.press(screen.getByTestId('water-goal-inc'));
     expect(getWaterGoal()).toBe(2250);
+  });
+});
+
+describe('FoodLogScreen Pro gate (sheet 05: ate-out rebalance is Pro)', () => {
+  beforeEach(() => closeGate());
+
+  it('free users start on Search food; Ate out opens the gate sheet', async () => {
+    onboard();
+    ensureWeekMeals(today());
+    lockPro();
+    await renderThemed(<FoodLogScreen />);
+    expect(screen.queryByTestId('log-out-save')).toBeNull();
+    await fireEvent.press(screen.getByText('Ate out'));
+    expect(useGateSheet.getState().feature).toBe('ate_out');
+    expect(screen.queryByTestId('log-out-save')).toBeNull();
   });
 });

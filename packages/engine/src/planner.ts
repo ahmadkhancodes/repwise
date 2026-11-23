@@ -550,7 +550,7 @@ interface DaySearch {
 
 function staticWeights(ctx: PlanningContext, liked: ReturnType<typeof likedTraits>): Map<string, number> {
   const m = new Map<string, number>();
-  const pref = ctx.profile.cuisines;
+  const pref = ctx.recConstraints.cuisines;
   for (const r of safeRecipes(ctx)) {
     let w = 1;
     if (ctx.moreLike.has(r.id)) w *= 3;

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
+import { closeGate, useGateSheet } from '@/features/billing/components/GateSheet';
 
 import { resetDbForTests } from '@/db/client';
 import { migrateDb } from '@/db/migrate';
@@ -147,10 +148,7 @@ describe('NotificationSettingsScreen', () => {
     const row = await screen.findByTestId('toggle-meals');
     expect(screen.getByTestId('toggle-trial')).toBeTruthy();
     await fireEvent.press(row);
-    expect(router.push).toHaveBeenCalledWith({
-      pathname: '/paywall',
-      params: { source: 'notifications' },
-    });
+    expect(useGateSheet.getState().feature).toBe('notifications');
     expect(useNotificationPrefs.getState().prefs.meals).toBe(true);
   });
 
@@ -160,3 +158,5 @@ describe('NotificationSettingsScreen', () => {
     expect(router.back).toHaveBeenCalled();
   });
 });
+
+beforeEach(() => closeGate());

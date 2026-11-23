@@ -11,3 +11,13 @@ export {
   type QuietHours,
 } from './logic/trialReminder';
 export { manageSubscriptionUrl } from './logic/manage';
+export { openGate, closeGate, useGateSheet, GateSheetHost } from './components/GateSheet';
+export {
+  GATES,
+  gateSource,
+  canSwapMeal,
+  canLogAteOut,
+  canViewMealDay,
+  canAdaptPlan,
+  type GateFeature,
+} from './logic/gates';

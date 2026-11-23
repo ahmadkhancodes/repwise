@@ -53,6 +53,7 @@ Listed here so both forms are complete. Confirm against the code before submitti
 | Email (Google / Apple sign-in) | Contact Info → Email Address | Personal info → Email address | Yes | App functionality (account, backup) | Yes (sign-in is optional) |
 | User id | Identifiers → User ID | Personal info → User IDs | Yes | App functionality | Yes |
 | Workouts, body weight, measurements | Health & Fitness → Fitness (and Health for body metrics) | Health and fitness → Fitness info / Health info | Yes | App functionality (backup, AI plans) | Yes (backup only when signed in) |
+| Daily step count (read only, after "Turn on steps") | Health & Fitness → Fitness | Health and fitness → Fitness info | Yes | App functionality (dashboard tile, backup) | Yes (backup only when signed in) |
 | Nutrition logs, diet preferences, allergies | Health & Fitness → Health | Health and fitness → Health info | Yes | App functionality | Yes |
 | Progress photos (private, optional backup) | User Content → Photos | Photos and videos → Photos | Yes | App functionality | Yes |
 | Purchases (subscription status via the Worker) | Purchases → Purchase History | Financial info → Purchase history | Yes | App functionality | No (if subscribed) |

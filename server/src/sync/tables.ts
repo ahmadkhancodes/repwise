@@ -32,6 +32,7 @@ export const SYNC_TABLES: Record<string, readonly string[]> = {
   body_metrics: ['date', 'weight_kg', 'waist_cm', 'hips_cm', 'chest_cm', 'arm_cm', 'thigh_cm', 'neck_cm', 'body_fat_pct', 'note'],
   photos: ['date', 'local_uri', 'cloud_key', 'pose'],
   cards: ['rule_id', 'date', 'text', 'action', 'state'],
+  daily_steps: ['date', 'steps', 'source'],
 };
 
 export const TABLE_NAMES = Object.keys(SYNC_TABLES);

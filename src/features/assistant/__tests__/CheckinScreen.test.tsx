@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import { BackHandler, Platform } from 'react-native';
+import { closeGate, useGateSheet } from '@/features/billing/components/GateSheet';
 
 import { renderThemed, SCHEMES } from '../../../../test/render';
 
@@ -130,7 +131,7 @@ describe('CheckinScreen states', () => {
     await renderThemed(<CheckinScreen now={SUNDAY} />);
     expect(screen.getByTestId('checkin-pro')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('checkin-pro-action'));
-    expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/paywall' }));
+    expect(useGateSheet.getState().feature).toBe('checkin');
   });
 
   it('before onboarding', async () => {
@@ -166,3 +167,5 @@ describe('startWeight (P2-20)', () => {
     expect(startWeight(80, true)).toBeCloseTo(176.5, 0);
   });
 });
+
+beforeEach(() => closeGate());

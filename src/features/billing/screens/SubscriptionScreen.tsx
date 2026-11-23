@@ -2,6 +2,7 @@ import { Redirect, router } from 'expo-router';
 
 import { View } from 'react-native';
 
+import { DEMO_PAYMENTS_AVAILABLE, resetDemoEntitlement } from '@/services/demoPayments';
 import { useTheme } from '@/theme';
 import { BackButton, Button, Card, Screen, showToast, Text } from '@/ui';
 
@@ -20,6 +21,7 @@ export function SubscriptionScreen() {
   if (!pro.paymentsEnabled) return <Redirect href="/settings" />;
 
   const e = pro.entitlement;
+  const demo = pro.demo;
   const otherStore =
     pro.subscribed && e?.source && (e.source === 'apple') !== (b.platform === 'ios');
 
@@ -34,7 +36,7 @@ export function SubscriptionScreen() {
       headerLeft={<BackButton />}
       footer={
         <>
-          {pro.subscribed ? (
+          {demo ? null : pro.subscribed ? (
             <Button
               label="Manage or cancel"
               onPress={() => void b.openManage()}
@@ -61,9 +63,19 @@ export function SubscriptionScreen() {
       <Card testID="subscription-card">
         <View style={{ gap: t.spacing.xxs }}>
           <Text variant="headline" testID="subscription-plan">
-            {pro.subscribed ? planLabel(e?.plan ?? null) : 'Repwise Free'}
+            {demo
+              ? `${planLabel(demo.plan)} (test)`
+              : pro.subscribed
+                ? planLabel(e?.plan ?? null)
+                : 'Repwise Free'}
           </Text>
-          {pro.subscribed && e ? (
+          {demo ? (
+            <Text variant="body" color="textSecondary" testID="subscription-renewal">
+              {demo.trialEndsAt
+                ? 'Test purchase with a free trial. No real payment was taken.'
+                : 'Test purchase. No real payment was taken.'}
+            </Text>
+          ) : pro.subscribed && e ? (
             <Text variant="body" color="textSecondary" testID="subscription-renewal">
               {renewalLine(e)}
             </Text>
@@ -73,7 +85,7 @@ export function SubscriptionScreen() {
               full history.
             </Text>
           )}
-          {pro.subscribed && e?.source ? (
+          {!demo && pro.subscribed && e?.source ? (
             <Text variant="callout" color="textSecondary">
               {`Billed by ${storeName(e.source)}.`}
             </Text>
@@ -84,6 +96,22 @@ export function SubscriptionScreen() {
         <Text variant="callout" color="textSecondary" testID="subscription-other-store">
           {`You subscribed through ${storeName(e!.source)}. Manage or cancel it there; it stays active on all your devices.`}
         </Text>
+      ) : null}
+      {DEMO_PAYMENTS_AVAILABLE && demo ? (
+        <View style={{ gap: t.spacing.xs }} testID="subscription-debug">
+          <Text variant="eyebrow" color="textSecondary">
+            Debug · test mode
+          </Text>
+          <Button
+            label="Reset test purchase"
+            variant="secondary"
+            onPress={() => {
+              resetDemoEntitlement();
+              showToast({ message: 'Test purchase reset' });
+            }}
+            testID="subscription-reset-test"
+          />
+        </View>
       ) : null}
       {b.pendingVerifications > 0 ? (
         <Text variant="callout" color="textSecondary" testID="subscription-pending">

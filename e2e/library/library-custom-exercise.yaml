@@ -42,7 +42,7 @@ tags:
 - tapOn:
     id: library-search
 - inputText: maestro landmine
-- assertVisible: Yours
+- assertVisible: "Maestro landmine row.*"
 # The result row is one accessible element; on iOS its label is the whole row
 # ("Maestro landmine row, your exercise, Lats · Landmine"), so match the start of it.
 - tapOn: "Maestro landmine row.*"

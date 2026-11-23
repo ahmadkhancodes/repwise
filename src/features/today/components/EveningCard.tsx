@@ -13,10 +13,8 @@ export function EveningCard({
   headline,
   items,
   tomorrow,
-  dateLabel,
   index = 0,
 }: {
-  dateLabel: string;
   headline: string;
   items: EveningItem[];
   tomorrow: TomorrowPreview | null;
@@ -28,8 +26,8 @@ export function EveningCard({
   return (
     <Animated.View entering={enterAt(index, reduceMotion)}>
       <Card testID="today-evening">
-        <Text variant="eyebrow" color="textSecondary" testID="today-date">
-          {dateLabel}
+        <Text variant="eyebrow" color="textSecondary">
+          Tonight
         </Text>
         <Text variant="title2" style={{ marginTop: t.spacing.xxs }} testID="evening-headline">
           {headline}

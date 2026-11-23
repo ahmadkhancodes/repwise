@@ -18,16 +18,21 @@ tags:
 - assertVisible:
     id: screen-exercise
 - assertVisible: Barbell back squat
-# Muscle-map hero (no media in v1): spoken label starts with the name, then the side.
+# Hero = animated ExerciseDB demo (GIF from our CDN); offline it is the muscle map, so the flow
+# only asserts the hero box. The muscle map lives under "Muscles worked" (secondary visual):
+# its spoken label starts with the name, then the side, and it turns with its flip button.
 - assertVisible:
     id: exercise-media
-- assertVisible:
-    text: Barbell back squat\. Front view\..*
+- scrollUntilVisible:
+    element:
+      id: exercise-muscles-map-flip
+    direction: DOWN
+    centerElement: true
+- assertVisible: Muscles worked
 - tapOn:
-    id: exercise-media-flip
+    id: exercise-muscles-map-flip
 - assertVisible:
     text: Barbell back squat\. Back view\..*
-- assertVisible: Muscles
 - scrollUntilVisible:
     element: How to do it
     direction: DOWN
@@ -41,3 +46,18 @@ tags:
 - hideKeyboard
 - assertVisible: Favourites
 - assertVisible: Recently used
+# The full ExerciseDB library: a browse-only V1 exercise opens with its demo and steps, and
+# cannot be added to a workout (the planner uses only the curated set).
+- tapOn:
+    id: library-search
+- inputText: guillotine
+- tapOn:
+    id: exercise-row-exercisedb-GXoaSgn
+- assertVisible:
+    id: exercise-browse-only
+- assertVisible:
+    id: exercise-media
+- assertNotVisible:
+    id: exercise-add
+- tapOn:
+    id: exercise-back
