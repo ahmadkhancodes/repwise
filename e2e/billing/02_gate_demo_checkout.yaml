@@ -66,8 +66,20 @@ onFlowComplete:
       id: "paywall-price-line"
     timeout: 5000
     optional: true
+- scrollUntilVisible:
+    element:
+      id: "plan-monthly"
+    direction: UP
+    timeout: 20000
+    optional: true
 - tapOn:
     id: "plan-monthly"
+- scrollUntilVisible:
+    element:
+      id: "plan-yearly"
+    direction: UP
+    timeout: 20000
+    optional: true
 - tapOn:
     id: "plan-yearly"
 - scrollUntilVisible:
