@@ -1,0 +1,8 @@
+# Tour helper: ~1.5 s still beat (waits on an id that never renders).
+appId: com.client.repwise
+---
+- extendedWaitUntil:
+    visible:
+      id: "tour-pause"
+    timeout: 1500
+    optional: true

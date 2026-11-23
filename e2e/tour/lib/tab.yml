@@ -1,0 +1,8 @@
+# Tour helper: open a bottom tab (TAB = today|train|eat|progress|library) and land on EXPECT.
+appId: com.client.repwise
+---
+- runFlow:
+    file: go.yml
+    env:
+      TAP: tab-${TAB}
+      EXPECT: ${EXPECT}

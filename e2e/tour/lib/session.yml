@@ -1,0 +1,26 @@
+# Tour helper: on Train, open the week's session card I (if the week has one), show its exercises,
+# then come back to Train. Missing cards are skipped without a wait.
+appId: com.client.repwise
+---
+- scrollUntilVisible:
+    element:
+      id: week-session-${I}
+    direction: DOWN
+    centerElement: true
+    timeout: 4000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: week-session-${I}
+    commands:
+      - runFlow:
+          file: go.yml
+          env:
+            TAP: week-session-${I}
+            EXPECT: player-overview
+      - runFlow: scroll.yml
+      - runFlow:
+          file: back.yml
+          env:
+            EXPECT: screen-train

@@ -1,0 +1,45 @@
+# Tour helper: log set S of exercise E with one tap, show the rest timer ~3 s, then Skip.
+# A running countdown never settles, so taps use short settle waits.
+appId: com.client.repwise
+---
+- scrollUntilVisible:
+    element:
+      id: exercise-${E}-set-${S}-check
+    direction: DOWN
+    centerElement: true
+    timeout: 6000
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 800
+- tapOn:
+    id: exercise-${E}-set-${S}-check
+    waitToSettleTimeoutMs: 500
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "rest-bar"
+    timeout: 3000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "tour-hold"
+    timeout: 2600
+    optional: true
+- tapOn:
+    id: "rest-bar-skip"
+    waitToSettleTimeoutMs: 500
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: "rest-bar-skip"
+    commands:
+      - tapOn:
+          id: "rest-bar-skip"
+          waitToSettleTimeoutMs: 500
+          optional: true
+- extendedWaitUntil:
+    visible:
+      id: "tour-pause"
+    timeout: 700
+    optional: true
