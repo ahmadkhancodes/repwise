@@ -305,6 +305,48 @@
   - Upload to a NEW release `app-tour-dark-v2`: `repwise-ios-dark-tour-fast-music.mp4` plus the silent version, with the CC BY credit in the notes.
   - Then comment on issue #1 with the link (attribution footer included), mentioning @ahmadkhancodes.
 
+- [ ] (opus) **FINISH: merge `feat/client-demo` into main.**
+  - Android E2E is green on a35e02e. iOS was 30/31; only billing/02 failed (a CTA tap during the paywall slide-in).
+  - The session fixed it in e2460da and ran `e2e-ios` with `flows=billing` on the branch.
+  - If that run is green: run a full e2e-ios on the branch head once more; if green, merge into main (CI green), push, and tick this task.
+  - If billing/02 is still red: make the paywall CTA tappable on iOS in the APP (the same fade-instead-of-translate fix as the checkout in 45d1161), not by loosening the flow.
+
+- [ ] (opus) **DAY-IN-THE-LIFE VIDEO (owner, 23 Nov, top priority).**
+  - Owner feedback on the 3:05 cut: "speed not consistent, too fast in places, looks stuck in places; exercises only 5% of the video; show every page; follow a complete one-day user journey with meals AND exercises; up to 10 min is fine; make it smooth and make it make sense."
+  - Work on a new branch `feat/day-tour` from main (after the merge above), or from `feat/client-demo` if the merge is not done yet.
+  - Rewrite `e2e/tour/ios_dark_full_tour.yaml` as ONE realistic day for a new user. Storyboard, in this order:
+    1. Fresh install → the Welcome carousel, swiping each card.
+    2. Onboarding: EVERY step answered naturally (goal, body, target weight, days, session length, equipment, go-easy areas, diet, allergies, cuisines American + British, kitchen, meals per day). Notifications Allow.
+    3. "Building your plan": the full 3–5 s.
+    4. Plan reveal, scrolled slowly to the bottom (calories, macros, the week, first workouts, today's meals).
+    5. Paywall: scroll so all 4 plans show; tap Weekly → Monthly → 3 Months → Yearly; close with X → Free.
+    6. MORNING, Today dashboard: scroll slowly through the hero workout, all stat tiles (steps tile included) and the meal timeline.
+    7. WEEKLY PLAN, Train tab: the week strip; tap EACH training day to show its session; then Routines and History.
+    8. TODAY'S WORKOUT PLAN: open the session preview and scroll through EVERY exercise with its GIF. Open 2–3 exercise details: GIF hero (let it loop about 3 s), instructions, "Muscles worked".
+    9. LIBRARY (the big visual moment): slow scroll through GIF thumbnails; filter Chest → Back → Legs (a scroll each); search "squat"; open 2 GIF details.
+    10. BREAKFAST: Eat tab → Day view; open the breakfast recipe (ingredients); tick it eaten. Then the WEEK view of the meal plan, scrolled across the days.
+    11. WORKOUT: Start → for the first 3 exercises: GIF visible, log 2–3 sets each, the rest timer shown about 3 s then Skip. Scroll the remaining exercises → Finish → "Workout done" summary.
+    12. LUNCH: tick it; water +250 ml twice; open "Ate out?" and close it.
+    13. PRO MOMENT: swap dinner → Pro gate → paywall (Yearly) → test checkout •••• 4444 → Confirm → "Payment complete" → Continue → the swap now works → pick an American dinner.
+    14. DINNER: open the recipe → Cook mode through ALL steps.
+    15. Grocery list (now Pro): scroll it.
+    16. EVENING: Today dashboard again (rings filled, workout done, steps tile) → Progress (log weight, heatmap, muscle recovery, charts, scrolled) → weekly check-in.
+    17. Settings: scroll everything, including Subscription "Repwise Pro · Yearly (test)". End on the Today dashboard.
+  - **PACING (the owner's main complaint):**
+    - One consistent, natural speed: every new screen gets about 2 s; each scroll is a steady `swipe` (duration about 900 ms, same distance each time), never a jump.
+    - Before EVERY tap after a navigation: `waitForAnimationToEnd`. iOS taps during slide-ins miss, and that caused the "stuck" moments.
+    - No static stretch over 4 s anywhere. Rest timers about 3 s max, then Skip.
+    - Target length 7–10 min.
+  - **Post-process:**
+    - Use the artifact `repwise-ios-dark-tour-natural` (`tour-natural-music.mp4`): 1×, NO mpdecimate, NO speed changes, music mixed (`record-ios-tour.yml`, session commit e423aeb).
+    - Ignore the old "fast" artifact.
+    - The debug artifact has `freezes.txt`: it must list NO freeze longer than 4 s. Fix the flow and re-record until it does.
+  - **QA before release:**
+    - Check a frame every 10 s: GIFs clearly visible, the weekly plan, the daily plan, the meal week plan, Payment complete, all pages present, Dark Mode throughout.
+    - Then upload to a NEW release `app-tour-day` as `repwise-day-in-the-life.mp4`, with the CC BY music credit.
+    - Comment the link on issue #1, mentioning @ahmadkhancodes, with the attribution footer.
+  - Dispatch recordings with `-f inputs[ref]=<branch>`.
+
 ## Owner steps (only what the agent cannot do)
 - Optional: apply docs/orchestration/record-ios-tour-fast.patch (`git apply`) to .github/workflows/record-ios-tour.yml and push it with a token that has the workflows permission (the Claude App token cannot); it moves the fast post-process into CI.
 - After the final report: set the repo private at https://github.com/ahmadkhancodes/repwise/settings → Change visibility → Private. Private repos use paid Actions minutes; keep it public until E2E work is finished.
