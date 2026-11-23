@@ -309,6 +309,10 @@
   - Android E2E is green on a35e02e. iOS was 30/31; only billing/02 failed (a CTA tap during the paywall slide-in).
   - The session fixed it in e2460da and ran `e2e-ios` with `flows=billing` on the branch.
   - If that run is green: run a full e2e-ios on the branch head once more; if green, merge into main (CI green), push, and tick this task.
+  - UPDATE (session, 23 Nov 09:45 UTC): the iOS billing-only run 45141383805 on e2460da is STILL red: `demo-checkout` never appears after the CTA, even with a slide-in wait and a label retry. The tour on the same code DOES reach the checkout.
+    - Likely cause: on iOS the `repwise://demo-payments?on=1` link's 'Open in "Repwise"?' alert appears late and is missed (`tapOn "Open"` is optional and immediate). Demo payments then stay OFF, and the CTA calls real IAP, which shows nothing on the simulator.
+    - Fix: `extendedWaitUntil` text "Open" (5 s, optional), then tap. Better still, add a visible "TEST MODE" marker on the paywall when demo payments are on, and assert it before the gate.
+    - Verify with `flows=billing` before the full run.
   - If billing/02 is still red: make the paywall CTA tappable on iOS in the APP (the same fade-instead-of-translate fix as the checkout in 45d1161), not by loosening the flow.
   - status (API run 19, 23 Nov 09:13 UTC): e2e-ios billing-only run 45141383805 on e2460da still in progress (started 08:46); no code changes. Queued a wait. Next run: read it; green → full e2e-ios on the branch head (e423aeb, CI-only change) → merge.
 
