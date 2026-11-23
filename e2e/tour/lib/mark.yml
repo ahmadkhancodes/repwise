@@ -1,0 +1,8 @@
+# Tour helper: write a video mark (NAME) through the local stub.
+appId: com.client.repwise
+---
+- runScript:
+    file: ../stub.js
+    env:
+      STUB_URL: ${STUB_URL}
+      ACTION: mark?name=${NAME}

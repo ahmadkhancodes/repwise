@@ -1,20 +1,23 @@
-# Owner tour video (iOS, Dark Mode): one calm, natural walk through the whole app on a fresh
-# install, recorded by .github/workflows/record-ios-tour.yml (simctl recordVideo around this flow).
+# Owner tour video (iOS, Dark Mode): ONE day in the life of a new Repwise user (D-TOUR-DAY, 23 Nov).
+# Recorded by .github/workflows/record-ios-tour.yml (simctl recordVideo around this flow); the
+# artifact `repwise-ios-dark-tour-natural` is the 1x cut with music, `freezes.txt` lists still runs > 4 s.
 #
-# FAST tour (D-TOUR-FAST, ~3 min after post-process): US+UK cuisines, building-plan screen, onboarding paywall (4 plans, X), 2 sets, GIF hero + Muscles worked, a Pro gate → test checkout → Payment complete, Subscription. keep-start/keep-end marks protect the payment holds from speed-up.
-# (brief, workout card, meal timeline) → workout (exercise detail, 3 sets, rest timer, finish) →
-# Train (week strip, history) → Eat (rings, tick, swap, recipe, cook mode, week) → Progress
-# (log weight, body, heatmap) → Library (muscle chip, exercise with muscle map) → weekly check-in
-# (opened by its notification link) → assistant card if one fired → Settings (scrolled end to end)
-# → paywall (shown, closed with its close button; never purchases) → back on Today.
+# Storyboard: welcome carousel → every onboarding step (US + UK cuisines) → building your plan →
+# plan reveal scrolled → paywall (all 4 plans, X → Free) → MORNING Today dashboard → Train week
+# (every session) + Routines + History → today's session preview (every exercise, 2 details) →
+# Library (GIF scroll, Chest/Back/Quads, search "squat", 2 details) → BREAKFAST (recipe, tick, meal
+# week) → WORKOUT (3 exercises × 2 sets, rests ~3 s, finish, summary) → LUNCH (tick, water ×2,
+# ate-out screen) → PRO (dinner swap gate → paywall → test checkout → Payment complete → swap) →
+# DINNER cook mode, every step → grocery list → EVENING Today → Progress (weight, recovery, charts)
+# → weekly check-in → Settings + Subscription → Today.
 #
-# Runs ONLY when TOUR_RECORDING=true (maestro test -e TOUR_RECORDING=true …): scripts/ci/maestro-run.sh
-# picks up every e2e/**/*.yaml, and there this flow is a no-op. It needs the local stub
-# (e2e/tour/stub-server.mjs, STUB_URL) for the paywall step and the video trim marks; without it the
-# paywall step is skipped. Pauses are optional waits on an id that never renders ("tour-pause").
-# Selectors are the ones the E2E flows already use on iOS.
+# PACING (owner, 23 Nov): one steady speed. Every screen ~2 s (lib/go.yml), every scroll the same
+# 900 ms swipe (lib/scroll.yml), waitForAnimationToEnd before taps, no still stretch over 4 s.
+# Helpers live in e2e/tour/lib/*.yml (".yml", so scripts/ci/maestro-run.sh never runs them alone).
+#
+# Runs ONLY when TOUR_RECORDING=true; elsewhere it is a no-op. Needs the tour stub (STUB_URL) for marks.
 appId: com.client.repwise
-name: iOS dark-mode full app tour (video)
+name: iOS dark-mode day-in-the-life tour (video)
 tags:
   - tour
 ---
@@ -22,328 +25,116 @@ tags:
     when:
       true: ${typeof TOUR_RECORDING !== 'undefined' && TOUR_RECORDING === 'true'}
     commands:
-      # ---------- start: mark the video, first launch with notifications not yet decided ----------
       - launchApp:
           clearState: true
           permissions:
             notifications: unset
-
-      - openLink: repwise://demo-payments?on=1&reset=1
+      # Demo payments ON before onboarding ends, so the onboarding paywall and test checkout work.
       - runFlow:
-          when:
-            platform: iOS
-          commands:
-            - tapOn:
-                text: "Open"
-                optional: true
-      # ---------- S02 Welcome ----------
+          file: lib/open-link.yml
+          env:
+            LINK: repwise://demo-payments?on=1&reset=1
+
+      # ================= 1. Welcome carousel =================
       - extendedWaitUntil:
           visible:
             id: "screen-welcome"
           timeout: 60000
-      # Mark the video start once the app is up (the reinstall before it shows the home screen for ~1 min).
-      - runScript:
-          file: stub.js
+      - runFlow:
+          file: lib/mark.yml
           env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=start
+            NAME: start
       - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          from:
-            id: "welcome-carousel"
-          direction: LEFT
-          duration: 600
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          from:
-            id: "welcome-carousel"
-          direction: LEFT
-          duration: 600
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "welcome-start"
-          optional: true
-      # The tap can be lost right after the carousel swipes: tap once more if the quiz did not open.
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-goal"
-          timeout: 30000
-          optional: true
+          timeout: 1500
+      - repeat:
+          times: 3
+          commands:
+            - runFlow: lib/pause.yml
+            - swipe:
+                from:
+                  id: "welcome-carousel"
+                direction: LEFT
+                duration: 700
+                optional: true
+      - runFlow: lib/pause.yml
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: welcome-start
+            EXPECT: screen-quiz-goal
+
+      # ================= 2. Onboarding, every step =================
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: goal, PICK: option-fat_loss, NEXT: none }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: about, PICK: option-male, NEXT: quiz-next }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: body, PICK: none, NEXT: quiz-next }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: target, PICK: target-set, NEXT: quiz-next }
+      # Target step left open (target-set hidden): decide later.
       - runFlow:
           when:
-            notVisible:
-              id: "screen-quiz-goal"
+            visible:
+              id: "screen-quiz-target"
           commands:
             - tapOn:
-                id: "welcome-start"
+                id: "quiz-next"
                 optional: true
-
-      # ---------- Quiz: goal (auto-advances) ----------
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-goal"
-          timeout: 30000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "option-fat_loss"
-          optional: true
-      # about: sex + year of birth
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-about"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "option-male"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-      # body: height + weight wheels (prefilled)
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-body"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-      # target weight (optional for fat loss): decide later
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-target"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-skip"
-          optional: true
-      # experience (auto-advances)
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-experience"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "option-intermediate"
-          optional: true
-      # training days: 4 a week, spread from today
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-days"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "days-count-4"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-      # session length (auto-advances)
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-length"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "option-60"
-          optional: true
-      # equipment: a full gym
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-equipment"
-          timeout: 20000
-      - tapOn:
-          id: "option-gym"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-      # injuries: none
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-injuries"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-skip"
-          optional: true
-      # daily activity (auto-advances)
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-activity"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "option-moderate"
-          optional: true
-      # diet (auto-advances)
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-diet"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "option-omnivore"
-          optional: true
-      # foods to avoid: no mushrooms
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-avoid"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "dislikes-mushrooms"
-          direction: DOWN
-          centerElement: true
-          optional: true
-      - tapOn:
-          id: "dislikes-mushrooms"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-      # cuisines: a few favourites
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-cuisines"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "cuisines-american"
-          optional: true
-      - tapOn:
-          id: "cuisines-british"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-      # kitchen: budget + cooking time (defaults)
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-kitchen"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-      # meals per day → Build my plan
-      - extendedWaitUntil:
-          visible:
-            id: "screen-quiz-meals"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "quiz-next"
-          optional: true
-
-      # ---------- S06 reminders primer → the real iOS permission dialog ----------
+            - runFlow:
+                when:
+                  visible:
+                    id: "screen-quiz-target"
+                commands:
+                  - tapOn:
+                      id: "quiz-skip"
+                      optional: true
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: experience, PICK: option-intermediate, NEXT: none }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: days, PICK: days-count-4, NEXT: quiz-next }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: length, PICK: option-60, NEXT: none }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: equipment, PICK: option-gym, NEXT: quiz-next }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: injuries, PICK: none, NEXT: quiz-skip }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: activity, PICK: option-moderate, NEXT: none }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: diet, PICK: option-omnivore, NEXT: none }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: avoid, PICK: dislikes-mushrooms, NEXT: quiz-next }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: cuisines, PICK: cuisines-american, NEXT: none }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: cuisines, PICK: cuisines-british, NEXT: quiz-next }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: kitchen, PICK: none, NEXT: quiz-next }
+      - runFlow:
+          file: lib/quiz.yml
+          env: { STEP: meals, PICK: none, NEXT: quiz-next }
+      # Reminders primer → the real iOS dialog → Allow.
       - extendedWaitUntil:
           visible:
             id: "screen-notify"
           timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
+      - runFlow: lib/pause.yml
       - tapOn:
           id: "notify-allow"
           optional: true
@@ -351,15 +142,9 @@ tags:
           visible: "Allow"
           timeout: 6000
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
       - tapOn:
           text: "Allow"
           optional: true
-      # If the system dialog never showed (already decided), the primer may still be up.
       - runFlow:
           when:
             visible:
@@ -369,77 +154,30 @@ tags:
                 id: "notify-later"
                 optional: true
 
-      # ---------- S07 plan build → W1 reveal ----------
-      - extendedWaitUntil:
-          visible:
-            id: "screen-plan"
-          timeout: 30000
+      # ================= 3–4. Building your plan → plan reveal, scrolled to the bottom =================
       - extendedWaitUntil:
           visible:
             id: "reveal-targets"
-          timeout: 20000
+          timeout: 30000
       - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 35%
-          duration: 1400
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 35%
-          duration: 1400
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "plan-continue"
-          optional: true
-      # Onboarding paywall (F1): all four plans, each price visible, then closed with X -> Free.
-      - runScript:
-          file: stub.js
+          timeout: 1500
+      - runFlow: lib/pause.yml
+      - repeat:
+          times: 5
+          commands:
+            - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/go.yml
           env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=keep-start
-      - extendedWaitUntil:
-          visible:
-            id: "screen-paywall"
-          timeout: 15000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 2500
-          optional: true
-      # Plans are tapped only once they are on screen: Weekly sits below the fold, behind the sticky
-      # "Start free trial" button, and a blind tap there opened the checkout (session QA, 22 Nov).
-      - tapOn:
-          id: "plan-quarterly"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "plan-monthly"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 900
-          optional: true
+            TAP: plan-continue
+            EXPECT: screen-paywall
+
+      # ================= 5. Paywall: all 4 plans, then X → Free =================
+      - runFlow:
+          file: lib/mark.yml
+          env:
+            NAME: keep-start
+      - runFlow: lib/hold.yml
       - scrollUntilVisible:
           element:
             id: "plan-weekly"
@@ -447,29 +185,23 @@ tags:
           centerElement: true
           timeout: 4000
           optional: true
+      - runFlow: lib/pause.yml
       - tapOn:
           id: "plan-weekly"
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 1200
+      - runFlow: lib/pause.yml
+      - tapOn:
+          id: "plan-monthly"
           optional: true
-      - scrollUntilVisible:
-          element:
-            id: "plan-yearly"
-          direction: UP
-          centerElement: true
-          timeout: 4000
+      - runFlow: lib/pause.yml
+      - tapOn:
+          id: "plan-quarterly"
           optional: true
+      - runFlow: lib/pause.yml
       - tapOn:
           id: "plan-yearly"
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 1200
-          optional: true
+      - runFlow: lib/hold.yml
       - scrollUntilVisible:
           element:
             id: "paywall-close"
@@ -479,432 +211,388 @@ tags:
       - tapOn:
           id: "paywall-close"
           optional: true
-      # Safety net: if a checkout opened anyway, cancel it and close the paywall (checked 3 times).
-      - repeat:
-          times: 3
+      # Safety net: a checkout opened by a stray tap is cancelled, then the paywall closed.
+      - runFlow:
+          when:
+            visible:
+              id: "demo-checkout"
           commands:
-            - runFlow:
-                when:
-                  visible:
-                    id: "demo-checkout"
-                commands:
-                  - tapOn:
-                      id: "demo-cancel"
-                      optional: true
-                  - waitForAnimationToEnd:
-                      timeout: 1500
-                  - tapOn:
-                      id: "paywall-close"
-                      optional: true
-                  - waitForAnimationToEnd:
-                      timeout: 1500
-      - runScript:
-          file: stub.js
+            - tapOn:
+                id: "demo-cancel"
+                optional: true
+            - waitForAnimationToEnd:
+                timeout: 1500
+            - tapOn:
+                id: "paywall-close"
+                optional: true
+      - runFlow:
+          file: lib/mark.yml
           env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=keep-end
+            NAME: keep-end
 
-      # ---------- S11 Today: brief, workout card, meal timeline ----------
+      # ================= 6. MORNING: Today dashboard =================
       - extendedWaitUntil:
           visible:
             id: "screen-today"
           timeout: 20000
       - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 40%
-          duration: 1300
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
+          timeout: 1500
+      - runFlow: lib/pause.yml
+      - repeat:
+          times: 5
+          commands:
+            - runFlow: lib/scroll.yml
       - scrollUntilVisible:
           element:
-            id: "today-meals"
-          direction: DOWN
-          centerElement: true
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 40%
-          duration: 1300
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "start-workout"
+            id: "today-date"
           direction: UP
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
+          timeout: 6000
           optional: true
 
-      # ---------- S13 workout: start, exercise detail, 3 sets, rest timer, finish ----------
+      # ================= 7. WEEKLY PLAN: Train week, every session, Routines, History =================
+      - runFlow:
+          file: lib/tab.yml
+          env:
+            TAB: train
+            EXPECT: screen-train
+      - extendedWaitUntil:
+          visible:
+            id: "week-session-0"
+          timeout: 15000
+          optional: true
+      - runFlow: lib/pause.yml
+      - runFlow:
+          file: lib/session.yml
+          env: { I: 0 }
+      - runFlow:
+          file: lib/session.yml
+          env: { I: 1 }
+      - runFlow:
+          file: lib/session.yml
+          env: { I: 2 }
+      - runFlow:
+          file: lib/session.yml
+          env: { I: 3 }
+      - scrollUntilVisible:
+          element:
+            id: "train-tabs"
+          direction: UP
+          timeout: 6000
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - tapOn:
+          id: "train-tabs-routines"
+          optional: true
+      - runFlow: lib/hold.yml
+      - tapOn:
+          id: "train-tabs-history"
+          optional: true
+      - runFlow: lib/hold.yml
+      - tapOn:
+          id: "train-tabs-week"
+          optional: true
+      - runFlow: lib/pause.yml
+
+      # ================= 8. TODAY'S WORKOUT PLAN: every exercise, 2 details =================
+      - runFlow:
+          file: lib/tab.yml
+          env:
+            TAB: today
+            EXPECT: screen-today
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: workout-view
+            EXPECT: player-overview
+      # Rest day on Today (no View): open the first session of the week from Train instead.
       - runFlow:
           when:
-            visible:
-              id: "start-workout"
+            notVisible:
+              id: "player-overview"
           commands:
-            - tapOn:
-                id: "start-workout"
-                optional: true
+            - runFlow:
+                file: lib/tab.yml
+                env:
+                  TAB: train
+                  EXPECT: screen-train
+            - runFlow:
+                file: lib/go.yml
+                env:
+                  TAP: week-session-0
+                  EXPECT: player-overview
+      - repeat:
+          times: 4
+          commands:
+            - runFlow: lib/scroll.yml
+      - scrollUntilVisible:
+          element:
+            id: "exercise-0-open"
+          direction: UP
+          timeout: 8000
+          optional: true
       - runFlow:
-          # Rest day (no Start on Today): start from Train instead.
+          file: lib/go.yml
+          env:
+            TAP: exercise-0-open
+            EXPECT: screen-exercise
+      - runFlow: lib/hold.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: player-overview
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: exercise-1-open
+            EXPECT: screen-exercise
+      - runFlow: lib/hold.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: player-overview
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-today
+
+      # ================= 9. LIBRARY: GIFs, Chest → Back → Quads, search "squat", 2 details =================
+      - runFlow:
+          file: lib/tab.yml
+          env:
+            TAB: library
+            EXPECT: screen-library
+      - extendedWaitUntil:
+          visible:
+            id: "exercise-row-.*"
+          timeout: 15000
+          optional: true
+      - runFlow: lib/pause.yml
+      - repeat:
+          times: 3
+          commands:
+            - runFlow: lib/scroll.yml
+      - repeat:
+          times: 3
+          commands:
+            - runFlow: lib/scrollup.yml
+      - tapOn:
+          id: "muscle-chip-chest"
+          optional: true
+      - runFlow: lib/pause.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scrollup.yml
+      - tapOn:
+          id: "muscle-chip-chest"
+          optional: true
+      - tapOn:
+          id: "muscle-chip-back"
+          optional: true
+      - runFlow: lib/pause.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scrollup.yml
+      - tapOn:
+          id: "muscle-chip-back"
+          optional: true
+      - tapOn:
+          id: "muscle-chip-quads"
+          optional: true
+      - runFlow: lib/pause.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scrollup.yml
+      - tapOn:
+          id: "muscle-chip-quads"
+          optional: true
+      - tapOn:
+          id: "library-search"
+          optional: true
+      - inputText: "squat"
+      - hideKeyboard
+      - runFlow: lib/pause.yml
+      - tapOn:
+          id: "exercise-row-.*"
+          index: 0
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-exercise"
+          timeout: 10000
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - runFlow: lib/hold.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-library
+      - tapOn:
+          id: "exercise-row-.*"
+          index: 1
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "screen-exercise"
+          timeout: 10000
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 1500
+      - runFlow: lib/hold.yml
+      - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-library
+
+      # ================= 10. BREAKFAST: recipe, tick; the meal week =================
+      - runFlow:
+          file: lib/tab.yml
+          env:
+            TAB: eat
+            EXPECT: screen-eat
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scrollup.yml
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: meal-breakfast
+            EXPECT: screen-recipe
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-eat
+      - scrollUntilVisible:
+          element:
+            id: "tick-breakfast"
+          direction: DOWN
+          centerElement: true
+          timeout: 6000
+          optional: true
+      - tapOn:
+          id: "tick-breakfast"
+          optional: true
+      - runFlow: lib/hold.yml
+      - scrollUntilVisible:
+          element:
+            id: "eat-view"
+          direction: UP
+          timeout: 6000
+          optional: true
+      - tapOn:
+          id: "eat-view-week"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "week-days"
+          timeout: 10000
+          optional: true
+      - runFlow: lib/pause.yml
+      - repeat:
+          times: 4
+          commands:
+            - runFlow: lib/scroll.yml
+      - scrollUntilVisible:
+          element:
+            id: "eat-view"
+          direction: UP
+          timeout: 8000
+          optional: true
+      - tapOn:
+          id: "eat-view-day"
+          optional: true
+      - runFlow: lib/pause.yml
+
+      # ================= 11. WORKOUT: 3 exercises × 2 sets, rests, finish, summary =================
+      - runFlow:
+          file: lib/tab.yml
+          env:
+            TAB: today
+            EXPECT: screen-today
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: start-workout
+            EXPECT: screen-workout
+      - runFlow:
           when:
             notVisible:
               id: "screen-workout"
           commands:
-            - tapOn:
-                id: "tab-train"
-                optional: true
-            # Retry once if the next screen has not appeared (a lost tap must not end the video).
-            - extendedWaitUntil:
-                visible:
-                  id: "train-start"
-                timeout: 10000
-                optional: true
             - runFlow:
-                when:
-                  notVisible:
-                    id: "train-start"
-                commands:
-                  - tapOn:
-                      id: "tab-train"
-                      optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "train-start"
-                timeout: 20000
-            - tapOn:
-                id: "train-start"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-workout"
-          timeout: 20000
+                file: lib/tab.yml
+                env:
+                  TAB: train
+                  EXPECT: screen-train
+            - runFlow:
+                file: lib/go.yml
+                env:
+                  TAP: train-start
+                  EXPECT: screen-workout
       - runFlow:
           when:
             visible:
               id: "player-start"
           commands:
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
+            - waitForAnimationToEnd:
+                timeout: 1500
             - tapOn:
                 id: "player-start"
-                optional: true
-      - runFlow:
-          # Empty workout (rest day): add an exercise from the bundled catalogue.
-          when:
-            visible:
-              id: "player-empty"
-          commands:
-            - tapOn:
-                id: "player-empty-action"
-                optional: true
-            - tapOn:
-                id: "pick-search"
-                optional: true
-            - inputText: "bench press"
-            - tapOn:
-                id: "exercise-row-barbell-bench-press"
                 optional: true
       - extendedWaitUntil:
           visible:
             id: "player-clock"
           timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      # The first exercise's detail (cues), then back to the player.
+      - runFlow: lib/hold.yml
       - runFlow:
-          when:
-            visible:
-              id: "exercise-0-open"
-          commands:
-            - tapOn:
-                id: "exercise-0-open"
-                optional: true
-            # Retry once if the next screen has not appeared (a lost tap must not end the video).
-            - extendedWaitUntil:
-                visible:
-                  id: "screen-exercise"
-                timeout: 10000
-                optional: true
-            - runFlow:
-                when:
-                  notVisible:
-                    id: "screen-exercise"
-                commands:
-                  - tapOn:
-                      id: "exercise-0-open"
-                      optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "screen-exercise"
-                timeout: 20000
-            - waitForAnimationToEnd:
-                timeout: 1000
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - swipe:
-                start: 50%, 70%
-                end: 50%, 40%
-                duration: 1300
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - runFlow:
-                when:
-                  visible:
-                    id: "ex-back"
-                commands:
-                  - tapOn:
-                      id: "ex-back"
-                      optional: true
-            - runFlow:
-                when:
-                  visible:
-                    id: "exercise-back"
-                commands:
-                  - tapOn:
-                      id: "exercise-back"
-                      optional: true
-            - runFlow:
-                when:
-                  visible:
-                    id: "back"
-                  notVisible:
-                    id: "player-clock"
-                commands:
-                  - tapOn:
-                      id: "back"
-                      optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "player-clock"
-                timeout: 20000
-      # Set 1: weight and reps with the stepper editor, then log.
+          file: lib/set.yml
+          env: { E: 0, S: 0 }
       - runFlow:
-          when:
-            visible:
-              id: "exercise-0-set-0-weight"
-          commands:
-            - tapOn:
-                id: "exercise-0-set-0-weight"
-                optional: true
-            # Retry once if the next screen has not appeared (a lost tap must not end the video).
-            - extendedWaitUntil:
-                visible:
-                  id: "set-editor-weight"
-                timeout: 10000
-                optional: true
-            - runFlow:
-                when:
-                  notVisible:
-                    id: "set-editor-weight"
-                commands:
-                  - tapOn:
-                      id: "exercise-0-set-0-weight"
-                      optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "set-editor-weight"
-                timeout: 20000
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - tapOn:
-                id: "set-editor-weight-inc"
-                optional: true
-            - tapOn:
-                id: "set-editor-weight-inc"
-                optional: true
-            - tapOn:
-                id: "set-editor-reps-inc"
-                optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - tapOn:
-                id: "set-editor-log"
-                optional: true
+          file: lib/set.yml
+          env: { E: 0, S: 1 }
       - runFlow:
-          when:
-            visible:
-              id: "player-log"
-            notVisible:
-              id: "rest-bar"
-          commands:
-            - tapOn:
-                id: "player-log"
-                optional: true
-      # Rest timer: open the big timer, take 15 s off, skip. About 5 s per rest so the video never sits
-      # through a real 2-minute rest. A ticking countdown never "settles", so every tap while a rest runs
-      # uses a short settle wait (Maestro would otherwise wait many seconds per tap).
-      - extendedWaitUntil:
-          visible:
-            id: "rest-bar"
-          timeout: 20000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "rest-bar-open"
-          waitToSettleTimeoutMs: 400
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "rest-time"
-          timeout: 5000
-          optional: true
+          file: lib/set.yml
+          env: { E: 0, S: 2 }
       - runFlow:
-          when:
-            visible:
-              id: "rest-time"
-          commands:
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - tapOn:
-                id: "rest-minus"
-                waitToSettleTimeoutMs: 400
-                optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - tapOn:
-                id: "rest-skip"
-                waitToSettleTimeoutMs: 400
-                optional: true
-      # A lost Skip tap: try once more, then close the sheet; the rest bar is skipped below either way.
+          file: lib/set.yml
+          env: { E: 1, S: 0 }
       - runFlow:
-          when:
-            visible:
-              id: "rest-skip"
-          commands:
-            - tapOn:
-                id: "rest-skip"
-                waitToSettleTimeoutMs: 400
-                optional: true
+          file: lib/set.yml
+          env: { E: 1, S: 1 }
       - runFlow:
-          when:
-            visible:
-              id: "rest-sheet-close"
-          commands:
-            - tapOn:
-                id: "rest-sheet-close"
-                waitToSettleTimeoutMs: 400
-                optional: true
-      - tapOn:
-          id: "rest-bar-skip"
-          waitToSettleTimeoutMs: 400
-          optional: true
+          file: lib/set.yml
+          env: { E: 2, S: 0 }
       - runFlow:
-          when:
-            visible:
-              id: "rest-bar-skip"
+          file: lib/set.yml
+          env: { E: 2, S: 1 }
+      - repeat:
+          times: 3
           commands:
-            - tapOn:
-                id: "rest-bar-skip"
-                waitToSettleTimeoutMs: 400
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      # Set 2: one tap on the row tick (or the thumb-zone button), rest a moment, skip.
-      - tapOn:
-          id: "exercise-0-set-1-check"
-          waitToSettleTimeoutMs: 400
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "rest-bar"
-            visible:
-              id: "player-log"
-          commands:
-            - tapOn:
-                id: "player-log"
-                waitToSettleTimeoutMs: 400
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "rest-bar-skip"
-          waitToSettleTimeoutMs: 400
-          optional: true
-      - runFlow:
-          when:
-            visible:
-              id: "rest-bar-skip"
-          commands:
-            - tapOn:
-                id: "rest-bar-skip"
-                waitToSettleTimeoutMs: 400
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      # Finish (confirm: the other exercises are not done) → summary.
+            - runFlow: lib/scroll.yml
+      - waitForAnimationToEnd:
+          timeout: 1500
       - tapOn:
           id: "player-finish"
-          waitToSettleTimeoutMs: 400
+          waitToSettleTimeoutMs: 500
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "finish-confirm"
+          timeout: 5000
           optional: true
       - runFlow:
           when:
             visible:
               id: "finish-confirm"
           commands:
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
+            - runFlow: lib/pause.yml
             - tapOn:
                 id: "finish-confirm"
                 optional: true
@@ -913,222 +601,103 @@ tags:
             id: "screen-summary"
           timeout: 20000
       - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 40%
-          duration: 1300
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
+          timeout: 1500
+      - runFlow: lib/hold.yml
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scroll.yml
       - tapOn:
           id: "summary-done"
           optional: true
-
-      # ---------- Train: week strip, today's session, history ----------
-      - extendedWaitUntil:
-          visible:
-            id: "tab-train"
-          timeout: 20000
-      - tapOn:
-          id: "tab-train"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "train-week-strip"
-          timeout: 10000
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "train-week-strip"
-          commands:
-            - tapOn:
-                id: "tab-train"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "train-week-strip"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - evalScript: ${(function(){var d=new Date();var p=function(n){return (n<10?'0':'')+n};output.today=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());return output.today})()}
-      - runFlow:
-          when:
-            visible:
-              id: "day-${output.today}"
-          commands:
-            - tapOn:
-                id: "day-${output.today}"
-                optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - tapOn:
-                id: "day-${output.today}"
-                optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 40%
-          duration: 1300
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "train-tabs"
-          direction: UP
-          optional: true
-      - tapOn:
-          id: "train-tabs-history"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "history-0"
-          timeout: 20000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "train-tabs-week"
-          optional: true
-
-      # ---------- Eat: rings, tick a meal, swap, recipe, cook mode, week ----------
-      - tapOn:
-          id: "tab-eat"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "meal-lunch"
-          timeout: 10000
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "meal-lunch"
-          commands:
-            - tapOn:
-                id: "tab-eat"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "meal-lunch"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "eat-rings"
-          timeout: 20000
       - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
+          timeout: 1500
+
+      # ================= 12. LUNCH: tick, water ×2, ate-out screen =================
+      - runFlow:
+          file: lib/tab.yml
+          env:
+            TAB: eat
+            EXPECT: screen-eat
       - scrollUntilVisible:
           element:
             id: "tick-lunch"
           direction: DOWN
           centerElement: true
+          timeout: 6000
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
+      - waitForAnimationToEnd:
+          timeout: 1500
       - tapOn:
           id: "tick-lunch"
           optional: true
-      - extendedWaitUntil:
-          visible: ".*logged"
-          timeout: 4000
+      - runFlow: lib/pause.yml
+      - scrollUntilVisible:
+          element:
+            id: "add-water"
+          direction: DOWN
+          centerElement: true
+          timeout: 6000
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
+      - tapOn:
+          id: "add-water"
+          optional: true
+      - runFlow: lib/pause.yml
+      - tapOn:
+          id: "add-water"
+          optional: true
+      - runFlow: lib/pause.yml
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: open-log
+            EXPECT: screen-log
+      - runFlow: lib/pause.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-eat
+
+      # ================= 13. PRO MOMENT: dinner swap → gate → paywall → test checkout =================
+      - scrollUntilVisible:
+          element:
+            id: "swap-dinner"
+          direction: UP
+          centerElement: true
+          timeout: 6000
           optional: true
       - scrollUntilVisible:
           element:
             id: "swap-dinner"
           direction: DOWN
           centerElement: true
+          timeout: 6000
           optional: true
+      - runFlow:
+          file: lib/mark.yml
+          env:
+            NAME: keep-start
+      - waitForAnimationToEnd:
+          timeout: 1500
       - tapOn:
           id: "swap-dinner"
           optional: true
-      # Free user hits a Pro gate: contextual sheet -> paywall -> Yearly -> test checkout -> Payment complete.
-      - runScript:
-          file: stub.js
-          env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=keep-start
       - extendedWaitUntil:
           visible:
             id: "gate-title"
           timeout: 10000
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 2000
-          optional: true
-      - tapOn:
-          id: "gate-cta"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-paywall"
-          timeout: 10000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 1500
-          optional: true
-      - tapOn:
-          id: "plan-weekly"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 700
-          optional: true
-      - tapOn:
-          id: "plan-monthly"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 700
-          optional: true
+      - runFlow: lib/hold.yml
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: gate-cta
+            EXPECT: screen-paywall
+      - runFlow: lib/pause.yml
       - tapOn:
           id: "plan-yearly"
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 700
-          optional: true
+      - runFlow: lib/pause.yml
+      - waitForAnimationToEnd:
+          timeout: 1500
       - tapOn:
           id: "paywall-cta"
           optional: true
@@ -1137,34 +706,29 @@ tags:
             id: "demo-checkout"
           timeout: 10000
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 2200
-          optional: true
+      - runFlow: lib/hold.yml
       - tapOn:
           id: "demo-confirm"
           optional: true
-      # Session QA 22 Nov: on iOS the id tap never registered (the checkout sat 15 s, then timed out),
-      # so fall back to the visible "Confirm" label, then wait for the success screen.
+      - extendedWaitUntil:
+          visible:
+            id: "demo-payment-complete"
+          timeout: 6000
+          optional: true
       - runFlow:
           when:
-            visible:
-              text: "Confirm"
+            notVisible:
+              id: "demo-payment-complete"
           commands:
             - tapOn:
                 text: "Confirm"
                 optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "demo-payment-complete"
-          timeout: 15000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 2200
-          optional: true
+            - extendedWaitUntil:
+                visible:
+                  id: "demo-payment-complete"
+                timeout: 10000
+                optional: true
+      - runFlow: lib/hold.yml
       - tapOn:
           id: "demo-continue"
           optional: true
@@ -1176,25 +740,16 @@ tags:
             - tapOn:
                 text: "Continue"
                 optional: true
-      - runScript:
-          file: stub.js
+      - runFlow:
+          file: lib/mark.yml
           env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=keep-end
+            NAME: keep-end
+      # Pro now: the swap opens the options; pick the first (American/British by default).
       - extendedWaitUntil:
           visible:
-            id: "swap-dinner"
-          timeout: 15000
-          optional: true
-      - tapOn:
-          id: "swap-dinner"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "swap-sheet"
+            id: "screen-eat"
           timeout: 10000
           optional: true
-      # The first tap can land while the lunch toast/list is still settling: tap once more if the sheet is not up.
       - runFlow:
           when:
             notVisible:
@@ -1205,34 +760,22 @@ tags:
                   id: "swap-dinner"
                 direction: DOWN
                 centerElement: true
+                timeout: 6000
                 optional: true
+            - waitForAnimationToEnd:
+                timeout: 1500
             - tapOn:
                 id: "swap-dinner"
                 optional: true
-      # Options appear once the engine has looked (a skeleton shows first).
       - extendedWaitUntil:
           visible:
             id: "swap-option-0"
-          timeout: 20000
+          timeout: 15000
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
+      - runFlow: lib/hold.yml
+      - tapOn:
+          id: "swap-option-0"
           optional: true
-      - runFlow:
-          when:
-            visible:
-              id: "swap-option-0"
-          commands:
-            - tapOn:
-                id: "swap-option-0"
-                optional: true
-            - extendedWaitUntil:
-                visible: "Swapped to.*"
-                timeout: 4000
-                optional: true
-      # Never leave the sheet open over the rest of the tour.
       - runFlow:
           when:
             visible:
@@ -1241,222 +784,97 @@ tags:
             - tapOn:
                 id: "swap-sheet-close"
                 optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      # Recipe detail for dinner, then cook mode for a couple of steps.
-      - scrollUntilVisible:
-          element:
-            id: "meal-dinner"
-          direction: DOWN
-          centerElement: true
-          optional: true
-      - tapOn:
-          id: "meal-dinner"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-recipe"
-          timeout: 10000
-          optional: true
+      - runFlow: lib/pause.yml
+
+      # ================= 14. DINNER: recipe → cook mode, every step =================
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-recipe"
+          file: lib/go.yml
+          env:
+            TAP: meal-dinner
+            EXPECT: screen-recipe
+      - runFlow: lib/scroll.yml
+      - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: start-cook
+            EXPECT: screen-cook
+      - repeat:
+          while:
+            visible:
+              id: "cook-next"
+          times: 12
           commands:
+            - runFlow: lib/pause.yml
             - tapOn:
-                id: "meal-dinner"
+                id: "cook-next"
+                waitToSettleTimeoutMs: 500
                 optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-recipe"
-          timeout: 20000
-      - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "recipe-ingredients"
-          direction: DOWN
-          centerElement: true
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 40%
-          duration: 1300
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "servings-inc"
-          direction: UP
-          optional: true
+      - runFlow: lib/pause.yml
       - tapOn:
-          id: "servings-inc"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "start-cook"
-          optional: true
-      - extendedWaitUntil:
-          visible: "Step 1 of .*"
-          timeout: 8000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "cook-next"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
+          id: "cook-done"
           optional: true
       - runFlow:
           when:
             visible:
-              id: "cook-next"
-          commands:
-            - tapOn:
-                id: "cook-next"
-                optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-      - tapOn:
-          id: "cook-close"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "start-cook"
-          timeout: 10000
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "start-cook"
+              id: "screen-cook"
           commands:
             - tapOn:
                 id: "cook-close"
                 optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "start-cook"
-          timeout: 20000
-      - tapOn:
-          id: "back"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-eat"
-          timeout: 10000
-          optional: true
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-eat"
-          commands:
-            - tapOn:
-                id: "back"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-eat"
-          timeout: 20000
-      # The week view, then back to the day.
+          file: lib/back.yml
+          env:
+            EXPECT: screen-eat
+
+      # ================= 15. Grocery list (Pro) =================
       - scrollUntilVisible:
           element:
-            text: "Week"
+            id: "open-grocery"
           direction: UP
+          timeout: 6000
           optional: true
-      - tapOn: "Week"
-      - extendedWaitUntil:
-          visible:
-            id: "week-days"
-          timeout: 20000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn: "Day"
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: open-grocery
+            EXPECT: screen-grocery
+      - repeat:
+          times: 3
+          commands:
+            - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-eat
 
-      # ---------- Progress: log today's weight, body, heatmap ----------
-      - tapOn:
-          id: "tab-progress"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-progress"
-          timeout: 10000
-          optional: true
+      # ================= 16. EVENING: Today → Progress → weekly check-in =================
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-progress"
+          file: lib/tab.yml
+          env:
+            TAB: today
+            EXPECT: screen-today
+      - scrollUntilVisible:
+          element:
+            id: "today-date"
+          direction: UP
+          timeout: 6000
+          optional: true
+      - runFlow: lib/pause.yml
+      - repeat:
+          times: 4
           commands:
-            - tapOn:
-                id: "tab-progress"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-progress"
-          timeout: 20000
-      - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "progress-log-weight"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-progress-log"
-          timeout: 10000
-          optional: true
+            - runFlow: lib/scroll.yml
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-progress-log"
-          commands:
-            - tapOn:
-                id: "progress-log-weight"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-progress-log"
-          timeout: 20000
+          file: lib/tab.yml
+          env:
+            TAB: progress
+            EXPECT: screen-progress
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: progress-log-weight
+            EXPECT: screen-progress-log
       - tapOn:
           id: "log-day-today"
           optional: true
@@ -1464,260 +882,54 @@ tags:
           id: "log-weight"
           optional: true
       - inputText: "82.4"
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
+      - runFlow: lib/pause.yml
       - tapOn:
           id: "log-save"
           optional: true
       - extendedWaitUntil:
-          visible: "Weight saved"
-          timeout: 5000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-progress"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "nav-body"
-          direction: DOWN
-          centerElement: true
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "nav-body"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "weight-chart"
-          timeout: 10000
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "weight-chart"
-          commands:
-            - tapOn:
-                id: "nav-body"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "weight-chart"
-          timeout: 20000
-      - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "back"
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "nav-heatmap"
-          direction: DOWN
-          centerElement: true
-          optional: true
-      - tapOn:
-          id: "nav-heatmap"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "body-map"
-          timeout: 10000
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "body-map"
-          commands:
-            - tapOn:
-                id: "nav-heatmap"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "body-map"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "heatmap-view-back"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "back"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
           visible:
             id: "screen-progress"
           timeout: 10000
           optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "screen-progress"
+      - runFlow: lib/pause.yml
+      - repeat:
+          times: 3
           commands:
-            - tapOn:
-                id: "back"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-progress"
-          timeout: 20000
-
-      # ---------- Library: muscle chip, an exercise with its muscle map ----------
-      - tapOn:
-          id: "tab-library"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-library"
-          timeout: 10000
-          optional: true
+            - runFlow: lib/scroll.yml
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-library"
-          commands:
-            - tapOn:
-                id: "tab-library"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-library"
-          timeout: 20000
-      - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "muscle-chip-chest"
-          optional: true
-      - extendedWaitUntil:
-          visible: "Results"
-          timeout: 5000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "exercise-row-.*"
-          index: 0
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "exercise-media"
-          timeout: 20000
-      - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          optional: true
-          timeout: 900
-      - scrollUntilVisible:
-          element:
-            text: "Muscles worked"
-          direction: DOWN
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 1800
-          optional: true
-      - swipe:
-          start: 50%, 70%
-          end: 50%, 35%
-          duration: 1400
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "exercise-back"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-library"
-          timeout: 10000
-          optional: true
+          file: lib/go.yml
+          env:
+            TAP: nav-heatmap
+            EXPECT: screen-progress-heatmap
+      - runFlow: lib/scroll.yml
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-library"
-          commands:
-            - tapOn:
-                id: "exercise-back"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-library"
-          timeout: 20000
-      - tapOn:
-          id: "muscle-chip-chest"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-
-      # ---------- Weekly check-in (opened from its reminder link, like the notification) ----------
-      - openLink: repwise://today?checkin=1
+          file: lib/back.yml
+          env:
+            EXPECT: screen-progress
       - runFlow:
-          # iOS asks 'Open in "Repwise"?' for a custom-scheme link; confirm it.
-          when:
-            platform: iOS
+          file: lib/go.yml
+          env:
+            TAP: nav-trends
+            EXPECT: screen-progress-trends
+      - repeat:
+          times: 3
           commands:
-            - tapOn:
-                text: "Open"
-                optional: true
+            - runFlow: lib/scroll.yml
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-progress
+      # Weekly check-in, opened by its reminder link like the notification.
+      - runFlow:
+          file: lib/open-link.yml
+          env:
+            LINK: repwise://today?checkin=1
       - extendedWaitUntil:
           visible:
             id: "checkin-progress"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
+          timeout: 15000
           optional: true
+      - runFlow: lib/pause.yml
       - runFlow:
           when:
             visible:
@@ -1737,259 +949,69 @@ tags:
       - extendedWaitUntil:
           visible:
             id: "energy-ok"
-          timeout: 20000
+          timeout: 10000
+          optional: true
+      - runFlow: lib/pause.yml
       - tapOn:
           id: "energy-ok"
           optional: true
       - tapOn:
           id: "sleep-good"
           optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "checkin-next"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "checkin-summary"
-          timeout: 10000
-          optional: true
+      - runFlow: lib/pause.yml
       - runFlow:
-          when:
-            notVisible:
-              id: "checkin-summary"
-          commands:
-            - tapOn:
-                id: "checkin-next"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "checkin-summary"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "checkin-next"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "checkin-volume"
-          timeout: 10000
-          optional: true
+          file: lib/go.yml
+          env:
+            TAP: checkin-next
+            EXPECT: checkin-summary
+      - runFlow: lib/pause.yml
       - runFlow:
-          when:
-            notVisible:
-              id: "checkin-volume"
-          commands:
-            - tapOn:
-                id: "checkin-next"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "checkin-volume"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
+          file: lib/go.yml
+          env:
+            TAP: checkin-next
+            EXPECT: checkin-volume
       - tapOn:
           id: "checkin-approve"
           optional: true
-      - extendedWaitUntil:
-          visible: "Next week is planned around you"
-          timeout: 8000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn:
-          id: "checkin-finish"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-today"
-          timeout: 10000
-          optional: true
+      - runFlow: lib/pause.yml
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-today"
-          commands:
-            - tapOn:
-                id: "checkin-finish"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-today"
-          timeout: 20000
+          file: lib/go.yml
+          env:
+            TAP: checkin-finish
+            EXPECT: screen-today
 
-      # ---------- Assistant card on Today (only when a rule fired today) ----------
-      - runFlow:
-          when:
-            visible:
-              id: "card-[a-z_]+-container"
-          commands:
-            - scrollUntilVisible:
-                element:
-                  id: "card-[a-z_]+-container"
-                direction: DOWN
-                centerElement: true
-                optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - tapOn:
-                id: "card-[a-z_]+"
-                index: 0
-                optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "card-detail-text"
-                timeout: 20000
-                optional: true
-            - extendedWaitUntil:
-                visible:
-                  id: "tour-pause"
-                timeout: 900
-                optional: true
-            - tapOn:
-                id: "card-detail-later"
-                optional: true
+      # ================= 17. Settings, Subscription → end on Today =================
       - scrollUntilVisible:
           element:
             id: "open-settings"
           direction: UP
-          optional: true
-
-      # ---------- Settings, scrolled end to end ----------
-      - tapOn:
-          id: "open-settings"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-settings"
-          timeout: 10000
+          timeout: 6000
           optional: true
       - runFlow:
-          when:
-            notVisible:
-              id: "screen-settings"
+          file: lib/go.yml
+          env:
+            TAP: open-settings
+            EXPECT: screen-settings
+      - repeat:
+          times: 5
           commands:
-            - tapOn:
-                id: "open-settings"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-settings"
-          timeout: 20000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - tapOn: "Dark"
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 75%
-          end: 50%, 35%
-          duration: 1400
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 75%
-          end: 50%, 35%
-          duration: 1400
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - swipe:
-          start: 50%, 75%
-          end: 50%, 35%
-          duration: 1400
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "app-version"
-          direction: DOWN
-          centerElement: true
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - scrollUntilVisible:
-          element:
-            id: "open-profile"
-          direction: UP
-          optional: true
-      - tapOn:
-          id: "back"
-          optional: true
-      # Retry once if the next screen has not appeared (a lost tap must not end the video).
-      - extendedWaitUntil:
-          visible:
-            id: "screen-today"
-          timeout: 10000
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "screen-today"
-          commands:
-            - tapOn:
-                id: "back"
-                optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-today"
-          timeout: 20000
-
-      # ---------- Settings -> Subscription: the test purchase shows as Pro ----------
-      - tapOn:
-          id: "open-settings"
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "screen-settings"
-          timeout: 20000
-          optional: true
+            - runFlow: lib/scroll.yml
       - scrollUntilVisible:
           element:
             id: "open-subscription"
-          direction: DOWN
+          direction: UP
+          centerElement: true
+          timeout: 10000
           optional: true
-      - tapOn:
-          id: "open-subscription"
-          optional: true
-      # iOS did not always register the id tap on the row (video stayed on Settings): retry by label.
+      - runFlow:
+          file: lib/mark.yml
+          env:
+            NAME: keep-start
+      - runFlow:
+          file: lib/go.yml
+          env:
+            TAP: open-subscription
+            EXPECT: screen-subscription
       - runFlow:
           when:
             notVisible:
@@ -1998,34 +1020,24 @@ tags:
             - tapOn:
                 text: "Subscription"
                 optional: true
-      - runScript:
-          file: stub.js
+            - extendedWaitUntil:
+                visible:
+                  id: "screen-subscription"
+                timeout: 10000
+                optional: true
+      - runFlow: lib/hold.yml
+      - runFlow:
+          file: lib/mark.yml
           env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=keep-start
-      - extendedWaitUntil:
-          visible:
-            id: "screen-subscription"
-          timeout: 20000
-          optional: true
-      - extendedWaitUntil:
-          visible:
-            id: "tour-hold"
-          timeout: 2500
-          optional: true
-      - runScript:
-          file: stub.js
+            NAME: keep-end
+      - runFlow:
+          file: lib/back.yml
           env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=keep-end
-      - tapOn:
-          id: "back"
-          optional: true
-      - tapOn:
-          id: "back"
-          optional: true
-
-      # ---------- End back on Today ----------
+            EXPECT: screen-settings
+      - runFlow:
+          file: lib/back.yml
+          env:
+            EXPECT: screen-today
       - runFlow:
           when:
             notVisible:
@@ -2038,15 +1050,8 @@ tags:
           visible:
             id: "screen-today"
           timeout: 20000
-      - waitForAnimationToEnd:
-          timeout: 1000
-      - extendedWaitUntil:
-          visible:
-            id: "tour-pause"
-          timeout: 900
-          optional: true
-      - runScript:
-          file: stub.js
+      - runFlow: lib/hold.yml
+      - runFlow:
+          file: lib/mark.yml
           env:
-            STUB_URL: ${STUB_URL}
-            ACTION: mark?name=end
+            NAME: end

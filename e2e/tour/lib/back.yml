@@ -1,0 +1,53 @@
+# Tour helper: go back until the screen EXPECT shows. Each back button is tried only while EXPECT
+# is still missing, so one call never goes back twice.
+appId: com.client.repwise
+---
+- waitForAnimationToEnd:
+    timeout: 1500
+- runFlow:
+    when:
+      notVisible:
+        id: ${EXPECT}
+      visible:
+        id: "ex-back"
+    commands:
+      - tapOn:
+          id: "ex-back"
+          optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: ${EXPECT}
+      visible:
+        id: "exercise-back"
+    commands:
+      - tapOn:
+          id: "exercise-back"
+          optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: ${EXPECT}
+      visible:
+        id: "back"
+    commands:
+      - tapOn:
+          id: "back"
+          optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: ${EXPECT}
+      visible:
+        id: "player-close"
+    commands:
+      - tapOn:
+          id: "player-close"
+          optional: true
+- extendedWaitUntil:
+    visible:
+      id: ${EXPECT}
+    timeout: 10000
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 1500

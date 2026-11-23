@@ -1,0 +1,12 @@
+# Tour helper: one steady scroll down (same distance and speed every time), then a short read.
+appId: com.client.repwise
+---
+- swipe:
+    start: 50%, 70%
+    end: 50%, 42%
+    duration: 900
+- extendedWaitUntil:
+    visible:
+      id: "tour-pause"
+    timeout: 1100
+    optional: true

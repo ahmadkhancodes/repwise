@@ -1,0 +1,15 @@
+# Tour helper: open LINK; on iOS confirm the 'Open in "Repwise"?' alert, which can appear late.
+appId: com.client.repwise
+---
+- openLink: ${LINK}
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Open"
+          timeout: 5000
+          optional: true
+      - tapOn:
+          text: "Open"
+          optional: true

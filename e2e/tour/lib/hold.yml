@@ -1,0 +1,8 @@
+# Tour helper: ~2.5 s hold on a moment worth reading (paywall, checkout, a looping GIF).
+appId: com.client.repwise
+---
+- extendedWaitUntil:
+    visible:
+      id: "tour-hold"
+    timeout: 2500
+    optional: true

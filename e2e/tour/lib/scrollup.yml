@@ -1,0 +1,12 @@
+# Tour helper: one steady scroll up, mirror of scroll.yml.
+appId: com.client.repwise
+---
+- swipe:
+    start: 50%, 42%
+    end: 50%, 70%
+    duration: 900
+- extendedWaitUntil:
+    visible:
+      id: "tour-pause"
+    timeout: 1100
+    optional: true
