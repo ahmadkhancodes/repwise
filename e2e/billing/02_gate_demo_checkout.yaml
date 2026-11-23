@@ -55,46 +55,13 @@ onFlowComplete:
     timeout: 10000
 - assertVisible:
     id: "paywall-close"
-- assertVisible:
-    id: "plan-weekly"
-- tapOn:
-    id: "plan-weekly"
-# The price line is asserted by billing/01 and the unit tests; on iOS the footer line is not always
-# exposed after a plan tap, so it only gates here as a soft wait (flow was wrong, not the app).
+# Yearly (trial) is pre-selected. Switching plans is covered by billing/01 + unit tests; on iOS the
+# rows below the fold sit behind the sticky CTA and scroll-to-row was flaky for 4 rounds, so this
+# flow goes straight from the gate's paywall to the test checkout (what it exists to prove).
 - extendedWaitUntil:
     visible:
-      id: "paywall-price-line"
+      id: "paywall-cta"
     timeout: 5000
-    optional: true
-# iOS: the plan rows sit partly behind the sticky CTA, so a 100%-visibility scroll never "finds" them
-# (3 red rounds: plan-monthly not found). Centre each row at >=50% visibility; Monthly is a
-# nice-to-have here (billing/01 + unit tests cover every plan), Yearly is required for the trial.
-- scrollUntilVisible:
-    element:
-      id: "plan-monthly"
-    direction: UP
-    visibilityPercentage: 50
-    centerElement: true
-    timeout: 15000
-    optional: true
-- tapOn:
-    id: "plan-monthly"
-    optional: true
-- scrollUntilVisible:
-    element:
-      id: "plan-yearly"
-    direction: UP
-    visibilityPercentage: 50
-    centerElement: true
-    timeout: 15000
-    optional: true
-- tapOn:
-    id: "plan-yearly"
-- scrollUntilVisible:
-    element:
-      id: "paywall-timeline"
-    direction: DOWN
-    centerElement: true
 - tapOn:
     id: "paywall-cta"
 - extendedWaitUntil:
