@@ -115,7 +115,13 @@ function DemoCheckoutSheet({ offer, onCancel, onComplete }: DemoCheckoutProps) {
   const cardValid = card.replace(/\D/g, '').length >= 12 && expiry.length >= 4 && cvc.length >= 3;
 
   return (
-    <View style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end' }]} testID="demo-checkout">
+    // collapsable={false}: a layout-only View is flattened away on Fabric, and its testID with it
+    // (iOS E2E could see the checkout but not `demo-checkout`).
+    <View
+      collapsable={false}
+      style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end' }]}
+      testID="demo-checkout"
+    >
       <View style={[StyleSheet.absoluteFill, { backgroundColor: t.colors.scrim }]} />
       <Animated.View
         accessibilityViewIsModal
@@ -134,6 +140,7 @@ function DemoCheckoutSheet({ offer, onCancel, onComplete }: DemoCheckoutProps) {
       >
         {step === 'done' ? (
           <View
+            collapsable={false}
             style={{ alignItems: 'center', gap: t.spacing.md, paddingVertical: t.spacing.xl }}
             testID="demo-payment-complete"
           >

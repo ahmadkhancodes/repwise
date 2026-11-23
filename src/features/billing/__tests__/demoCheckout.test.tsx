@@ -99,6 +99,8 @@ describe(`demo purchase flow (${Platform.OS})`, () => {
       jest.useFakeTimers();
       await fireEvent.press(screen.getByTestId('paywall-cta'));
       expect(screen.getByTestId('demo-checkout')).toBeTruthy();
+      // Not flattened on Fabric, so iOS E2E can find the id (billing/02 regression).
+      expect(screen.getByTestId('demo-checkout').props.collapsable).toBe(false);
       expect(screen.getByTestId('demo-test-badge')).toHaveTextContent('TEST MODE');
       expect(screen.getByTestId('demo-card-masked')).toHaveTextContent('Card •••• 4444');
       expect(screen.getByTestId('demo-total')).toHaveTextContent('$0.00');
