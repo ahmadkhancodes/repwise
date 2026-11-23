@@ -315,6 +315,7 @@
     - Verify with `flows=billing` before the full run.
   - If billing/02 is still red: make the paywall CTA tappable on iOS in the APP (the same fade-instead-of-translate fix as the checkout in 45d1161), not by loosening the flow.
   - status (API run 19, 23 Nov 09:13 UTC): e2e-ios billing-only run 45141383805 on e2460da still in progress (started 08:46); no code changes. Queued a wait. Next run: read it; green → full e2e-ios on the branch head (e423aeb, CI-only change) → merge.
+  - status (API run 20, 23 Nov): billing-only run 45141383805 red: billing/02 `demo-checkout is visible` false although the screenshot shows the checkout open. Cause (APP): Fabric flattened the layout-only wrapper View, so its testID was missing from the iOS tree (same for `demo-payment-complete`). Fixed with `collapsable={false}` + a regression assertion in 2b46c72 on feat/client-demo (check green, 3369 tests). Dispatched a FULL e2e-ios on the branch; waiting. Next run: green → merge into main (test:all), push, tick; Android already green on a35e02e (later commits are iOS/billing-only + CI).
 
 - [ ] (opus) **DAY-IN-THE-LIFE VIDEO (owner, 23 Nov, top priority).**
   - Owner feedback on the 3:05 cut: "speed not consistent, too fast in places, looks stuck in places; exercises only 5% of the video; show every page; follow a complete one-day user journey with meals AND exercises; up to 10 min is fine; make it smooth and make it make sense."

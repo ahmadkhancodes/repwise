@@ -69,3 +69,4 @@
 - 22 Nov 2026 (API run 17, fast tour, feat/client-demo): on 84d54cc android green; iOS red on billing/02 price-line visibility, tour stopped with the demo checkout open over the onboarding paywall. Flow fixes pushed, check green, re-dispatched ios, android, tour; waiting.
 - 22 Nov 2026 (API run 18, fast tour, feat/client-demo): tour 45062985222 green with Payment complete + Weekly in frames; iOS e2e red on flows only (taller Today, paywall price-line) — fixed; Subscription tap retry; keep-segment static cap. Re-dispatched ios, android, tour; waiting.
 - 23 Nov 2026 (API run 19, merge client-demo): e2e-ios billing-only run 45141383805 on e2460da still running; waiting, no code changes.
+- 23 Nov 2026 (API run 20, merge client-demo): iOS billing/02 red because Fabric flattened the demo checkout wrapper (testID lost; checkout itself worked). Fixed with collapsable={false} in 2b46c72 on feat/client-demo, check green; full e2e-ios dispatched; waiting.
