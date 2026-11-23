@@ -353,6 +353,7 @@
     - Then upload to a NEW release `app-tour-day` as `repwise-day-in-the-life.mp4`, with the CC BY music credit.
     - Comment the link on issue #1, mentioning @ahmadkhancodes, with the attribution footer.
   - Dispatch recordings with `-f inputs[ref]=<branch>`.
+  - status (API run 22, 23 Nov): flow rewritten as the 17-part day on `feat/day-tour` (85ce824, check green): helpers in `e2e/tour/lib/*.yml` (D-TOUR-DAY). Dispatched record-ios-tour on the branch; waiting. Next run: read the run; download `repwise-ios-dark-tour-natural` + debug (`freezes.txt`, marks, maestro.log); fix any failed step or freeze > 4 s in the flow and re-record; when clean, QA a frame every 10 s, publish release `app-tour-day` (`repwise-day-in-the-life.mp4`, CC BY credit), comment on #1, merge the branch into main.
 
 ## Owner steps (only what the agent cannot do)
 - Optional: apply docs/orchestration/record-ios-tour-fast.patch (`git apply`) to .github/workflows/record-ios-tour.yml and push it with a token that has the workflows permission (the Claude App token cannot); it moves the fast post-process into CI.
