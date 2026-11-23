@@ -305,7 +305,8 @@
   - Upload to a NEW release `app-tour-dark-v2`: `repwise-ios-dark-tour-fast-music.mp4` plus the silent version, with the CC BY credit in the notes.
   - Then comment on issue #1 with the link (attribution footer included), mentioning @ahmadkhancodes.
 
-- [ ] (opus) **FINISH: merge `feat/client-demo` into main.**
+- [x] (opus) **FINISH: merge `feat/client-demo` into main.**
+  - result (API run 21, 23 Nov): full e2e-ios https://github.com/ahmadkhancodes/repwise/actions/runs/45153681298 green on 2b46c72 (FLOWS all, 0 failed); e2e-android https://github.com/ahmadkhancodes/repwise/actions/runs/45125312767 green on a35e02e (later commits iOS/billing/CI only). Merged into main as 2690a79 (PROGRESS/DECISIONS conflicts kept both sides); test:all green (app 3369, engine 775, content, server).
   - Android E2E is green on a35e02e. iOS was 30/31; only billing/02 failed (a CTA tap during the paywall slide-in).
   - The session fixed it in e2460da and ran `e2e-ios` with `flows=billing` on the branch.
   - If that run is green: run a full e2e-ios on the branch head once more; if green, merge into main (CI green), push, and tick this task.
